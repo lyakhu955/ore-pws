@@ -2173,6 +2173,10 @@
                 // Converti l'indice del giorno per iniziare da lunedì (0 = lunedì, 6 = domenica)
                 startingDay = startingDay === 0 ? 6 : startingDay - 1;
                 
+                // Ottieni l'ultimo giorno del mese
+                const lastDay = new Date(currentYear, currentMonth + 1, 0);
+                const totalDays = lastDay.getDate();
+                
                 // Aggiungi celle vuote per i giorni prima dell'inizio del mese
                 for (let i = 0; i < startingDay; i++) {
                     calendarHTML += '<div class="calendar-day empty"></div>';
@@ -2185,7 +2189,7 @@
                 let monthlyNotturne = 0;
                 
                 // Aggiungi i giorni del mese
-                for (let day = 1; day <= 31; day++) {
+                for (let day = 1; day <= totalDays; day++) {
                     const date = new Date(currentYear, currentMonth, day);
                     // Formatta la data direttamente in formato italiano (dd/mm/yyyy)
                     const dateString = date.toLocaleDateString('it-IT', {
