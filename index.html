@@ -2211,13 +2211,13 @@
                         <button id="nextMonth"><i class="fas fa-chevron-right"></i></button>
                     </div>
                     <div class="calendar-grid">
-                        <div class="calendar-weekday">Domenica</div>
                         <div class="calendar-weekday">Lunedì</div>
                         <div class="calendar-weekday">Martedì</div>
                         <div class="calendar-weekday">Mercoledì</div>
                         <div class="calendar-weekday">Giovedì</div>
                         <div class="calendar-weekday">Venerdì</div>
                         <div class="calendar-weekday">Sabato</div>
+                        <div class="calendar-weekday">Domenica</div>
                 `;
                 
                 // Ottieni il primo giorno del mese
@@ -2229,7 +2229,9 @@
                 const totalDays = lastDay.getDate();
                 
                 // Aggiungi celle vuote per i giorni prima dell'inizio del mese
-                for (let i = 0; i < startingDay; i++) {
+                // Adjust for Monday being the first day (0 = Sunday, 1 = Monday, etc.)
+                const adjustedStartingDay = startingDay === 0 ? 6 : startingDay - 1;
+                for (let i = 0; i < adjustedStartingDay; i++) {
                     calendarHTML += '<div class="calendar-day empty"></div>';
                 }
                 
@@ -2283,7 +2285,7 @@
                              data-notturne="${totalNotturne}">
                             <div class="calendar-day-number">${day}</div>
                             <div class="calendar-day-content">
-                                <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
+                                ${dayEntries.length > 0 ? `<div class="calendar-hours">${totalHours.toFixed(1)}h</div>` : ''}
                                 ${dayEntries.length > 0 ? `
                                     <div class="calendar-icons">
                                         ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
@@ -2317,6 +2319,7 @@
                         displayedYear--;
                     }
                     updateCalendarDisplay(displayedMonth, displayedYear);
+                    updateMonthlyReport(displayedMonth, displayedYear);
                 });
                 
                 document.getElementById('nextMonth').addEventListener('click', () => {
@@ -2326,6 +2329,7 @@
                         displayedYear++;
                     }
                     updateCalendarDisplay(displayedMonth, displayedYear);
+                    updateMonthlyReport(displayedMonth, displayedYear);
                 });
                 
                 // Aggiungi event listener per i giorni del calendario
@@ -2405,9 +2409,7 @@
                 // Raggruppa le entries per data
                 const entriesByDate = {};
                 entries.forEach(entry => {
-                    // Usa direttamente la data nel formato originale (dd/mm/yyyy)
                     const dateString = entry.date;
-                    
                     if (!entriesByDate[dateString]) {
                         entriesByDate[dateString] = [];
                     }
@@ -2431,17 +2433,27 @@
                 
                 // Crea il calendario
                 let calendarHTML = `
-                    <div class="calendar-weekday">Domenica</div>
-                    <div class="calendar-weekday">Lunedì</div>
-                    <div class="calendar-weekday">Martedì</div>
-                    <div class="calendar-weekday">Mercoledì</div>
-                    <div class="calendar-weekday">Giovedì</div>
-                    <div class="calendar-weekday">Venerdì</div>
-                    <div class="calendar-weekday">Sabato</div>
+                    <div class="calendar-header">
+                        <button id="prevMonth"><i class="fas fa-chevron-left"></i></button>
+                        <div class="calendar-title">
+                            <div class="calendar-month" id="calendarMonth">${new Date(year, month).toLocaleDateString('it-IT', { month: 'long' })}</div>
+                            <div class="calendar-year" id="calendarYear">${year}</div>
+                        </div>
+                        <button id="nextMonth"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="calendar-grid">
+                        <div class="calendar-weekday">Lunedì</div>
+                        <div class="calendar-weekday">Martedì</div>
+                        <div class="calendar-weekday">Mercoledì</div>
+                        <div class="calendar-weekday">Giovedì</div>
+                        <div class="calendar-weekday">Venerdì</div>
+                        <div class="calendar-weekday">Sabato</div>
+                        <div class="calendar-weekday">Domenica</div>
                 `;
                 
                 // Aggiungi celle vuote per i giorni prima dell'inizio del mese
-                for (let i = 0; i < startingDay; i++) {
+                const adjustedStartingDay = startingDay === 0 ? 6 : startingDay - 1;
+                for (let i = 0; i < adjustedStartingDay; i++) {
                     calendarHTML += '<div class="calendar-day empty"></div>';
                 }
                 
@@ -2454,16 +2466,8 @@
                 // Aggiungi i giorni del mese
                 for (let day = 1; day <= totalDays; day++) {
                     const date = new Date(year, month, day);
-                    // Formatta la data direttamente in formato italiano (dd/mm/yyyy)
-                    const dateString = date.toLocaleDateString('it-IT', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric'
-                    });
-                    
-                    // Cerca le entries per questo giorno
+                    const dateString = `${day.toString().padStart(2, '0')}/${(month + 1).toString().padStart(2, '0')}/${year}`;
                     const dayEntries = entriesByDate[dateString] || [];
-                    console.log(`Giorno ${dateString}:`, dayEntries);
                     
                     // Calcola le ore totali per il giorno
                     const totalHours = dayEntries.reduce((sum, entry) => sum + parseFloat(entry.hours), 0);
@@ -2495,7 +2499,7 @@
                              data-notturne="${totalNotturne}">
                             <div class="calendar-day-number">${day}</div>
                             <div class="calendar-day-content">
-                                <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
+                                ${dayEntries.length > 0 ? `<div class="calendar-hours">${totalHours.toFixed(1)}h</div>` : ''}
                                 ${dayEntries.length > 0 ? `
                                     <div class="calendar-icons">
                                         ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
@@ -2508,8 +2512,8 @@
                     `;
                 }
                 
-                // Aggiorna il contenuto del calendario
-                document.querySelector('.calendar-grid').innerHTML = calendarHTML;
+                calendarHTML += '</div>';
+                document.getElementById('calendarEntries').innerHTML = calendarHTML;
                 
                 // Aggiorna il riepilogo mensile
                 document.getElementById('monthlyTotalHours').textContent = `${monthlyTotalHours.toFixed(1)}h`;
@@ -2517,12 +2521,31 @@
                 document.getElementById('monthlyTransferta').textContent = `${monthlyTransferta.toFixed(1)}h`;
                 document.getElementById('monthlyNotturne').textContent = `${monthlyNotturne.toFixed(1)}h`;
                 
+                // Aggiungi event listener per i pulsanti di navigazione
+                document.getElementById('prevMonth').addEventListener('click', () => {
+                    month--;
+                    if (month < 0) {
+                        month = 11;
+                        year--;
+                    }
+                    updateCalendarDisplay(month, year);
+                    updateMonthlyReport(month, year);
+                });
+                
+                document.getElementById('nextMonth').addEventListener('click', () => {
+                    month++;
+                    if (month > 11) {
+                        month = 0;
+                        year++;
+                    }
+                    updateCalendarDisplay(month, year);
+                    updateMonthlyReport(month, year);
+                });
+                
                 // Aggiungi event listener per i giorni del calendario
                 document.querySelectorAll('.calendar-day:not(.empty)').forEach(day => {
                     day.addEventListener('click', function() {
                         const date = this.getAttribute('data-date');
-                        
-                        // Cerca le entries per questa data
                         const dayEntries = entriesByDate[date] || [];
                         
                         // Calcola le ore totali per il giorno
@@ -2578,7 +2601,6 @@
                             });
                         }
                         
-                        // Mostra il modale
                         document.getElementById('dayModal').style.display = 'block';
                     });
                 });
@@ -2975,17 +2997,28 @@
             }
 
             // Funzione per aggiornare il riepilogo mensile
-            function updateMonthlyReport() {
+            function updateMonthlyReport(month = null, year = null) {
                 const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
                 const monthlyReportContent = document.getElementById('monthlyReportContent');
                 
-                if (entries.length === 0) {
+                // Se non vengono forniti mese e anno, usa quelli correnti
+                const today = new Date();
+                const currentMonth = month !== null ? month : today.getMonth();
+                const currentYear = year !== null ? year : today.getFullYear();
+                
+                // Filtra le entries per il mese e l'anno specificati
+                const monthlyEntries = entries.filter(entry => {
+                    const [day, month, year] = entry.date.split('/').map(Number);
+                    return month === currentMonth + 1 && year === currentYear;
+                });
+                
+                if (monthlyEntries.length === 0) {
                     monthlyReportContent.innerHTML = '<div class="monthly-report-empty">Nessuna entry salvata</div>';
                     return;
                 }
                 
                 // Ordina le entries per data (più recenti prima)
-                entries.sort((a, b) => {
+                monthlyEntries.sort((a, b) => {
                     // Normalizza le date per il confronto
                     const dateA = a.date.includes('/') ? convertItalianToStandardDate(a.date) : a.date;
                     const dateB = b.date.includes('/') ? convertItalianToStandardDate(b.date) : b.date;
@@ -2995,7 +3028,7 @@
                 // Raggruppa le entries per mese
                 const entriesByMonth = {};
                 
-                entries.forEach(entry => {
+                monthlyEntries.forEach(entry => {
                     // Normalizza la data per il raggruppamento
                     let dateParts;
                     if (entry.date.includes('/')) {
