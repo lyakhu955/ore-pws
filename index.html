@@ -2146,25 +2146,27 @@
                         <button id="nextMonth"><i class="fas fa-chevron-right"></i></button>
                     </div>
                     <div class="calendar-grid">
-                        <div class="calendar-weekday">Domenica</div>
                         <div class="calendar-weekday">Lunedì</div>
                         <div class="calendar-weekday">Martedì</div>
                         <div class="calendar-weekday">Mercoledì</div>
                         <div class="calendar-weekday">Giovedì</div>
                         <div class="calendar-weekday">Venerdì</div>
                         <div class="calendar-weekday">Sabato</div>
+                        <div class="calendar-weekday">Domenica</div>
                 `;
                 
                 // Ottieni il primo giorno del mese
                 const firstDay = new Date(currentYear, currentMonth, 1);
                 const startingDay = firstDay.getDay();
+                // Converti il giorno della settimana per far iniziare da lunedì (0 = lunedì, 6 = domenica)
+                const adjustedStartingDay = startingDay === 0 ? 6 : startingDay - 1;
                 
                 // Ottieni l'ultimo giorno del mese
                 const lastDay = new Date(currentYear, currentMonth + 1, 0);
                 const totalDays = lastDay.getDate();
                 
                 // Aggiungi celle vuote per i giorni prima dell'inizio del mese
-                for (let i = 0; i < startingDay; i++) {
+                for (let i = 0; i < adjustedStartingDay; i++) {
                     calendarHTML += '<div class="calendar-day empty"></div>';
                 }
                 
@@ -2366,13 +2368,13 @@
                 
                 // Crea il calendario
                 let calendarHTML = `
-                    <div class="calendar-weekday">Domenica</div>
                     <div class="calendar-weekday">Lunedì</div>
                     <div class="calendar-weekday">Martedì</div>
                     <div class="calendar-weekday">Mercoledì</div>
                     <div class="calendar-weekday">Giovedì</div>
                     <div class="calendar-weekday">Venerdì</div>
                     <div class="calendar-weekday">Sabato</div>
+                    <div class="calendar-weekday">Domenica</div>
                 `;
                 
                 // Aggiungi celle vuote per i giorni prima dell'inizio del mese
