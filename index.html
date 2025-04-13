@@ -30,9 +30,10 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 100%;
             margin: 0 auto;
             padding: 20px;
+            overflow-x: hidden;
         }
 
         header {
@@ -191,79 +192,84 @@
         }
 
         .calendar-container {
-            margin-top: 10px;
-            width: 100%;
-            padding: 0 5px;
+            margin-top: 20px;
         }
 
         .calendar-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             background-color: var(--primary-color);
             color: white;
-            padding: 10px;
+            padding: 15px;
             border-radius: 10px 10px 0 0;
-            font-size: 0.9rem;
         }
         
         .calendar-header button {
             background: none;
             border: none;
-            font-size: 1rem;
+            font-size: 1.2rem;
             cursor: pointer;
             color: white;
-            padding: 3px 6px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .calendar-header button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .calendar-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         .calendar-month {
-            font-size: 1.1rem;
+            font-size: 1.5rem;
+            font-weight: bold;
         }
         
         .calendar-year {
-            font-size: 0.9rem;
+            font-size: 1.2rem;
+            opacity: 0.9;
         }
-
+        
         .calendar-grid {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 1px;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 2px;
             background-color: white;
             border-radius: 0 0 10px 10px;
             overflow: hidden;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             width: 100%;
         }
-
+        
         .calendar-weekday {
             text-align: center;
-            padding: 3px;
-            font-size: 0.7rem;
-            background-color: #f5f5f5;
+            padding: 10px 5px;
+            font-weight: bold;
+            background-color: #f8f9fa;
+            font-size: 0.9rem;
         }
-
+        
         .calendar-day {
+            aspect-ratio: 1;
+            padding: 5px;
             text-align: center;
-            padding: 3px;
-            font-size: 0.7rem;
-            min-height: 25px;
             border: 1px solid var(--border-color);
-            position: relative;
-            cursor: pointer;
             background-color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 0.9rem;
             display: flex;
             flex-direction: column;
-        }
-
-        .calendar-day-number {
-            font-weight: bold;
-            margin-bottom: 2px;
-        }
-
-        .calendar-day-events {
-            font-size: 0.6rem;
-            color: var(--primary-color);
+            justify-content: flex-start;
+            align-items: center;
+            overflow: hidden;
         }
         
         .calendar-day:hover {
@@ -1103,22 +1109,6 @@
         .dark-theme header {
             background-color: #1e1e1e;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-
-        .calendar-weekdays {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 1px;
-            background-color: #f5f5f5;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .calendar-weekday {
-            text-align: center;
-            padding: 3px;
-            font-size: 0.7rem;
-            background-color: #f5f5f5;
-            font-weight: bold;
         }
     </style>
 </head>
@@ -2156,22 +2146,18 @@
                         <button id="nextMonth"><i class="fas fa-chevron-right"></i></button>
                     </div>
                     <div class="calendar-grid">
+                        <div class="calendar-weekday">Domenica</div>
                         <div class="calendar-weekday">Lunedì</div>
                         <div class="calendar-weekday">Martedì</div>
                         <div class="calendar-weekday">Mercoledì</div>
                         <div class="calendar-weekday">Giovedì</div>
                         <div class="calendar-weekday">Venerdì</div>
                         <div class="calendar-weekday">Sabato</div>
-                        <div class="calendar-weekday">Domenica</div>
-                    </div>
-                    <div class="calendar-days">
                 `;
                 
                 // Ottieni il primo giorno del mese
                 const firstDay = new Date(currentYear, currentMonth, 1);
-                let startingDay = firstDay.getDay();
-                // Converti l'indice del giorno per iniziare da lunedì (0 = lunedì, 6 = domenica)
-                startingDay = startingDay === 0 ? 6 : startingDay - 1;
+                const startingDay = firstDay.getDay();
                 
                 // Ottieni l'ultimo giorno del mese
                 const lastDay = new Date(currentYear, currentMonth + 1, 0);
@@ -2380,13 +2366,13 @@
                 
                 // Crea il calendario
                 let calendarHTML = `
+                    <div class="calendar-weekday">Domenica</div>
                     <div class="calendar-weekday">Lunedì</div>
                     <div class="calendar-weekday">Martedì</div>
                     <div class="calendar-weekday">Mercoledì</div>
                     <div class="calendar-weekday">Giovedì</div>
                     <div class="calendar-weekday">Venerdì</div>
                     <div class="calendar-weekday">Sabato</div>
-                    <div class="calendar-weekday">Domenica</div>
                 `;
                 
                 // Aggiungi celle vuote per i giorni prima dell'inizio del mese
@@ -3055,49 +3041,6 @@
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-            }
-
-            // Modifica la funzione che crea il calendario
-            function createCalendar(year, month) {
-                const firstDay = new Date(year, month, 1);
-                const lastDay = new Date(year, month + 1, 0);
-                const daysInMonth = lastDay.getDate();
-                
-                // Imposta lunedì come primo giorno (0 = domenica, 1 = lunedì, ecc.)
-                let startingDay = firstDay.getDay();
-                if (startingDay === 0) startingDay = 6; // Se è domenica, sposta a 6
-                else startingDay--; // Altrimenti sottrai 1 per far iniziare da lunedì
-                
-                const weekdays = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
-                
-                let calendarHTML = '<div class="calendar-weekdays">';
-                weekdays.forEach(day => {
-                    calendarHTML += `<div class="calendar-weekday">${day}</div>`;
-                });
-                calendarHTML += '</div><div class="calendar-days">';
-                
-                // Aggiungi celle vuote per i giorni precedenti
-                for (let i = 0; i < startingDay; i++) {
-                    calendarHTML += '<div class="calendar-day empty"></div>';
-                }
-                
-                // Aggiungi i giorni del mese
-                for (let day = 1; day <= daysInMonth; day++) {
-                    calendarHTML += `
-                        <div class="calendar-day ${day === today.getDate() && month === today.getMonth() && year === today.getFullYear() ? 'today' : ''} ${entriesByDate[`${month}/${year}`]?.some(entry => entry.date === `${year}-${month}-${day}`) ? 'has-entries' : ''} ${isItalianHoliday(new Date(year, month - 1, day)) ? 'holiday' : ''}">
-                            <div class="calendar-day-number">${day}</div>
-                            <div class="calendar-day-content">
-                                <div class="calendar-hours">${entriesByDate[`${month}/${year}`]?.find(entry => entry.date === `${year}-${month}-${day}`)?.hours || ''}h</div>
-                                ${entriesByDate[`${month}/${year}`]?.some(entry => entry.transferta > 0) ? `<div class="calendar-icons"><i class="fas fa-car" title="Trasferta"></i> ${entriesByDate[`${month}/${year}`]?.find(entry => entry.transferta > 0)?.transferta || ''}h</div>` : ''}
-                                ${entriesByDate[`${month}/${year}`]?.some(entry => entry.notturne > 0) ? `<div class="calendar-icons"><i class="fas fa-moon" title="Notturne"></i> ${entriesByDate[`${month}/${year}`]?.find(entry => entry.notturne > 0)?.notturne || ''}h</div>` : ''}
-                                ${isItalianHoliday(new Date(year, month - 1, day)) ? `<div class="calendar-holiday-name">${getHolidayName(new Date(year, month - 1, day))}</div>` : ''}
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                calendarHTML += '</div>';
-                calendarEntries.innerHTML = calendarHTML;
             }
         });
     </script>
