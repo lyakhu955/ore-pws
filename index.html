@@ -253,17 +253,25 @@
                 width: 100%;
                 min-width: 100%;
                 overflow-x: auto;
+                display: grid;
+                grid-template-columns: repeat(7, 1fr);
             }
 
             .calendar-day {
                 padding: 2px;
-                min-height: 40px;
+                min-height: 60px;
+                height: 60px;
                 font-size: 0.7rem;
+                width: 100%;
+                min-width: 40px;
             }
 
             .calendar-weekday {
                 padding: 2px;
                 font-size: 0.7rem;
+                width: 100%;
+                min-width: 40px;
+                text-align: center;
             }
 
             .calendar-header {
@@ -282,10 +290,11 @@
                 margin: 5px;
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
+                width: 100%;
             }
 
             .calendar-grid {
-                min-width: 300px;
+                min-width: 280px;
                 width: 100%;
             }
 
@@ -299,6 +308,24 @@
 
             .calendar-day i {
                 font-size: 0.7rem;
+            }
+
+            .calendar-day-number {
+                width: 16px;
+                height: 16px;
+                font-size: 0.7rem;
+            }
+
+            .calendar-hours {
+                font-size: 0.8rem;
+            }
+
+            .calendar-icons {
+                font-size: 0.7rem;
+            }
+
+            .calendar-holiday-name {
+                font-size: 0.6rem;
             }
 
             main {
