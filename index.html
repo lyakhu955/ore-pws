@@ -2290,14 +2290,13 @@
                              data-notturne="${totalNotturne}">
                             <div class="calendar-day-number">${day}</div>
                             <div class="calendar-day-content">
-                                <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
                                 ${dayEntries.length > 0 ? `
+                                    <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
                                     <div class="calendar-icons">
                                         ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
                                         ${hasNotturne ? '<i class="fas fa-moon" title="Notturne"></i>' : ''}
                                     </div>
                                 ` : ''}
-                                ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
                             </div>
                         </div>
                     `;
@@ -2512,14 +2511,13 @@
                              data-notturne="${totalNotturne}">
                             <div class="calendar-day-number">${day}</div>
                             <div class="calendar-day-content">
-                                <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
                                 ${dayEntries.length > 0 ? `
+                                    <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
                                     <div class="calendar-icons">
                                         ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
                                         ${hasNotturne ? '<i class="fas fa-moon" title="Notturne"></i>' : ''}
                                     </div>
                                 ` : ''}
-                                ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
                             </div>
                         </div>
                     `;
