@@ -1120,96 +1120,135 @@
         /* Stili per dispositivi mobili */
         @media screen and (max-width: 768px) {
             .container {
-                padding: 10px;
+                padding: 5px;
             }
 
             .card {
-                padding: 15px;
+                padding: 10px;
+                margin-bottom: 10px;
             }
 
             .calendar-container {
                 margin-top: 5px;
                 padding: 0;
+                width: 100%;
+                overflow-x: auto;
             }
 
             .calendar-header {
                 padding: 8px;
-                font-size: 0.8rem;
+                font-size: 1rem;
+                position: sticky;
+                top: 0;
+                z-index: 10;
             }
 
             .calendar-header button {
-                padding: 2px 4px;
-                font-size: 0.9rem;
+                padding: 5px 10px;
+                font-size: 1.2rem;
             }
 
             .calendar-month {
-                font-size: 1rem;
+                font-size: 1.3rem;
             }
 
             .calendar-year {
-                font-size: 0.8rem;
+                font-size: 1.1rem;
             }
 
             .calendar-grid {
-                gap: 0;
+                gap: 1px;
+                min-width: 100%;
+                display: grid;
+                grid-template-columns: repeat(7, minmax(50px, 1fr));
             }
 
             .calendar-weekday {
-                padding: 5px 2px;
-                font-size: 0.7rem;
+                padding: 8px 2px;
+                font-size: 0.9rem;
+                text-align: center;
+                background-color: #f8f9fa;
+                border-bottom: 1px solid var(--border-color);
             }
 
             .calendar-day {
-                min-height: 60px;
-                padding: 3px;
-                font-size: 0.7rem;
+                min-height: 80px;
+                padding: 5px;
+                font-size: 0.9rem;
+                position: relative;
             }
 
             .calendar-day-number {
-                font-size: 0.9rem;
-                margin-bottom: 2px;
+                width: 35px;
+                height: 35px;
+                font-size: 1.2rem;
+                top: 3px;
+                left: 3px;
             }
 
-            .calendar-hours {
-                font-size: 0.9rem;
-                margin-bottom: 2px;
-            }
-
-            .calendar-icons {
-                font-size: 0.7rem;
-                gap: 3px;
-            }
-
-            .calendar-holiday-name {
-                font-size: 0.6rem;
-                margin-top: 2px;
+            .calendar-day.today .calendar-day-number {
+                font-size: 1.3rem;
             }
 
             .calendar-day-content {
+                margin-top: 40px;
                 padding: 2px;
+            }
+
+            .calendar-hours {
+                font-size: 1.1rem;
+                margin-bottom: 3px;
+            }
+
+            .calendar-icons {
+                font-size: 0.8rem;
+                gap: 3px;
+            }
+
+            .calendar-icons i {
+                font-size: 0.9rem;
+            }
+
+            .calendar-holiday-name {
+                font-size: 0.7rem;
+                margin-top: 2px;
             }
 
             /* Ottimizzazione per schermi molto piccoli */
             @media screen and (max-width: 480px) {
+                .calendar-grid {
+                    grid-template-columns: repeat(7, minmax(45px, 1fr));
+                }
+
                 .calendar-day {
-                    min-height: 50px;
+                    min-height: 70px;
                 }
 
                 .calendar-weekday {
-                    font-size: 0.6rem;
-                    padding: 3px 1px;
+                    font-size: 0.8rem;
+                    padding: 6px 1px;
                 }
 
                 .calendar-day-number {
-                    font-size: 0.8rem;
+                    width: 30px;
+                    height: 30px;
+                    font-size: 1.1rem;
+                }
+
+                .calendar-day.today .calendar-day-number {
+                    font-size: 1.2rem;
                 }
 
                 .calendar-hours {
-                    font-size: 0.8rem;
+                    font-size: 1rem;
                 }
 
                 .calendar-icons {
-                    font-size: 0.6rem;
+                    font-size: 0.7rem;
+                }
+
+                .calendar-icons i {
+                    font-size: 0.8rem;
                 }
             }
         }
