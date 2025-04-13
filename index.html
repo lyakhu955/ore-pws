@@ -261,64 +261,81 @@
         
         .calendar-day {
             aspect-ratio: 1;
-            padding: 8px;
+            padding: 4px;
             background-color: var(--card-bg);
             cursor: pointer;
             transition: background-color 0.3s;
             display: grid;
             grid-template-areas: 
-                "number icons"
+                "number number"
+                "icons icons"
                 "hours hours";
-            grid-template-rows: auto 1fr;
+            grid-template-rows: auto 1fr auto;
             grid-template-columns: 1fr auto;
-            gap: 4px;
+            gap: 2px;
             min-width: 40px;
             min-height: 40px;
             position: relative;
             border: 1px solid var(--border-color);
+            overflow: hidden;
         }
 
         .calendar-day-number {
             grid-area: number;
+            width: 24px;
+            height: 24px;
+            background-color: #444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-weight: bold;
-            font-size: 1.2rem;
-            color: var(--text-color);
-            justify-self: start;
-            align-self: start;
+            font-size: 0.9rem;
+            color: white;
+            margin: 0 auto;
         }
 
         .calendar-icons {
             grid-area: icons;
             display: flex;
             gap: 4px;
-            justify-self: end;
-            align-self: start;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8rem;
         }
 
         .calendar-hours {
             grid-area: hours;
-            font-size: 1.2rem;
+            font-size: 0.9rem;
             color: var(--primary-color);
             align-self: end;
             justify-self: start;
+            padding-left: 2px;
         }
 
         @media (max-width: 480px) {
             .calendar-day {
-                padding: 6px;
-                gap: 2px;
+                padding: 2px;
+                gap: 1px;
             }
 
             .calendar-day-number {
-                font-size: 1rem;
+                width: 20px;
+                height: 20px;
+                font-size: 0.8rem;
             }
 
             .calendar-hours {
-                font-size: 1rem;
+                font-size: 0.8rem;
             }
 
-            .calendar-icons i {
-                font-size: 1rem;
+            .calendar-icons {
+                font-size: 0.7rem;
+            }
+
+            .calendar-weekday {
+                padding: 2px;
+                font-size: 0.7rem;
             }
         }
         
