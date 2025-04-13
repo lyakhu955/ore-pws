@@ -282,17 +282,26 @@
 
         .calendar-day-number {
             grid-area: number;
-            width: 24px;
-            height: 24px;
+            width: 16px;
+            height: 16px;
             background-color: #444;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 0.7rem;
             color: white;
-            margin: 0 auto;
+            margin: 0;
+            justify-self: start;
+        }
+
+        @media (max-width: 480px) {
+            .calendar-day-number {
+                width: 14px;
+                height: 14px;
+                font-size: 0.6rem;
+            }
         }
 
         .calendar-icons {
