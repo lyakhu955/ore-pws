@@ -630,6 +630,25 @@
             color: #666;
         }
         
+        .day-holiday-info {
+            text-align: center;
+            margin-top: 10px;
+            padding: 8px;
+            background-color: rgba(255, 0, 0, 0.1);
+            border-radius: 5px;
+            color: #ff0000;
+            font-weight: bold;
+        }
+        
+        .day-holiday-info i {
+            margin-right: 5px;
+        }
+        
+        .dark-theme .day-holiday-info {
+            background-color: rgba(255, 0, 0, 0.2);
+            color: #ff4444;
+        }
+        
         .day-entries {
             max-height: 300px;
             overflow-y: auto;
@@ -2342,6 +2361,16 @@
                         document.getElementById('modalTransferta').textContent = `${totalTransferta.toFixed(1)}h`;
                         document.getElementById('modalNotturne').textContent = `${totalNotturne.toFixed(1)}h`;
                         
+                        // Aggiungi il nome della festività se presente
+                        const isHoliday = isItalianHoliday(new Date(date.split('/').reverse().join('-')));
+                        if (isHoliday) {
+                            const holidayName = getHolidayName(new Date(date.split('/').reverse().join('-')));
+                            const holidayInfo = document.createElement('div');
+                            holidayInfo.className = 'day-holiday-info';
+                            holidayInfo.innerHTML = `<i class="fas fa-calendar-day"></i> ${holidayName}`;
+                            document.querySelector('.day-summary').appendChild(holidayInfo);
+                        }
+                        
                         // Aggiorna le entries nel modale
                         const modalEntries = document.getElementById('modalEntries');
                         
@@ -2528,6 +2557,16 @@
                         document.getElementById('modalTotalHours').textContent = `${totalHours.toFixed(1)}h`;
                         document.getElementById('modalTransferta').textContent = `${totalTransferta.toFixed(1)}h`;
                         document.getElementById('modalNotturne').textContent = `${totalNotturne.toFixed(1)}h`;
+                        
+                        // Aggiungi il nome della festività se presente
+                        const isHoliday = isItalianHoliday(new Date(date.split('/').reverse().join('-')));
+                        if (isHoliday) {
+                            const holidayName = getHolidayName(new Date(date.split('/').reverse().join('-')));
+                            const holidayInfo = document.createElement('div');
+                            holidayInfo.className = 'day-holiday-info';
+                            holidayInfo.innerHTML = `<i class="fas fa-calendar-day"></i> ${holidayName}`;
+                            document.querySelector('.day-summary').appendChild(holidayInfo);
+                        }
                         
                         // Aggiorna le entries nel modale
                         const modalEntries = document.getElementById('modalEntries');
