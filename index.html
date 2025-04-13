@@ -30,10 +30,9 @@
         }
 
         .container {
-            max-width: 100%;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-            overflow-x: hidden;
         }
 
         header {
@@ -193,8 +192,6 @@
 
         .calendar-container {
             margin-top: 20px;
-            width: 100%;
-            overflow-x: auto;
         }
 
         .calendar-header {
@@ -241,104 +238,26 @@
         
         .calendar-grid {
             display: grid;
-            grid-template-columns: repeat(7, minmax(0, 1fr));
-            gap: 2px;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
             background-color: white;
             border-radius: 0 0 10px 10px;
             overflow: hidden;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            width: 100%;
-            min-width: 300px;
         }
         
-        .calendar-weekday {
-            text-align: center;
-            padding: 8px 5px;
-            font-weight: bold;
-            background-color: #f8f9fa;
-            font-size: 0.8rem;
-        }
-        
-        .calendar-day {
-            aspect-ratio: 1;
-            padding: 4px;
-            background-color: var(--card-bg);
-            cursor: pointer;
-            transition: background-color 0.3s;
-            display: grid;
-            grid-template-areas: 
-                "number number"
-                "icons icons"
-                "hours hours";
-            grid-template-rows: auto 1fr auto;
-            grid-template-columns: 1fr auto;
-            gap: 2px;
-            min-width: 40px;
-            min-height: 40px;
-            position: relative;
-            border: 1px solid var(--border-color);
-            overflow: hidden;
-        }
-
-        .calendar-day-number {
-            grid-area: number;
-            width: 16px;
-            height: 16px;
-            background-color: #444;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 0.7rem;
-            color: white;
-            margin: 0;
-            justify-self: start;
-        }
-
-        @media (max-width: 480px) {
-            .calendar-day-number {
-                width: 14px;
-                height: 14px;
-                font-size: 0.6rem;
+        @media (max-width: 768px) {
+            .calendar-grid {
+                font-size: 0.8rem;
+                gap: 1px;
+                width: 100%;
+                min-width: 100%;
+                overflow-x: auto;
             }
-        }
 
-        .calendar-icons {
-            grid-area: icons;
-            display: flex;
-            gap: 4px;
-            justify-content: center;
-            align-items: center;
-            font-size: 0.8rem;
-        }
-
-        .calendar-hours {
-            grid-area: hours;
-            font-size: 0.9rem;
-            color: var(--primary-color);
-            align-self: end;
-            justify-self: start;
-            padding-left: 2px;
-        }
-
-        @media (max-width: 480px) {
             .calendar-day {
                 padding: 2px;
-                gap: 1px;
-            }
-
-            .calendar-day-number {
-                width: 20px;
-                height: 20px;
-                font-size: 0.8rem;
-            }
-
-            .calendar-hours {
-                font-size: 0.8rem;
-            }
-
-            .calendar-icons {
+                min-height: 40px;
                 font-size: 0.7rem;
             }
 
@@ -346,6 +265,74 @@
                 padding: 2px;
                 font-size: 0.7rem;
             }
+
+            .calendar-header {
+                padding: 5px;
+            }
+
+            .calendar-month {
+                font-size: 1rem;
+            }
+
+            .calendar-year {
+                font-size: 0.9rem;
+            }
+
+            .calendar-container {
+                margin: 5px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .calendar-grid {
+                min-width: 300px;
+                width: 100%;
+            }
+
+            .time-total {
+                font-size: 0.7rem;
+            }
+
+            .calendar-day .hours {
+                font-size: 0.6rem;
+            }
+
+            .calendar-day i {
+                font-size: 0.7rem;
+            }
+
+            main {
+                margin-top: 60px;
+                padding: 5px;
+            }
+
+            .container {
+                padding: 5px;
+            }
+        }
+        
+        .calendar-weekday {
+            text-align: center;
+            font-weight: bold;
+            padding: 10px;
+            background-color: #f5f5f5;
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .calendar-day {
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
         }
         
         .calendar-day:hover {
@@ -371,18 +358,17 @@
         
         .calendar-day-number {
             position: absolute;
-            top: 3px;
-            right: 3px;
+            top: 5px;
+            right: 5px;
             font-weight: bold;
-            width: 24px;
-            height: 24px;
+            width: 25px;
+            height: 25px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
             background-color: #f5f5f5;
             color: var(--text-color);
-            font-size: 0.9rem;
         }
         
         .calendar-day.today .calendar-day-number {
@@ -400,21 +386,21 @@
         }
         
         .calendar-hours {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: bold;
             color: var(--primary-color);
-            margin-bottom: 3px;
+            margin-bottom: 5px;
         }
         
         .calendar-icons {
             display: flex;
             justify-content: center;
-            gap: 4px;
-            margin-top: 4px;
+            gap: 5px;
+            margin-top: 5px;
         }
         
         .calendar-icons i {
-            font-size: 0.9rem;
+            font-size: 1rem;
         }
         
         .calendar-icons i.fa-car {
@@ -576,51 +562,6 @@
             .stats-container {
                 flex-direction: column;
             }
-
-            .calendar-day {
-                min-width: 80px;
-                min-height: 80px;
-                padding: 15px;
-                font-size: 1.2rem;
-            }
-
-            .calendar-day-number {
-                width: 35px;
-                height: 35px;
-                font-size: 1.2rem;
-            }
-
-            .calendar-hours {
-                font-size: 1.6rem;
-            }
-
-            .calendar-icons i {
-                font-size: 1.4rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .calendar-day {
-                min-width: 30px;
-                min-height: 30px;
-                padding: 3px;
-                font-size: 0.8rem;
-            }
-
-            .calendar-weekday {
-                padding: 3px 1px;
-                font-size: 0.6rem;
-            }
-
-            .calendar-day-number {
-                width: 18px;
-                height: 18px;
-                font-size: 0.7rem;
-            }
-
-            .calendar-hours {
-                font-size: 0.9rem;
-            }
         }
 
         /* Stili per il modale */
@@ -699,25 +640,6 @@
         .day-summary-label {
             font-size: 0.9rem;
             color: #666;
-        }
-        
-        .day-holiday-info {
-            text-align: center;
-            margin-top: 10px;
-            padding: 8px;
-            background-color: rgba(255, 0, 0, 0.1);
-            border-radius: 5px;
-            color: #ff0000;
-            font-weight: bold;
-        }
-        
-        .day-holiday-info i {
-            margin-right: 5px;
-        }
-        
-        .dark-theme .day-holiday-info {
-            background-color: rgba(255, 0, 0, 0.2);
-            color: #ff4444;
         }
         
         .day-entries {
@@ -1257,7 +1179,9 @@
     <header>
         <div class="header-content">
             <div class="logo">
-                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjUwIiB2aWV3Qm94PSIwIDAgMjAwIDUwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxzdHlsZT4uY2xzLTF7ZmlsbDojNGNhZjUwO2ZvbnQtZmFtaWx5OkFyaWFsLEhlbHZldGljYSxzYW5zLXNlcmlmO2ZvbnQtd2VpZ2h0OmJvbGQ7fTwvc3R5bGU+PC9kZWZzPjx0ZXh0IGNsYXNzPSJjbHMtMSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTAgMzUpIj5QV1MgR1JPVVA8L3RleHQ+PC9zdmc+" alt="PWS Logo">
+                <img src="https://i.imgur.com/BnllByD.png" 
+                     alt="PWS Logo" 
+                     style="max-width: 200px; height: auto;">
             </div>
             <div class="header-actions">
                 <!-- Aggiungi qui le azioni del header -->
@@ -2287,27 +2211,25 @@
                         <button id="nextMonth"><i class="fas fa-chevron-right"></i></button>
                     </div>
                     <div class="calendar-grid">
+                        <div class="calendar-weekday">Domenica</div>
                         <div class="calendar-weekday">Lunedì</div>
                         <div class="calendar-weekday">Martedì</div>
                         <div class="calendar-weekday">Mercoledì</div>
                         <div class="calendar-weekday">Giovedì</div>
                         <div class="calendar-weekday">Venerdì</div>
                         <div class="calendar-weekday">Sabato</div>
-                        <div class="calendar-weekday">Domenica</div>
                 `;
                 
                 // Ottieni il primo giorno del mese
                 const firstDay = new Date(currentYear, currentMonth, 1);
                 const startingDay = firstDay.getDay();
-                // Converti il giorno della settimana per far iniziare da lunedì (0 = lunedì, 6 = domenica)
-                const adjustedStartingDay = startingDay === 0 ? 6 : startingDay - 1;
                 
                 // Ottieni l'ultimo giorno del mese
                 const lastDay = new Date(currentYear, currentMonth + 1, 0);
                 const totalDays = lastDay.getDate();
                 
                 // Aggiungi celle vuote per i giorni prima dell'inizio del mese
-                for (let i = 0; i < adjustedStartingDay; i++) {
+                for (let i = 0; i < startingDay; i++) {
                     calendarHTML += '<div class="calendar-day empty"></div>';
                 }
                 
@@ -2361,13 +2283,14 @@
                              data-notturne="${totalNotturne}">
                             <div class="calendar-day-number">${day}</div>
                             <div class="calendar-day-content">
+                                <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
                                 ${dayEntries.length > 0 ? `
                                     <div class="calendar-icons">
                                         ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
                                         ${hasNotturne ? '<i class="fas fa-moon" title="Notturne"></i>' : ''}
                                     </div>
-                                    <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
                                 ` : ''}
+                                ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
                             </div>
                         </div>
                     `;
@@ -2430,16 +2353,6 @@
                         document.getElementById('modalTotalHours').textContent = `${totalHours.toFixed(1)}h`;
                         document.getElementById('modalTransferta').textContent = `${totalTransferta.toFixed(1)}h`;
                         document.getElementById('modalNotturne').textContent = `${totalNotturne.toFixed(1)}h`;
-                        
-                        // Aggiungi il nome della festività se presente
-                        const isHoliday = isItalianHoliday(new Date(date.split('/').reverse().join('-')));
-                        if (isHoliday) {
-                            const holidayName = getHolidayName(new Date(date.split('/').reverse().join('-')));
-                            const holidayInfo = document.createElement('div');
-                            holidayInfo.className = 'day-holiday-info';
-                            holidayInfo.innerHTML = `<i class="fas fa-calendar-day"></i> ${holidayName}`;
-                            document.querySelector('.day-summary').appendChild(holidayInfo);
-                        }
                         
                         // Aggiorna le entries nel modale
                         const modalEntries = document.getElementById('modalEntries');
@@ -2518,13 +2431,13 @@
                 
                 // Crea il calendario
                 let calendarHTML = `
+                    <div class="calendar-weekday">Domenica</div>
                     <div class="calendar-weekday">Lunedì</div>
                     <div class="calendar-weekday">Martedì</div>
                     <div class="calendar-weekday">Mercoledì</div>
                     <div class="calendar-weekday">Giovedì</div>
                     <div class="calendar-weekday">Venerdì</div>
                     <div class="calendar-weekday">Sabato</div>
-                    <div class="calendar-weekday">Domenica</div>
                 `;
                 
                 // Aggiungi celle vuote per i giorni prima dell'inizio del mese
@@ -2582,13 +2495,14 @@
                              data-notturne="${totalNotturne}">
                             <div class="calendar-day-number">${day}</div>
                             <div class="calendar-day-content">
+                                <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
                                 ${dayEntries.length > 0 ? `
                                     <div class="calendar-icons">
                                         ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
                                         ${hasNotturne ? '<i class="fas fa-moon" title="Notturne"></i>' : ''}
                                     </div>
-                                    <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
                                 ` : ''}
+                                ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
                             </div>
                         </div>
                     `;
@@ -2626,16 +2540,6 @@
                         document.getElementById('modalTotalHours').textContent = `${totalHours.toFixed(1)}h`;
                         document.getElementById('modalTransferta').textContent = `${totalTransferta.toFixed(1)}h`;
                         document.getElementById('modalNotturne').textContent = `${totalNotturne.toFixed(1)}h`;
-                        
-                        // Aggiungi il nome della festività se presente
-                        const isHoliday = isItalianHoliday(new Date(date.split('/').reverse().join('-')));
-                        if (isHoliday) {
-                            const holidayName = getHolidayName(new Date(date.split('/').reverse().join('-')));
-                            const holidayInfo = document.createElement('div');
-                            holidayInfo.className = 'day-holiday-info';
-                            holidayInfo.innerHTML = `<i class="fas fa-calendar-day"></i> ${holidayName}`;
-                            document.querySelector('.day-summary').appendChild(holidayInfo);
-                        }
                         
                         // Aggiorna le entries nel modale
                         const modalEntries = document.getElementById('modalEntries');
@@ -3204,6 +3108,52 @@
                 document.body.removeChild(link);
             }
         });
+
+        // Aggiungi questa sezione per la gestione audio
+        let audioContext;
+        let audioElements = {};
+
+        async function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                // Inizializza gli elementi audio per ogni giorno
+                for (let i = 1; i <= 31; i++) {
+                    audioElements[i] = new Audio();
+                }
+            } catch (e) {
+                console.error('Errore nell\'inizializzazione audio:', e);
+            }
+        }
+
+        async function playSound(day) {
+            try {
+                const audio = audioElements[day];
+                if (audio.src) {
+                    await audio.play();
+                } else {
+                    // Se non c'è un file audio associato, usa un suono di default
+                    const defaultSound = new Audio('assets/sounds/default.mp3');
+                    await defaultSound.play();
+                }
+            } catch (e) {
+                console.error('Errore nella riproduzione audio:', e);
+            }
+        }
+
+        // Modifica la funzione createCalendar per aggiungere il supporto audio
+        function createCalendar(year, month) {
+            // ... existing code ...
+            const dayElement = document.createElement('div');
+            dayElement.className = `calendar-day ${isToday ? 'today' : ''} ${dayEntries.length > 0 ? 'has-entries' : ''} ${isHoliday ? 'holiday' : ''}`;
+            
+            // Aggiungi l'evento click per la riproduzione audio
+            dayElement.addEventListener('click', () => playSound(day));
+            
+            // ... rest of the existing code ...
+        }
+
+        // Inizializza l'audio quando la pagina è caricata
+        document.addEventListener('DOMContentLoaded', initAudio);
     </script>
 </body>
 </html> 
