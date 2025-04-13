@@ -301,7 +301,7 @@
         .calendar-day-number {
             position: absolute;
             top: 3px;
-            left: 3px;
+            right: 3px;
             font-weight: bold;
             width: 24px;
             height: 24px;
@@ -1160,39 +1160,6 @@
         .dark-theme header {
             background-color: #1e1e1e;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-
-        .day-holiday-info {
-            background-color: rgba(255, 0, 0, 0.1);
-            padding: 10px;
-            margin-bottom: 15px;
-            border-radius: 5px;
-            text-align: center;
-        }
-
-        .holiday-name {
-            color: #d32f2f;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .holiday-name i {
-            color: #d32f2f;
-        }
-
-        .dark-theme .day-holiday-info {
-            background-color: rgba(255, 0, 0, 0.2);
-        }
-
-        .dark-theme .holiday-name {
-            color: #ff6b6b;
-        }
-
-        .dark-theme .holiday-name i {
-            color: #ff6b6b;
         }
     </style>
 </head>
@@ -2290,20 +2257,29 @@
                     }
                     
                     // Determina se il giorno è oggi
-                    const isToday = date.toDateString() === today.toDateString();
+                    const isToday = day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
+                    
+                    // Determina se il giorno è una festività
                     const isHoliday = isItalianHoliday(date);
                     
+                    // Crea la cella del calendario
                     calendarHTML += `
-                        <div class="calendar-day ${isToday ? 'today' : ''} ${isHoliday ? 'holiday' : ''} ${dayEntries.length > 0 ? 'has-entries' : ''}" data-date="${dateString}">
+                        <div class="calendar-day ${isToday ? 'today' : ''} ${dayEntries.length > 0 ? 'has-entries' : ''} ${isHoliday ? 'holiday' : ''}" 
+                             data-date="${dateString}" 
+                             data-hours="${totalHours}"
+                             data-transferta="${totalTransferta}"
+                             data-notturne="${totalNotturne}">
                             <div class="calendar-day-number">${day}</div>
                             <div class="calendar-day-content">
-                                ${totalHours > 0 ? `<div class="calendar-hours">${totalHours.toFixed(1)}h</div>` : ''}
-                                <div class="calendar-icons">
-                                    ${hasTransferta ? '<i class="fas fa-car"></i>' : ''}
-                                    ${hasNotturne ? '<i class="fas fa-moon"></i>' : ''}
-                                </div>
+                                <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
+                                ${dayEntries.length > 0 ? `
+                                    <div class="calendar-icons">
+                                        ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
+                                        ${hasNotturne ? '<i class="fas fa-moon" title="Notturne"></i>' : ''}
+                                    </div>
+                                ` : ''}
+                                ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
                             </div>
-                            ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
                         </div>
                     `;
                 }
@@ -2404,15 +2380,6 @@
                             });
                         }
                         
-                        // Aggiungi il nome della festività se il giorno è festivo
-                        if (isHoliday) {
-                            const holidayName = getHolidayName(date);
-                            const holidayInfo = document.createElement('div');
-                            holidayInfo.className = 'day-holiday-info';
-                            holidayInfo.innerHTML = `<div class="holiday-name"><i class="fas fa-calendar"></i> ${holidayName}</div>`;
-                            modalEntries.insertBefore(holidayInfo, modalEntries.firstChild);
-                        }
-                        
                         // Mostra il modale
                         document.getElementById('dayModal').style.display = 'block';
                     });
@@ -2484,6 +2451,7 @@
                     
                     // Cerca le entries per questo giorno
                     const dayEntries = entriesByDate[dateString] || [];
+                    console.log(`Giorno ${dateString}:`, dayEntries);
                     
                     // Calcola le ore totali per il giorno
                     const totalHours = dayEntries.reduce((sum, entry) => sum + parseFloat(entry.hours), 0);
@@ -2501,20 +2469,29 @@
                     }
                     
                     // Determina se il giorno è oggi
-                    const isToday = date.toDateString() === today.toDateString();
+                    const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+                    
+                    // Determina se il giorno è una festività
                     const isHoliday = isItalianHoliday(date);
                     
+                    // Crea la cella del calendario
                     calendarHTML += `
-                        <div class="calendar-day ${isToday ? 'today' : ''} ${isHoliday ? 'holiday' : ''} ${dayEntries.length > 0 ? 'has-entries' : ''}" data-date="${dateString}">
+                        <div class="calendar-day ${isToday ? 'today' : ''} ${dayEntries.length > 0 ? 'has-entries' : ''} ${isHoliday ? 'holiday' : ''}" 
+                             data-date="${dateString}" 
+                             data-hours="${totalHours}"
+                             data-transferta="${totalTransferta}"
+                             data-notturne="${totalNotturne}">
                             <div class="calendar-day-number">${day}</div>
                             <div class="calendar-day-content">
-                                ${totalHours > 0 ? `<div class="calendar-hours">${totalHours.toFixed(1)}h</div>` : ''}
-                                <div class="calendar-icons">
-                                    ${hasTransferta ? '<i class="fas fa-car"></i>' : ''}
-                                    ${hasNotturne ? '<i class="fas fa-moon"></i>' : ''}
-                                </div>
+                                <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
+                                ${dayEntries.length > 0 ? `
+                                    <div class="calendar-icons">
+                                        ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
+                                        ${hasNotturne ? '<i class="fas fa-moon" title="Notturne"></i>' : ''}
+                                    </div>
+                                ` : ''}
+                                ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
                             </div>
-                            ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
                         </div>
                     `;
                 }
@@ -2587,15 +2564,6 @@
                                     document.getElementById('dayModal').style.display = 'none';
                                 });
                             });
-                        }
-                        
-                        // Aggiungi il nome della festività se il giorno è festivo
-                        if (isHoliday) {
-                            const holidayName = getHolidayName(date);
-                            const holidayInfo = document.createElement('div');
-                            holidayInfo.className = 'day-holiday-info';
-                            holidayInfo.innerHTML = `<div class="holiday-name"><i class="fas fa-calendar"></i> ${holidayName}</div>`;
-                            modalEntries.insertBefore(holidayInfo, modalEntries.firstChild);
                         }
                         
                         // Mostra il modale
