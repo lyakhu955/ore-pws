@@ -284,31 +284,209 @@
         }
 
         @media (max-width: 480px) {
+            .container {
+                padding: 0 5px;
+                margin: 0;
+                width: 100%;
+            }
+
+            .card {
+                margin: 5px 0;
+                padding: 8px;
+                border-radius: 8px;
+            }
+
+            .calendar-container {
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            .calendar-header {
+                padding: 5px;
+                border-radius: 8px 8px 0 0;
+            }
+
+            .calendar-month {
+                font-size: 0.9rem;
+            }
+
+            .calendar-year {
+                font-size: 0.8rem;
+            }
+
+            .calendar-header button {
+                padding: 2px 5px;
+                font-size: 0.9rem;
+            }
+
+            .calendar-grid {
+                gap: 1px;
+                border-radius: 0 0 8px 8px;
+            }
+
             .calendar-weekday {
+                padding: 2px;
                 font-size: 0.6rem;
-                padding: 2px;
+                font-weight: normal;
             }
-            
+
             .calendar-day {
-                padding: 2px;
+                min-height: 30px;
+                padding: 1px;
+                border-width: 0.5px;
             }
-            
+
             .calendar-day-number {
                 width: 12px;
                 height: 12px;
-                font-size: 0.6rem;
+                font-size: 0.55rem;
+                top: 1px;
+                right: 1px;
             }
-            
-            .calendar-hours {
-                font-size: 0.7rem;
-            }
-            
-            .calendar-icons i {
-                font-size: 0.6rem;
-            }
-            
+
             .calendar-day-content {
                 margin-top: 12px;
+                font-size: 0.6rem;
+            }
+
+            .calendar-hours {
+                font-size: 0.65rem;
+                margin-bottom: 0;
+            }
+
+            .calendar-icons {
+                gap: 1px;
+                margin-top: 1px;
+            }
+
+            .calendar-icons i {
+                font-size: 0.55rem;
+            }
+
+            .monthly-summary {
+                margin-top: 8px;
+                padding: 8px;
+            }
+
+            .monthly-stat-item {
+                padding: 5px;
+            }
+
+            .monthly-stat-value {
+                font-size: 1rem;
+            }
+
+            .monthly-stat-label {
+                font-size: 0.7rem;
+            }
+
+            /* Ottimizzazioni per il modale su mobile */
+            .modal-content {
+                margin: 5% auto;
+                width: 95%;
+                padding: 10px;
+            }
+
+            .modal-header {
+                padding: 8px;
+            }
+
+            .modal-title {
+                font-size: 1.1rem;
+            }
+
+            .day-summary {
+                padding: 5px;
+                margin-bottom: 10px;
+            }
+
+            .day-summary-value {
+                font-size: 1.1rem;
+            }
+
+            .day-summary-label {
+                font-size: 0.7rem;
+            }
+
+            .day-entry {
+                padding: 5px;
+            }
+
+            .day-entry-header {
+                font-size: 0.9rem;
+            }
+
+            .day-entry-details {
+                font-size: 0.7rem;
+            }
+
+            /* Ottimizzazioni per la navigazione inferiore */
+            .bottom-nav {
+                padding: 5px;
+            }
+
+            .nav-item {
+                font-size: 0.7rem;
+            }
+
+            .nav-item i {
+                font-size: 1rem;
+                margin-bottom: 2px;
+            }
+
+            /* Ottimizzazioni per il form di input */
+            .form-row {
+                gap: 8px;
+                margin-bottom: 8px;
+            }
+
+            .form-group {
+                margin-bottom: 8px;
+            }
+
+            label {
+                font-size: 0.8rem;
+                margin-bottom: 2px;
+            }
+
+            input, select {
+                padding: 6px;
+                font-size: 0.9rem;
+            }
+
+            button {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Ottimizzazioni per schermi molto piccoli */
+        @media (max-width: 360px) {
+            .calendar-day {
+                min-height: 25px;
+            }
+
+            .calendar-day-number {
+                width: 10px;
+                height: 10px;
+                font-size: 0.5rem;
+            }
+
+            .calendar-hours {
+                font-size: 0.6rem;
+            }
+
+            .calendar-icons i {
+                font-size: 0.5rem;
+            }
+
+            .nav-item {
+                font-size: 0.6rem;
+            }
+
+            .nav-item i {
+                font-size: 0.9rem;
             }
         }
 
