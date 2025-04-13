@@ -2243,27 +2243,24 @@
                         <button id="nextMonth"><i class="fas fa-chevron-right"></i></button>
                     </div>
                     <div class="calendar-grid">
-                        <div class="calendar-weekday">Domenica</div>
                         <div class="calendar-weekday">Lunedì</div>
                         <div class="calendar-weekday">Martedì</div>
                         <div class="calendar-weekday">Mercoledì</div>
                         <div class="calendar-weekday">Giovedì</div>
                         <div class="calendar-weekday">Venerdì</div>
                         <div class="calendar-weekday">Sabato</div>
+                        <div class="calendar-weekday">Domenica</div>
                 `;
                 
                 // Ottieni il primo giorno del mese
                 const firstDay = new Date(currentYear, currentMonth, 1);
-                const startingDay = firstDay.getDay();
+                let startingDay = firstDay.getDay();
+                // Converti l'indice del giorno per iniziare da lunedì (0 = lunedì, 6 = domenica)
+                startingDay = startingDay === 0 ? 6 : startingDay - 1;
                 
                 // Ottieni l'ultimo giorno del mese
                 const lastDay = new Date(currentYear, currentMonth + 1, 0);
                 const totalDays = lastDay.getDate();
-                
-                // Aggiungi celle vuote per i giorni prima dell'inizio del mese
-                for (let i = 0; i < startingDay; i++) {
-                    calendarHTML += '<div class="calendar-day empty"></div>';
-                }
                 
                 // Variabili per il riepilogo mensile
                 let monthlyTotalHours = 0;
@@ -2271,10 +2268,15 @@
                 let monthlyTransferta = 0;
                 let monthlyNotturne = 0;
                 
+                // Aggiungi celle vuote per i giorni prima dell'inizio del mese
+                for (let i = 0; i < startingDay; i++) {
+                    calendarHTML += '<div class="calendar-day empty"></div>';
+                }
+                
                 // Aggiungi i giorni del mese
                 for (let day = 1; day <= totalDays; day++) {
                     const date = new Date(currentYear, currentMonth, day);
-                    // Formatta la data direttamente in formato italiano (dd/mm/yyyy)
+                    // Formatta la data
                     const dateString = date.toLocaleDateString('it-IT', {
                         day: '2-digit',
                         month: '2-digit',
@@ -2283,7 +2285,6 @@
                     
                     // Cerca le entries per questo giorno
                     const dayEntries = entriesByDate[dateString] || [];
-                    console.log(`Giorno ${dateString}:`, dayEntries);
                     
                     // Calcola le ore totali per il giorno
                     const totalHours = dayEntries.reduce((sum, entry) => sum + parseFloat(entry.hours), 0);
@@ -2318,8 +2319,8 @@
                                 <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
                                 ${dayEntries.length > 0 ? `
                                     <div class="calendar-icons">
-                                        ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
-                                        ${hasNotturne ? '<i class="fas fa-moon" title="Notturne"></i>' : ''}
+                                        ${hasTransferta ? `<i class="fas fa-car" title="Trasferta"> ${totalTransferta}h</i>` : ''}
+                                        ${hasNotturne ? `<i class="fas fa-moon" title="Notturne"> ${totalNotturne}h</i>` : ''}
                                     </div>
                                 ` : ''}
                                 ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
@@ -2364,11 +2365,9 @@
                 document.querySelectorAll('.calendar-day:not(.empty)').forEach(day => {
                     day.addEventListener('click', function() {
                         const date = this.getAttribute('data-date');
-                        console.log('Data cliccata nel calendario:', date);
                         
                         // Cerca le entries per questa data
                         const dayEntries = entriesByDate[date] || [];
-                        console.log('Entries trovate per questa data:', dayEntries);
                         
                         // Calcola le ore totali per il giorno
                         const totalHours = dayEntries.reduce((sum, entry) => sum + parseFloat(entry.hours), 0);
@@ -2463,13 +2462,13 @@
                 
                 // Crea il calendario
                 let calendarHTML = `
-                    <div class="calendar-weekday">Domenica</div>
                     <div class="calendar-weekday">Lunedì</div>
                     <div class="calendar-weekday">Martedì</div>
                     <div class="calendar-weekday">Mercoledì</div>
                     <div class="calendar-weekday">Giovedì</div>
                     <div class="calendar-weekday">Venerdì</div>
                     <div class="calendar-weekday">Sabato</div>
+                    <div class="calendar-weekday">Domenica</div>
                 `;
                 
                 // Aggiungi celle vuote per i giorni prima dell'inizio del mese
@@ -2486,7 +2485,7 @@
                 // Aggiungi i giorni del mese
                 for (let day = 1; day <= totalDays; day++) {
                     const date = new Date(year, month, day);
-                    // Formatta la data direttamente in formato italiano (dd/mm/yyyy)
+                    // Formatta la data
                     const dateString = date.toLocaleDateString('it-IT', {
                         day: '2-digit',
                         month: '2-digit',
@@ -2495,7 +2494,6 @@
                     
                     // Cerca le entries per questo giorno
                     const dayEntries = entriesByDate[dateString] || [];
-                    console.log(`Giorno ${dateString}:`, dayEntries);
                     
                     // Calcola le ore totali per il giorno
                     const totalHours = dayEntries.reduce((sum, entry) => sum + parseFloat(entry.hours), 0);
@@ -2530,8 +2528,8 @@
                                 <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
                                 ${dayEntries.length > 0 ? `
                                     <div class="calendar-icons">
-                                        ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
-                                        ${hasNotturne ? '<i class="fas fa-moon" title="Notturne"></i>' : ''}
+                                        ${hasTransferta ? `<i class="fas fa-car" title="Trasferta"> ${totalTransferta}h</i>` : ''}
+                                        ${hasNotturne ? `<i class="fas fa-moon" title="Notturne"> ${totalNotturne}h</i>` : ''}
                                     </div>
                                 ` : ''}
                                 ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
