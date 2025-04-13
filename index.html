@@ -301,7 +301,7 @@
         .calendar-day-number {
             position: absolute;
             top: 3px;
-            right: 3px;
+            left: 3px;
             font-weight: bold;
             width: 24px;
             height: 24px;
@@ -2257,29 +2257,20 @@
                     }
                     
                     // Determina se il giorno è oggi
-                    const isToday = day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
-                    
-                    // Determina se il giorno è una festività
+                    const isToday = date.toDateString() === today.toDateString();
                     const isHoliday = isItalianHoliday(date);
                     
-                    // Crea la cella del calendario
                     calendarHTML += `
-                        <div class="calendar-day ${isToday ? 'today' : ''} ${dayEntries.length > 0 ? 'has-entries' : ''} ${isHoliday ? 'holiday' : ''}" 
-                             data-date="${dateString}" 
-                             data-hours="${totalHours}"
-                             data-transferta="${totalTransferta}"
-                             data-notturne="${totalNotturne}">
+                        <div class="calendar-day ${isToday ? 'today' : ''} ${isHoliday ? 'holiday' : ''} ${dayEntries.length > 0 ? 'has-entries' : ''}" data-date="${dateString}">
                             <div class="calendar-day-number">${day}</div>
                             <div class="calendar-day-content">
-                                <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
-                                ${dayEntries.length > 0 ? `
-                                    <div class="calendar-icons">
-                                        ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
-                                        ${hasNotturne ? '<i class="fas fa-moon" title="Notturne"></i>' : ''}
-                                    </div>
-                                ` : ''}
-                                ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
+                                ${totalHours > 0 ? `<div class="calendar-hours">${totalHours.toFixed(1)}h</div>` : ''}
+                                <div class="calendar-icons">
+                                    ${hasTransferta ? '<i class="fas fa-car"></i>' : ''}
+                                    ${hasNotturne ? '<i class="fas fa-moon"></i>' : ''}
+                                </div>
                             </div>
+                            ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
                         </div>
                     `;
                 }
@@ -2451,7 +2442,6 @@
                     
                     // Cerca le entries per questo giorno
                     const dayEntries = entriesByDate[dateString] || [];
-                    console.log(`Giorno ${dateString}:`, dayEntries);
                     
                     // Calcola le ore totali per il giorno
                     const totalHours = dayEntries.reduce((sum, entry) => sum + parseFloat(entry.hours), 0);
@@ -2469,29 +2459,20 @@
                     }
                     
                     // Determina se il giorno è oggi
-                    const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
-                    
-                    // Determina se il giorno è una festività
+                    const isToday = date.toDateString() === today.toDateString();
                     const isHoliday = isItalianHoliday(date);
                     
-                    // Crea la cella del calendario
                     calendarHTML += `
-                        <div class="calendar-day ${isToday ? 'today' : ''} ${dayEntries.length > 0 ? 'has-entries' : ''} ${isHoliday ? 'holiday' : ''}" 
-                             data-date="${dateString}" 
-                             data-hours="${totalHours}"
-                             data-transferta="${totalTransferta}"
-                             data-notturne="${totalNotturne}">
+                        <div class="calendar-day ${isToday ? 'today' : ''} ${isHoliday ? 'holiday' : ''} ${dayEntries.length > 0 ? 'has-entries' : ''}" data-date="${dateString}">
                             <div class="calendar-day-number">${day}</div>
                             <div class="calendar-day-content">
-                                <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
-                                ${dayEntries.length > 0 ? `
-                                    <div class="calendar-icons">
-                                        ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
-                                        ${hasNotturne ? '<i class="fas fa-moon" title="Notturne"></i>' : ''}
-                                    </div>
-                                ` : ''}
-                                ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
+                                ${totalHours > 0 ? `<div class="calendar-hours">${totalHours.toFixed(1)}h</div>` : ''}
+                                <div class="calendar-icons">
+                                    ${hasTransferta ? '<i class="fas fa-car"></i>' : ''}
+                                    ${hasNotturne ? '<i class="fas fa-moon"></i>' : ''}
+                                </div>
                             </div>
+                            ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
                         </div>
                     `;
                 }
