@@ -603,8 +603,11 @@
 
             .calendar-day {
                 padding: 2px;
-                min-width: 40px;
-                min-height: 40px;
+                min-width: 42px;
+                min-height: 42px;
+                display: grid;
+                grid-template-rows: auto 1fr;
+                gap: 1px;
             }
 
             .calendar-weekday {
@@ -617,14 +620,35 @@
                 width: 16px;
                 height: 16px;
                 font-size: 0.75rem;
+                margin: 1px;
             }
 
-            .calendar-icons {
-                font-size: 0.65rem;
+            .calendar-day-content {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                gap: 1px;
+                margin-top: 2px;
             }
 
             .calendar-hours {
                 font-size: 0.7rem;
+            }
+
+            .calendar-day:not(.has-entries) .calendar-hours {
+                display: none;
+            }
+
+            .calendar-icons {
+                font-size: 0.65rem;
+                display: flex;
+                gap: 2px;
+                justify-content: center;
+            }
+
+            .calendar-icons i {
+                margin: 0 1px;
             }
         }
 
@@ -2362,8 +2386,8 @@
                              ${isHoliday ? `data-holiday="${getHolidayName(date)}"` : ''}>
                             <div class="calendar-day-number">${day}</div>
                             <div class="calendar-day-content">
-                                <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
                                 ${dayEntries.length > 0 ? `
+                                    <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
                                     <div class="calendar-icons">
                                         ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
                                         ${hasNotturne ? '<i class="fas fa-moon" title="Notturne"></i>' : ''}
@@ -2579,8 +2603,8 @@
                              ${isHoliday ? `data-holiday="${getHolidayName(date)}"` : ''}>
                             <div class="calendar-day-number">${day}</div>
                             <div class="calendar-day-content">
-                                <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
                                 ${dayEntries.length > 0 ? `
+                                    <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
                                     <div class="calendar-icons">
                                         ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
                                         ${hasNotturne ? '<i class="fas fa-moon" title="Notturne"></i>' : ''}
