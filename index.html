@@ -2,7 +2,11 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Ore PWS">
+    <link rel="apple-touch-icon" href="icon.png">
     <title>Ore PWS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -346,615 +350,6 @@
             color: #673AB7;
         }
 
-        .stats-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .stat-card {
-            flex: 1;
-            min-width: 200px;
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--primary-color);
-            margin: 10px 0;
-        }
-
-        .stat-label {
-            color: #666;
-        }
-
-        .settings-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .setting-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background: white;
-            border-radius: 5px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .setting-label {
-            font-weight: 500;
-        }
-
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .toggle-slider {
-            background-color: var(--primary-color);
-        }
-
-        input:checked + .toggle-slider:before {
-            transform: translateX(26px);
-        }
-
-        .delete-btn {
-            background-color: #f44336;
-            color: white;
-            border: none;
-            border-radius: 3px;
-            padding: 3px 8px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-
-        .delete-btn:hover {
-            background-color: #d32f2f;
-        }
-
-        .time-entry-details {
-            display: flex;
-            gap: 15px;
-            margin: 5px 0;
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .time-entry-details span {
-            background-color: #f5f5f5;
-            padding: 2px 8px;
-            border-radius: 3px;
-        }
-
-        .time-entry i {
-            margin-left: 5px;
-            color: var(--primary-color);
-        }
-
-        .time-entry i.fa-car {
-            color: #2196F3;
-        }
-
-        .time-entry i.fa-moon {
-            color: #673AB7;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-
-            main {
-                margin-top: 60px;
-                padding: 10px;
-            }
-
-            .card {
-                padding: 15px;
-            }
-
-            .stats-container {
-                flex-direction: column;
-            }
-        }
-
-        /* Stili per il modale */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1001;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-        }
-        
-        .modal-content {
-            background-color: #fefefe;
-            margin: 10% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 600px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-        
-        .close-modal {
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        
-        .close-modal:hover {
-            color: var(--text-color);
-        }
-        
-        .modal-body {
-            margin-bottom: 20px;
-        }
-        
-        .day-summary {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: rgba(76, 175, 80, 0.1);
-            border-radius: 5px;
-        }
-        
-        .day-summary-item {
-            text-align: center;
-        }
-        
-        .day-summary-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-        
-        .day-summary-label {
-            font-size: 0.9rem;
-            color: #666;
-        }
-        
-        .day-entries {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        
-        .day-entry {
-            padding: 10px;
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        .day-entry:last-child {
-            border-bottom: none;
-        }
-        
-        .day-entry-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
-        
-        .day-entry-hours {
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-        
-        .day-entry-details {
-            display: flex;
-            gap: 10px;
-            margin: 5px 0;
-            font-size: 0.9rem;
-            color: #666;
-        }
-        
-        .day-entry-description {
-            margin-top: 5px;
-        }
-        
-        .modal-footer {
-            text-align: right;
-        }
-        
-        .dark-theme .modal-content {
-            background-color: #1e1e1e;
-            color: #f5f5f5;
-        }
-        
-        .dark-theme .day-summary {
-            background-color: rgba(76, 175, 80, 0.2);
-        }
-        
-        .dark-theme .day-entry {
-            border-bottom-color: #444;
-        }
-
-        .monthly-summary {
-            margin-top: 30px;
-            padding: 20px;
-            background-color: rgba(76, 175, 80, 0.1);
-            border-radius: 10px;
-        }
-        
-        .monthly-summary h3 {
-            margin-bottom: 15px;
-            color: var(--primary-color);
-            text-align: center;
-        }
-        
-        .monthly-stats {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
-            gap: 15px;
-        }
-        
-        .monthly-stat-item {
-            flex: 1;
-            min-width: 120px;
-            text-align: center;
-            padding: 10px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .monthly-stat-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--primary-color);
-            margin-bottom: 5px;
-        }
-        
-        .monthly-stat-label {
-            font-size: 0.9rem;
-            color: #666;
-        }
-        
-        .dark-theme .monthly-stat-item {
-            background-color: #2d2d2d;
-        }
-        
-        .dark-theme .monthly-stat-label {
-            color: #aaa;
-        }
-
-        .dark-theme {
-            --primary-color: #4CAF50;
-            --secondary-color: #2196F3;
-            --background-color: #1a1a1a;
-            --text-color: #f5f5f5;
-            --border-color: #444;
-            --card-bg: #2d2d2d;
-            --input-bg: #2d2d2d;
-            --input-text: #f5f5f5;
-            --nav-bg: #1e1e1e;
-            --modal-bg: #1e1e1e;
-            --modal-text: #f5f5f5;
-            --stat-bg: #2d2d2d;
-            --stat-text: #f5f5f5;
-            --stat-label: #aaa;
-            --setting-bg: #2d2d2d;
-            --setting-text: #f5f5f5;
-            --setting-label: #f5f5f5;
-            --toggle-bg: #444;
-            --toggle-active: #4CAF50;
-            --contact-bg: #2d2d2d;
-            --contact-text: #f5f5f5;
-            --contact-link: #4CAF50;
-        }
-
-        /* Stili per la sezione contatti */
-        .contacts-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        
-        .contact-address {
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: rgba(76, 175, 80, 0.1);
-            border-radius: 8px;
-        }
-        
-        .contact-address .contact-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .contact-address .contact-item i {
-            color: var(--primary-color);
-            font-size: 1.2rem;
-        }
-        
-        .contact-address .contact-item span {
-            font-size: 1.1rem;
-            color: var(--text-color);
-        }
-        
-        .dark-theme .contact-address {
-            background-color: rgba(76, 175, 80, 0.2);
-        }
-        
-        .contact-group {
-            margin-bottom: 15px;
-        }
-        
-        .contact-group h3 {
-            color: var(--primary-color);
-            margin-bottom: 10px;
-            font-size: 1.2rem;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 5px;
-        }
-        
-        .contact-card {
-            background-color: white;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 10px;
-        }
-        
-        .contact-name {
-            font-weight: bold;
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-            color: var(--text-color);
-        }
-        
-        .contact-info {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        
-        .contact-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .contact-item i {
-            color: var(--primary-color);
-            width: 20px;
-        }
-        
-        .contact-item a {
-            color: var(--primary-color);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-        
-        .contact-item a:hover {
-            text-decoration: underline;
-        }
-        
-        .dark-theme .contact-card {
-            background-color: var(--contact-bg);
-            color: var(--contact-text);
-        }
-        
-        .dark-theme .contact-name {
-            color: var(--contact-text);
-        }
-        
-        .dark-theme .contact-item a {
-            color: var(--contact-link);
-        }
-
-        /* Stili per il QR code */
-        .qr-code-container {
-            text-align: center;
-            margin: 20px 0;
-            padding: 15px;
-            background-color: #f9f9f9;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        
-        .qr-code-container h4 {
-            margin-bottom: 15px;
-            color: var(--primary-color);
-        }
-        
-        #qrcode {
-            display: inline-block;
-            padding: 10px;
-            background-color: white;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin: 0 auto;
-            min-width: 200px;
-            min-height: 200px;
-        }
-        
-        #qrcode img {
-            display: block !important;
-            max-width: 100% !important;
-            height: auto !important;
-            margin: 0 auto !important;
-        }
-        
-        .dark-theme .qr-code-container {
-            background-color: #333;
-        }
-        
-        .dark-theme #qrcode {
-            background-color: white;
-        }
-        
-        /* Stili per il tema scuro */
-        .dark-theme body {
-            background-color: var(--background-color);
-            color: var(--text-color);
-        }
-        
-        .dark-theme .card {
-            background-color: var(--card-bg);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-        
-        .dark-theme input, .dark-theme select {
-            background-color: #333;
-            color: var(--text-color);
-            border-color: #444;
-        }
-        
-        .dark-theme .time-entry {
-            border-bottom-color: #444;
-        }
-        
-        .dark-theme .time-entry-description {
-            color: #aaa;
-        }
-        
-        .dark-theme .bottom-nav {
-            background-color: var(--card-bg);
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.3);
-        }
-        
-        .dark-theme .nav-item {
-            color: #aaa;
-        }
-        
-        .dark-theme .nav-item.active {
-            color: var(--primary-color);
-        }
-        
-        .dark-theme .modal-content {
-            background-color: var(--card-bg);
-            color: var(--text-color);
-        }
-        
-        .dark-theme .modal-header {
-            border-bottom-color: #444;
-        }
-        
-        .dark-theme .day-entry {
-            border-bottom-color: #444;
-        }
-        
-        .dark-theme .day-summary {
-            background-color: rgba(76, 175, 80, 0.2);
-        }
-        
-        .dark-theme .day-summary-label {
-            color: #aaa;
-        }
-        
-        /* Stili per il calendario in tema scuro */
-        .dark-theme .calendar-grid {
-            background-color: #2d2d2d;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-        
-        .dark-theme .calendar-weekday {
-            background-color: #444;
-            color: #f5f5f5;
-            border-bottom-color: #555;
-        }
-        
-        .dark-theme .calendar-day {
-            background-color: #2d2d2d;
-            color: #f5f5f5;
-            border-color: #444;
-        }
-        
-        .dark-theme .calendar-day:hover {
-            background-color: rgba(76, 175, 80, 0.2);
-        }
-        
-        .dark-theme .calendar-day.empty {
-            background-color: #333;
-        }
-        
-        .dark-theme .calendar-day.empty:hover {
-            background-color: #333;
-        }
-        
-        .dark-theme .calendar-day.has-entries {
-            background-color: rgba(76, 175, 80, 0.2);
-        }
-        
-        .dark-theme .calendar-day-number {
-            background-color: #444;
-            color: #f5f5f5;
-        }
-        
-        .dark-theme .calendar-day.today .calendar-day-number {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .dark-theme .calendar-hours {
-            color: #4CAF50;
-        }
-        
         .calendar-day.holiday {
             background-color: rgba(255, 0, 0, 0.1);
             border: 1px solid rgba(255, 0, 0, 0.3);
@@ -1013,10 +408,6 @@
         .monthly-report-title p {
             color: #666;
             font-size: 0.9rem;
-        }
-        
-        .dark-theme .monthly-report-title p {
-            color: #aaa;
         }
         
         .monthly-report-actions {
@@ -1107,6 +498,281 @@
         .dark-theme header {
             background-color: #1e1e1e;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .monthly-summary {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: rgba(76, 175, 80, 0.1);
+            border-radius: 10px;
+        }
+        
+        .monthly-summary h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            text-align: center;
+        }
+        
+        .monthly-stats {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 15px;
+        }
+        
+        .monthly-stat-item {
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+            padding: 10px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .monthly-stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        
+        .monthly-stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .dark-theme {
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --background-color: #1a1a1a;
+            --text-color: #f5f5f5;
+            --border-color: #444;
+            --card-bg: #2d2d2d;
+            --input-bg: #2d2d2d;
+            --input-text: #f5f5f5;
+            --nav-bg: #1e1e1e;
+            --modal-bg: #1e1e1e;
+            --modal-text: #f5f5f5;
+            --stat-bg: #2d2d2d;
+            --stat-text: #f5f5f5;
+            --stat-label: #aaa;
+            --setting-bg: #2d2d2d;
+            --setting-text: #f5f5f5;
+            --setting-label: #f5f5f5;
+            --contact-bg: #2d2d2d;
+            --contact-text: #f5f5f5;
+            --contact-link: #4CAF50;
+        }
+
+        /* Stili per il tema scuro */
+        .dark-theme body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+        
+        .dark-theme .card {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+        
+        .dark-theme input, .dark-theme select {
+            background-color: var(--input-bg);
+            color: var(--input-text);
+            border-color: #444;
+        }
+        
+        .dark-theme .bottom-nav {
+            background-color: var(--nav-bg);
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .dark-theme .nav-item {
+            color: #aaa;
+        }
+        
+        .dark-theme .nav-item.active {
+            color: var(--primary-color);
+        }
+        
+        .dark-theme .modal-content {
+            background-color: var(--modal-bg);
+            color: var(--modal-text);
+        }
+        
+        .dark-theme .modal-header {
+            border-bottom-color: #444;
+        }
+        
+        .dark-theme .day-entry {
+            border-bottom-color: #444;
+        }
+        
+        .dark-theme .day-summary {
+            background-color: rgba(76, 175, 80, 0.2);
+        }
+        
+        .dark-theme .day-summary-label {
+            color: #aaa;
+        }
+        
+        /* Stili per il calendario in tema scuro */
+        .dark-theme .calendar-grid {
+            background-color: #2d2d2d;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .dark-theme .calendar-weekday {
+            background-color: #444;
+            color: #f5f5f5;
+        }
+        
+        .dark-theme .calendar-day {
+            background-color: #2d2d2d;
+            border-color: #444;
+        }
+        
+        .dark-theme .calendar-day-number {
+            background-color: #444;
+            color: #f5f5f5;
+        }
+        
+        .dark-theme .calendar-day.today .calendar-day-number {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .dark-theme .calendar-hours {
+            color: #4CAF50;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            main {
+                margin-top: 60px;
+                padding: 10px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .stats-container {
+                flex-direction: column;
+            }
+
+            .monthly-stat-item {
+                flex: 1 1 calc(50% - 10px);
+            }
+
+            .calendar-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: 15px;
+            }
+
+            .calendar-grid {
+                min-width: 600px; /* Assicura che il calendario mantenga una larghezza minima */
+                width: 100%;
+            }
+
+            .calendar-day {
+                min-height: 80px;
+                padding: 8px;
+            }
+
+            .calendar-weekday {
+                padding: 8px;
+                font-size: 0.9rem;
+            }
+
+            .calendar-day-number {
+                width: 22px;
+                height: 22px;
+                font-size: 0.9rem;
+            }
+
+            .calendar-hours {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 5px;
+            }
+
+            .card {
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+
+            .calendar-day {
+                min-height: 60px;
+                padding: 5px;
+            }
+
+            .calendar-weekday {
+                padding: 5px;
+                font-size: 0.8rem;
+            }
+
+            .calendar-day-number {
+                width: 20px;
+                height: 20px;
+                font-size: 0.8rem;
+            }
+
+            .calendar-hours {
+                font-size: 0.9rem;
+            }
+
+            .calendar-icons i {
+                font-size: 0.8rem;
+            }
+
+            .monthly-stat-item {
+                flex: 1 1 100%;
+                margin: 5px 0;
+            }
+
+            .nav-item {
+                font-size: 0.7rem;
+            }
+
+            .nav-item i {
+                font-size: 1rem;
+            }
+
+            .calendar-container {
+                margin: 10px -10px; /* Estende leggermente oltre i bordi del container */
+            }
+
+            .calendar-grid {
+                min-width: 500px;
+            }
+
+            .calendar-day {
+                min-height: 70px;
+                padding: 5px;
+            }
+
+            .calendar-day-number {
+                width: 20px;
+                height: 20px;
+                font-size: 0.8rem;
+            }
+
+            .calendar-hours {
+                font-size: 0.9rem;
+            }
+
+            .calendar-icons i {
+                font-size: 0.8rem;
+            }
         }
     </style>
 </head>
