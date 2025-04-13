@@ -270,6 +270,7 @@
             justify-content: flex-start;
             align-items: center;
             overflow: hidden;
+            position: relative;
         }
         
         .calendar-day:hover {
@@ -296,25 +297,30 @@
         .calendar-day-number {
             position: absolute;
             top: 5px;
-            right: 5px;
+            left: 5px;
             font-weight: bold;
-            width: 25px;
-            height: 25px;
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
             background-color: #f5f5f5;
             color: var(--text-color);
+            font-size: 1.4rem;
+            z-index: 2;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .calendar-day.today .calendar-day-number {
             background-color: var(--primary-color);
             color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         
         .calendar-day-content {
-            margin-top: 25px;
+            margin-top: 40px;
             text-align: center;
             flex-grow: 1;
             display: flex;
