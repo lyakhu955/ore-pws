@@ -1227,6 +1227,30 @@
             background-color: #1e1e1e;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
+
+        .calendar-day.holiday {
+            background-color: rgba(255, 0, 0, 0.2);
+        }
+
+        .calendar-day.holiday .calendar-day-number {
+            color: #fff;
+            background-color: rgba(255, 0, 0, 0.4);
+        }
+
+        .calendar-holiday-name {
+            display: none;
+        }
+
+        /* Stili per il modale */
+        .modal-holiday-name {
+            color: #ff4444;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .dark-theme .modal-holiday-name {
+            color: #ff6666;
+        }
     </style>
 </head>
 <body>
@@ -2334,16 +2358,17 @@
                              data-date="${dateString}" 
                              data-hours="${totalHours}"
                              data-transferta="${totalTransferta}"
-                             data-notturne="${totalNotturne}">
+                             data-notturne="${totalNotturne}"
+                             ${isHoliday ? `data-holiday="${getHolidayName(date)}"` : ''}>
                             <div class="calendar-day-number">${day}</div>
                             <div class="calendar-day-content">
+                                <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
                                 ${dayEntries.length > 0 ? `
                                     <div class="calendar-icons">
                                         ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
                                         ${hasNotturne ? '<i class="fas fa-moon" title="Notturne"></i>' : ''}
                                     </div>
                                 ` : ''}
-                                ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
                             </div>
                         </div>
                     `;
@@ -2397,7 +2422,12 @@
                         const totalNotturne = dayEntries.reduce((sum, entry) => sum + parseFloat(entry.notturne || 0), 0);
                         
                         // Aggiorna il titolo del modale
-                        document.getElementById('modalTitle').textContent = `Dettagli: ${date}`;
+                        const holidayName = this.getAttribute('data-holiday');
+                        let modalTitle = `Dettagli: ${date}`;
+                        if (holidayName) {
+                            modalTitle = `<div class="modal-title">${date}</div><div class="modal-holiday-name">${holidayName}</div>`;
+                        }
+                        document.getElementById('modalTitle').innerHTML = modalTitle;
                         
                         // Salva la data originale nel modale per uso futuro
                         document.getElementById('dayModal').setAttribute('data-original-date', date);
@@ -2545,16 +2575,17 @@
                              data-date="${dateString}" 
                              data-hours="${totalHours}"
                              data-transferta="${totalTransferta}"
-                             data-notturne="${totalNotturne}">
+                             data-notturne="${totalNotturne}"
+                             ${isHoliday ? `data-holiday="${getHolidayName(date)}"` : ''}>
                             <div class="calendar-day-number">${day}</div>
                             <div class="calendar-day-content">
+                                <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
                                 ${dayEntries.length > 0 ? `
                                     <div class="calendar-icons">
                                         ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
                                         ${hasNotturne ? '<i class="fas fa-moon" title="Notturne"></i>' : ''}
                                     </div>
                                 ` : ''}
-                                ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
                             </div>
                         </div>
                     `;
@@ -2583,7 +2614,12 @@
                         const totalNotturne = dayEntries.reduce((sum, entry) => sum + parseFloat(entry.notturne || 0), 0);
                         
                         // Aggiorna il titolo del modale
-                        document.getElementById('modalTitle').textContent = `Dettagli: ${date}`;
+                        const holidayName = this.getAttribute('data-holiday');
+                        let modalTitle = `Dettagli: ${date}`;
+                        if (holidayName) {
+                            modalTitle = `<div class="modal-title">${date}</div><div class="modal-holiday-name">${holidayName}</div>`;
+                        }
+                        document.getElementById('modalTitle').innerHTML = modalTitle;
                         
                         // Salva la data originale nel modale per uso futuro
                         document.getElementById('dayModal').setAttribute('data-original-date', date);
