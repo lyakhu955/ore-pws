@@ -1104,6 +1104,22 @@
             background-color: #1e1e1e;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background-color: #f5f5f5;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .calendar-weekday {
+            text-align: center;
+            padding: 3px;
+            font-size: 0.7rem;
+            background-color: #f5f5f5;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -3035,6 +3051,49 @@
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+            }
+
+            // Modifica la funzione che crea il calendario
+            function createCalendar(year, month) {
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                const daysInMonth = lastDay.getDate();
+                
+                // Imposta lunedì come primo giorno (0 = domenica, 1 = lunedì, ecc.)
+                let startingDay = firstDay.getDay();
+                if (startingDay === 0) startingDay = 6; // Se è domenica, sposta a 6
+                else startingDay--; // Altrimenti sottrai 1 per far iniziare da lunedì
+                
+                const weekdays = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
+                
+                let calendarHTML = '<div class="calendar-weekdays">';
+                weekdays.forEach(day => {
+                    calendarHTML += `<div class="calendar-weekday">${day}</div>`;
+                });
+                calendarHTML += '</div><div class="calendar-days">';
+                
+                // Aggiungi celle vuote per i giorni precedenti
+                for (let i = 0; i < startingDay; i++) {
+                    calendarHTML += '<div class="calendar-day empty"></div>';
+                }
+                
+                // Aggiungi i giorni del mese
+                for (let day = 1; day <= daysInMonth; day++) {
+                    calendarHTML += `
+                        <div class="calendar-day ${day === today.getDate() && month === today.getMonth() && year === today.getFullYear() ? 'today' : ''} ${entriesByDate[`${month}/${year}`]?.some(entry => entry.date === `${year}-${month}-${day}`) ? 'has-entries' : ''} ${isItalianHoliday(new Date(year, month - 1, day)) ? 'holiday' : ''}">
+                            <div class="calendar-day-number">${day}</div>
+                            <div class="calendar-day-content">
+                                <div class="calendar-hours">${entriesByDate[`${month}/${year}`]?.find(entry => entry.date === `${year}-${month}-${day}`)?.hours || ''}h</div>
+                                ${entriesByDate[`${month}/${year}`]?.some(entry => entry.transferta > 0) ? `<div class="calendar-icons"><i class="fas fa-car" title="Trasferta"></i> ${entriesByDate[`${month}/${year}`]?.find(entry => entry.transferta > 0)?.transferta || ''}h</div>` : ''}
+                                ${entriesByDate[`${month}/${year}`]?.some(entry => entry.notturne > 0) ? `<div class="calendar-icons"><i class="fas fa-moon" title="Notturne"></i> ${entriesByDate[`${month}/${year}`]?.find(entry => entry.notturne > 0)?.notturne || ''}h</div>` : ''}
+                                ${isItalianHoliday(new Date(year, month - 1, day)) ? `<div class="calendar-holiday-name">${getHolidayName(new Date(year, month - 1, day))}</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                calendarHTML += '</div>';
+                calendarEntries.innerHTML = calendarHTML;
             }
         });
     </script>
