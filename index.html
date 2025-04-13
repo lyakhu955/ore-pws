@@ -2288,8 +2288,8 @@
                                 ${dayEntries.length > 0 ? `<div class="calendar-hours">${totalHours.toFixed(1)}h</div>` : ''}
                                 ${dayEntries.length > 0 ? `
                                     <div class="calendar-icons">
-                                        ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
-                                        ${hasNotturne ? '<i class="fas fa-moon" title="Notturne"></i>' : ''}
+                                        ${hasTransferta ? `<span><i class="fas fa-car" title="Trasferta"></i> ${totalTransferta}h</span>` : ''}
+                                        ${hasNotturne ? `<span><i class="fas fa-moon" title="Notturne"></i> ${totalNotturne}h</span>` : ''}
                                     </div>
                                 ` : ''}
                                 ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
@@ -2502,8 +2502,8 @@
                                 ${dayEntries.length > 0 ? `<div class="calendar-hours">${totalHours.toFixed(1)}h</div>` : ''}
                                 ${dayEntries.length > 0 ? `
                                     <div class="calendar-icons">
-                                        ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
-                                        ${hasNotturne ? '<i class="fas fa-moon" title="Notturne"></i>' : ''}
+                                        ${hasTransferta ? `<span><i class="fas fa-car" title="Trasferta"></i> ${totalTransferta}h</span>` : ''}
+                                        ${hasNotturne ? `<span><i class="fas fa-moon" title="Notturne"></i> ${totalNotturne}h</span>` : ''}
                                     </div>
                                 ` : ''}
                                 ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
