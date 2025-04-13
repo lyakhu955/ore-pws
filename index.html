@@ -262,19 +262,64 @@
         .calendar-day {
             aspect-ratio: 1;
             padding: 8px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-            background-color: white;
+            background-color: var(--card-bg);
             cursor: pointer;
             transition: background-color 0.3s;
-            font-size: 1rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            overflow: hidden;
+            display: grid;
+            grid-template-areas: 
+                "number icons"
+                "hours hours";
+            grid-template-rows: auto 1fr;
+            grid-template-columns: 1fr auto;
+            gap: 4px;
             min-width: 40px;
             min-height: 40px;
+            position: relative;
+            border: 1px solid var(--border-color);
+        }
+
+        .calendar-day-number {
+            grid-area: number;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--text-color);
+            justify-self: start;
+            align-self: start;
+        }
+
+        .calendar-icons {
+            grid-area: icons;
+            display: flex;
+            gap: 4px;
+            justify-self: end;
+            align-self: start;
+        }
+
+        .calendar-hours {
+            grid-area: hours;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            align-self: end;
+            justify-self: start;
+        }
+
+        @media (max-width: 480px) {
+            .calendar-day {
+                padding: 6px;
+                gap: 2px;
+            }
+
+            .calendar-day-number {
+                font-size: 1rem;
+            }
+
+            .calendar-hours {
+                font-size: 1rem;
+            }
+
+            .calendar-icons i {
+                font-size: 1rem;
+            }
         }
         
         .calendar-day:hover {
@@ -2291,11 +2336,11 @@
                             <div class="calendar-day-number">${day}</div>
                             <div class="calendar-day-content">
                                 ${dayEntries.length > 0 ? `
-                                    <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
                                     <div class="calendar-icons">
                                         ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
                                         ${hasNotturne ? '<i class="fas fa-moon" title="Notturne"></i>' : ''}
                                     </div>
+                                    <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
                                 ` : ''}
                             </div>
                         </div>
@@ -2512,11 +2557,11 @@
                             <div class="calendar-day-number">${day}</div>
                             <div class="calendar-day-content">
                                 ${dayEntries.length > 0 ? `
-                                    <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
                                     <div class="calendar-icons">
                                         ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
                                         ${hasNotturne ? '<i class="fas fa-moon" title="Notturne"></i>' : ''}
                                     </div>
+                                    <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
                                 ` : ''}
                             </div>
                         </div>
