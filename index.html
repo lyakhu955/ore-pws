@@ -605,9 +605,7 @@
                 padding: 2px;
                 min-width: 42px;
                 min-height: 42px;
-                display: grid;
-                grid-template-rows: auto 1fr;
-                gap: 1px;
+                position: relative;
             }
 
             .calendar-weekday {
@@ -621,34 +619,39 @@
                 height: 16px;
                 font-size: 0.75rem;
                 margin: 1px;
+                position: absolute;
+                top: 2px;
+                left: 2px;
             }
 
             .calendar-day-content {
+                height: 100%;
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                gap: 1px;
-                margin-top: 2px;
+                justify-content: space-between;
+                padding-top: 20px;
+                padding-right: 2px;
             }
 
             .calendar-hours {
-                font-size: 0.7rem;
-            }
-
-            .calendar-day:not(.has-entries) .calendar-hours {
-                display: none;
+                font-size: 0.6rem;
+                position: absolute;
+                bottom: 2px;
+                left: 2px;
             }
 
             .calendar-icons {
-                font-size: 0.65rem;
                 display: flex;
-                gap: 2px;
-                justify-content: center;
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 1px;
+                position: absolute;
+                top: 20px;
+                right: 2px;
             }
 
             .calendar-icons i {
-                margin: 0 1px;
+                font-size: 0.6rem;
             }
         }
 
@@ -2385,15 +2388,15 @@
                              data-notturne="${totalNotturne}"
                              ${isHoliday ? `data-holiday="${getHolidayName(date)}"` : ''}>
                             <div class="calendar-day-number">${day}</div>
-                            <div class="calendar-day-content">
-                                ${dayEntries.length > 0 ? `
-                                    <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
+                            ${dayEntries.length > 0 ? `
+                                <div class="calendar-day-content">
                                     <div class="calendar-icons">
                                         ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
                                         ${hasNotturne ? '<i class="fas fa-moon" title="Notturne"></i>' : ''}
                                     </div>
-                                ` : ''}
-                            </div>
+                                    <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
+                                </div>
+                            ` : ''}
                         </div>
                     `;
                 }
@@ -2602,15 +2605,15 @@
                              data-notturne="${totalNotturne}"
                              ${isHoliday ? `data-holiday="${getHolidayName(date)}"` : ''}>
                             <div class="calendar-day-number">${day}</div>
-                            <div class="calendar-day-content">
-                                ${dayEntries.length > 0 ? `
-                                    <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
+                            ${dayEntries.length > 0 ? `
+                                <div class="calendar-day-content">
                                     <div class="calendar-icons">
                                         ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
                                         ${hasNotturne ? '<i class="fas fa-moon" title="Notturne"></i>' : ''}
                                     </div>
-                                ` : ''}
-                            </div>
+                                    <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
+                                </div>
+                            ` : ''}
                         </div>
                     `;
                 }
