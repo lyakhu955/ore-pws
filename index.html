@@ -193,6 +193,8 @@
 
         .calendar-container {
             margin-top: 20px;
+            width: 100%;
+            overflow-x: auto;
         }
 
         .calendar-header {
@@ -246,32 +248,33 @@
             overflow: hidden;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             width: 100%;
+            min-width: 300px;
         }
         
         .calendar-weekday {
             text-align: center;
-            padding: 10px 5px;
+            padding: 8px 5px;
             font-weight: bold;
             background-color: #f8f9fa;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
         }
         
         .calendar-day {
             aspect-ratio: 1;
-            padding: 10px;
+            padding: 8px;
             text-align: center;
             border: 1px solid var(--border-color);
             background-color: white;
             cursor: pointer;
             transition: background-color 0.3s;
-            font-size: 1.1rem;
+            font-size: 1rem;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
             overflow: hidden;
-            min-width: 50px;
-            min-height: 50px;
+            min-width: 40px;
+            min-height: 40px;
         }
         
         .calendar-day:hover {
@@ -297,18 +300,18 @@
         
         .calendar-day-number {
             position: absolute;
-            top: 5px;
-            right: 5px;
+            top: 3px;
+            right: 3px;
             font-weight: bold;
-            width: 30px;
-            height: 30px;
+            width: 24px;
+            height: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
             background-color: #f5f5f5;
             color: var(--text-color);
-            font-size: 1.1rem;
+            font-size: 0.9rem;
         }
         
         .calendar-day.today .calendar-day-number {
@@ -326,21 +329,21 @@
         }
         
         .calendar-hours {
-            font-size: 1.4rem;
+            font-size: 1.1rem;
             font-weight: bold;
             color: var(--primary-color);
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
         
         .calendar-icons {
             display: flex;
             justify-content: center;
-            gap: 8px;
-            margin-top: 8px;
+            gap: 4px;
+            margin-top: 4px;
         }
         
         .calendar-icons i {
-            font-size: 1.2rem;
+            font-size: 0.9rem;
         }
         
         .calendar-icons i.fa-car {
@@ -522,6 +525,30 @@
 
             .calendar-icons i {
                 font-size: 1.4rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .calendar-day {
+                min-width: 30px;
+                min-height: 30px;
+                padding: 3px;
+                font-size: 0.8rem;
+            }
+
+            .calendar-weekday {
+                padding: 3px 1px;
+                font-size: 0.6rem;
+            }
+
+            .calendar-day-number {
+                width: 18px;
+                height: 18px;
+                font-size: 0.7rem;
+            }
+
+            .calendar-hours {
+                font-size: 0.9rem;
             }
         }
 
