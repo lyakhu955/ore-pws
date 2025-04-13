@@ -574,37 +574,15 @@
                 flex-direction: column;
             }
 
-            .calendar-day {
-                min-width: 80px;
-                min-height: 80px;
-                padding: 15px;
-                font-size: 1.2rem;
-            }
-
-            .calendar-day-number {
-                width: 35px;
-                height: 35px;
-                font-size: 1.2rem;
-            }
-
-            .calendar-hours {
-                font-size: 1.6rem;
-            }
-
-            .calendar-icons i {
-                font-size: 1.4rem;
-            }
-        }
-
-        @media (max-width: 480px) {
             .calendar-grid {
                 gap: 1px;
+                min-width: 100%;
             }
 
             .calendar-day {
-                padding: 2px;
                 min-width: 42px;
                 min-height: 42px;
+                padding: 2px;
                 position: relative;
             }
 
@@ -652,6 +630,82 @@
 
             .calendar-icons i {
                 font-size: 0.6rem;
+            }
+
+            .monthly-summary {
+                margin-top: 20px;
+                padding: 15px;
+            }
+
+            .monthly-stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .monthly-stat-item {
+                min-width: 100%;
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .calendar-grid {
+                gap: 1px;
+            }
+
+            .calendar-day {
+                min-width: 35px;
+                min-height: 35px;
+                padding: 1px;
+            }
+
+            .calendar-weekday {
+                padding: 2px 1px;
+                font-size: 0.6rem;
+            }
+
+            .calendar-day-number {
+                width: 14px;
+                height: 14px;
+                font-size: 0.7rem;
+                top: 1px;
+                left: 1px;
+            }
+
+            .calendar-day-content {
+                padding-top: 15px;
+            }
+
+            .calendar-hours {
+                font-size: 0.55rem;
+                bottom: 1px;
+                left: 1px;
+            }
+
+            .calendar-icons {
+                top: 15px;
+                right: 1px;
+            }
+
+            .calendar-icons i {
+                font-size: 0.55rem;
+            }
+
+            .monthly-summary {
+                margin-top: 15px;
+                padding: 10px;
+            }
+
+            .monthly-stat-item {
+                padding: 8px;
+            }
+
+            .monthly-stat-value {
+                font-size: 1.2rem;
+            }
+
+            .monthly-stat-label {
+                font-size: 0.8rem;
             }
         }
 
