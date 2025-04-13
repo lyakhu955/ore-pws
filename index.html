@@ -34,9 +34,8 @@
         }
 
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+            max-width: 100%;
+            padding: 0 10px;
         }
 
         header {
@@ -69,16 +68,18 @@
         }
 
         main {
-            margin-top: 80px;
-            padding: 20px;
+            margin-top: 70px;
+            padding: 10px;
+            margin-bottom: 70px;
         }
 
         .card {
             background: white;
             border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 15px;
+            margin-bottom: 15px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: visible;
         }
 
         .form-group {
@@ -195,20 +196,19 @@
         }
 
         .calendar-container {
-            margin-top: 20px;
-            overflow: hidden;
+            margin: 10px 0;
+            overflow: visible;
             max-width: 100%;
-            margin-bottom: 20px;
+            padding: 0;
         }
         
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
+            gap: 2px;
             background-color: white;
             border-radius: 0 0 10px 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow: visible;
         }
         
         .calendar-weekday {
@@ -223,8 +223,8 @@
         }
         
         .calendar-day {
-            aspect-ratio: 1;
-            padding: 5px;
+            aspect-ratio: 1/0.8;
+            padding: 3px;
             border: 1px solid var(--border-color);
             position: relative;
             cursor: pointer;
@@ -232,7 +232,7 @@
             background-color: white;
             display: flex;
             flex-direction: column;
-            min-height: auto;
+            min-height: 50px;
         }
         
         .calendar-day-number {
@@ -251,7 +251,7 @@
         }
         
         .calendar-day-content {
-            margin-top: 20px;
+            margin-top: 15px;
             text-align: center;
             flex-grow: 1;
             display: flex;
