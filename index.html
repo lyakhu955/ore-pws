@@ -261,10 +261,10 @@
         
         .calendar-day {
             aspect-ratio: 1;
-            padding: 8px;
+            padding: 4px;
             text-align: center;
             border: 1px solid var(--border-color);
-            background-color: white;
+            background-color: var(--card-bg);
             cursor: pointer;
             transition: background-color 0.3s;
             font-size: 1rem;
@@ -301,19 +301,19 @@
         
         .calendar-day-number {
             position: absolute;
-            top: 5px;
-            left: 5px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             font-weight: bold;
-            width: 28px;
-            height: 28px;
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            background-color: #f5f5f5;
-            color: var(--text-color);
-            font-size: 1.1rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1.2rem;
             z-index: 1;
         }
         
@@ -335,10 +335,18 @@
         }
         
         .calendar-hours {
-            font-size: 1.1rem;
+            display: none;
+        }
+        
+        .calendar-day.has-entries .calendar-hours {
+            display: block;
+            position: absolute;
+            bottom: 4px;
+            left: 0;
+            right: 0;
+            font-size: 0.8rem;
             font-weight: bold;
             color: var(--primary-color);
-            margin-bottom: 3px;
         }
         
         .calendar-icons {
@@ -536,25 +544,25 @@
 
         @media (max-width: 480px) {
             .calendar-day {
-                min-width: 30px;
-                min-height: 30px;
-                padding: 3px;
-                font-size: 0.8rem;
+                min-width: 40px;
+                min-height: 40px;
+                padding: 2px;
             }
 
             .calendar-weekday {
-                padding: 3px 1px;
-                font-size: 0.6rem;
+                padding: 4px 2px;
+                font-size: 0.75rem;
+                color: #fff;
             }
 
             .calendar-day-number {
-                width: 18px;
-                height: 18px;
-                font-size: 0.7rem;
+                width: 28px;
+                height: 28px;
+                font-size: 1.1rem;
             }
 
-            .calendar-hours {
-                font-size: 0.9rem;
+            .calendar-day.has-entries .calendar-hours {
+                font-size: 0.7rem;
             }
         }
 
@@ -1015,17 +1023,12 @@
         }
         
         .calendar-day.holiday {
-            background-color: rgba(255, 0, 0, 0.1);
-            border: 1px solid rgba(255, 0, 0, 0.3);
-        }
-        
-        .calendar-day.holiday:hover {
             background-color: rgba(255, 0, 0, 0.2);
         }
-        
+
         .calendar-day.holiday .calendar-day-number {
-            background-color: rgba(255, 0, 0, 0.3);
-            color: white;
+            color: #fff;
+            background-color: rgba(255, 0, 0, 0.4);
         }
         
         .calendar-day.holiday .calendar-hours {
@@ -1033,11 +1036,6 @@
         }
         
         .dark-theme .calendar-day.holiday {
-            background-color: rgba(255, 0, 0, 0.2);
-            border: 1px solid rgba(255, 0, 0, 0.4);
-        }
-        
-        .dark-theme .calendar-day.holiday:hover {
             background-color: rgba(255, 0, 0, 0.3);
         }
         
@@ -2277,7 +2275,6 @@
                              data-notturne="${totalNotturne}">
                             <div class="calendar-day-number">${day}</div>
                             <div class="calendar-day-content">
-                                <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
                                 ${dayEntries.length > 0 ? `
                                     <div class="calendar-icons">
                                         ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
@@ -2489,7 +2486,6 @@
                              data-notturne="${totalNotturne}">
                             <div class="calendar-day-number">${day}</div>
                             <div class="calendar-day-content">
-                                <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
                                 ${dayEntries.length > 0 ? `
                                     <div class="calendar-icons">
                                         ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
