@@ -261,19 +261,20 @@
         
         .calendar-day {
             aspect-ratio: 1;
-            padding: 3px;
+            padding: 8px;
             text-align: center;
             border: 1px solid var(--border-color);
-            background-color: var(--card-bg);
+            background-color: white;
             cursor: pointer;
             transition: background-color 0.3s;
-            display: grid;
-            grid-template-columns: auto auto;
-            grid-template-rows: auto auto;
-            min-width: 42px;
-            min-height: 42px;
-            position: relative;
-            gap: 1px;
+            font-size: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            overflow: hidden;
+            min-width: 40px;
+            min-height: 40px;
         }
         
         .calendar-day:hover {
@@ -298,19 +299,19 @@
         }
         
         .calendar-day-number {
-            grid-column: 1;
-            grid-row: 1;
+            position: absolute;
+            top: 3px;
+            right: 3px;
             font-weight: bold;
-            width: 18px;
-            height: 18px;
+            width: 24px;
+            height: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            font-size: 0.8rem;
-            margin: 1px;
+            background-color: #f5f5f5;
+            color: var(--text-color);
+            font-size: 0.9rem;
         }
         
         .calendar-day.today .calendar-day-number {
@@ -318,19 +319,31 @@
             color: white;
         }
         
-        .calendar-icons {
-            grid-column: 2;
-            grid-row: 1;
+        .calendar-day-content {
+            margin-top: 25px;
+            text-align: center;
+            flex-grow: 1;
             display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            gap: 2px;
-            font-size: 0.7rem;
-            padding-left: 2px;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .calendar-hours {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 3px;
+        }
+        
+        .calendar-icons {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            margin-top: 4px;
         }
         
         .calendar-icons i {
-            color: var(--primary-color);
+            font-size: 0.9rem;
         }
         
         .calendar-icons i.fa-car {
@@ -340,88 +353,7 @@
         .calendar-icons i.fa-moon {
             color: #673AB7;
         }
-        
-        .calendar-hours {
-            grid-column: 2;
-            grid-row: 2;
-            font-size: 0.75rem;
-            font-weight: bold;
-            color: var(--primary-color);
-            display: flex;
-            justify-content: flex-end;
-            align-items: flex-end;
-            padding-right: 2px;
-        }
-        
-        .calendar-day.holiday {
-            background-color: rgba(255, 0, 0, 0.2);
-        }
-        
-        .calendar-day.holiday .calendar-day-number {
-            color: #fff;
-            background-color: rgba(255, 0, 0, 0.4);
-        }
-        
-        .calendar-day.holiday .calendar-hours {
-            color: #ff0000;
-        }
-        
-        .calendar-day.has-entries .calendar-hours {
-            display: block;
-            position: absolute;
-            bottom: 4px;
-            left: 0;
-            right: 0;
-            font-size: 0.8rem;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-        
-        .calendar-day-content {
-            margin-top: 35px;
-            text-align: center;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            position: relative;
-            z-index: 0;
-        }
-        
-        .calendar-day.has-entries .calendar-day-content {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            overflow: hidden;
-        }
-        
-        .calendar-day.has-entries .calendar-icons {
-            display: flex;
-            justify-content: center;
-            gap: 3px;
-            font-size: 0.7rem;
-            margin-bottom: 2px;
-        }
-        
-        .calendar-day.has-entries .calendar-icons i {
-            color: var(--primary-color);
-        }
-        
-        .calendar-day.has-entries .calendar-icons i.fa-car {
-            color: #2196F3;
-        }
-        
-        .calendar-day.has-entries .calendar-icons i.fa-moon {
-            color: #673AB7;
-        }
-        
-        .calendar-holiday-name {
-            font-size: 0.8rem;
-            color: #fff;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        
+
         .stats-container {
             display: flex;
             flex-wrap: wrap;
@@ -574,138 +506,49 @@
                 flex-direction: column;
             }
 
-            .calendar-grid {
-                gap: 2px;
-                min-width: 100%;
-            }
-
             .calendar-day {
-                min-width: 50px;
-                min-height: 50px;
-                padding: 3px;
-                position: relative;
-            }
-
-            .calendar-weekday {
-                padding: 4px 2px;
-                font-size: 0.75rem;
-                color: #fff;
+                min-width: 80px;
+                min-height: 80px;
+                padding: 15px;
+                font-size: 1.2rem;
             }
 
             .calendar-day-number {
-                width: 10px;
-                height: 10px;
-                font-size: 0.7rem;
-                margin: 1px;
-                position: absolute;
-                top: 3px;
-                left: 3px;
-            }
-
-            .calendar-day-content {
-                height: 100%;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-                padding-top: 25px;
-                padding-right: 3px;
+                width: 35px;
+                height: 35px;
+                font-size: 1.2rem;
             }
 
             .calendar-hours {
-                font-size: 0.75rem;
-                position: absolute;
-                bottom: 3px;
-                left: 3px;
-            }
-
-            .calendar-icons {
-                display: flex;
-                flex-direction: column;
-                align-items: flex-end;
-                gap: 2px;
-                position: absolute;
-                top: 25px;
-                right: 3px;
+                font-size: 1.6rem;
             }
 
             .calendar-icons i {
-                font-size: 0.75rem;
-            }
-
-            .monthly-summary {
-                margin-top: 20px;
-                padding: 15px;
-            }
-
-            .monthly-stats {
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .monthly-stat-item {
-                min-width: 100%;
-                padding: 10px;
+                font-size: 1.4rem;
             }
         }
 
         @media (max-width: 480px) {
-            .calendar-grid {
-                gap: 2px;
-            }
-
             .calendar-day {
-                min-width: 45px;
-                min-height: 45px;
-                padding: 2px;
+                min-width: 30px;
+                min-height: 30px;
+                padding: 3px;
+                font-size: 0.8rem;
             }
 
             .calendar-weekday {
-                padding: 3px 2px;
-                font-size: 0.7rem;
+                padding: 3px 1px;
+                font-size: 0.6rem;
             }
 
             .calendar-day-number {
-                width: 9px;
-                height: 9px;
-                font-size: 0.65rem;
-                top: 2px;
-                left: 2px;
-            }
-
-            .calendar-day-content {
-                padding-top: 20px;
+                width: 18px;
+                height: 18px;
+                font-size: 0.7rem;
             }
 
             .calendar-hours {
-                font-size: 0.7rem;
-                bottom: 2px;
-                left: 2px;
-            }
-
-            .calendar-icons {
-                top: 20px;
-                right: 2px;
-            }
-
-            .calendar-icons i {
-                font-size: 0.7rem;
-            }
-
-            .monthly-summary {
-                margin-top: 15px;
-                padding: 10px;
-            }
-
-            .monthly-stat-item {
-                padding: 8px;
-            }
-
-            .monthly-stat-value {
-                font-size: 1.2rem;
-            }
-
-            .monthly-stat-label {
-                font-size: 0.8rem;
+                font-size: 0.9rem;
             }
         }
 
@@ -1166,12 +1009,17 @@
         }
         
         .calendar-day.holiday {
+            background-color: rgba(255, 0, 0, 0.1);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+        }
+        
+        .calendar-day.holiday:hover {
             background-color: rgba(255, 0, 0, 0.2);
         }
-
+        
         .calendar-day.holiday .calendar-day-number {
-            color: #fff;
-            background-color: rgba(255, 0, 0, 0.4);
+            background-color: rgba(255, 0, 0, 0.3);
+            color: white;
         }
         
         .calendar-day.holiday .calendar-hours {
@@ -1179,6 +1027,11 @@
         }
         
         .dark-theme .calendar-day.holiday {
+            background-color: rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255, 0, 0, 0.4);
+        }
+        
+        .dark-theme .calendar-day.holiday:hover {
             background-color: rgba(255, 0, 0, 0.3);
         }
         
@@ -1307,30 +1160,6 @@
         .dark-theme header {
             background-color: #1e1e1e;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-
-        .calendar-day.holiday {
-            background-color: rgba(255, 0, 0, 0.2);
-        }
-
-        .calendar-day.holiday .calendar-day-number {
-            color: #fff;
-            background-color: rgba(255, 0, 0, 0.4);
-        }
-
-        .calendar-holiday-name {
-            display: none;
-        }
-
-        /* Stili per il modale */
-        .modal-holiday-name {
-            color: #ff4444;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .dark-theme .modal-holiday-name {
-            color: #ff6666;
         }
     </style>
 </head>
@@ -2439,18 +2268,18 @@
                              data-date="${dateString}" 
                              data-hours="${totalHours}"
                              data-transferta="${totalTransferta}"
-                             data-notturne="${totalNotturne}"
-                             ${isHoliday ? `data-holiday="${getHolidayName(date)}"` : ''}>
+                             data-notturne="${totalNotturne}">
                             <div class="calendar-day-number">${day}</div>
-                            ${dayEntries.length > 0 ? `
-                                <div class="calendar-day-content">
+                            <div class="calendar-day-content">
+                                <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
+                                ${dayEntries.length > 0 ? `
                                     <div class="calendar-icons">
                                         ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
                                         ${hasNotturne ? '<i class="fas fa-moon" title="Notturne"></i>' : ''}
                                     </div>
-                                    <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
-                                </div>
-                            ` : ''}
+                                ` : ''}
+                                ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
+                            </div>
                         </div>
                     `;
                 }
@@ -2503,12 +2332,7 @@
                         const totalNotturne = dayEntries.reduce((sum, entry) => sum + parseFloat(entry.notturne || 0), 0);
                         
                         // Aggiorna il titolo del modale
-                        const holidayName = this.getAttribute('data-holiday');
-                        let modalTitle = `Dettagli: ${date}`;
-                        if (holidayName) {
-                            modalTitle = `<div class="modal-title">${date}</div><div class="modal-holiday-name">${holidayName}</div>`;
-                        }
-                        document.getElementById('modalTitle').innerHTML = modalTitle;
+                        document.getElementById('modalTitle').textContent = `Dettagli: ${date}`;
                         
                         // Salva la data originale nel modale per uso futuro
                         document.getElementById('dayModal').setAttribute('data-original-date', date);
@@ -2656,18 +2480,18 @@
                              data-date="${dateString}" 
                              data-hours="${totalHours}"
                              data-transferta="${totalTransferta}"
-                             data-notturne="${totalNotturne}"
-                             ${isHoliday ? `data-holiday="${getHolidayName(date)}"` : ''}>
+                             data-notturne="${totalNotturne}">
                             <div class="calendar-day-number">${day}</div>
-                            ${dayEntries.length > 0 ? `
-                                <div class="calendar-day-content">
+                            <div class="calendar-day-content">
+                                <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
+                                ${dayEntries.length > 0 ? `
                                     <div class="calendar-icons">
                                         ${hasTransferta ? '<i class="fas fa-car" title="Trasferta"></i>' : ''}
                                         ${hasNotturne ? '<i class="fas fa-moon" title="Notturne"></i>' : ''}
                                     </div>
-                                    <div class="calendar-hours">${totalHours.toFixed(1)}h</div>
-                                </div>
-                            ` : ''}
+                                ` : ''}
+                                ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
+                            </div>
                         </div>
                     `;
                 }
@@ -2695,12 +2519,7 @@
                         const totalNotturne = dayEntries.reduce((sum, entry) => sum + parseFloat(entry.notturne || 0), 0);
                         
                         // Aggiorna il titolo del modale
-                        const holidayName = this.getAttribute('data-holiday');
-                        let modalTitle = `Dettagli: ${date}`;
-                        if (holidayName) {
-                            modalTitle = `<div class="modal-title">${date}</div><div class="modal-holiday-name">${holidayName}</div>`;
-                        }
-                        document.getElementById('modalTitle').innerHTML = modalTitle;
+                        document.getElementById('modalTitle').textContent = `Dettagli: ${date}`;
                         
                         // Salva la data originale nel modale per uso futuro
                         document.getElementById('dayModal').setAttribute('data-original-date', date);
