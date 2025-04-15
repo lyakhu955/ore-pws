@@ -2192,45 +2192,77 @@
             document.getElementById('breakTime').addEventListener('change', calculateTotalHours);
             
             function calculateTotalHours() {
-                const startTime = document.getElementById('startTime').value;
-                const endTime = document.getElementById('endTime').value;
-                const breakTime = document.getElementById('breakTime').value;
+                const startTime = parseFloat(document.getElementById('startTime').value) || 0;
+                const endTime = parseFloat(document.getElementById('endTime').value) || 0;
+                const breakTime = parseFloat(document.getElementById('breakTime').value) || 0;
                 
                 if (startTime && endTime) {
-                    const hours = calculateHours(startTime, endTime, breakTime);
-                    document.getElementById('hours').value = hours.toFixed(2);
+                    // Gestione speciale per mezzanotte
+                    let start = startTime;
+                    let end = endTime;
+                    
+                    if (start === 24) start = 0;
+                    if (end === 24) end = 0;
+                    
+                    // Calcolo delle ore
+                    let totalHours;
+                    if (end >= start) {
+                        // Stesso giorno
+                        totalHours = end - start;
+                    } else {
+                        // Giorno successivo
+                        totalHours = (24 - start) + end;
+                    }
+                    
+                    // Sottrai la pausa
+                    totalHours = totalHours - breakTime;
+                    
+                    document.getElementById('totalHours').value = totalHours.toFixed(1);
                 }
             }
             
             function calculateHours(startTime, endTime, breakTime) {
+                // Log dei valori di input
+                console.log('Calcolo ore - Input originale:', { startTime, endTime, breakTime });
+                
                 // Converti le stringhe in numeri
                 let start = parseFloat(startTime);
                 let end = parseFloat(endTime);
-                const breakHours = parseFloat(breakTime) || 0;
-
-                // Normalizza l'ora di inizio
-                if (start === 24) start = 0;
+                let break_hours = parseFloat(breakTime) || 0;
                 
-                // Normalizza l'ora di fine
-                if (end === 24) end = 0;
+                console.log('Valori convertiti:', { start, end, break_hours });
                 
-                // Calcola la differenza
-                let totalHours;
+                // Gestione speciale per mezzanotte
+                if (start === 24) {
+                    start = 0;
+                    console.log('Convertito start 24 in 0');
+                }
+                if (end === 24) {
+                    end = 0;
+                    console.log('Convertito end 24 in 0');
+                }
                 
-                // Se l'ora di fine è minore dell'ora di inizio, significa che siamo passati al giorno dopo
-                if (end < start) {
-                    totalHours = (24 - start) + end;
+                // Calcolo delle ore
+                let hours;
+                if (end >= start) {
+                    // Stesso giorno
+                    hours = end - start;
+                    console.log('Calcolo stesso giorno:', hours);
                 } else {
-                    totalHours = end - start;
+                    // Giorno successivo
+                    hours = (24 - start) + end;
+                    console.log('Calcolo giorno successivo:', hours);
                 }
                 
                 // Sottrai la pausa
-                totalHours -= breakHours;
+                hours = hours - break_hours;
+                console.log('Ore dopo la pausa:', hours);
                 
-                // Assicurati che il risultato non sia negativo
-                if (totalHours < 0) totalHours = 0;
+                // Arrotonda a due decimali
+                hours = Math.round(hours * 100) / 100;
+                console.log('Risultato finale arrotondato:', hours);
                 
-                return totalHours;
+                return hours;
             }
             
             function saveTimeEntry(date, hours, description) {
@@ -3724,7 +3756,26 @@
                 const breakTime = parseFloat(document.getElementById('breakTime').value) || 0;
                 
                 if (startTime && endTime) {
-                    const totalHours = endTime - startTime - breakTime;
+                    // Gestione speciale per mezzanotte
+                    let start = startTime;
+                    let end = endTime;
+                    
+                    if (start === 24) start = 0;
+                    if (end === 24) end = 0;
+                    
+                    // Calcolo delle ore
+                    let totalHours;
+                    if (end >= start) {
+                        // Stesso giorno
+                        totalHours = end - start;
+                    } else {
+                        // Giorno successivo
+                        totalHours = (24 - start) + end;
+                    }
+                    
+                    // Sottrai la pausa
+                    totalHours = totalHours - breakTime;
+                    
                     document.getElementById('totalHours').value = totalHours.toFixed(1);
                 }
             }
