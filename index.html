@@ -1829,6 +1829,9 @@
                     // Mostra la sezione corrispondente
                     const sectionId = this.getAttribute('data-section');
                     document.getElementById(sectionId).classList.add('active');
+
+                    // Resetta il form quando si cambia sezione
+                    resetForm();
                 });
             });
             
@@ -2115,6 +2118,8 @@
                     allowInput: true,
                     defaultDate: 'today',
                     onChange: function(selectedDates, dateStr) {
+                        // Resetta il form quando si cambia data
+                        resetForm();
                         // Quando cambia la data, controlla se esistono già entries per quella data
                         loadExistingEntry(dateStr);
                     }
@@ -3784,6 +3789,18 @@
             document.getElementById('startTime').addEventListener('input', calculateTotalHours);
             document.getElementById('endTime').addEventListener('input', calculateTotalHours);
             document.getElementById('breakTime').addEventListener('input', calculateTotalHours);
+
+            // ... existing code ...
+            // Funzione per resettare il form
+            function resetForm() {
+                document.getElementById('startTime').value = '';
+                document.getElementById('endTime').value = '';
+                document.getElementById('breakTime').value = '0.5';
+                document.getElementById('totalHours').value = '';
+                document.getElementById('transferta').value = '';
+                document.getElementById('notturne').value = '';
+                document.getElementById('description').value = '';
+            }
         });
     </script>
 </body>
