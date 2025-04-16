@@ -1,0 +1,4667 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ore PWS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --background-color: #f5f5f5;
+            --text-color: #333;
+            --border-color: #999;
+            --card-bg: #ffffff;
+            --input-bg: #ffffff;
+            --input-text: #333;
+            --nav-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.25);
+            --toggle-bg: #ccc;
+            --toggle-active: #4CAF50;
+            --button-danger: #ff4444;
+            --button-danger-hover: #cc0000;
+        }
+
+        .dark-theme {
+            --background-color: #1a1a1a;
+            --text-color: #f5f5f5;
+            --border-color: #444;
+            --card-bg: #2d2d2d;
+            --input-bg: #2d2d2d;
+            --input-text: #f5f5f5;
+            --nav-bg: #1e1e1e;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding-bottom: 70px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            box-shadow: 0 3px 10px var(--shadow);
+            border-bottom: 2px solid var(--border-color);
+            padding: 1rem;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px var(--shadow);
+            border: 2px solid var(--border-color);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 1rem;
+            background-color: var(--input-bg);
+            color: var(--input-text);
+            box-shadow: inset 0 2px 4px var(--shadow);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333333;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: var(--card-bg);
+            box-shadow: 0 -3px 10px var(--shadow);
+            border-top: 2px solid var(--border-color);
+            padding: 10px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #666;
+            font-size: 0.8rem;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item i {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .nav-item.active {
+            color: #3a8a3d;
+            background-color: rgba(76, 175, 80, 0.15);
+            font-weight: bold;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .logo img {
+            max-height: 50px;
+            width: auto;
+        }
+
+        main {
+            margin-top: 80px;
+            padding: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px var(--shadow);
+            border: 2px solid var(--border-color);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group-inline {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 0.8rem;
+            padding: 5px;
+        }
+
+        .nav-item i {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+
+        .time-entry {
+            border-bottom: 2px solid var(--border-color);
+            padding: 15px 0;
+            margin-bottom: 10px;
+        }
+
+        .time-entry:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .time-entry-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .time-entry-date {
+            font-weight: bold;
+        }
+
+        .time-entry-hours {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .time-entry-description {
+            color: #666;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .calendar-container {
+            margin-top: 20px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .calendar-header button {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .calendar-header button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .calendar-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .calendar-month {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .calendar-year {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            background-color: white;
+            border-radius: 0 0 10px 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .calendar-grid {
+                font-size: 0.8rem;
+                gap: 1px;
+                width: 100%;
+                min-width: 100%;
+                overflow-x: auto;
+                display: grid;
+                grid-template-columns: repeat(7, 1fr);
+            }
+
+            .calendar-day {
+                padding: 2px;
+                min-height: 60px;
+                height: 60px;
+                font-size: 0.7rem;
+                width: 100%;
+                min-width: 40px;
+            }
+
+            .calendar-weekday {
+                padding: 2px;
+                font-size: 0.7rem;
+                width: 100%;
+                min-width: 40px;
+                text-align: center;
+            }
+
+            .calendar-header {
+                padding: 5px;
+            }
+
+            .calendar-month {
+                font-size: 1rem;
+            }
+
+            .calendar-year {
+                font-size: 0.9rem;
+            }
+
+            .calendar-container {
+                margin: 5px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                width: 100%;
+            }
+
+            .calendar-grid {
+                min-width: 280px;
+                width: 100%;
+            }
+
+            .time-total {
+                font-size: 0.7rem;
+            }
+
+            .calendar-day .hours {
+                font-size: 0.6rem;
+            }
+
+            .calendar-day i {
+                font-size: 0.7rem;
+            }
+
+            .calendar-day-number {
+                width: 16px;
+                height: 16px;
+                font-size: 0.7rem;
+            }
+
+            .calendar-hours {
+                font-size: 0.8rem;
+            }
+
+            .calendar-icons {
+                font-size: 0.7rem;
+            }
+
+            .calendar-holiday-name {
+                font-size: 0.6rem;
+            }
+
+            main {
+                margin-top: 60px;
+                padding: 5px;
+            }
+
+            .container {
+                padding: 5px;
+            }
+        }
+        
+        .calendar-weekday {
+            text-align: center;
+            font-weight: bold;
+            padding: 10px;
+            background-color: #f5f5f5;
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .calendar-day {
+            min-height: 80px;
+            height: 80px;
+            padding: 5px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .calendar-day:hover {
+            background-color: rgba(76, 175, 80, 0.05);
+        }
+        
+        .calendar-day.empty {
+            background-color: #f9f9f9;
+            cursor: default;
+        }
+        
+        .calendar-day.empty:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .calendar-day.today {
+            border: 2px solid var(--primary-color);
+        }
+        
+        .calendar-day.has-entries {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+        
+        .calendar-day-number {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-weight: bold;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: #f5f5f5;
+            color: var(--text-color);
+            font-size: 0.7rem;
+        }
+        
+        .calendar-day.today .calendar-day-number {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .calendar-day-content {
+            margin-top: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .calendar-hours {
+            font-size: 1rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .calendar-icons {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .calendar-icons i {
+            font-size: 1rem;
+        }
+        
+        .calendar-icons i.fa-car {
+            color: #2196F3;
+        }
+        
+        .calendar-icons i.fa-moon {
+            color: #FFD700;
+        }
+
+        .stats-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .stat-card {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: #666;
+        }
+
+        .settings-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background-color: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px var(--shadow);
+        }
+
+        .setting-label {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--toggle-bg);
+            transition: .4s;
+            border-radius: 34px;
+            border: 2px solid var(--border-color);
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--toggle-active);
+            border-color: var(--toggle-active);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        #exportData {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 2px 4px var(--shadow);
+            border: 2px solid var(--primary-color);
+        }
+
+        #exportData:hover {
+            opacity: 0.9;
+        }
+
+        #clearData {
+            background-color: var(--button-danger);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 2px 4px var(--shadow);
+            border: 2px solid var(--button-danger);
+        }
+
+        #clearData:hover {
+            background-color: var(--button-danger-hover);
+        }
+
+        .delete-btn, .edit-btn {
+            padding: 2px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .delete-btn {
+            background-color: #ff4444;
+            color: white;
+        }
+
+        .edit-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background-color: #cc0000;
+        }
+
+        .edit-btn:hover {
+            background-color: #45a049;
+        }
+
+        .time-entry-details {
+            display: flex;
+            gap: 15px;
+            margin: 5px 0;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .time-entry-details span {
+            background-color: #f5f5f5;
+            padding: 2px 8px;
+            border-radius: 3px;
+        }
+
+        .time-entry i {
+            margin-left: 5px;
+            color: var(--primary-color);
+        }
+
+        .time-entry i.fa-car {
+            color: #2196F3;
+        }
+
+        .time-entry i.fa-moon {
+            color: #FFD700;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            main {
+                margin-top: 60px;
+                padding: 10px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .stats-container {
+                flex-direction: column;
+            }
+        }
+
+        /* Stili per il modale */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .close-modal {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close-modal:hover {
+            color: var(--text-color);
+        }
+        
+        .modal-body {
+            margin-bottom: 20px;
+        }
+        
+        .day-summary {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: rgba(76, 175, 80, 0.1);
+            border-radius: 5px;
+        }
+        
+        .day-summary-item {
+            text-align: center;
+        }
+        
+        .day-summary-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .day-summary-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .day-entries {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .day-entry {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .day-entry:last-child {
+            border-bottom: none;
+        }
+        
+        .day-entry-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .day-entry-hours {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .day-entry-details {
+            display: flex;
+            gap: 10px;
+            margin: 5px 0;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .day-entry-description {
+            margin-top: 5px;
+        }
+        
+        .modal-footer {
+            text-align: right;
+        }
+        
+        .dark-theme .modal-content {
+            background-color: #1e1e1e;
+            color: #f5f5f5;
+        }
+        
+        .dark-theme .day-summary {
+            background-color: rgba(76, 175, 80, 0.2);
+        }
+        
+        .dark-theme .day-entry {
+            border-bottom-color: #444;
+        }
+
+        .monthly-summary {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: rgba(76, 175, 80, 0.1);
+            border-radius: 10px;
+        }
+        
+        .monthly-summary h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            text-align: center;
+        }
+        
+        .monthly-stats {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 15px;
+        }
+        
+        .monthly-stat-item {
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+            padding: 10px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .monthly-stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        
+        .monthly-stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .dark-theme .monthly-stat-item {
+            background-color: #2d2d2d;
+        }
+        
+        .dark-theme .monthly-stat-label {
+            color: #aaa;
+        }
+
+        .dark-theme {
+            --background-color: #1a1a1a;
+            --text-color: #f5f5f5;
+            --border-color: #444;
+            --card-bg: #2d2d2d;
+            --input-bg: #2d2d2d;
+            --input-text: #f5f5f5;
+            --nav-bg: #1e1e1e;
+            --setting-bg: #2d2d2d;
+            --setting-text: #f5f5f5;
+            --toggle-bg: #444;
+            --toggle-active: #4CAF50;
+        }
+
+        /* Stili per la sezione contatti */
+        .contacts-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .contact-address {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: rgba(76, 175, 80, 0.1);
+            border-radius: 8px;
+        }
+        
+        .contact-address .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .contact-address .contact-item i {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+        
+        .contact-address .contact-item span {
+            font-size: 1.1rem;
+            color: var(--text-color);
+        }
+        
+        .dark-theme .contact-address {
+            background-color: rgba(76, 175, 80, 0.2);
+        }
+        
+        .contact-group {
+            margin-bottom: 15px;
+        }
+        
+        .contact-group h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+        
+        .contact-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
+        }
+        
+        .contact-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+        
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .contact-item i {
+            color: var(--primary-color);
+            width: 20px;
+        }
+        
+        .contact-item a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .contact-item a:hover {
+            text-decoration: underline;
+        }
+        
+        .dark-theme .contact-card {
+            background-color: var(--contact-bg);
+            color: var(--contact-text);
+        }
+        
+        .dark-theme .contact-name {
+            color: var(--contact-text);
+        }
+        
+        .dark-theme .contact-item a {
+            color: var(--contact-link);
+        }
+
+        /* Stili per il QR code */
+        .qr-code-container {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .qr-code-container h4 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        #qrcode {
+            display: inline-block;
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin: 0 auto;
+            min-width: 200px;
+            min-height: 200px;
+        }
+        
+        #qrcode img {
+            display: block !important;
+            max-width: 100% !important;
+            height: auto !important;
+            margin: 0 auto !important;
+        }
+        
+        .dark-theme .qr-code-container {
+            background-color: #333;
+        }
+        
+        .dark-theme #qrcode {
+            background-color: white;
+        }
+        
+        /* Stili per il tema scuro */
+        .dark-theme body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+        
+        .dark-theme .card {
+            background-color: var(--card-bg);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .dark-theme input, .dark-theme select {
+            background-color: #333;
+            color: var(--text-color);
+            border-color: #444;
+        }
+        
+        .dark-theme .time-entry {
+            border-bottom-color: #444;
+        }
+        
+        .dark-theme .time-entry-description {
+            color: #aaa;
+        }
+        
+        .dark-theme .bottom-nav {
+            background-color: var(--card-bg);
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .dark-theme .nav-item {
+            color: #aaa;
+        }
+        
+        .dark-theme .nav-item.active {
+            color: var(--primary-color);
+        }
+        
+        .dark-theme .modal-content {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+        
+        .dark-theme .modal-header {
+            border-bottom-color: #444;
+        }
+        
+        .dark-theme .day-entry {
+            border-bottom-color: #444;
+        }
+        
+        .dark-theme .day-summary {
+            background-color: rgba(76, 175, 80, 0.2);
+        }
+        
+        .dark-theme .day-summary-label {
+            color: #aaa;
+        }
+        
+        /* Stili per il calendario in tema scuro */
+        .dark-theme .calendar-grid {
+            background-color: #2d2d2d;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .dark-theme .calendar-weekday {
+            background-color: #444;
+            color: #f5f5f5;
+            border-bottom-color: #555;
+        }
+        
+        .dark-theme .calendar-day {
+            background-color: #2d2d2d;
+            color: #f5f5f5;
+            border-color: #444;
+        }
+        
+        .dark-theme .calendar-day:hover {
+            background-color: rgba(76, 175, 80, 0.2);
+        }
+        
+        .dark-theme .calendar-day.empty {
+            background-color: #333;
+        }
+        
+        .dark-theme .calendar-day.empty:hover {
+            background-color: #333;
+        }
+        
+        .dark-theme .calendar-day.has-entries {
+            background-color: rgba(76, 175, 80, 0.2);
+        }
+        
+        .dark-theme .calendar-day-number {
+            background-color: #444;
+            color: #f5f5f5;
+        }
+        
+        .dark-theme .calendar-day.today .calendar-day-number {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .dark-theme .calendar-hours {
+            color: #4CAF50;
+        }
+        
+        .calendar-day.holiday {
+            background-color: rgba(255, 0, 0, 0.1);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+        }
+        
+        .calendar-day.holiday:hover {
+            background-color: rgba(255, 0, 0, 0.2);
+        }
+        
+        .calendar-day.holiday .calendar-day-number {
+            background-color: rgba(255, 0, 0, 0.3);
+            color: white;
+        }
+        
+        .calendar-day.holiday .calendar-hours {
+            color: #ff0000;
+        }
+        
+        .dark-theme .calendar-day.holiday {
+            background-color: rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255, 0, 0, 0.4);
+        }
+        
+        .dark-theme .calendar-day.holiday:hover {
+            background-color: rgba(255, 0, 0, 0.3);
+        }
+        
+        .dark-theme .calendar-day.holiday .calendar-day-number {
+            background-color: rgba(255, 0, 0, 0.4);
+            color: white;
+        }
+        
+        .dark-theme .calendar-day.holiday .calendar-hours {
+            color: #ff5555;
+        }
+
+        /* Stili per la sezione Riepilogo Mese */
+        .monthly-report-container {
+            margin-top: 20px;
+        }
+        
+        .monthly-report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .monthly-report-title h3 {
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        
+        .monthly-report-title p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .dark-theme .monthly-report-title p {
+            color: #aaa;
+        }
+        
+        .monthly-report-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .export-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+        }
+        
+        .excel-btn {
+            background-color: #217346; /* Verde Excel */
+        }
+        
+        .excel-btn:hover {
+            background-color: #1a5c37;
+        }
+        
+        .monthly-report-content {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .monthly-report-item {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s;
+        }
+        
+        .monthly-report-item:hover {
+            background-color: rgba(76, 175, 80, 0.05);
+        }
+        
+        .dark-theme .monthly-report-item:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+        
+        .monthly-report-date {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+        
+        .monthly-report-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+        
+        .monthly-report-detail {
+            background-color: #f5f5f5;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.9rem;
+        }
+        
+        .dark-theme .monthly-report-detail {
+            background-color: #333;
+        }
+        
+        .monthly-report-description {
+            margin-top: 5px;
+            color: #666;
+        }
+        
+        .dark-theme .monthly-report-description {
+            color: #aaa;
+        }
+        
+        .monthly-report-empty {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+        }
+        
+        .dark-theme .monthly-report-empty {
+            color: #aaa;
+        }
+
+        /* Stili per la visualizzazione responsive dei report mensili */
+        .monthly-report-group {
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        .monthly-report-group h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            text-align: center;
+            padding: 10px;
+            background-color: rgba(76, 175, 80, 0.1);
+            border-radius: 5px;
+        }
+
+        .monthly-report-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .monthly-stat-item {
+            text-align: center;
+            min-width: 100px;
+            flex: 1;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: rgba(76, 175, 80, 0.05);
+        }
+
+        .monthly-stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .monthly-stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .dark-theme .monthly-stat-label {
+            color: #aaa;
+        }
+
+        /* Media queries per adattarsi a schermi più piccoli */
+        @media (max-width: 768px) {
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .section-header h2 {
+                margin-bottom: 15px;
+            }
+            
+            .section-controls {
+                flex-direction: column;
+                width: 100%;
+                gap: 10px;
+            }
+            
+            .month-selector {
+                width: 100%;
+            }
+            
+            .month-selector select {
+                width: 100%;
+            }
+            
+            .export-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .dropdown {
+                width: 100%;
+            }
+            
+            .dropdown-content {
+                width: 100%;
+                left: 0;
+                right: auto;
+            }
+            
+            .monthly-report-stats {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .monthly-stat-item {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .monthly-report-details {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .monthly-report-detail {
+                margin-bottom: 5px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .monthly-report-date {
+                font-size: 1rem;
+            }
+            
+            .monthly-report-item {
+                padding: 10px;
+            }
+            
+            .monthly-report-description {
+                font-size: 0.9rem;
+            }
+            
+            .monthly-stat-value {
+                font-size: 1.2rem;
+            }
+            
+            .monthly-stat-label {
+                font-size: 0.8rem;
+            }
+        }
+
+        .dark-theme header {
+            background-color: #1e1e1e;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .holiday-name {
+            color: #ff0000;
+            text-align: center;
+            margin: 10px 0;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 5px;
+            background-color: rgba(255, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+
+        .dark-theme .holiday-name {
+            background-color: rgba(255, 0, 0, 0.2);
+        }
+
+        .entry-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .edit-form {
+            padding: 15px;
+            background-color: var(--background-color);
+            border-radius: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-color);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--input-background);
+            color: var(--text-color);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .form-buttons button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .form-buttons button:first-child {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .form-buttons button:last-child {
+            background-color: var(--border-color);
+            color: var(--text-color);
+        }
+
+        .form-buttons button:hover {
+            opacity: 0.9;
+        }
+
+        .edit-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 2px 5px;
+            font-size: 0.9em;
+            transition: color 0.2s;
+        }
+
+        .edit-btn:hover {
+            color: var(--accent-color);
+        }
+
+        .message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 5px;
+            background-color: #333;
+            color: white;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+        
+        .message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .message.success {
+            background-color: #4CAF50;
+        }
+        
+        .message.error {
+            background-color: #f44336;
+        }
+
+        .modal-actions {
+            margin-bottom: 15px;
+            text-align: right;
+        }
+
+        .edit-all-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.2s;
+        }
+
+        .edit-all-btn:hover {
+            background-color: var(--accent-color);
+        }
+
+        .edit-all-btn i {
+            font-size: 0.9em;
+        }
+
+        /* Stile per il layout mobile */
+        @media screen and (max-width: 768px) {
+            .time-inputs {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+
+            .time-input {
+                width: 100%;
+            }
+
+            .short-input {
+                max-width: 100%;
+                height: 40px;
+            }
+
+            /* Contenitore per ora inizio e fine */
+            .time-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+
+            /* Stile per input più corti */
+            .compact-input {
+                height: 40px;
+                margin-bottom: 10px;
+            }
+
+            /* Aggiusta la dimensione del form su mobile */
+            .form-container {
+                padding: 10px;
+            }
+
+            /* Rendi i label più compatti su mobile */
+            label {
+                margin-bottom: 5px;
+                display: block;
+            }
+        }
+
+        .dark-theme .nav-item {
+            color: #aaa;
+        }
+        
+        .dark-theme .nav-item.active {
+            color: var(--primary-color);
+            background-color: rgba(76, 175, 80, 0.2);
+        }
+        
+        .dark-theme .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .calendar-day.selected {
+            background-color: #4b7bec;
+            color: white;
+            font-weight: bold;
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 0 0 2px rgba(75, 123, 236, 0.3);
+        }
+
+        .flatpickr-day.selected, .flatpickr-day.selected:hover {
+            background-color: #4b7bec;
+            border-color: #4b7bec;
+            color: white;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .month-selector {
+            position: relative;
+        }
+
+        .month-selector select {
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            color: #333;
+            font-weight: 500;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .month-selector select:hover,
+        .month-selector select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        /* Stili per le icone di azione */
+        .action-icon {
+            color: var(--primary-color);
+            cursor: pointer;
+            margin-left: 5px;
+        }
+        
+        .action-icon:hover {
+            color: var(--hover-color);
+        }
+        
+        /* Stili per il dropdown menu di condivisione */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: var(--card-bg-color);
+            min-width: 200px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .dropdown-content a {
+            color: var(--text-color);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+        }
+        
+        .dropdown-content a:hover {
+            background-color: var(--hover-bg-color);
+        }
+        
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        
+        .dark-theme .dropdown-content {
+            background-color: var(--dark-card-bg-color);
+            border: 1px solid #444;
+        }
+        
+        .dark-theme .dropdown-content a {
+            color: var(--dark-text-color);
+        }
+        
+        .dark-theme .dropdown-content a:hover {
+            background-color: var(--dark-hover-bg-color);
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <img src="https://i.imgur.com/BnllByD.png" 
+                     alt="PWS Logo" 
+                     style="max-width: 200px; height: auto;">
+            </div>
+            <div class="header-actions">
+                <!-- Aggiungi qui le azioni del header -->
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <!-- Sezione Home -->
+            <div id="home-section" class="section active">
+                <div class="card">
+                    <h2>Inserisci Ore</h2>
+                    <div class="form-container">
+                        <form id="timeEntryForm">
+                            <div class="form-group">
+                                <label for="date">Data:</label>
+                                <input type="text" id="date" class="form-control datepicker" required>
+                                <div id="dateIndicator" style="display: none; text-align: center; font-weight: bold; margin-top: 5px; padding: 5px; background-color: rgba(76, 175, 80, 0.1); border-radius: 5px; color: #3a8a3d;"></div>
+                            </div>
+                            
+                            <div class="time-row">
+                                <div class="form-group">
+                                    <label for="startTime">Ora Inizio:</label>
+                                    <input type="text" id="startTime" class="form-control time-input" placeholder="Es. 7" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="endTime">Ora Fine:</label>
+                                    <input type="text" id="endTime" class="form-control time-input" placeholder="Es. 17" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="breakTime">Pausa (ore):</label>
+                                <input type="number" id="breakTime" class="form-control compact-input" step="0.5" min="0" value="0.5" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="notturne">Ore Notturne:</label>
+                                <input type="number" id="notturne" class="form-control compact-input" step="0.5" min="0">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="transferta">Ore Trasferta:</label>
+                                <input type="number" id="transferta" class="form-control compact-input" step="0.5" min="0">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="totalHours">Ore Totali:</label>
+                                <input type="number" id="totalHours" class="form-control compact-input" readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="description">Descrizione:</label>
+                                <input type="text" id="description" class="form-control" placeholder="Inserisci una descrizione">
+                            </div>
+
+                            <div class="form-group" style="margin-top: 20px;">
+                                <button type="submit" id="submitBtn" class="btn btn-primary">Salva</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Ultime Entrate</h2>
+                    <div id="timeEntries"></div>
+                </div>
+            </div>
+
+            <!-- Sezione Calendario -->
+            <div id="calendar-section" class="section">
+                <div class="card">
+                    <h2>Calendario</h2>
+                    <div class="calendar-container" id="calendarEntries"></div>
+                    <div class="monthly-summary" id="monthlySummary">
+                        <h3>Riepilogo Mensile</h3>
+                        <div class="monthly-stats">
+                            <div class="monthly-stat-item">
+                                <div class="monthly-stat-value" id="monthlyTotalHours">0h</div>
+                                <div class="monthly-stat-label">Ore Totali</div>
+                            </div>
+                            <div class="monthly-stat-item">
+                                <div class="monthly-stat-value" id="monthlyWorkDays">0</div>
+                                <div class="monthly-stat-label">Giorni Lavorati</div>
+                            </div>
+                            <div class="monthly-stat-item">
+                                <div class="monthly-stat-value" id="monthlyTransferta">0h</div>
+                                <div class="monthly-stat-label">Ore Trasferta</div>
+                            </div>
+                            <div class="monthly-stat-item">
+                                <div class="monthly-stat-value" id="monthlyNotturne">0h</div>
+                                <div class="monthly-stat-label">Ore Notturne</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sezione Impostazioni -->
+            <div id="settings-section" class="section">
+                <div class="card">
+                    <h2>Impostazioni</h2>
+                    <div class="settings-container">
+                        <div class="setting-item">
+                            <div class="setting-label">Tema Scuro</div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="darkTheme">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">Nome Utente</div>
+                            <input type="text" id="userName" class="settings-input" placeholder="Inserisci il tuo nome">
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">Esporta Dati</div>
+                            <button id="exportData">Esporta Dati</button>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">Importa Dati</div>
+                            <button id="importData">Importa Dati</button>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">Cancella Dati</div>
+                            <button id="clearData" class="delete-btn">Cancella Tutto</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sezione Contatti -->
+            <div id="contacts-section" class="section">
+                <div class="card">
+                    <h2>Contatti PWS Group</h2>
+                    
+                    <div class="contact-address">
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Trezzano S.N(MI) 20090, via G.Boccaccio, 95/c</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-phone"></i>
+                            <span>Tel: 02 93219393</span>
+                        </div>
+                    </div>
+                    
+                    <div class="qr-code-container">
+                        <h4>Scansiona il QR Code per visitare il nostro sito web</h4>
+                        <div id="qrcode">
+                            <!-- QR code statico come fallback -->
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://www.pwsgroup.eu/" alt="QR Code PWS Group" style="width: 200px; height: 200px;">
+                        </div>
+                    </div>
+                    
+                    <div class="qr-code-container">
+                        <h4>Scansiona il QR Code per copiare i contatti e l'indirizzo</h4>
+                        <div id="contacts-qrcode">
+                            <!-- QR code statico come fallback -->
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=PWS%20GROUP%20-%20CONTATTI%0A%0AINDIRIZZO%3A%0ATrezzano%20S.N(MI)%2020090%2C%20via%20G.Boccaccio%2C%2095%2Fc%0ATel%3A%2002%2093219393%0AMaps%3A%20https%3A%2F%2Fmaps.app.goo.gl%2FaoH4g28iEMoqiP2S9%0A%0ACEO%20PWS%20GROUP%0AMarcello%20Cipriani%0ATel%3A%20%2B39.348.1282035%0AEmail%3A%20m.cipriani%40pwsdecoart.it" alt="QR Code Contatti PWS Group" style="width: 200px; height: 200px;">
+                        </div>
+                    </div>
+                    
+                    <div class="contacts-container">
+                        <div class="contact-group">
+                            <h3>CEO PWS Group</h3>
+                            <div class="contact-card">
+                                <div class="contact-name">Marcello Cipriani</div>
+                                <div class="contact-info">
+                                    <div class="contact-item">
+                                        <i class="fas fa-phone"></i>
+                                        <a href="tel:+393481282035">+39.348.1282035</a>
+                                    </div>
+                                    <div class="contact-item">
+                                        <i class="fas fa-envelope"></i>
+                                        <a href="mailto:m.cipriani@pwsdecoart.it">m.cipriani@pwsdecoart.it</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contact-group">
+                            <h3>Operation Director</h3>
+                            <div class="contact-card">
+                                <div class="contact-name">Mauro Pirovano</div>
+                                <div class="contact-info">
+                                    <div class="contact-item">
+                                        <i class="fas fa-phone"></i>
+                                        <a href="tel:+393341041545">+39.334.1041545</a>
+                                    </div>
+                                    <div class="contact-item">
+                                        <i class="fas fa-envelope"></i>
+                                        <a href="mailto:m.pirovano@pwsdecoart.it">m.pirovano@pwsdecoart.it</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contact-group">
+                            <h3>Sales Director</h3>
+                            <div class="contact-card">
+                                <div class="contact-name">Danilo Rosa</div>
+                                <div class="contact-info">
+                                    <div class="contact-item">
+                                        <i class="fas fa-envelope"></i>
+                                        <a href="mailto:d.rosa@pwsdecoart.it">d.rosa@pwsdecoart.it</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contact-group">
+                            <h3>Commerciale</h3>
+                            <div class="contact-card">
+                                <div class="contact-name">Roberto Bonzanini</div>
+                                <div class="contact-info">
+                                    <div class="contact-item">
+                                        <i class="fas fa-envelope"></i>
+                                        <a href="mailto:r.bonzanini@pwsdecoart.it">r.bonzanini@pwsdecoart.it</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contact-group">
+                            <h3>Ufficio Tecnico</h3>
+                            <div class="contact-card">
+                                <div class="contact-name">Nicola Manniello</div>
+                                <div class="contact-info">
+                                    <div class="contact-item">
+                                        <i class="fas fa-envelope"></i>
+                                        <a href="mailto:n.manniello@pwsdecoart.it">n.manniello@pwsdecoart.it</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contact-group">
+                            <h3>Ufficio Grafico</h3>
+                            <div class="contact-card">
+                                <div class="contact-name">Claudia Favagrossa</div>
+                                <div class="contact-info">
+                                    <div class="contact-item">
+                                        <i class="fas fa-envelope"></i>
+                                        <a href="mailto:c.favagrossa@pwsdecoart.it">c.favagrossa@pwsdecoart.it</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contact-group">
+                            <h3>Amministrazione</h3>
+                            <div class="contact-card">
+                                <div class="contact-name">Daniela Dicensi</div>
+                                <div class="contact-info">
+                                    <div class="contact-item">
+                                        <i class="fas fa-envelope"></i>
+                                        <a href="mailto:d.dicensi@pwsdecoart.it">d.dicensi@pwsdecoart.it</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sezione Riepilogo Mese -->
+            <div id="monthly-report-section" class="section">
+                <div class="card">
+                    <div class="section-header">
+                        <h2>Riepilogo Mese</h2>
+                        <div class="section-controls">
+                            <div class="month-selector">
+                                <select id="exportMonthSelect"></select>
+                            </div>
+                            <button id="exportMonthlyReport" class="export-btn">
+                                <i class="fas fa-file-export"></i> Esporta TXT
+                            </button>
+                            <button id="exportMonthlyExcel" class="export-btn excel-btn">
+                                <i class="fas fa-file-excel"></i> Esporta Excel
+                            </button>
+                            <div class="dropdown">
+                                <button class="export-btn" id="shareOptionsBtn">
+                                    <i class="fas fa-share-alt"></i> Condividi
+                                </button>
+                                <div class="dropdown-content">
+                                    <a href="#" id="emailExcelBtn"><i class="fas fa-envelope"></i> Email (Excel)</a>
+                                    <a href="#" id="whatsappExcelBtn"><i class="fab fa-whatsapp"></i> WhatsApp (Excel)</a>
+                                    <a href="#" id="emailTxtBtn"><i class="fas fa-envelope"></i> Email (TXT)</a>
+                                    <a href="#" id="whatsappTxtBtn"><i class="fab fa-whatsapp"></i> WhatsApp (TXT)</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="monthlyReportContent" class="monthly-report-content">
+                        <!-- Il contenuto del riepilogo mensile verrà generato dinamicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active" data-section="home-section">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="#" class="nav-item" data-section="calendar-section">
+            <i class="fas fa-calendar"></i>
+            <span>Calendario</span>
+        </a>
+        <a href="#" class="nav-item" data-section="monthly-report-section">
+            <i class="fas fa-list-alt"></i>
+            <span>Riepilogo Mese</span>
+        </a>
+        <a href="#" class="nav-item" data-section="contacts-section">
+            <i class="fas fa-address-book"></i>
+            <span>Contatti</span>
+        </a>
+        <a href="#" class="nav-item" data-section="settings-section">
+            <i class="fas fa-cog"></i>
+            <span>Impostazioni</span>
+        </a>
+    </nav>
+
+    <!-- Modale per i dettagli del giorno -->
+    <div id="dayModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Dettagli Giorno</div>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="day-summary">
+                    <div class="day-summary-item">
+                        <div class="day-summary-value" id="modalTotalHours">0h</div>
+                        <div class="day-summary-label">Ore Totali</div>
+                    </div>
+                    <div class="day-summary-item">
+                        <div class="day-summary-value" id="modalTransferta">0h</div>
+                        <div class="day-summary-label">Trasferta</div>
+                    </div>
+                    <div class="day-summary-item">
+                        <div class="day-summary-value" id="modalNotturne">0h</div>
+                        <div class="day-summary-label">Notturne</div>
+                    </div>
+                </div>
+                <div class="day-entries" id="modalEntries">
+                    <!-- Le entries verranno inserite qui dinamicamente -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="addEntryBtn">Aggiungi Entry</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/it.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        // Funzione globale per modificare una entry
+        function editEntry(date, index) {
+            console.log('editEntry chiamata con:', date, index);
+            const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+            const dayEntries = entries.filter(e => e.date === date);
+            const entry = dayEntries[index];
+            
+            if (!entry) {
+                console.error('Entry non trovata');
+                return;
+            }
+
+            // Salva l'entry da modificare nel localStorage
+            localStorage.setItem('editingEntry', JSON.stringify({
+                index: entries.findIndex(e => e.date === date && e.description === entry.description),
+                entry: entry
+            }));
+
+            // Chiudi il modale
+            document.getElementById('dayModal').style.display = 'none';
+
+            // Vai alla home page utilizzando la funzione handleNavigation
+            handleNavigation('home-section');
+
+            // Imposta i valori nel form
+            setTimeout(() => {
+                // Aggiorna la data sia nell'input che nell'istanza flatpickr
+                const dateInput = document.getElementById('date');
+                dateInput.value = entry.date;
+                
+                // Usa l'istanza globale di flatpickr per aggiornare la data
+                if (window.datepickerInstance) {
+                    window.datepickerInstance.setDate(entry.date);
+                }
+                
+                document.getElementById('startTime').value = entry.startTime;
+                document.getElementById('endTime').value = entry.endTime;
+                document.getElementById('breakTime').value = entry.breakTime;
+                document.getElementById('transferta').value = entry.transferta || 0;
+                document.getElementById('notturne').value = entry.notturne || 0;
+                document.getElementById('description').value = entry.description;
+                
+                // Aggiorna direttamente il campo ore totali
+                document.getElementById('totalHours').value = entry.hours;
+
+                // Modifica il testo del pulsante di submit
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.textContent = 'Modifica Entry';
+                submitBtn.onclick = function(e) {
+                    e.preventDefault();
+                    
+                    // Prendi i valori dal form
+                    const formDate = document.getElementById('date').value;
+                    const formStartTime = parseFloat(document.getElementById('startTime').value);
+                    const formEndTime = parseFloat(document.getElementById('endTime').value);
+                    const formBreakTime = parseFloat(document.getElementById('breakTime').value);
+                    const formTransferta = parseFloat(document.getElementById('transferta').value);
+                    const formNotturne = parseFloat(document.getElementById('notturne').value);
+                    const formDescription = document.getElementById('description').value;
+                    
+                    // Calcola le ore totali
+                    const hours = formEndTime - formStartTime - formBreakTime;
+                    
+                    // Prendi l'indice dell'entry da modificare
+                    const editingData = JSON.parse(localStorage.getItem('editingEntry'));
+                    const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                    
+                    // Aggiorna l'entry
+                    entries[editingData.index] = {
+                        date: formDate,
+                        startTime: formStartTime,
+                        endTime: formEndTime,
+                        breakTime: formBreakTime,
+                        transferta: formTransferta,
+                        notturne: formNotturne,
+                        description: formDescription,
+                        hours: hours
+                    };
+                    
+                    // Salva nel localStorage
+                    localStorage.setItem('timeEntries', JSON.stringify(entries));
+                    localStorage.removeItem('editingEntry');
+                    
+                    // Resetta il form
+                    document.getElementById('timeEntryForm').reset();
+                    submitBtn.textContent = 'Aggiungi Entry';
+                    submitBtn.onclick = function(e) {
+                        e.preventDefault();
+                        
+                        const form = document.getElementById('timeEntryForm');
+                        if (form) {
+                            // Crea un evento di submit
+                            const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+                            form.dispatchEvent(submitEvent);
+                        }
+                    };
+                    
+                    // Aggiorna il calendario
+                    updateCalendarDisplay(new Date().getMonth(), new Date().getFullYear());
+                    
+                    // Mostra un messaggio di successo
+                    alert('Entry modificata con successo!');
+                    
+                    // Aggiorna le visualizzazioni
+                    loadTimeEntries();
+                    updateCalendar();
+                    updateMonthlyReport();
+                };
+            }, 100);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Funzione globale per aggiornare l'indicatore della data
+            function updateDateIndicator(dateStr) {
+                console.log("Aggiornamento indicatore data:", dateStr);
+                
+                const dateIndicator = document.getElementById('dateIndicator');
+                if (dateIndicator) {
+                    try {
+                        // Formatta la data per visualizzazione
+                        const dateParts = dateStr.split('/');
+                        if (dateParts.length === 3) {
+                            const day = parseInt(dateParts[0]);
+                            const month = parseInt(dateParts[1]) - 1;
+                            const year = parseInt(dateParts[2]);
+                            const dateObj = new Date(year, month, day);
+                            
+                            if (!isNaN(dateObj.getTime())) {
+                                const dayName = dateObj.toLocaleDateString('it-IT', { weekday: 'long' });
+                                const monthName = dateObj.toLocaleDateString('it-IT', { month: 'long' });
+                                
+                                // Rendi più visibile e chiara la data selezionata
+                                dateIndicator.innerHTML = `
+                                    <div style="background-color: #4b7bec; color: white; padding: 8px; border-radius: 5px; margin-top: 5px;">
+                                        <i class="fas fa-calendar-day"></i> 
+                                        <span style="font-size: 1.1rem; font-weight: bold;">${dayName}, ${day} ${monthName} ${year}</span>
+                                    </div>
+                                `;
+                                
+                                // Forza l'aggiornamento dell'input date
+                                const dateInput = document.getElementById('date');
+                                if (dateInput && dateInput.value !== dateStr) {
+                                    dateInput.value = dateStr;
+                                }
+                                
+                                // Aggiorna anche visualmente l'interfaccia del datepicker
+                                if (window.datepickerInstance) {
+                                    window.datepickerInstance.setDate(dateStr, false);
+                                }
+                            } else {
+                                console.error("Data non valida:", dateStr);
+                                dateIndicator.innerHTML = `<div style="color: red;"><i class="fas fa-exclamation-circle"></i> Formato data non valido</div>`;
+                            }
+                        } else {
+                            console.error("Formato data non valido:", dateStr);
+                            dateIndicator.innerHTML = `<div style="color: red;"><i class="fas fa-exclamation-circle"></i> Formato data non valido</div>`;
+                        }
+                    } catch (error) {
+                        console.error("Errore nell'aggiornamento dell'indicatore data:", error);
+                        dateIndicator.innerHTML = `<div style="color: red;"><i class="fas fa-exclamation-circle"></i> Errore nel formato data</div>`;
+                    }
+                }
+            }
+            
+            // Inizializzazione
+            const form = document.getElementById('timeEntryForm');
+            const timeEntries = document.getElementById('timeEntries');
+            const calendarEntries = document.getElementById('calendarEntries');
+            const navItems = document.querySelectorAll('.nav-item');
+            const sections = document.querySelectorAll('.section');
+            const darkTheme = document.getElementById('darkTheme');
+            const exportData = document.getElementById('exportData');
+            const clearData = document.getElementById('clearData');
+            const exportMonthlyReport = document.getElementById('exportMonthlyReport');
+            const exportMonthlyExcel = document.getElementById('exportMonthlyExcel');
+            
+            // Carica le impostazioni
+            loadSettings();
+            
+            // Inizializza il datepicker
+            initDatepicker();
+            
+            // Carica le entries salvate
+            loadTimeEntries();
+            updateCalendar();
+            updateMonthlyReport();
+
+            // Funzione per gestire la navigazione
+            function handleNavigation(sectionId) {
+                // Rimuovi classe active da tutti gli elementi
+                navItems.forEach(nav => nav.classList.remove('active'));
+                sections.forEach(section => section.classList.remove('active'));
+                
+                // Aggiungi classe active all'elemento cliccato
+                const activeNav = document.querySelector(`.nav-item[data-section="${sectionId}"]`);
+                if (activeNav) {
+                    activeNav.classList.add('active');
+                }
+                
+                // Mostra la sezione corrispondente
+                const targetSection = document.getElementById(sectionId);
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                    
+                    // Aggiorna il contenuto in base alla sezione
+                    switch(sectionId) {
+                        case 'calendar-section':
+                            updateCalendar();
+                            break;
+                        case 'monthly-report-section':
+                            updateMonthlyReport();
+                            break;
+                        case 'home-section':
+                            loadTimeEntries();
+                            break;
+                    }
+                    
+                    // Resetta il form solo se si sta lasciando la sezione home
+                    if (sectionId !== 'home-section') {
+                        resetForm();
+                    }
+                }
+            }
+
+            // Rimuovi tutti i vecchi event listener
+            navItems.forEach(item => {
+                const newItem = item.cloneNode(true);
+                item.parentNode.replaceChild(newItem, item);
+            });
+
+            // Aggiungi i nuovi event listener per la navigazione
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const sectionId = this.getAttribute('data-section');
+                    if (sectionId) {
+                        handleNavigation(sectionId);
+                    }
+                });
+            });
+
+            // Gestione form
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const date = document.getElementById('date').value;
+                const startTime = document.getElementById('startTime').value;
+                const endTime = document.getElementById('endTime').value;
+                const breakTime = document.getElementById('breakTime').value;
+                const hours = calculateHours(startTime, endTime, breakTime);
+                const description = document.getElementById('description').value;
+                
+                if (!date || !startTime || !endTime || !breakTime || !description) {
+                    alert('Per favore compila tutti i campi obbligatori');
+                    return;
+                }
+                
+                // Salva l'entry
+                saveTimeEntry(date, hours, description);
+                
+                // Resetta il form
+                form.reset();
+                
+                // Ricarica le entries
+                loadTimeEntries();
+                updateCalendar();
+                updateMonthlyReport();
+            });
+            
+            // Gestione impostazioni
+            darkTheme.addEventListener('change', function() {
+                localStorage.setItem('darkTheme', this.checked);
+                applyTheme();
+            });
+            
+            exportData.addEventListener('click', function() {
+                exportAllData();
+            });
+            
+            const importData = document.getElementById('importData');
+            importData.addEventListener('click', function() {
+                importAllData();
+            });
+            
+            exportMonthlyReport.addEventListener('click', function() {
+                const selectedMonth = document.getElementById('exportMonthSelect').value;
+                exportMonthlyReportToText(selectedMonth);
+            });
+
+            exportMonthlyExcel.addEventListener('click', function() {
+                const selectedMonth = document.getElementById('exportMonthSelect').value;
+                exportMonthlyReportToExcel(selectedMonth);
+            });
+            
+            clearData.addEventListener('click', function() {
+                if (confirm('Sei sicuro di voler cancellare tutti i dati? Questa azione non può essere annullata.')) {
+                    localStorage.removeItem('timeEntries');
+                    loadTimeEntries();
+                    updateCalendar();
+                    updateMonthlyReport();
+                }
+            });
+            
+            // Funzioni di utilità
+            function loadSettings() {
+                const darkThemeValue = localStorage.getItem('darkTheme') === 'true';
+                const userNameValue = localStorage.getItem('userName') || '';
+                
+                darkTheme.checked = darkThemeValue;
+                document.getElementById('userName').value = userNameValue;
+                
+                applyTheme();
+            }
+            
+            function applyTheme() {
+                if (darkTheme.checked) {
+                    document.body.classList.add('dark-theme');
+                } else {
+                    document.body.classList.remove('dark-theme');
+                }
+            }
+            
+            function initDatepicker() {
+                // Forza l'uso del formato italiano
+                localStorage.setItem('italianDateFormat', 'true');
+                
+                const options = {
+                    dateFormat: 'd/m/Y', // Formato italiano: giorno/mese/anno
+                    locale: 'it',
+                    allowInput: true,
+                    defaultDate: 'today',
+                    onChange: function(selectedDates, dateStr) {
+                        console.log("Data selezionata:", dateStr);
+                        
+                        // IMPORTANTE: Forza l'aggiornamento del valore dell'input in modo sincrono
+                        dateInput.value = dateStr;
+                        
+                        // Aggiorna l'indicatore visivo
+                        updateDateIndicator(dateStr);
+                        
+                        // Invece di chiamare clearForm che non è visibile in questo scope,
+                        // eseguiamo direttamente le operazioni necessarie
+                        console.log("Reset form in corso...");
+                        const entryForm = document.getElementById('entryForm');
+                        if (entryForm) {
+                            entryForm.reset();
+                        }
+                        const messageDiv = document.getElementById('messageDiv');
+                        if (messageDiv) {
+                            messageDiv.style.display = 'none';
+                        }
+                        
+                        // Quando cambia la data, controlla se esistono già entries per quella data
+                        loadExistingEntry(dateStr);
+                        
+                        // Forza l'aggiornamento dell'interfaccia utente
+                        setTimeout(function() {
+                            // Trigger di un evento input per assicurarsi che tutti gli ascoltatori siano notificati
+                            const inputEvent = new Event('input', { bubbles: true });
+                            dateInput.dispatchEvent(inputEvent);
+                            
+                            // Forza un refresh completo dell'istanza flatpickr
+                            window.datepickerInstance.close();
+                            
+                            // Attiva un blur sull'input per assicurarsi che il focus venga perso
+                            dateInput.blur();
+                            
+                            // Forza l'aggiornamento del valore visualizzato
+                            console.log("Data selezionata e impostata:", dateStr);
+                        }, 50);
+                    },
+                    onReady: function(selectedDates, dateStr) {
+                        // Inizializza l'indicatore con la data corrente
+                        updateDateIndicator(dateStr);
+                    },
+                    onOpen: function(selectedDates, dateStr) {
+                        // Aggiorna l'UI quando si apre il calendario
+                        updateDateIndicator(dateStr);
+                    },
+                    onClose: function(selectedDates, dateStr) {
+                        // Assicura che il valore dell'input sia corretto alla chiusura
+                        dateInput.value = dateStr;
+                        console.log("Datepicker chiuso, data finale:", dateStr);
+                    }
+                };
+                
+                flatpickr('.datepicker', options);
+            }
+            
+            // Funzione per caricare le entries esistenti per una data
+            function loadExistingEntry(date) {
+                console.log('Caricamento entry per data:', date);
+                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                console.log('Tutte le entries:', entries);
+                
+                // Normalizza la data per il confronto
+                let normalizedDate = date;
+                
+                // Se la data è in formato italiano (dd/mm/yyyy), convertila in formato standard (yyyy-mm-dd)
+                if (date.includes('/')) {
+                    const parts = date.split('/');
+                    if (parts.length === 3) {
+                        normalizedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                    }
+                }
+                
+                console.log('Data normalizzata per ricerca:', normalizedDate);
+                
+                // Cerca le entries per questa data
+                const existingEntries = entries.filter(entry => {
+                    // Normalizza anche la data dell'entry per il confronto
+                    let entryDate = entry.date;
+                    if (entryDate.includes('/')) {
+                        const parts = entryDate.split('/');
+                        if (parts.length === 3) {
+                            entryDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                        }
+                    }
+                    return entryDate === normalizedDate;
+                });
+                
+                console.log('Entries trovate per questa data:', existingEntries);
+                
+                if (existingEntries.length > 0) {
+                    // Carica automaticamente l'ultima entry per questa data
+                    const lastEntry = existingEntries[existingEntries.length - 1];
+                    console.log('Caricamento ultima entry:', lastEntry);
+                    
+                    // Popola il form con i dati dell'entry
+                    const elements = {
+                        'startTime': lastEntry.startTime,
+                        'endTime': lastEntry.endTime,
+                        'breakTime': lastEntry.breakTime,
+                        'totalHours': lastEntry.hours,
+                        'transferta': lastEntry.transferta || '',
+                        'notturne': lastEntry.notturne || '',
+                        'description': lastEntry.description
+                    };
+
+                    for (const [id, value] of Object.entries(elements)) {
+                        const element = document.getElementById(id);
+                        if (element) {
+                            element.value = value;
+                        } else {
+                            console.warn(`Elemento con ID '${id}' non trovato nel DOM`);
+                        }
+                    }
+                    
+                    // Calcola le ore totali
+                    calculateTotalHours();
+                } else {
+                    console.log('Nessuna entry trovata per questa data, reset del form');
+                    // Se non ci sono entries per questa data, resetta il form
+                    const resetValues = {
+                        'startTime': '',
+                        'endTime': '',
+                        'breakTime': '0.5',
+                        'totalHours': '',
+                        'transferta': '',
+                        'notturne': '',
+                        'description': ''
+                    };
+
+                    for (const [id, value] of Object.entries(resetValues)) {
+                        const element = document.getElementById(id);
+                        if (element) {
+                            element.value = value;
+                        } else {
+                            console.warn(`Elemento con ID '${id}' non trovato nel DOM durante il reset`);
+                        }
+                    }
+                }
+            }
+            
+            // Aggiungi event listener per il calcolo automatico delle ore
+            document.getElementById('startTime').addEventListener('change', calculateTotalHours);
+            document.getElementById('endTime').addEventListener('change', calculateTotalHours);
+            document.getElementById('breakTime').addEventListener('change', calculateTotalHours);
+            
+            function calculateTotalHours() {
+                const startTime = parseFloat(document.getElementById('startTime').value) || 0;
+                const endTime = parseFloat(document.getElementById('endTime').value) || 0;
+                const breakTime = parseFloat(document.getElementById('breakTime').value) || 0;
+                
+                if (startTime && endTime) {
+                    // Gestione speciale per mezzanotte
+                    let start = startTime;
+                    let end = endTime;
+                    
+                    if (start === 24) start = 0;
+                    if (end === 24) end = 0;
+                    
+                    // Calcolo delle ore
+                    let totalHours;
+                    if (end >= start) {
+                        // Stesso giorno
+                        totalHours = end - start;
+                    } else {
+                        // Giorno successivo
+                        totalHours = (24 - start) + end;
+                    }
+                    
+                    // Sottrai la pausa
+                    totalHours = totalHours - breakTime;
+                    
+                    document.getElementById('totalHours').value = totalHours.toFixed(1);
+                }
+            }
+            
+            function calculateHours(startTime, endTime, breakTime) {
+                // Log dei valori di input
+                console.log('Calcolo ore - Input originale:', { startTime, endTime, breakTime });
+                
+                // Converti le stringhe in numeri
+                let start = parseFloat(startTime);
+                let end = parseFloat(endTime);
+                let break_hours = parseFloat(breakTime) || 0;
+                
+                console.log('Valori convertiti:', { start, end, break_hours });
+                
+                // Gestione speciale per mezzanotte
+                if (start === 24) {
+                    start = 0;
+                    console.log('Convertito start 24 in 0');
+                }
+                if (end === 24) {
+                    end = 0;
+                    console.log('Convertito end 24 in 0');
+                }
+                
+                // Calcolo delle ore
+                let hours;
+                if (end >= start) {
+                    // Stesso giorno
+                    hours = end - start;
+                    console.log('Calcolo stesso giorno:', hours);
+                } else {
+                    // Giorno successivo
+                    hours = (24 - start) + end;
+                    console.log('Calcolo giorno successivo:', hours);
+                }
+                
+                // Sottrai la pausa
+                hours = hours - break_hours;
+                console.log('Ore dopo la pausa:', hours);
+                
+                // Arrotonda a due decimali
+                hours = Math.round(hours * 100) / 100;
+                console.log('Risultato finale arrotondato:', hours);
+                
+                return hours;
+            }
+            
+            function saveTimeEntry(date, hours, description) {
+                let entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                const startTime = document.getElementById('startTime').value;
+                const endTime = document.getElementById('endTime').value;
+                const breakTime = document.getElementById('breakTime').value;
+                const transferta = document.getElementById('transferta').value || '';
+                const notturne = document.getElementById('notturne').value || '';
+                
+                // Normalizza la data per il confronto
+                let normalizedDate = date;
+                if (date.includes('/')) {
+                    const parts = date.split('/');
+                    if (parts.length === 3) {
+                        normalizedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                    }
+                }
+                
+                console.log('Salvataggio entry per data:', normalizedDate);
+                console.log('Tutte le entries prima del salvataggio:', entries);
+                
+                // Cerca se esiste già un'entry per questa data
+                const existingEntryIndex = entries.findIndex(entry => {
+                    // Normalizza anche la data dell'entry per il confronto
+                    let entryDate = entry.date;
+                    if (entryDate.includes('/')) {
+                        const parts = entryDate.split('/');
+                        if (parts.length === 3) {
+                            entryDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                        }
+                    }
+                    return entryDate === normalizedDate;
+                });
+                
+                console.log('Indice dell\'entry esistente:', existingEntryIndex);
+                
+                if (existingEntryIndex !== -1) {
+                    // Se esiste già un'entry per questa data, aggiorna i valori
+                    console.log('Aggiornamento entry esistente per la data:', normalizedDate);
+                    
+                    // Aggiorna l'entry esistente
+                    entries[existingEntryIndex] = {
+                        date: date, // Salva la data nel formato originale (dd/mm/yyyy)
+                        hours: parseFloat(hours),
+                        description: description,
+                        startTime: startTime,
+                        endTime: endTime,
+                        breakTime: parseFloat(breakTime),
+                        transferta: transferta ? parseFloat(transferta) : 0,
+                        notturne: notturne ? parseFloat(notturne) : 0
+                    };
+                } else {
+                    // Se non esiste un'entry per questa data, creane una nuova
+                    console.log('Creazione nuova entry per la data:', normalizedDate);
+                    
+                    entries.push({ 
+                        date: date, // Salva la data nel formato originale (dd/mm/yyyy)
+                        hours: parseFloat(hours), 
+                        description,
+                        startTime,
+                        endTime,
+                        breakTime: parseFloat(breakTime),
+                        transferta: transferta ? parseFloat(transferta) : 0,
+                        notturne: notturne ? parseFloat(notturne) : 0
+                    });
+                }
+                
+                // Salva le entries aggiornate
+                localStorage.setItem('timeEntries', JSON.stringify(entries));
+                console.log('Entries dopo il salvataggio:', JSON.parse(localStorage.getItem('timeEntries')));
+                
+                // Aggiorna il riepilogo mensile
+                updateMonthlyReport();
+            }
+            
+            function loadTimeEntries() {
+                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                
+                if (entries.length === 0) {
+                    timeEntries.innerHTML = '<p>Nessuna entry salvata</p>';
+                    return;
+                }
+                
+                // Ordina le entries per data (più recenti prima)
+                entries.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                timeEntries.innerHTML = entries.map(entry => {
+                    const formattedDate = formatDate(entry.date);
+                    const transfertaText = entry.transferta > 0 ? `<i class="fas fa-car" title="Trasferta"></i> ${entry.transferta}h` : '';
+                    const notturneText = entry.notturne > 0 ? `<i class="fas fa-moon" title="Notturne"></i> ${entry.notturne}h` : '';
+                    
+                    return `
+                        <div class="time-entry">
+                            <div class="time-entry-header">
+                                <span class="time-entry-date">${formattedDate}</span>
+                                <span class="time-entry-hours">${entry.hours}h ${transfertaText} ${notturneText}</span>
+                                <button class="delete-btn" data-date="${entry.date}" data-hours="${entry.hours}" data-description="${entry.description}">X</button>
+                            </div>
+                            <div class="time-entry-details">
+                                <span>Inizio: ${entry.startTime}h</span>
+                                <span>Fine: ${entry.endTime}h</span>
+                                <span>Pausa: ${entry.breakTime} ore</span>
+                            </div>
+                            <div class="time-entry-description">${entry.description}</div>
+                        </div>
+                    `;
+                }).join('');
+                
+                // Aggiungi event listener per i pulsanti di eliminazione
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const date = this.getAttribute('data-date');
+                        const hours = this.getAttribute('data-hours');
+                        const description = this.getAttribute('data-description');
+                        
+                        deleteTimeEntry(date, hours, description);
+                    });
+                });
+            }
+            
+            function deleteTimeEntry(date, hours, description) {
+                let entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                console.log('Tentativo di cancellazione:', { date, hours, description });
+                console.log('Entries attuali:', entries);
+                
+                // Trova l'indice dell'entry da eliminare usando un confronto più preciso
+                const index = entries.findIndex(entry => {
+                    // Normalizza le date per il confronto
+                    const entryDate = entry.date;
+                    const targetDate = date;
+                    
+                    // Confronta i valori numerici delle ore
+                    const entryHours = parseFloat(entry.hours);
+                    const targetHours = parseFloat(hours);
+                    
+                    const match = entryDate === targetDate && 
+                           Math.abs(entryHours - targetHours) < 0.01 && 
+                           entry.description === description;
+                    
+                    console.log('Confronto entry:', {
+                        entryDate,
+                        targetDate,
+                        entryHours,
+                        targetHours,
+                        entryDescription: entry.description,
+                        targetDescription: description,
+                        match
+                    });
+                    
+                    return match;
+                });
+                
+                console.log('Indice trovato:', index);
+                
+                if (index !== -1) {
+                    // Rimuovi l'entry
+                    entries.splice(index, 1);
+                    localStorage.setItem('timeEntries', JSON.stringify(entries));
+                    console.log('Entry eliminata con successo');
+                    
+                    // Aggiorna la visualizzazione
+                    loadTimeEntries();
+                    updateCalendar();
+                    updateMonthlyReport();
+                } else {
+                    console.log('Entry non trovata. Dettagli:', { date, hours, description });
+                    // Prova a trovare l'entry con un confronto più flessibile
+                    const flexibleIndex = entries.findIndex(entry => {
+                        const dateMatch = entry.date === date;
+                        const hoursMatch = Math.abs(parseFloat(entry.hours) - parseFloat(hours)) < 0.01;
+                        const descriptionMatch = entry.description === description;
+                        
+                        console.log('Confronto flessibile:', {
+                            entry,
+                            dateMatch,
+                            hoursMatch,
+                            descriptionMatch
+                        });
+                        
+                        return dateMatch && hoursMatch && descriptionMatch;
+                    });
+                    
+                    if (flexibleIndex !== -1) {
+                        entries.splice(flexibleIndex, 1);
+                        localStorage.setItem('timeEntries', JSON.stringify(entries));
+                        console.log('Entry eliminata con confronto flessibile');
+                        
+                        loadTimeEntries();
+                        updateCalendar();
+                        updateMonthlyReport();
+                    } else {
+                        // Rimuovo il messaggio di errore
+                        // alert('Non è stato possibile trovare l\'entry da eliminare. Prova a ricaricare la pagina.');
+                    }
+                }
+            }
+            
+            function updateCalendar() {
+                const today = new Date();
+                const currentMonth = today.getMonth();
+                const currentYear = today.getFullYear();
+                updateCalendarDisplay(currentMonth, currentYear);
+            }
+
+            function updateCalendarDisplay(month, year) {
+                const today = new Date();
+                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                
+                // Raggruppa le entries per data
+                const entriesByDate = {};
+                entries.forEach(entry => {
+                    if (!entriesByDate[entry.date]) {
+                        entriesByDate[entry.date] = [];
+                    }
+                    entriesByDate[entry.date].push(entry);
+                });
+                
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                const totalDays = lastDay.getDate();
+                const startingDay = firstDay.getDay(); // 0 = Domenica, 1 = Lunedì, ...
+                
+                // Crea il calendario
+                let calendarHTML = `
+                    <div class="calendar-header">
+                        <button id="prevMonth"><i class="fas fa-chevron-left"></i></button>
+                        <div class="calendar-title">
+                            <div class="calendar-month">${new Date(year, month).toLocaleDateString('it-IT', { month: 'long' })}</div>
+                            <div class="calendar-year">${year}</div>
+                        </div>
+                        <button id="nextMonth"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="calendar-grid">
+                        <div class="calendar-weekday">LU</div>
+                        <div class="calendar-weekday">MA</div>
+                        <div class="calendar-weekday">ME</div>
+                        <div class="calendar-weekday">GI</div>
+                        <div class="calendar-weekday">VE</div>
+                        <div class="calendar-weekday">SA</div>
+                        <div class="calendar-weekday">DO</div>
+                `;
+                
+                // Aggiungi celle vuote per i giorni prima dell'inizio del mese
+                const adjustedStartingDay = startingDay === 0 ? 6 : startingDay - 1;
+                for (let i = 0; i < adjustedStartingDay; i++) {
+                    calendarHTML += '<div class="calendar-day empty"></div>';
+                }
+                
+                // Variabili per il riepilogo mensile
+                let monthlyTotalHours = 0;
+                let monthlyWorkDays = 0;
+                let monthlyTransferta = 0;
+                let monthlyNotturne = 0;
+                
+                // Aggiungi i giorni del mese
+                for (let day = 1; day <= totalDays; day++) {
+                    const date = new Date(year, month, day);
+                    const dateString = date.toLocaleDateString('it-IT', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    });
+                    
+                    const dayEntries = entriesByDate[dateString] || [];
+                    
+                    // Calcola le ore totali per il giorno
+                    const totalHours = dayEntries.reduce((sum, entry) => sum + parseFloat(entry.hours), 0);
+                    const totalTransferta = dayEntries.reduce((sum, entry) => sum + parseFloat(entry.transferta || 0), 0);
+                    const totalNotturne = dayEntries.reduce((sum, entry) => sum + parseFloat(entry.notturne || 0), 0);
+                    const hasTransferta = dayEntries.some(entry => parseFloat(entry.transferta) > 0);
+                    const hasNotturne = dayEntries.some(entry => parseFloat(entry.notturne) > 0);
+                    
+                    // Aggiorna le statistiche mensili
+                    if (dayEntries.length > 0) {
+                        monthlyTotalHours += totalHours;
+                        monthlyWorkDays++;
+                        monthlyTransferta += totalTransferta;
+                        monthlyNotturne += totalNotturne;
+                    }
+                    
+                    // Determina se il giorno è oggi
+                    const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+                    
+                    // Determina se il giorno è una festività
+                    const isHoliday = isItalianHoliday(date);
+                    
+                    // Crea la cella del calendario
+                    calendarHTML += `
+                        <div class="calendar-day ${isToday ? 'today' : ''} ${dayEntries.length > 0 ? 'has-entries' : ''} ${isHoliday ? 'holiday' : ''}" 
+                             data-date="${dateString}" 
+                             data-hours="${totalHours}"
+                             data-transferta="${totalTransferta}"
+                             data-notturne="${totalNotturne}">
+                            <div class="calendar-day-number">${day}</div>
+                            <div class="calendar-day-content">
+                                ${dayEntries.length > 0 ? `<div class="calendar-hours">${totalHours.toFixed(1)}h</div>` : ''}
+                                ${dayEntries.length > 0 ? `
+                                    <div class="calendar-icons">
+                                        ${hasTransferta ? `<span><i class="fas fa-car" title="Trasferta"></i></span>` : ''}
+                                        ${hasNotturne ? `<span><i class="fas fa-moon" title="Notturne"></i></span>` : ''}
+                                    </div>
+                                ` : ''}
+                                ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                calendarHTML += '</div>';
+                document.getElementById('calendarEntries').innerHTML = calendarHTML;
+                
+                // Aggiorna il riepilogo mensile
+                document.getElementById('monthlyTotalHours').textContent = `${monthlyTotalHours.toFixed(1)}h`;
+                document.getElementById('monthlyWorkDays').textContent = monthlyWorkDays;
+                document.getElementById('monthlyTransferta').textContent = `${monthlyTransferta.toFixed(1)}h`;
+                document.getElementById('monthlyNotturne').textContent = `${monthlyNotturne.toFixed(1)}h`;
+                
+                // Aggiungi event listener per i pulsanti di navigazione
+                const prevMonthBtn = document.getElementById('prevMonth');
+                const nextMonthBtn = document.getElementById('nextMonth');
+                
+                // Rimuovi i vecchi event listener
+                prevMonthBtn.replaceWith(prevMonthBtn.cloneNode(true));
+                nextMonthBtn.replaceWith(nextMonthBtn.cloneNode(true));
+                
+                // Aggiungi i nuovi event listener
+                document.getElementById('prevMonth').addEventListener('click', () => {
+                    month--;
+                    if (month < 0) {
+                        month = 11;
+                        year--;
+                    }
+                    updateCalendarDisplay(month, year);
+                });
+                
+                document.getElementById('nextMonth').addEventListener('click', () => {
+                    month++;
+                    if (month > 11) {
+                        month = 0;
+                        year++;
+                    }
+                    updateCalendarDisplay(month, year);
+                });
+                
+                // Aggiungi event listener per i giorni del calendario
+                document.querySelectorAll('.calendar-day:not(.empty)').forEach(day => {
+                    day.addEventListener('click', function() {
+                        const date = this.getAttribute('data-date');
+                        const dayEntries = entriesByDate[date] || [];
+                        
+                        // Mostra il modale con i dettagli del giorno in tutti i casi
+                        showDayDetails(date);
+                    });
+                });
+            }
+            
+            /**
+             * Ottiene tutte le voci per una data specifica
+             * @param {string} date - La data in formato italiano (dd/mm/yyyy)
+             * @return {Array} Array di voci per la data specificata
+             */
+            function getEntriesForDate(date) {
+                console.log('Ottenimento entries per data:', date);
+                
+                try {
+                    // Ottieni tutte le entries dal localStorage
+                    const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                    
+                    if (entries.length === 0) {
+                        console.log('Nessuna entry presente nel localStorage');
+                        return [];
+                    }
+                    
+                    // Normalizza la data per il confronto
+                    let targetDate = date;
+                    
+                    // Converti la data dal formato italiano (dd/mm/yyyy) a quello standard (yyyy-mm-dd) se necessario
+                    if (date.includes('/')) {
+                        const [day, month, year] = date.split('/').map(part => part.padStart(2, '0'));
+                        targetDate = `${year}-${month}-${day}`;
+                    }
+                    
+                    console.log('Data normalizzata per la ricerca:', targetDate);
+                    
+                    // Filtra le entries per la data richiesta
+                    const matchingEntries = entries.filter(entry => {
+                        // Normalizza anche la data dell'entry
+                        let entryDate = entry.date;
+                        if (entryDate.includes('/')) {
+                            const [day, month, year] = entryDate.split('/').map(part => part.padStart(2, '0'));
+                            entryDate = `${year}-${month}-${day}`;
+                        }
+                        
+                        // Verifica più formati di data possibili per garantire corrispondenza
+                        return (
+                            entryDate === targetDate || 
+                            entry.date === date || 
+                            entryDate.replace(/-/g, '/') === date.replace(/-/g, '/') ||
+                            entryDate === date.split('/').reverse().join('-')
+                        );
+                    });
+                    
+                    console.log(`Trovate ${matchingEntries.length} entries per la data ${date}:`, matchingEntries);
+                    return matchingEntries;
+                } catch (error) {
+                    console.error('Errore durante il recupero delle entries per la data:', error);
+                    return [];
+                }
+            }
+            
+            function showDayDetails(date) {
+                const modal = document.getElementById('dayModal');
+                const modalTitle = document.getElementById('modalTitle');
+                const modalTotalHours = document.getElementById('modalTotalHours');
+                const modalTransferta = document.getElementById('modalTransferta');
+                const modalNotturne = document.getElementById('modalNotturne');
+                const modalEntries = document.getElementById('modalEntries');
+                const addEntryBtn = document.getElementById('addEntryBtn');
+                
+                const entries = getEntriesForDate(date);
+                
+                // Controllo se è un giorno festivo
+                const [day, month, year] = date.split('/').map(Number);
+                const dateObj = new Date(year, month - 1, day);
+                const isHoliday = isItalianHoliday(dateObj);
+                const holidayName = isHoliday ? getHolidayName(dateObj) : '';
+                
+                // Aggiorna il titolo del modale con il nome della festività
+                if (isHoliday) {
+                    modalTitle.innerHTML = `Dettagli del ${date} <br><span style="color:#ff5555; font-size:0.9em;"><i class="fas fa-star"></i> ${holidayName}</span>`;
+                } else {
+                    modalTitle.textContent = `Dettagli del ${date}`;
+                }
+                
+                // Calcola i totali
+                const totalHours = entries.reduce((sum, entry) => sum + parseFloat(entry.hours), 0);
+                const totalTransferta = entries.reduce((sum, entry) => sum + (parseFloat(entry.transferta) || 0), 0);
+                const totalNotturne = entries.reduce((sum, entry) => sum + (parseFloat(entry.notturne) || 0), 0);
+                
+                // Aggiorna i totali nel modale
+                modalTotalHours.textContent = `${totalHours.toFixed(1)}h`;
+                modalTransferta.textContent = `${totalTransferta.toFixed(1)}h`;
+                modalNotturne.textContent = `${totalNotturne.toFixed(1)}h`;
+                
+                // Aggiorna le entries nel modale
+                if (entries.length === 0) {
+                    modalEntries.innerHTML = '<p>Nessuna entry per questo giorno</p>';
+                } else {
+                    modalEntries.innerHTML = entries.map((entry, index) => `
+                        <div class="day-entry">
+                            <div class="day-entry-header">
+                                <span class="day-entry-hours">${entry.hours}h</span>
+                                <div class="entry-buttons">
+                                    <button class="edit-btn" data-date="${date}" data-index="${index}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="delete-btn" data-date="${entry.date}" data-hours="${entry.hours}" data-description="${entry.description}">X</button>
+                                </div>
+                            </div>
+                            <div class="day-entry-details">
+                                <span>Inizio: ${entry.startTime}h</span>
+                                <span>Fine: ${entry.endTime}h</span>
+                                <span>Pausa: ${entry.breakTime} ore</span>
+                                ${entry.transferta > 0 ? `<span><i class="fas fa-car"></i> ${entry.transferta}h</span>` : ''}
+                                ${entry.notturne > 0 ? `<span><i class="fas fa-moon"></i> ${entry.notturne}h</span>` : ''}
+                            </div>
+                            <div class="day-entry-description">${entry.description}</div>
+                        </div>
+                    `).join('');
+                    
+                    // Aggiungi event listener ai pulsanti di modifica
+                    setTimeout(() => {
+                        document.querySelectorAll('.edit-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const date = this.getAttribute('data-date');
+                                const index = parseInt(this.getAttribute('data-index'));
+                                editEntry(date, index);
+                            });
+                        });
+                        
+                        // Aggiungi event listener ai pulsanti di eliminazione
+                        document.querySelectorAll('.delete-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const date = this.getAttribute('data-date');
+                                const hours = this.getAttribute('data-hours');
+                                const description = this.getAttribute('data-description');
+                                
+                                if (confirm('Sei sicuro di voler cancellare questa registrazione?')) {
+                                    deleteTimeEntry(date, hours, description);
+                                    // Chiudi il modale dopo l'eliminazione
+                                    modal.style.display = 'none';
+                                }
+                            });
+                        });
+                    }, 100);
+                }
+                
+                // Aggiungi event listener per il pulsante di aggiunta
+                addEntryBtn.onclick = function() {
+                    modal.style.display = 'none';
+                    handleNavigation('home-section');
+                    
+                    // Imposta la data sia nell'input che nell'istanza di flatpickr
+                    const dateInput = document.getElementById('date');
+                    
+                    // Assicura che il valore sia aggiornato prima di procedere
+                    dateInput.value = date;
+                    
+                    // Usa l'istanza globale di flatpickr per aggiornare la data
+                    if (window.datepickerInstance) {
+                        // Forza un aggiornamento sincrono e completo
+                        window.datepickerInstance.setDate(date, true);
+                        
+                        // Assicura che il datepicker abbia aggiornato il suo stato interno
+                        window.datepickerInstance.close();
+                        
+                        console.log("Calendario -> Home: Data impostata a", date);
+                    }
+                    
+                    // Aggiorna anche l'indicatore visivo
+                    updateDateIndicator(date);
+                    
+                    // Forza il caricamento delle entry esistenti per questa data
+                    setTimeout(function() {
+                        loadExistingEntry(date);
+                    }, 100);
+                };
+                
+                // Mostra il modale
+                modal.style.display = 'block';
+                
+                // Aggiungi event listener per chiudere il modale
+                const closeModal = document.querySelector('.close-modal');
+                closeModal.onclick = function() {
+                    modal.style.display = 'none';
+                };
+                
+                // Chiudi il modale quando si clicca fuori
+                window.onclick = function(event) {
+                    if (event.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                };
+            }
+
+            // Funzioni globali
+            function editEntry(date, index) {
+                console.log('editEntry chiamata con:', date, index);
+                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                const dayEntries = entries.filter(e => e.date === date);
+                const entry = dayEntries[index];
+                
+                if (!entry) {
+                    console.error('Entry non trovata');
+                    return;
+                }
+
+                // Salva l'entry da modificare nel localStorage
+                localStorage.setItem('editingEntry', JSON.stringify({
+                    index: entries.findIndex(e => e.date === date && e.description === entry.description),
+                    entry: entry
+                }));
+
+                // Chiudi il modale
+                document.getElementById('dayModal').style.display = 'none';
+
+                // Vai alla home page utilizzando la funzione handleNavigation
+                handleNavigation('home-section');
+
+                // Imposta i valori nel form
+                setTimeout(() => {
+                    // Aggiorna la data sia nell'input che nell'istanza flatpickr
+                    const dateInput = document.getElementById('date');
+                    dateInput.value = entry.date;
+                    
+                    // Usa l'istanza globale di flatpickr per aggiornare la data
+                    if (window.datepickerInstance) {
+                        window.datepickerInstance.setDate(entry.date);
+                    }
+                    
+                    document.getElementById('startTime').value = entry.startTime;
+                    document.getElementById('endTime').value = entry.endTime;
+                    document.getElementById('breakTime').value = entry.breakTime;
+                    document.getElementById('transferta').value = entry.transferta || 0;
+                    document.getElementById('notturne').value = entry.notturne || 0;
+                    document.getElementById('description').value = entry.description;
+
+                    // Modifica il testo del pulsante di submit
+                    const submitBtn = document.getElementById('submitBtn');
+                    submitBtn.textContent = 'Modifica Entry';
+                    submitBtn.onclick = function(e) {
+                        e.preventDefault();
+                        
+                        // Prendi i valori dal form
+                        const formDate = document.getElementById('date').value;
+                        const formStartTime = parseFloat(document.getElementById('startTime').value);
+                        const formEndTime = parseFloat(document.getElementById('endTime').value);
+                        const formBreakTime = parseFloat(document.getElementById('breakTime').value);
+                        const formTransferta = parseFloat(document.getElementById('transferta').value);
+                        const formNotturne = parseFloat(document.getElementById('notturne').value);
+                        const formDescription = document.getElementById('description').value;
+                        
+                        // Calcola le ore totali
+                        const hours = formEndTime - formStartTime - formBreakTime;
+                        
+                        // Prendi l'indice dell'entry da modificare
+                        const editingData = JSON.parse(localStorage.getItem('editingEntry'));
+                        const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                        
+                        // Aggiorna l'entry
+                        entries[editingData.index] = {
+                            date: formDate,
+                            startTime: formStartTime,
+                            endTime: formEndTime,
+                            breakTime: formBreakTime,
+                            transferta: formTransferta,
+                            notturne: formNotturne,
+                            description: formDescription,
+                            hours: hours
+                        };
+                        
+                        // Salva nel localStorage
+                        localStorage.setItem('timeEntries', JSON.stringify(entries));
+                        localStorage.removeItem('editingEntry');
+                        
+                        // Resetta il form
+                        document.getElementById('timeEntryForm').reset();
+                        submitBtn.textContent = 'Aggiungi Entry';
+                        submitBtn.onclick = function(e) {
+                            e.preventDefault();
+                            
+                            const form = document.getElementById('timeEntryForm');
+                            if (form) {
+                                // Crea un evento di submit
+                                const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+                                form.dispatchEvent(submitEvent);
+                            }
+                        };
+                        
+                        // Aggiorna il calendario
+                        updateCalendarDisplay(new Date().getMonth(), new Date().getFullYear());
+                        
+                        // Mostra messaggio di successo
+                        alert('Entry modificata con successo!');
+                        
+                        // Aggiorna le visualizzazioni
+                        loadTimeEntries();
+                        updateCalendar();
+                        updateMonthlyReport();
+                    };
+                }, 100);
+            }
+
+            function showMessage(message, type = 'info') {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type}`;
+                messageDiv.textContent = message;
+                document.body.appendChild(messageDiv);
+                
+                setTimeout(() => {
+                    messageDiv.classList.add('show');
+                }, 100);
+                
+                setTimeout(() => {
+                    messageDiv.classList.remove('show');
+                    setTimeout(() => {
+                        document.body.removeChild(messageDiv);
+                    }, 300);
+                }, 3000);
+            }
+
+            // Document ready
+            document.addEventListener('DOMContentLoaded', function() {
+                // ... rest of the existing code ...
+
+                if (dayEntries.length === 0) {
+                    modalEntries.innerHTML = '<p>Nessuna entry per questo giorno</p>';
+                } else {
+                    modalEntries.innerHTML = dayEntries.map((entry, index) => `
+                        <div class="day-entry">
+                            <div class="day-entry-header">
+                                <span class="day-entry-hours">${entry.hours}h</span>
+                                <div class="entry-buttons">
+                                    <button class="edit-btn" data-date="${date}" data-index="${index}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="delete-btn" data-date="${entry.date}" data-hours="${entry.hours}" data-description="${entry.description}">X</button>
+                                </div>
+                            </div>
+                            <div class="day-entry-details">
+                                <span>Inizio: ${entry.startTime}h</span>
+                                <span>Fine: ${entry.endTime}h</span>
+                                <span>Pausa: ${entry.breakTime} ore</span>
+                                ${entry.transferta > 0 ? `<span><i class="fas fa-car"></i> ${entry.transferta}h</span>` : ''}
+                                ${entry.notturne > 0 ? `<span><i class="fas fa-moon"></i> ${entry.notturne}h</span>` : ''}
+                            </div>
+                            <div class="day-entry-description">${entry.description}</div>
+                        </div>
+                    `).join('');
+                }
+                // ... rest of the existing code ...
+            });
+
+            // Funzione per modificare le entries di un giorno
+            window.editDayEntries = function(date) {
+                console.log('Funzione editDayEntries chiamata con data:', date);
+                
+                // Recupera le entries esistenti per questa data
+                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                const dayEntries = entries.filter(e => e.date === date);
+                
+                if (dayEntries.length > 0) {
+                    // Prendi la prima entry del giorno
+                    const entry = dayEntries[0];
+                    console.log('Entry trovata:', entry);
+                    
+                    // Chiudi il modale
+                    const dayModal = document.getElementById('dayModal');
+                    if (dayModal) {
+                        dayModal.style.display = 'none';
+                        console.log('Modale chiuso');
+                    }
+                    
+                    // Passa alla sezione Home usando handleNavigation
+                    handleNavigation('home-section');
+                    
+                    // Imposta i valori nel form
+                    const dateInput = document.getElementById('date');
+                    const startTimeInput = document.getElementById('startTime');
+                    const endTimeInput = document.getElementById('endTime');
+                    const breakTimeInput = document.getElementById('breakTime');
+                    const transfertaInput = document.getElementById('transferta');
+                    const notturneInput = document.getElementById('notturne');
+                    const descriptionInput = document.getElementById('description');
+                    
+                    if (dateInput) {
+                        dateInput.value = date;
+                        console.log('Data impostata nel form:', date);
+                        
+                        // Aggiorna il datepicker
+                        const datepicker = dateInput._flatpickr;
+                        if (datepicker) {
+                            datepicker.setDate(date);
+                            console.log('Datepicker aggiornato');
+                        }
+                    }
+                    
+                    // Imposta gli altri campi
+                    if (startTimeInput) startTimeInput.value = entry.startTime;
+                    if (endTimeInput) endTimeInput.value = entry.endTime;
+                    if (breakTimeInput) breakTimeInput.value = entry.breakTime;
+                    if (transfertaInput) transfertaInput.value = entry.transferta || 0;
+                    if (notturneInput) notturneInput.value = entry.notturne || 0;
+                    if (descriptionInput) descriptionInput.value = entry.description;
+                    
+                    // Aggiorna direttamente il campo ore totali
+                    const totalHoursInput = document.getElementById('totalHours');
+                    if (totalHoursInput) {
+                        totalHoursInput.value = entry.hours;
+                    }
+
+                    console.log('Tutti i campi del form sono stati impostati');
+                } else {
+                    console.log('Nessuna entry trovata per questa data');
+                }
+            };
+
+            // Funzione globale per aggiornare l'indicatore della data
+            function updateDateIndicator(dateStr) {
+                console.log("Aggiornamento indicatore data:", dateStr);
+                
+                const dateIndicator = document.getElementById('dateIndicator');
+                if (dateIndicator) {
+                    try {
+                        // Formatta la data per visualizzazione
+                        const dateParts = dateStr.split('/');
+                        if (dateParts.length === 3) {
+                            const day = parseInt(dateParts[0]);
+                            const month = parseInt(dateParts[1]) - 1;
+                            const year = parseInt(dateParts[2]);
+                            const dateObj = new Date(year, month, day);
+                            
+                            if (!isNaN(dateObj.getTime())) {
+                                const dayName = dateObj.toLocaleDateString('it-IT', { weekday: 'long' });
+                                const monthName = dateObj.toLocaleDateString('it-IT', { month: 'long' });
+                                
+                                // Rendi più visibile e chiara la data selezionata
+                                dateIndicator.innerHTML = `
+                                    <div style="background-color: #4b7bec; color: white; padding: 8px; border-radius: 5px; margin-top: 5px;">
+                                        <i class="fas fa-calendar-day"></i> 
+                                        <span style="font-size: 1.1rem; font-weight: bold;">${dayName}, ${day} ${monthName} ${year}</span>
+                                    </div>
+                                `;
+                                
+                                // Forza l'aggiornamento dell'input date
+                                const dateInput = document.getElementById('date');
+                                if (dateInput && dateInput.value !== dateStr) {
+                                    dateInput.value = dateStr;
+                                }
+                                
+                                // Aggiorna anche visualmente l'interfaccia del datepicker
+                                if (window.datepickerInstance) {
+                                    window.datepickerInstance.setDate(dateStr, false);
+                                }
+                            } else {
+                                console.error("Data non valida:", dateStr);
+                                dateIndicator.innerHTML = `<div style="color: red;"><i class="fas fa-exclamation-circle"></i> Formato data non valido</div>`;
+                            }
+                        } else {
+                            console.error("Formato data non valido:", dateStr);
+                            dateIndicator.innerHTML = `<div style="color: red;"><i class="fas fa-exclamation-circle"></i> Formato data non valido</div>`;
+                        }
+                    } catch (error) {
+                        console.error("Errore nell'aggiornamento dell'indicatore data:", error);
+                        dateIndicator.innerHTML = `<div style="color: red;"><i class="fas fa-exclamation-circle"></i> Errore nel formato data</div>`;
+                    }
+                }
+            }
+
+            // Funzione per evidenziare la data selezionata nel calendario mensile
+            function highlightSelectedDate(dateStr) {
+                // Rimuovi l'evidenziazione precedente
+                document.querySelectorAll('.calendar-day.selected').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                
+                // Converti in formato di comparazione standard
+                let normalizedDate = dateStr;
+                if (dateStr.includes('/')) {
+                    const parts = dateStr.split('/');
+                    if (parts.length === 3) {
+                        normalizedDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                    }
+                }
+                
+                // Trova e evidenzia la data nel calendario mensile
+                document.querySelectorAll('.calendar-day').forEach(dayEl => {
+                    const dayDate = dayEl.getAttribute('data-date');
+                    if (dayDate === normalizedDate || dayDate === dateStr) {
+                        dayEl.classList.add('selected');
+                    }
+                });
+            }
+            
+            // Funzione per resettare il form
+            function resetForm() {
+                console.log("Resettaggio form");
+                
+                // Ottieni riferimento al form
+                const form = document.getElementById('timeEntryForm');
+                if (!form) {
+                    console.warn("Form non trovato");
+                    return;
+                }
+                
+                try {
+                    // Resetta tutti i campi del form tranne la data
+                    const currentDate = document.getElementById('date')?.value;
+                    
+                    // Resetta il form
+                    form.reset();
+                    
+                    // Ripristina la data (se era impostata)
+                    if (currentDate) {
+                        document.getElementById('date').value = currentDate;
+                    }
+                    
+                    // Imposta valori predefiniti
+                    document.getElementById('breakTime').value = '0.5';
+                    document.getElementById('transferta').value = '';
+                    document.getElementById('notturne').value = '';
+                    document.getElementById('description').value = '';
+                    document.getElementById('startTime').value = '';
+                    document.getElementById('endTime').value = '';
+                    document.getElementById('totalHours').value = '';
+                    
+                    // Rimuovi lo stato di modifica se attivo
+                    const submitBtn = document.getElementById('submitBtn');
+                    if (submitBtn) {
+                        submitBtn.textContent = 'Salva';
+                        
+                        // Rimuovi eventuale onclick personalizzato
+                        const newSubmitBtn = submitBtn.cloneNode(true);
+                        submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
+                    }
+                    
+                    // Rimuovi entry in modifica dal localStorage
+                    localStorage.removeItem('editingEntry');
+                    
+                    console.log("Form resettato con successo");
+                } catch (error) {
+                    console.error("Errore durante il reset del form:", error);
+                }
+            }
+            
+            // Funzione per aggiornare il riepilogo mensile
+            function updateMonthlyReport() {
+                console.log("Aggiornamento riepilogo mensile");
+                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                const monthlyReportContent = document.getElementById('monthlyReportContent');
+                const monthSelector = document.getElementById('exportMonthSelect');
+                
+                if (!monthlyReportContent || !monthSelector) {
+                    console.warn('Elemento monthlyReportContent o monthSelector non trovato');
+                    return;
+                }
+                
+                if (entries.length === 0) {
+                    monthlyReportContent.innerHTML = '<div class="monthly-report-empty">Nessuna entry registrata</div>';
+                    monthSelector.innerHTML = '<option value="">Nessun mese disponibile</option>';
+                    return;
+                }
+                
+                // Ordina le entries per data (più recenti prima) mantenendo il formato italiano
+                entries.sort((a, b) => {
+                    const dateObjA = getDateFromItalianFormat(a.date);
+                    const dateObjB = getDateFromItalianFormat(b.date);
+                    
+                    return dateObjB - dateObjA; // Ordine decrescente (più recenti prima)
+                });
+                
+                // Raggruppa le entries per mese
+                const entriesByMonth = {};
+                entries.forEach(entry => {
+                    // Usa la data direttamente in formato italiano
+                    const dateObj = getDateFromItalianFormat(entry.date);
+                    const monthYear = `${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
+                    
+                    if (!entriesByMonth[monthYear]) {
+                        entriesByMonth[monthYear] = [];
+                    }
+                    entriesByMonth[monthYear].push(entry);
+                });
+                
+                // Popola il selettore di mesi
+                monthSelector.innerHTML = '';
+                monthSelector.innerHTML = '<option value="all">Tutti i mesi</option>';
+                
+                Object.keys(entriesByMonth).forEach(monthYear => {
+                    const [month, year] = monthYear.split('/');
+                    const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long' });
+                    const optionText = `${monthName} ${year}`;
+                    const optionValue = monthYear;
+                    
+                    const option = document.createElement('option');
+                    option.value = optionValue;
+                    option.textContent = optionText;
+                    monthSelector.appendChild(option);
+                });
+                
+                let html = '';
+                
+                // Per ogni mese
+                Object.keys(entriesByMonth).forEach(monthYear => {
+                    const monthEntries = entriesByMonth[monthYear];
+                    const [month, year] = monthYear.split('/');
+                    const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long' });
+                    
+                    html += `
+                        <div class="monthly-report-group">
+                            <h3>${monthName} ${year}</h3>
+                            <div class="monthly-report-stats">
+                                <div class="monthly-stat-item">
+                                    <div class="monthly-stat-value">
+                                        ${monthEntries.reduce((sum, entry) => sum + parseFloat(entry.hours || 0), 0).toFixed(1)}h
+                                    </div>
+                                    <div class="monthly-stat-label">Ore Totali</div>
+                                </div>
+                                <div class="monthly-stat-item">
+                                    <div class="monthly-stat-value">
+                                        ${monthEntries.reduce((sum, entry) => sum + (parseFloat(entry.transferta || 0) || 0), 0).toFixed(1)}h
+                                    </div>
+                                    <div class="monthly-stat-label">Ore Trasferta</div>
+                                </div>
+                                <div class="monthly-stat-item">
+                                    <div class="monthly-stat-value">
+                                        ${monthEntries.reduce((sum, entry) => sum + (parseFloat(entry.notturne || 0) || 0), 0).toFixed(1)}h
+                                    </div>
+                                    <div class="monthly-stat-label">Ore Notturne</div>
+                                </div>
+                            </div>
+                            <div class="monthly-report-entries">
+                                ${monthEntries.map(entry => `
+                                    <div class="monthly-report-item">
+                                        <div class="monthly-report-date">${formatDate(entry.date)}</div>
+                                        <div class="monthly-report-details">
+                                            <span class="monthly-report-detail">${parseFloat(entry.hours || 0).toFixed(1)}h</span>
+                                            ${parseFloat(entry.transferta || 0) > 0 ? `<span class="monthly-report-detail"><i class="fas fa-car"></i> ${parseFloat(entry.transferta).toFixed(1)}h</span>` : ''}
+                                            ${parseFloat(entry.notturne || 0) > 0 ? `<span class="monthly-report-detail"><i class="fas fa-moon"></i> ${parseFloat(entry.notturne).toFixed(1)}h</span>` : ''}
+                                        </div>
+                                        <div class="monthly-report-description">${entry.description || ''}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                monthlyReportContent.innerHTML = html;
+            }
+            
+            // Funzione di supporto per normalizzare la data dal formato italiano a quello standard
+            function normalizeDate(dateStr) {
+                if (!dateStr.includes('/')) return dateStr;
+                
+                const [day, month, year] = dateStr.split('/');
+                return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+            }
+            
+            // Funzione di supporto per formattare la data
+            function formatDate(dateStr) {
+                if (!dateStr) return '';
+                
+                if (dateStr.includes('/')) {
+                    const [day, month, year] = dateStr.split('/');
+                    return `${day}/${month}/${year}`;
+                }
+                
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('it-IT');
+            }
+
+            // Funzione per ottenere il nome del giorno in italiano
+            function getDayName(dateStr) {
+                const [day, month, year] = dateStr.split('/').map(Number);
+                const date = new Date(year, month - 1, day);
+                const days = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+                return days[date.getDay()];
+            }
+
+            // Funzione per convertire le date dal formato italiano (GG/MM/AAAA) a oggetti Date
+            function getDateFromItalianFormat(dateStr) {
+                if (!dateStr || !dateStr.includes('/')) return new Date(dateStr);
+                const [day, month, year] = dateStr.split('/').map(Number);
+                return new Date(year, month - 1, day);
+            }
+
+            function exportMonthlyReportToText(selectedMonth = 'all') {
+                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                const userName = localStorage.getItem('userName') || '';
+                
+                if (entries.length === 0) {
+                    alert('Nessun dato da esportare');
+                    return;
+                }
+                
+                // Filtra le entries in base al mese selezionato
+                let filteredEntries = entries;
+                
+                if (selectedMonth !== 'all') {
+                    const [selectedMonthNum, selectedYear] = selectedMonth.split('/');
+                    
+                    filteredEntries = entries.filter(entry => {
+                        const dateObj = getDateFromItalianFormat(entry.date);
+                        const entryMonth = dateObj.getMonth() + 1;
+                        const entryYear = dateObj.getFullYear();
+                        
+                        return entryMonth === parseInt(selectedMonthNum) && entryYear === parseInt(selectedYear);
+                    });
+                    
+                    if (filteredEntries.length === 0) {
+                        alert('Nessun dato da esportare per il mese selezionato');
+                        return;
+                    }
+                }
+                
+                // Ordina le entries per data (più recenti prima) mantenendo il formato italiano
+                filteredEntries.sort((a, b) => {
+                    const dateObjA = getDateFromItalianFormat(a.date);
+                    const dateObjB = getDateFromItalianFormat(b.date);
+                    
+                    return dateObjB - dateObjA; // Ordine decrescente (più recenti prima)
+                });
+                
+                // Crea il contenuto del file di testo
+                let textContent = 'RIEPILOGO ORE PWS GROUP\n';
+                if (userName) {
+                    textContent += `Operatore: ${userName}\n`;
+                }
+                
+                // Aggiungi informazioni sul mese selezionato
+                if (selectedMonth !== 'all') {
+                    const [month, year] = selectedMonth.split('/');
+                    const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long' });
+                    textContent += `Periodo: ${monthName} ${year}\n`;
+                }
+                
+                textContent += '\n';
+                
+                // Calcola i totali
+                const totalHours = filteredEntries.reduce((sum, entry) => sum + parseFloat(entry.hours || 0), 0).toFixed(1);
+                const totalTransferta = filteredEntries.reduce((sum, entry) => sum + (parseFloat(entry.transferta || 0) || 0), 0).toFixed(1);
+                const totalNotturne = filteredEntries.reduce((sum, entry) => sum + (parseFloat(entry.notturne || 0) || 0), 0).toFixed(1);
+                
+                // Aggiungi riepilogo totali
+                textContent += `Ore Totali: ${totalHours}h\n`;
+                if (parseFloat(totalTransferta) > 0) {
+                    textContent += `Ore Trasferta: ${totalTransferta}h\n`;
+                }
+                if (parseFloat(totalNotturne) > 0) {
+                    textContent += `Ore Notturne: ${totalNotturne}h\n`;
+                }
+                textContent += '\n';
+                
+                filteredEntries.forEach(entry => {
+                    const formattedDate = formatDate(entry.date);
+                    const dayName = getDayName(entry.date);
+                    textContent += `${dayName} ${formattedDate} ${entry.startTime}-${entry.endTime} ${entry.breakTime} tot ore ${entry.hours} ---${entry.description}\n`;
+                });
+                
+                // Crea un blob e un link per il download
+                const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                
+                // Nome del file con eventuale indicazione del mese
+                let fileName = `riepilogo_ore_${userName || 'pws'}`;
+                if (selectedMonth !== 'all') {
+                    const [month, year] = selectedMonth.split('/');
+                    const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long' });
+                    fileName += `_${monthName.toLowerCase()}_${year}`;
+                }
+                fileName += '.txt';
+                
+                link.setAttribute('download', fileName);
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+            
+            /**
+             * Verifica se una data è una festività italiana
+             * @param {Date} date - L'oggetto data da verificare
+             * @return {boolean} true se la data è una festività, false altrimenti
+             */
+            function isItalianHoliday(date) {
+                const day = date.getDate();
+                const month = date.getMonth() + 1; // I mesi in JavaScript sono 0-based
+                const year = date.getFullYear();
+                
+                // Festività fisse
+                if (day === 1 && month === 1) return true; // Capodanno
+                if (day === 6 && month === 1) return true; // Epifania
+                if (day === 25 && month === 4) return true; // Festa della Liberazione
+                if (day === 1 && month === 5) return true; // Festa del Lavoro
+                if (day === 2 && month === 6) return true; // Festa della Repubblica
+                if (day === 15 && month === 8) return true; // Ferragosto
+                if (day === 1 && month === 11) return true; // Tutti i Santi
+                if (day === 8 && month === 12) return true; // Immacolata Concezione
+                if (day === 25 && month === 12) return true; // Natale
+                if (day === 26 && month === 12) return true; // Santo Stefano
+                
+                // Festività mobili (Pasqua e Lunedì dell'Angelo)
+                const easter = calculateEaster(year);
+                const easterMonday = new Date(easter);
+                easterMonday.setDate(easterMonday.getDate() + 1);
+                
+                if (day === easter.getDate() && month === easter.getMonth() + 1) return true; // Pasqua
+                if (day === easterMonday.getDate() && month === easterMonday.getMonth() + 1) return true; // Lunedì dell'Angelo
+                
+                // San Giuseppe (19 marzo) - festivo solo in alcune regioni
+                if (day === 19 && month === 3) return true; // San Giuseppe
+                
+                // San Giovanni Battista (24 giugno) - festivo solo in alcune regioni
+                if (day === 24 && month === 6) return true; // San Giovanni Battista
+                
+                // San Pietro e Paolo (29 giugno) - festivo solo a Roma
+                if (day === 29 && month === 6) return true; // San Pietro e Paolo
+                
+                // Sant'Ambrogio (7 dicembre) - festivo solo a Milano
+                if (day === 7 && month === 12) return true; // Sant'Ambrogio
+                
+                return false;
+            }
+            
+            /**
+             * Ottiene il nome della festività italiana per una data
+             * @param {Date} date - L'oggetto data per cui ottenere il nome della festività
+             * @return {string} Il nome della festività o "Festa" come valore predefinito
+             */
+            function getHolidayName(date) {
+                const day = date.getDate();
+                const month = date.getMonth() + 1; // I mesi in JavaScript sono 0-based
+                const year = date.getFullYear();
+                
+                // Festività fisse
+                if (day === 1 && month === 1) return "Capodanno";
+                if (day === 6 && month === 1) return "Epifania";
+                if (day === 25 && month === 4) return "Festa della Liberazione";
+                if (day === 1 && month === 5) return "Festa del Lavoro";
+                if (day === 2 && month === 6) return "Festa della Repubblica";
+                if (day === 15 && month === 8) return "Ferragosto";
+                if (day === 1 && month === 11) return "Tutti i Santi";
+                if (day === 8 && month === 12) return "Immacolata Concezione";
+                if (day === 25 && month === 12) return "Natale";
+                if (day === 26 && month === 12) return "Santo Stefano";
+                
+                // Pasqua e festività collegate
+                const easterDate = calculateEaster(year);
+                
+                // Pasqua
+                if (date.getTime() === easterDate.getTime()) return "Pasqua";
+                
+                // Lunedì dell'Angelo (Pasquetta) - giorno dopo Pasqua
+                const easterMonday = new Date(easterDate);
+                easterMonday.setDate(easterDate.getDate() + 1);
+                if (date.getTime() === easterMonday.getTime()) return "Lunedì dell'Angelo";
+                
+                return null;
+            }
+
+            function calculateEaster(year) {
+                // Algoritmo di Meeus/Jones/Butcher per calcolare la Pasqua
+                const a = year % 19;
+                const b = Math.floor(year / 100);
+                const c = year % 100;
+                const d = Math.floor(b / 4);
+                const e = b % 4;
+                const f = Math.floor((b + 8) / 25);
+                const g = Math.floor((b - f + 1) / 3);
+                const h = (19 * a + b - d - g + 15) % 30;
+                const i = Math.floor(c / 4);
+                const k = c % 4;
+                const l = (32 + 2 * e + 2 * i - h - k) % 7;
+                const m = Math.floor((a + 11 * h + 22 * l) / 451);
+                const month = Math.floor((h + l - 7 * m + 114) / 31);
+                const day = ((h + l - 7 * m + 114) % 31) + 1;
+                
+                return new Date(year, month - 1, day);
+            }
+
+            function exportToCSV() {
+                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                const userName = localStorage.getItem('userName') || '';
+                
+                if (entries.length === 0) {
+                    alert('Nessun dato da esportare');
+                    return;
+                }
+                
+                // Ordina le entries per data (più recenti prima)
+                entries.sort((a, b) => {
+                    const dateObjA = getDateFromItalianFormat(a.date);
+                    const dateObjB = getDateFromItalianFormat(b.date);
+                    return dateObjB - dateObjA; // Ordine decrescente (più recenti prima)
+                });
+                
+                // Crea intestazione CSV
+                let csvContent = 'Data,Inizio,Fine,Pausa,Ore Totali,Trasferta,Notturne,Descrizione\n';
+                
+                // Aggiungi ogni riga al file CSV
+                entries.forEach(entry => {
+                    const row = [
+                        entry.date,
+                        entry.startTime,
+                        entry.endTime,
+                        entry.breakTime,
+                        entry.hours,
+                        entry.transferta || '0',
+                        entry.notturne || '0',
+                        '"' + (entry.description || '').replace(/"/g, '""') + '"' // Escaping delle virgolette per CSV
+                    ];
+                    
+                    csvContent += row.join(',') + '\n';
+                });
+                
+                // Crea un blob e un link per il download
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', `ore_pws_${userName || 'export'}.csv`);
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            function exportAllData() {
+                const timeEntries = localStorage.getItem('timeEntries') || '[]';
+                const settings = {
+                    userName: localStorage.getItem('userName') || '',
+                    darkTheme: localStorage.getItem('darkTheme') || 'false'
+                };
+                
+                const exportData = {
+                    timeEntries: JSON.parse(timeEntries),
+                    settings: settings,
+                    version: '1.0'
+                };
+                
+                // Crea un blob e un link per il download
+                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', `orepws_backup_${new Date().toISOString().slice(0,10)}.json`);
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            function importAllData() {
+                // Crea un input file invisibile
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = '.json';
+                fileInput.style.display = 'none';
+                document.body.appendChild(fileInput);
+                
+                fileInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (!file) {
+                        document.body.removeChild(fileInput);
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        try {
+                            const data = JSON.parse(event.target.result);
+                            
+                            // Verifica che il file contenga i dati corretti
+                            if (!data.timeEntries || !data.settings || !data.version) {
+                                alert('Formato file non valido');
+                                document.body.removeChild(fileInput);
+                                return;
+                            }
+                            
+                            if (confirm('Questa operazione sovrascriverà tutti i dati esistenti. Continuare?')) {
+                                // Salva i dati importati
+                                localStorage.setItem('timeEntries', JSON.stringify(data.timeEntries));
+                                localStorage.setItem('userName', data.settings.userName);
+                                localStorage.setItem('darkTheme', data.settings.darkTheme);
+                                
+                                // Ricarica la pagina per applicare le modifiche
+                                alert('Dati importati con successo!');
+                                window.location.reload();
+                            }
+                        } catch (error) {
+                            alert('Errore durante l\'importazione: ' + error.message);
+                        }
+                        document.body.removeChild(fileInput);
+                    };
+                    
+                    reader.readAsText(file);
+                });
+                
+                fileInput.click();
+            }
+
+            /**
+             * Funzione per esportare il riepilogo mensile in formato Excel
+             * @param {string} selectedMonth - Il mese selezionato nel formato "MM/YYYY" o "all" per tutti i mesi
+             */
+            function exportMonthlyReportToExcel(selectedMonth = 'all') {
+                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                const userName = localStorage.getItem('userName') || 'Utente';
+                
+                if (entries.length === 0) {
+                    alert('Nessun dato da esportare');
+                    return;
+                }
+                
+                // Filtra le entries in base al mese selezionato
+                let filteredEntries = entries;
+                
+                if (selectedMonth !== 'all') {
+                    const [selectedMonthNum, selectedYear] = selectedMonth.split('/');
+                    
+                    filteredEntries = entries.filter(entry => {
+                        const dateObj = getDateFromItalianFormat(entry.date);
+                        const entryMonth = dateObj.getMonth() + 1;
+                        const entryYear = dateObj.getFullYear();
+                        
+                        return entryMonth === parseInt(selectedMonthNum) && entryYear === parseInt(selectedYear);
+                    });
+                    
+                    if (filteredEntries.length === 0) {
+                        alert('Nessun dato da esportare per il mese selezionato');
+                        return;
+                    }
+                }
+                
+                // Ordina le entries per data (crescente)
+                filteredEntries.sort((a, b) => {
+                    const dateObjA = getDateFromItalianFormat(a.date);
+                    const dateObjB = getDateFromItalianFormat(b.date);
+                    
+                    return dateObjA - dateObjB; // Ordine crescente
+                });
+                
+                // Array per tenere traccia delle celle con colori diversi
+                const holidayCells = [];
+                const saturdayCells = [];
+                const sundayCells = [];
+                
+                // Crea un nuovo workbook
+                const wb = XLSX.utils.book_new();
+                
+                // Prepara i dati per l'Excel con formattazione per il centramento
+                // Intestazione con nome utente
+                let headerData = [];
+                
+                // Intestazione principale
+                headerData.push(['RIEPILOGO ORE PWS GROUP']);
+                headerData.push([`Operatore: ${userName}`]);
+                
+                // Aggiungi leggenda per i giorni speciali
+                headerData.push(['★ = Giorno Festivo', '', '', '', '', '', '', '']);
+                headerData.push(['◆ = Sabato', '', '', '', '', '', '', '']);
+                headerData.push(['■ = Domenica', '', '', '', '', '', '', '']);
+                headerData.push([]); // Riga vuota dopo la leggenda
+                
+                // Aggiungi informazioni sul mese selezionato
+                if (selectedMonth !== 'all') {
+                    const [month, year] = selectedMonth.split('/');
+                    const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long' });
+                    headerData.push([`Periodo: ${monthName.toUpperCase()} ${year}`]);
+                } else {
+                    headerData.push(['Periodo: TUTTI I MESI']);
+                }
+
+                // Aggiungi riga vuota
+                headerData.push([]);
+
+                // Determina il numero massimo di lavori in una descrizione
+                let maxWorkplaces = 1;
+                filteredEntries.forEach(entry => {
+                    if (entry.description) {
+                        // Divide la descrizione usando virgole, punti o trattini come separatori
+                        const workplaces = entry.description.split(/[,.;-]/);
+                        const filteredWorkplaces = workplaces.filter(wp => wp.trim().length > 0);
+                        maxWorkplaces = Math.max(maxWorkplaces, filteredWorkplaces.length);
+                    }
+                });
+
+                // Prepara le intestazioni con colonne aggiuntive per i lavori
+                const baseHeaders = ['Giorno', 'Data', 'Ora Inizio', 'Pausa', 'Ora Fine', 'Ore Trasferta', 'Ore Notturne', 'Ore Totali'];
+                const workplaceHeaders = Array.from({length: maxWorkplaces}, (_, i) => `Lavoro ${i+1}`);
+                const allHeaders = [...baseHeaders, ...workplaceHeaders];
+
+                // Intestazioni colonne
+                headerData.push(allHeaders);
+
+                // Aggiungi ogni riga di dati
+                filteredEntries.forEach((entry, rowIndex) => {
+                    const dayName = getDayName(entry.date);
+                    
+                    // Suddivide la descrizione in lavori separati
+                    let workplaces = [];
+                    if (entry.description) {
+                        workplaces = entry.description.split(/[,.;-]/).map(wp => wp.trim()).filter(wp => wp.length > 0);
+                    }
+                    
+                    // Riempie l'array fino alla lunghezza massima con celle vuote
+                    while (workplaces.length < maxWorkplaces) {
+                        workplaces.push('');
+                    }
+                    
+                    // Determina il tipo di giorno per applicare lo stile
+                    const [day, month, year] = entry.date.split('/').map(Number);
+                    const dateObj = new Date(year, month - 1, day);
+                    const dayOfWeek = dateObj.getDay(); // 0 = Domenica, 6 = Sabato
+                    
+                    // Verifica se è un giorno festivo
+                    const isHoliday = isItalianHoliday(dateObj);
+                    const isSaturday = dayOfWeek === 6;
+                    const isSunday = dayOfWeek === 0;
+                    
+                    // Formatta il nome del giorno in base al tipo
+                    let formattedDayName = dayName;
+                    if (isHoliday && parseFloat(entry.hours || 0) > 0) {
+                        formattedDayName = "★ " + dayName;
+                    } else if (isSaturday) {
+                        formattedDayName = "◆ " + dayName; // Simbolo diamante per sabato
+                    } else if (isSunday) {
+                        formattedDayName = "■ " + dayName; // Simbolo quadrato per domenica
+                    }
+                    // Non aggiungiamo simboli per sabato e domenica, li distingueremo con la formattazione
+                    
+                    // Combina i dati base con i lavori separati
+                    const rowData = [
+                        formattedDayName,
+                        entry.date,
+                        entry.startTime,
+                        entry.breakTime,
+                        entry.endTime,
+                        parseFloat(entry.transferta || 0).toFixed(1),
+                        parseFloat(entry.notturne || 0).toFixed(1),
+                        parseFloat(entry.hours || 0).toFixed(1),
+                        ...workplaces
+                    ];
+                    
+                    headerData.push(rowData);
+                    
+                    // Salva l'indice della riga per applicare gli stili dopo
+                    const dataRowIndex = headerData.length - 1;
+                    
+                    // Definisci lo stile in base al tipo di giorno
+                    if (isHoliday) {
+                        // Festa (rosso)
+                        holidayCells.push({ row: dataRowIndex, cols: [1, 7] }); // Colonne Data e Ore Totali
+                    } else if (dayOfWeek === 0) {
+                        // Domenica (grigio scuro)
+                        sundayCells.push({ row: dataRowIndex, cols: [1, 7] });
+                    } else if (dayOfWeek === 6) {
+                        // Sabato (grigio chiaro)
+                        saturdayCells.push({ row: dataRowIndex, cols: [1, 7] });
+                    }
+                });
+
+                // Aggiungi riga vuota e totali
+                headerData.push([]);
+
+                // Calcola i totali
+                const totalHours = filteredEntries.reduce((sum, entry) => sum + parseFloat(entry.hours || 0), 0).toFixed(1);
+                const totalTransferta = filteredEntries.reduce((sum, entry) => sum + (parseFloat(entry.transferta || 0) || 0), 0).toFixed(1);
+                const totalNotturne = filteredEntries.reduce((sum, entry) => sum + (parseFloat(entry.notturne || 0) || 0), 0).toFixed(1);
+
+                // Riga per le etichette dei totali con celle vuote per le colonne dei lavori
+                const totalLabelsRow = ['', '', '', '', '', 'Totale Trasferta', 'Totale Notturne', 'Totale Ore'];
+                for (let i = 0; i < maxWorkplaces; i++) {
+                    totalLabelsRow.push('');
+                }
+                headerData.push(totalLabelsRow);
+
+                // Riga per i valori dei totali con celle vuote per le colonne dei lavori
+                const totalValuesRow = ['', '', '', '', '', totalTransferta, totalNotturne, totalHours];
+                for (let i = 0; i < maxWorkplaces; i++) {
+                    totalValuesRow.push('');
+                }
+                headerData.push(totalValuesRow);
+
+                // Crea il foglio di lavoro
+                const ws = XLSX.utils.aoa_to_sheet(headerData);
+
+                // Stile e formattazione (intestazioni in grassetto, larghezza colonne)
+                const defaultColWidth = 10;
+                ws['!cols'] = [
+                    { wch: 15 }, // Giorno
+                    { wch: 12 }, // Data
+                    { wch: 10 }, // Ora Inizio
+                    { wch: 10 }, // Pausa
+                    { wch: 10 }, // Ora Fine
+                    { wch: 13 }, // Ore Trasferta
+                    { wch: 13 }, // Ore Notturne
+                    { wch: 10 }  // Ore Totali
+                ];
+
+                // Aggiungi larghezza per le colonne dei luoghi di lavoro
+                for (let i = 0; i < maxWorkplaces; i++) {
+                    ws['!cols'].push({ wch: 15 }); // Lavoro X
+                }
+
+                // Applicazione avanzata degli stili con SheetJS - creazione di un foglio di stile
+                const stylesheet = {};
+                const numRows = headerData.length;
+                const numCols = 8 + maxWorkplaces; // Numero di colonne base + colonne lavoro
+
+                // Crea un oggetto stile per il testo centrato
+                const centeredStyle = { alignment: { horizontal: 'center', vertical: 'center', wrapText: true } };
+
+                // Applica lo stile a tutte le celle nel range usato
+                for (let r = 0; r < numRows; r++) {
+                    for (let c = 0; c < numCols; c++) {
+                        const cellRef = XLSX.utils.encode_cell({r: r, c: c});
+                        stylesheet[cellRef] = { ...centeredStyle };
+                        
+                        // Assicurati che tutte le colonne numeriche (pausa, ore trasferta, ore notturne, ore totali) 
+                        // abbiano lo stesso allineamento
+                        if (r > 0 && (c === 3 || c === 5 || c === 6 || c === 7)) {
+                            stylesheet[cellRef] = { 
+                                ...centeredStyle,
+                                alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+                                numFmt: "0.0" // Formato numerico con 1 decimale
+                            };
+                        }
+                    }
+                }
+                
+                // Aggiungi stile specifico per la leggenda
+                const legendCellRef = XLSX.utils.encode_cell({r: 0, c: 0});
+                stylesheet[legendCellRef] = {
+                    ...centeredStyle,
+                    font: { color: { rgb: "FFFF0000" }, bold: true, size: 12 },
+                    alignment: { horizontal: 'left', vertical: 'center' }
+                };
+
+                // Stile per la nota sui giorni di sabato e domenica
+                const noteCellRef = XLSX.utils.encode_cell({r: 3, c: 0});
+                stylesheet[noteCellRef] = {
+                    ...centeredStyle,
+                    font: { color: { rgb: "FFFF0000" }, bold: true, size: 12 },
+                    alignment: { horizontal: 'left', vertical: 'center' }
+                };
+
+                // Stile per la nota su domenica
+                const sundayLegendRef = XLSX.utils.encode_cell({r: 4, c: 0});
+                stylesheet[sundayLegendRef] = {
+                    ...centeredStyle,
+                    font: { color: { rgb: "FFFF0000" }, bold: true, size: 12 },
+                    alignment: { horizontal: 'left', vertical: 'center' }
+                };
+
+                // Aggiungi gli stili specifici per i giorni speciali
+                holidayCells.forEach(cell => {
+                    cell.cols.forEach(col => {
+                        const cellRef = XLSX.utils.encode_cell({r: cell.row, c: col});
+                        stylesheet[cellRef] = {
+                            ...centeredStyle,
+                            fill: { fgColor: { rgb: "FFFF9999" }, patternType: "solid" }, // Rosso chiaro
+                            font: { color: { rgb: "FFFF0000" }, bold: true } // Testo rosso e grassetto
+                        };
+                    });
+                    
+                    // Aggiungi stile rosso alla colonna del nome del giorno per i giorni festivi
+                    const dayNameCellRef = XLSX.utils.encode_cell({r: cell.row, c: 0});
+                    stylesheet[dayNameCellRef] = {
+                        ...centeredStyle,
+                        font: { color: { rgb: "FFFF0000" }, bold: true } // Testo rosso e grassetto
+                    };
+                });
+
+                // Sabato - formattazione speciale per il nome del giorno
+                saturdayCells.forEach(cell => {
+                    cell.cols.forEach(col => {
+                        const cellRef = XLSX.utils.encode_cell({r: cell.row, c: col});
+                        stylesheet[cellRef] = {
+                            ...centeredStyle,
+                            fill: { fgColor: { rgb: "FFE0E0E0" }, patternType: "solid" } // Grigio chiaro
+                        };
+                    });
+                    
+                    // Stile per il nome del giorno (sabato)
+                    const dayNameCellRef = XLSX.utils.encode_cell({r: cell.row, c: 0});
+                    stylesheet[dayNameCellRef] = {
+                        ...centeredStyle,
+                        font: { color: { rgb: "FFFF0000" }, bold: true, underline: true } // Rosso, grassetto e sottolineato
+                    };
+                });
+
+                // Domenica - formattazione speciale per il nome del giorno
+                sundayCells.forEach(cell => {
+                    cell.cols.forEach(col => {
+                        const cellRef = XLSX.utils.encode_cell({r: cell.row, c: col});
+                        stylesheet[cellRef] = {
+                            ...centeredStyle,
+                            fill: { fgColor: { rgb: "FFA0A0A0" }, patternType: "solid" }, // Grigio scuro
+                            font: { color: { rgb: "FFFFFFFF" } } // Testo bianco
+                        };
+                    });
+                    
+                    // Stile per il nome del giorno (domenica)
+                    const dayNameCellRef = XLSX.utils.encode_cell({r: cell.row, c: 0});
+                    stylesheet[dayNameCellRef] = {
+                        ...centeredStyle,
+                        font: { color: { rgb: "FFFF0000" }, bold: true, underline: true } // Rosso, grassetto e sottolineato
+                    };
+                });
+
+                // Applica il foglio di stile al foglio di lavoro
+                ws['!styles'] = stylesheet;
+
+                // Nome del foglio e del file
+                let fileName = `ore_pws_${userName.replace(/\s+/g, '_')}`;
+                let sheetName = 'Riepilogo Ore';
+
+                if (selectedMonth !== 'all') {
+                    const [month, year] = selectedMonth.split('/');
+                    const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long' });
+                    fileName += `_${monthName.toLowerCase()}_${year}`;
+                    sheetName = `${monthName} ${year}`;
+                }
+
+                // Aggiungi il foglio al workbook
+                XLSX.utils.book_append_sheet(wb, ws, sheetName);
+
+                // Scarica il file Excel
+                XLSX.writeFile(wb, `${fileName}.xlsx`);
+                
+                // Restituisci il nome del file per eventuali usi aggiuntivi
+                return fileName;
+            }
+            
+            /**
+             * Funzione per condividere un report via email
+             * @param {string} format - Il formato del file ('excel' o 'txt')
+             * @param {string} selectedMonth - Il mese selezionato
+             */
+            function shareReportViaEmail(format, selectedMonth = 'all') {
+                const userName = localStorage.getItem('userName') || 'Utente';
+                let subject, body, fileName;
+                
+                if (format === 'excel') {
+                    // Per Excel, genera prima il file e ottieni il nome
+                    fileName = exportMonthlyReportToExcel(selectedMonth);
+                    subject = `Riepilogo Ore PWS - ${userName}`;
+                    body = `Ciao,\n\nIn allegato il riepilogo ore di ${userName}.\n\nCordiali saluti`;
+                } else {
+                    // Per TXT, usa il nome file generato dal metodo di esportazione TXT
+                    exportMonthlyReport(selectedMonth);
+                    
+                    const [month, year] = selectedMonth !== 'all' 
+                        ? selectedMonth.split('/') 
+                        : [new Date().getMonth() + 1, new Date().getFullYear()];
+                        
+                    const monthName = selectedMonth !== 'all' 
+                        ? new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long' })
+                        : 'tutti i mesi';
+                        
+                    fileName = `ore_pws_${userName.replace(/\s+/g, '_')}`;
+                    if (selectedMonth !== 'all') {
+                        fileName += `_${monthName.toLowerCase()}_${year}`;
+                    }
+                    fileName += '.txt';
+                    
+                    subject = `Riepilogo Ore PWS (TXT) - ${userName}`;
+                    body = `Ciao,\n\nIn allegato il riepilogo ore (formato testo) di ${userName}.\n\nCordiali saluti`;
+                }
+                
+                // Crea il link mailto (nota: non è garantito che gli allegati funzionino in tutti i client email)
+                const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                
+                // Apri il client email
+                window.location.href = mailtoLink;
+                
+                // Mostra messaggio informativo sull'allegato
+                alert(`Si aprirà il tuo client email. Il file ${fileName} è stato scaricato e dovrai allegarlo manualmente all'email.`);
+            }
+            
+            /**
+             * Funzione per condividere un report via WhatsApp
+             * @param {string} format - Il formato del file ('excel' o 'txt')
+             * @param {string} selectedMonth - Il mese selezionato
+             */
+            function shareReportViaWhatsApp(format, selectedMonth = 'all') {
+                const userName = localStorage.getItem('userName') || 'Utente';
+                let fileName, message;
+                
+                if (format === 'excel') {
+                    // Per Excel, genera prima il file
+                    fileName = exportMonthlyReportToExcel(selectedMonth);
+                    message = `Ecco il riepilogo ore di ${userName} in formato Excel. Il file è stato scaricato sul mio dispositivo.`;
+                } else {
+                    // Per TXT, usa il nome file generato dal metodo di esportazione TXT
+                    exportMonthlyReport(selectedMonth);
+                    
+                    const [month, year] = selectedMonth !== 'all' 
+                        ? selectedMonth.split('/') 
+                        : [new Date().getMonth() + 1, new Date().getFullYear()];
+                        
+                    const monthName = selectedMonth !== 'all' 
+                        ? new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long' })
+                        : 'tutti i mesi';
+                        
+                    fileName = `ore_pws_${userName.replace(/\s+/g, '_')}`;
+                    if (selectedMonth !== 'all') {
+                        fileName += `_${monthName.toLowerCase()}_${year}`;
+                    }
+                    fileName += '.txt';
+                    
+                    message = `Ecco il riepilogo ore di ${userName} in formato testo. Il file è stato scaricato sul mio dispositivo.`;
+                }
+                
+                // Crea il link per WhatsApp Web
+                const whatsappLink = `https://wa.me/?text=${encodeURIComponent(message)}`;
+                
+                // Apri WhatsApp Web
+                window.open(whatsappLink, '_blank');
+                
+                // Mostra messaggio informativo
+                alert(`Si aprirà WhatsApp. Il file ${fileName} è stato scaricato e dovrai inviarlo manualmente dal tuo dispositivo.`);
+            }
+
+            /**
+             * Funzione globale per pulire il form di input
+             */
+            function clearForm() {
+                console.log("Pulizia form");
+                
+                // Resetta tutti i campi del form
+                const form = document.getElementById('entryForm');
+                if (form) {
+                    form.reset();
+                    
+                    // Ripristina la data corrente
+                    const today = new Date();
+                    const dateString = formatDateForInput(today);
+                    const dateInput = document.getElementById('date');
+                    if (dateInput) {
+                        dateInput.value = dateString;
+                    }
+                    
+                    // Aggiorna l'indicatore della data se la funzione è disponibile
+                    if (typeof updateDateIndicator === 'function') {
+                        updateDateIndicator(dateString);
+                    }
+                }
+                
+                // Nascondi il messaggio di successo/errore
+                const messageDiv = document.getElementById('messageDiv');
+                if (messageDiv) {
+                    messageDiv.style.display = 'none';
+                }
+            }
+
+            // Aggiungi event listeners per i bottoni di condivisione
+            document.getElementById('emailExcelBtn').addEventListener('click', function() {
+                const selectedMonth = document.getElementById('exportMonthSelect').value;
+                shareReportViaEmail('excel', selectedMonth);
+            });
+            
+            document.getElementById('whatsappExcelBtn').addEventListener('click', function() {
+                const selectedMonth = document.getElementById('exportMonthSelect').value;
+                shareReportViaWhatsApp('excel', selectedMonth);
+            });
+            
+            document.getElementById('emailTxtBtn').addEventListener('click', function() {
+                const selectedMonth = document.getElementById('exportMonthSelect').value;
+                shareReportViaEmail('txt', selectedMonth);
+            });
+            
+            document.getElementById('whatsappTxtBtn').addEventListener('click', function() {
+                const selectedMonth = document.getElementById('exportMonthSelect').value;
+                shareReportViaWhatsApp('txt', selectedMonth);
+            });
+
+            // Inizializza gli elementi dell'interfaccia utente
+            // ... existing code ...
+        });
+
+        // Inizializza il datepicker con la data odierna
+        document.addEventListener('DOMContentLoaded', function() {
+            // Funzione globale per aggiornare l'indicatore della data
+            function updateDateIndicator(dateStr) {
+                console.log("Aggiornamento indicatore data:", dateStr);
+                
+                const dateIndicator = document.getElementById('dateIndicator');
+                if (dateIndicator) {
+                    try {
+                        // Formatta la data per visualizzazione
+                        const dateParts = dateStr.split('/');
+                        if (dateParts.length === 3) {
+                            const day = parseInt(dateParts[0]);
+                            const month = parseInt(dateParts[1]) - 1;
+                            const year = parseInt(dateParts[2]);
+                            const dateObj = new Date(year, month, day);
+                            
+                            if (!isNaN(dateObj.getTime())) {
+                                const dayName = dateObj.toLocaleDateString('it-IT', { weekday: 'long' });
+                                const monthName = dateObj.toLocaleDateString('it-IT', { month: 'long' });
+                                
+                                // Rendi più visibile e chiara la data selezionata
+                                dateIndicator.innerHTML = `
+                                    <div style="background-color: #4b7bec; color: white; padding: 8px; border-radius: 5px; margin-top: 5px;">
+                                        <i class="fas fa-calendar-day"></i> 
+                                        <span style="font-size: 1.1rem; font-weight: bold;">${dayName}, ${day} ${monthName} ${year}</span>
+                                    </div>
+                                `;
+                                
+                                // Forza l'aggiornamento dell'input date
+                                const dateInput = document.getElementById('date');
+                                if (dateInput && dateInput.value !== dateStr) {
+                                    dateInput.value = dateStr;
+                                }
+                                
+                                // Aggiorna anche visualmente l'interfaccia del datepicker
+                                if (window.datepickerInstance) {
+                                    window.datepickerInstance.setDate(dateStr, false);
+                                }
+                            } else {
+                                console.error("Data non valida:", dateStr);
+                                dateIndicator.innerHTML = `<div style="color: red;"><i class="fas fa-exclamation-circle"></i> Formato data non valido</div>`;
+                            }
+                        } else {
+                            console.error("Formato data non valido:", dateStr);
+                            dateIndicator.innerHTML = `<div style="color: red;"><i class="fas fa-exclamation-circle"></i> Formato data non valido</div>`;
+                        }
+                    } catch (error) {
+                        console.error("Errore nell'aggiornamento dell'indicatore data:", error);
+                        dateIndicator.innerHTML = `<div style="color: red;"><i class="fas fa-exclamation-circle"></i> Errore nel formato data</div>`;
+                    }
+                }
+            }
+
+            const dateInput = document.getElementById('date');
+            
+            if (dateInput) {
+                // Crea un'istanza globale del datepicker per facilitare l'accesso e la manipolazione
+                window.datepickerInstance = flatpickr(dateInput, {
+                    dateFormat: "d/m/Y",
+                    defaultDate: "today",
+                    locale: "it",
+                    disableMobile: false, // Assicura che usi l'interfaccia flatpickr anche su mobile
+                    allowInput: true,     // Permette l'input diretto
+                    static: true,         // Mantiene il calendario visibile durante la selezione
+                    clickOpens: true,     // Assicura che il click apra il calendario
+                    time_24hr: true,      // Usa il formato 24 ore
+                    onChange: function(selectedDates, dateStr) {
+                        console.log("Data selezionata:", dateStr);
+                        
+                        // IMPORTANTE: Forza l'aggiornamento del valore dell'input in modo sincrono
+                        dateInput.value = dateStr;
+                        
+                        // Aggiorna l'indicatore visivo
+                        updateDateIndicator(dateStr);
+                        
+                        // Resetta il form quando si cambia data
+                        clearForm();
+                        
+                        // Quando cambia la data, controlla se esistono già entries per quella data
+                        loadExistingEntry(dateStr);
+                        
+                        // Forza l'aggiornamento dell'interfaccia utente
+                        setTimeout(function() {
+                            // Trigger di un evento input per assicurarsi che tutti gli ascoltatori siano notificati
+                            const inputEvent = new Event('input', { bubbles: true });
+                            dateInput.dispatchEvent(inputEvent);
+                            
+                            // Forza un refresh completo dell'istanza flatpickr
+                            window.datepickerInstance.close();
+                            
+                            // Attiva un blur sull'input per assicurarsi che il focus venga perso
+                            dateInput.blur();
+                            
+                            // Forza l'aggiornamento del valore visualizzato
+                            console.log("Data selezionata e impostata:", dateStr);
+                        }, 50);
+                    },
+                    onReady: function(selectedDates, dateStr) {
+                        // Inizializza l'indicatore con la data corrente
+                        updateDateIndicator(dateStr);
+                    },
+                    onOpen: function(selectedDates, dateStr) {
+                        // Aggiorna l'UI quando si apre il calendario
+                        updateDateIndicator(dateStr);
+                    },
+                    onClose: function(selectedDates, dateStr) {
+                        // Assicura che il valore dell'input sia corretto alla chiusura
+                        dateInput.value = dateStr;
+                        console.log("Datepicker chiuso, data finale:", dateStr);
+                    }
+                });
+                
+                // La definizione locale viene rimossa poiché ora è globale
+            }
+        });
+    </script>
+</body>
+</html>
