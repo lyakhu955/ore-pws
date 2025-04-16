@@ -12,9 +12,27 @@
             --secondary-color: #2196F3;
             --background-color: #f5f5f5;
             --text-color: #333;
-            --border-color: #ddd;
-            --input-background: #2d2d2d;
-            --accent-color: #4CAF50;
+            --border-color: #999;
+            --card-bg: #ffffff;
+            --input-bg: #ffffff;
+            --input-text: #333;
+            --nav-bg: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.25);
+            --toggle-bg: #ccc;
+            --toggle-active: #4CAF50;
+            --button-danger: #ff4444;
+            --button-danger-hover: #cc0000;
+        }
+
+        .dark-theme {
+            --background-color: #1a1a1a;
+            --text-color: #f5f5f5;
+            --border-color: #444;
+            --card-bg: #2d2d2d;
+            --input-bg: #2d2d2d;
+            --input-text: #f5f5f5;
+            --nav-bg: #1e1e1e;
+            --shadow: rgba(0, 0, 0, 0.3);
         }
 
         * {
@@ -28,7 +46,7 @@
             background-color: var(--background-color);
             color: var(--text-color);
             line-height: 1.6;
-            padding-bottom: 70px; /* Spazio per la barra di navigazione */
+            padding-bottom: 70px;
         }
 
         .container {
@@ -38,13 +56,109 @@
         }
 
         header {
-            background-color: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            background-color: var(--card-bg);
+            box-shadow: 0 3px 10px var(--shadow);
+            border-bottom: 2px solid var(--border-color);
             padding: 1rem;
             position: fixed;
             top: 0;
             width: 100%;
             z-index: 1000;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px var(--shadow);
+            border: 2px solid var(--border-color);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 1rem;
+            background-color: var(--input-bg);
+            color: var(--input-text);
+            box-shadow: inset 0 2px 4px var(--shadow);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333333;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: var(--card-bg);
+            box-shadow: 0 -3px 10px var(--shadow);
+            border-top: 2px solid var(--border-color);
+            padding: 10px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #666;
+            font-size: 0.8rem;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item i {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .nav-item.active {
+            color: #3a8a3d;
+            background-color: rgba(76, 175, 80, 0.15);
+            font-weight: bold;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
         }
 
         .header-content {
@@ -72,11 +186,12 @@
         }
 
         .card {
-            background: white;
+            background-color: var(--card-bg);
             border-radius: 10px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 3px 10px var(--shadow);
+            border: 2px solid var(--border-color);
         }
 
         .form-group {
@@ -101,14 +216,6 @@
             font-weight: 500;
         }
 
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-            font-size: 1rem;
-        }
-
         button {
             background-color: var(--primary-color);
             color: white;
@@ -122,19 +229,6 @@
 
         button:hover {
             background-color: #45a049;
-        }
-
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: white;
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-            padding: 10px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 1000;
         }
 
         .nav-item {
@@ -157,12 +251,14 @@
         }
 
         .time-entry {
-            border-bottom: 1px solid var(--border-color);
-            padding: 10px 0;
+            border-bottom: 2px solid var(--border-color);
+            padding: 15px 0;
+            margin-bottom: 10px;
         }
 
         .time-entry:last-child {
             border-bottom: none;
+            margin-bottom: 0;
         }
 
         .time-entry-header {
@@ -478,14 +574,17 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px;
-            background: white;
-            border-radius: 5px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 15px;
+            background-color: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px var(--shadow);
         }
 
         .setting-label {
             font-weight: 500;
+            color: var(--text-color);
         }
 
         .toggle-switch {
@@ -508,9 +607,10 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: #ccc;
+            background-color: var(--toggle-bg);
             transition: .4s;
             border-radius: 34px;
+            border: 2px solid var(--border-color);
         }
 
         .toggle-slider:before {
@@ -519,18 +619,52 @@
             height: 26px;
             width: 26px;
             left: 4px;
-            bottom: 4px;
+            bottom: 2px;
             background-color: white;
             transition: .4s;
             border-radius: 50%;
+            box-shadow: 0 2px 4px var(--shadow);
         }
 
         input:checked + .toggle-slider {
-            background-color: var(--primary-color);
+            background-color: var(--toggle-active);
+            border-color: var(--toggle-active);
         }
 
         input:checked + .toggle-slider:before {
             transform: translateX(26px);
+        }
+
+        #exportData {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 2px 4px var(--shadow);
+            border: 2px solid var(--primary-color);
+        }
+
+        #exportData:hover {
+            opacity: 0.9;
+        }
+
+        #clearData {
+            background-color: var(--button-danger);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 2px 4px var(--shadow);
+            border: 2px solid var(--button-danger);
+        }
+
+        #clearData:hover {
+            background-color: var(--button-danger-hover);
         }
 
         .delete-btn, .edit-btn {
@@ -788,8 +922,6 @@
         }
 
         .dark-theme {
-            --primary-color: #4CAF50;
-            --secondary-color: #2196F3;
             --background-color: #1a1a1a;
             --text-color: #f5f5f5;
             --border-color: #444;
@@ -797,19 +929,10 @@
             --input-bg: #2d2d2d;
             --input-text: #f5f5f5;
             --nav-bg: #1e1e1e;
-            --modal-bg: #1e1e1e;
-            --modal-text: #f5f5f5;
-            --stat-bg: #2d2d2d;
-            --stat-text: #f5f5f5;
-            --stat-label: #aaa;
             --setting-bg: #2d2d2d;
             --setting-text: #f5f5f5;
-            --setting-label: #f5f5f5;
             --toggle-bg: #444;
             --toggle-active: #4CAF50;
-            --contact-bg: #2d2d2d;
-            --contact-text: #f5f5f5;
-            --contact-link: #4CAF50;
         }
 
         /* Stili per la sezione contatti */
@@ -1134,17 +1257,22 @@
             background-color: var(--primary-color);
             color: white;
             border: none;
-            border-radius: 5px;
-            padding: 8px 15px;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 14px;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 5px;
-            font-size: 0.9rem;
+            transition: all 0.2s ease;
         }
         
-        .export-btn:hover {
-            background-color: #45a049;
+        .excel-btn {
+            background-color: #217346; /* Verde Excel */
+        }
+        
+        .excel-btn:hover {
+            background-color: #1a5c37;
         }
         
         .monthly-report-content {
@@ -1208,6 +1336,136 @@
         
         .dark-theme .monthly-report-empty {
             color: #aaa;
+        }
+
+        /* Stili per la visualizzazione responsive dei report mensili */
+        .monthly-report-group {
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        .monthly-report-group h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            text-align: center;
+            padding: 10px;
+            background-color: rgba(76, 175, 80, 0.1);
+            border-radius: 5px;
+        }
+
+        .monthly-report-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .monthly-stat-item {
+            text-align: center;
+            min-width: 100px;
+            flex: 1;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: rgba(76, 175, 80, 0.05);
+        }
+
+        .monthly-stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .monthly-stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .dark-theme .monthly-stat-label {
+            color: #aaa;
+        }
+
+        /* Media queries per adattarsi a schermi più piccoli */
+        @media (max-width: 768px) {
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .section-header h2 {
+                margin-bottom: 15px;
+            }
+            
+            .section-controls {
+                flex-direction: column;
+                width: 100%;
+                gap: 10px;
+            }
+            
+            .month-selector {
+                width: 100%;
+            }
+            
+            .month-selector select {
+                width: 100%;
+            }
+            
+            .export-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .dropdown {
+                width: 100%;
+            }
+            
+            .dropdown-content {
+                width: 100%;
+                left: 0;
+                right: auto;
+            }
+            
+            .monthly-report-stats {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .monthly-stat-item {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .monthly-report-details {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .monthly-report-detail {
+                margin-bottom: 5px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .monthly-report-date {
+                font-size: 1rem;
+            }
+            
+            .monthly-report-item {
+                padding: 10px;
+            }
+            
+            .monthly-report-description {
+                font-size: 0.9rem;
+            }
+            
+            .monthly-stat-value {
+                font-size: 1.2rem;
+            }
+            
+            .monthly-stat-label {
+                font-size: 0.8rem;
+            }
         }
 
         .dark-theme header {
@@ -1405,7 +1663,131 @@
                 display: block;
             }
         }
+
+        .dark-theme .nav-item {
+            color: #aaa;
+        }
+        
+        .dark-theme .nav-item.active {
+            color: var(--primary-color);
+            background-color: rgba(76, 175, 80, 0.2);
+        }
+        
+        .dark-theme .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .calendar-day.selected {
+            background-color: #4b7bec;
+            color: white;
+            font-weight: bold;
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 0 0 2px rgba(75, 123, 236, 0.3);
+        }
+
+        .flatpickr-day.selected, .flatpickr-day.selected:hover {
+            background-color: #4b7bec;
+            border-color: #4b7bec;
+            color: white;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .month-selector {
+            position: relative;
+        }
+
+        .month-selector select {
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            color: #333;
+            font-weight: 500;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .month-selector select:hover,
+        .month-selector select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        /* Stili per le icone di azione */
+        .action-icon {
+            color: var(--primary-color);
+            cursor: pointer;
+            margin-left: 5px;
+        }
+        
+        .action-icon:hover {
+            color: var(--hover-color);
+        }
+        
+        /* Stili per il dropdown menu di condivisione */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: var(--card-bg-color);
+            min-width: 200px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .dropdown-content a {
+            color: var(--text-color);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+        }
+        
+        .dropdown-content a:hover {
+            background-color: var(--hover-bg-color);
+        }
+        
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        
+        .dark-theme .dropdown-content {
+            background-color: var(--dark-card-bg-color);
+            border: 1px solid #444;
+        }
+        
+        .dark-theme .dropdown-content a {
+            color: var(--dark-text-color);
+        }
+        
+        .dark-theme .dropdown-content a:hover {
+            background-color: var(--dark-hover-bg-color);
+        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
     <header>
@@ -1432,6 +1814,7 @@
                             <div class="form-group">
                                 <label for="date">Data:</label>
                                 <input type="text" id="date" class="form-control datepicker" required>
+                                <div id="dateIndicator" style="display: none; text-align: center; font-weight: bold; margin-top: 5px; padding: 5px; background-color: rgba(76, 175, 80, 0.1); border-radius: 5px; color: #3a8a3d;"></div>
                             </div>
                             
                             <div class="time-row">
@@ -1518,13 +1901,6 @@
                     <h2>Impostazioni</h2>
                     <div class="settings-container">
                         <div class="setting-item">
-                            <div class="setting-label">Formato Data Italiano</div>
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="italianDateFormat">
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
                             <div class="setting-label">Tema Scuro</div>
                             <label class="toggle-switch">
                                 <input type="checkbox" id="darkTheme">
@@ -1532,8 +1908,16 @@
                             </label>
                         </div>
                         <div class="setting-item">
+                            <div class="setting-label">Nome Utente</div>
+                            <input type="text" id="userName" class="settings-input" placeholder="Inserisci il tuo nome">
+                        </div>
+                        <div class="setting-item">
                             <div class="setting-label">Esporta Dati</div>
-                            <button id="exportData">Esporta CSV</button>
+                            <button id="exportData">Esporta Dati</button>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label">Importa Dati</div>
+                            <button id="importData">Importa Dati</button>
                         </div>
                         <div class="setting-item">
                             <div class="setting-label">Cancella Dati</div>
@@ -1681,22 +2065,33 @@
             <!-- Sezione Riepilogo Mese -->
             <div id="monthly-report-section" class="section">
                 <div class="card">
-                    <h2>Riepilogo Mese</h2>
-                    <div class="monthly-report-container">
-                        <div class="monthly-report-header">
-                            <div class="monthly-report-title">
-                                <h3>Elenco Giorni Lavorati</h3>
-                                <p>Visualizzazione dei giorni in cui hai registrato ore di lavoro</p>
+                    <div class="section-header">
+                        <h2>Riepilogo Mese</h2>
+                        <div class="section-controls">
+                            <div class="month-selector">
+                                <select id="exportMonthSelect"></select>
                             </div>
-                            <div class="monthly-report-actions">
-                                <button id="exportMonthlyReport" class="export-btn">
-                                    <i class="fas fa-file-export"></i> Esporta
+                            <button id="exportMonthlyReport" class="export-btn">
+                                <i class="fas fa-file-export"></i> Esporta TXT
+                            </button>
+                            <button id="exportMonthlyExcel" class="export-btn excel-btn">
+                                <i class="fas fa-file-excel"></i> Esporta Excel
+                            </button>
+                            <div class="dropdown">
+                                <button class="export-btn" id="shareOptionsBtn">
+                                    <i class="fas fa-share-alt"></i> Condividi
                                 </button>
+                                <div class="dropdown-content">
+                                    <a href="#" id="emailExcelBtn"><i class="fas fa-envelope"></i> Email (Excel)</a>
+                                    <a href="#" id="whatsappExcelBtn"><i class="fab fa-whatsapp"></i> WhatsApp (Excel)</a>
+                                    <a href="#" id="emailTxtBtn"><i class="fas fa-envelope"></i> Email (TXT)</a>
+                                    <a href="#" id="whatsappTxtBtn"><i class="fab fa-whatsapp"></i> WhatsApp (TXT)</a>
+                                </div>
                             </div>
                         </div>
-                        <div id="monthlyReportContent" class="monthly-report-content">
-                            <!-- Il contenuto del riepilogo mensile verrà generato dinamicamente -->
-                        </div>
+                    </div>
+                    <div id="monthlyReportContent" class="monthly-report-content">
+                        <!-- Il contenuto del riepilogo mensile verrà generato dinamicamente -->
                     </div>
                 </div>
             </div>
@@ -1762,18 +2157,181 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/it.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
+        // Funzione globale per modificare una entry
+        function editEntry(date, index) {
+            console.log('editEntry chiamata con:', date, index);
+            const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+            const dayEntries = entries.filter(e => e.date === date);
+            const entry = dayEntries[index];
+            
+            if (!entry) {
+                console.error('Entry non trovata');
+                return;
+            }
+
+            // Salva l'entry da modificare nel localStorage
+            localStorage.setItem('editingEntry', JSON.stringify({
+                index: entries.findIndex(e => e.date === date && e.description === entry.description),
+                entry: entry
+            }));
+
+            // Chiudi il modale
+            document.getElementById('dayModal').style.display = 'none';
+
+            // Vai alla home page utilizzando la funzione handleNavigation
+            handleNavigation('home-section');
+
+            // Imposta i valori nel form
+            setTimeout(() => {
+                // Aggiorna la data sia nell'input che nell'istanza flatpickr
+                const dateInput = document.getElementById('date');
+                dateInput.value = entry.date;
+                
+                // Usa l'istanza globale di flatpickr per aggiornare la data
+                if (window.datepickerInstance) {
+                    window.datepickerInstance.setDate(entry.date);
+                }
+                
+                document.getElementById('startTime').value = entry.startTime;
+                document.getElementById('endTime').value = entry.endTime;
+                document.getElementById('breakTime').value = entry.breakTime;
+                document.getElementById('transferta').value = entry.transferta || 0;
+                document.getElementById('notturne').value = entry.notturne || 0;
+                document.getElementById('description').value = entry.description;
+                
+                // Aggiorna direttamente il campo ore totali
+                document.getElementById('totalHours').value = entry.hours;
+
+                // Modifica il testo del pulsante di submit
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.textContent = 'Modifica Entry';
+                submitBtn.onclick = function(e) {
+                    e.preventDefault();
+                    
+                    // Prendi i valori dal form
+                    const formDate = document.getElementById('date').value;
+                    const formStartTime = parseFloat(document.getElementById('startTime').value);
+                    const formEndTime = parseFloat(document.getElementById('endTime').value);
+                    const formBreakTime = parseFloat(document.getElementById('breakTime').value);
+                    const formTransferta = parseFloat(document.getElementById('transferta').value);
+                    const formNotturne = parseFloat(document.getElementById('notturne').value);
+                    const formDescription = document.getElementById('description').value;
+                    
+                    // Calcola le ore totali
+                    const hours = formEndTime - formStartTime - formBreakTime;
+                    
+                    // Prendi l'indice dell'entry da modificare
+                    const editingData = JSON.parse(localStorage.getItem('editingEntry'));
+                    const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                    
+                    // Aggiorna l'entry
+                    entries[editingData.index] = {
+                        date: formDate,
+                        startTime: formStartTime,
+                        endTime: formEndTime,
+                        breakTime: formBreakTime,
+                        transferta: formTransferta,
+                        notturne: formNotturne,
+                        description: formDescription,
+                        hours: hours
+                    };
+                    
+                    // Salva nel localStorage
+                    localStorage.setItem('timeEntries', JSON.stringify(entries));
+                    localStorage.removeItem('editingEntry');
+                    
+                    // Resetta il form
+                    document.getElementById('timeEntryForm').reset();
+                    submitBtn.textContent = 'Aggiungi Entry';
+                    submitBtn.onclick = function(e) {
+                        e.preventDefault();
+                        
+                        const form = document.getElementById('timeEntryForm');
+                        if (form) {
+                            // Crea un evento di submit
+                            const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+                            form.dispatchEvent(submitEvent);
+                        }
+                    };
+                    
+                    // Aggiorna il calendario
+                    updateCalendarDisplay(new Date().getMonth(), new Date().getFullYear());
+                    
+                    // Mostra un messaggio di successo
+                    alert('Entry modificata con successo!');
+                    
+                    // Aggiorna le visualizzazioni
+                    loadTimeEntries();
+                    updateCalendar();
+                    updateMonthlyReport();
+                };
+            }, 100);
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
+            // Funzione globale per aggiornare l'indicatore della data
+            function updateDateIndicator(dateStr) {
+                console.log("Aggiornamento indicatore data:", dateStr);
+                
+                const dateIndicator = document.getElementById('dateIndicator');
+                if (dateIndicator) {
+                    try {
+                        // Formatta la data per visualizzazione
+                        const dateParts = dateStr.split('/');
+                        if (dateParts.length === 3) {
+                            const day = parseInt(dateParts[0]);
+                            const month = parseInt(dateParts[1]) - 1;
+                            const year = parseInt(dateParts[2]);
+                            const dateObj = new Date(year, month, day);
+                            
+                            if (!isNaN(dateObj.getTime())) {
+                                const dayName = dateObj.toLocaleDateString('it-IT', { weekday: 'long' });
+                                const monthName = dateObj.toLocaleDateString('it-IT', { month: 'long' });
+                                
+                                // Rendi più visibile e chiara la data selezionata
+                                dateIndicator.innerHTML = `
+                                    <div style="background-color: #4b7bec; color: white; padding: 8px; border-radius: 5px; margin-top: 5px;">
+                                        <i class="fas fa-calendar-day"></i> 
+                                        <span style="font-size: 1.1rem; font-weight: bold;">${dayName}, ${day} ${monthName} ${year}</span>
+                                    </div>
+                                `;
+                                
+                                // Forza l'aggiornamento dell'input date
+                                const dateInput = document.getElementById('date');
+                                if (dateInput && dateInput.value !== dateStr) {
+                                    dateInput.value = dateStr;
+                                }
+                                
+                                // Aggiorna anche visualmente l'interfaccia del datepicker
+                                if (window.datepickerInstance) {
+                                    window.datepickerInstance.setDate(dateStr, false);
+                                }
+                            } else {
+                                console.error("Data non valida:", dateStr);
+                                dateIndicator.innerHTML = `<div style="color: red;"><i class="fas fa-exclamation-circle"></i> Formato data non valido</div>`;
+                            }
+                        } else {
+                            console.error("Formato data non valido:", dateStr);
+                            dateIndicator.innerHTML = `<div style="color: red;"><i class="fas fa-exclamation-circle"></i> Formato data non valido</div>`;
+                        }
+                    } catch (error) {
+                        console.error("Errore nell'aggiornamento dell'indicatore data:", error);
+                        dateIndicator.innerHTML = `<div style="color: red;"><i class="fas fa-exclamation-circle"></i> Errore nel formato data</div>`;
+                    }
+                }
+            }
+            
             // Inizializzazione
             const form = document.getElementById('timeEntryForm');
             const timeEntries = document.getElementById('timeEntries');
             const calendarEntries = document.getElementById('calendarEntries');
             const navItems = document.querySelectorAll('.nav-item');
             const sections = document.querySelectorAll('.section');
-            const italianDateFormat = document.getElementById('italianDateFormat');
             const darkTheme = document.getElementById('darkTheme');
             const exportData = document.getElementById('exportData');
             const clearData = document.getElementById('clearData');
             const exportMonthlyReport = document.getElementById('exportMonthlyReport');
+            const exportMonthlyExcel = document.getElementById('exportMonthlyExcel');
             
             // Carica le impostazioni
             loadSettings();
@@ -1785,7 +2343,63 @@
             loadTimeEntries();
             updateCalendar();
             updateMonthlyReport();
-            
+
+            // Funzione per gestire la navigazione
+            function handleNavigation(sectionId) {
+                // Rimuovi classe active da tutti gli elementi
+                navItems.forEach(nav => nav.classList.remove('active'));
+                sections.forEach(section => section.classList.remove('active'));
+                
+                // Aggiungi classe active all'elemento cliccato
+                const activeNav = document.querySelector(`.nav-item[data-section="${sectionId}"]`);
+                if (activeNav) {
+                    activeNav.classList.add('active');
+                }
+                
+                // Mostra la sezione corrispondente
+                const targetSection = document.getElementById(sectionId);
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                    
+                    // Aggiorna il contenuto in base alla sezione
+                    switch(sectionId) {
+                        case 'calendar-section':
+                            updateCalendar();
+                            break;
+                        case 'monthly-report-section':
+                            updateMonthlyReport();
+                            break;
+                        case 'home-section':
+                            loadTimeEntries();
+                            break;
+                    }
+                    
+                    // Resetta il form solo se si sta lasciando la sezione home
+                    if (sectionId !== 'home-section') {
+                        resetForm();
+                    }
+                }
+            }
+
+            // Rimuovi tutti i vecchi event listener
+            navItems.forEach(item => {
+                const newItem = item.cloneNode(true);
+                item.parentNode.replaceChild(newItem, item);
+            });
+
+            // Aggiungi i nuovi event listener per la navigazione
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const sectionId = this.getAttribute('data-section');
+                    if (sectionId) {
+                        handleNavigation(sectionId);
+                    }
+                });
+            });
+
             // Gestione form
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -1814,46 +2428,29 @@
                 updateMonthlyReport();
             });
             
-            // Gestione navigazione
-            navItems.forEach(item => {
-                item.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Rimuovi classe active da tutti gli elementi
-                    navItems.forEach(nav => nav.classList.remove('active'));
-                    sections.forEach(section => section.classList.remove('active'));
-                    
-                    // Aggiungi classe active all'elemento cliccato
-                    this.classList.add('active');
-                    
-                    // Mostra la sezione corrispondente
-                    const sectionId = this.getAttribute('data-section');
-                    document.getElementById(sectionId).classList.add('active');
-
-                    // Resetta il form quando si cambia sezione
-                    resetForm();
-                });
-            });
-            
             // Gestione impostazioni
-            italianDateFormat.addEventListener('change', function() {
-                localStorage.setItem('italianDateFormat', this.checked);
-                initDatepicker();
-                loadTimeEntries();
-                updateCalendar();
-            });
-            
             darkTheme.addEventListener('change', function() {
                 localStorage.setItem('darkTheme', this.checked);
                 applyTheme();
             });
             
             exportData.addEventListener('click', function() {
-                exportToCSV();
+                exportAllData();
+            });
+            
+            const importData = document.getElementById('importData');
+            importData.addEventListener('click', function() {
+                importAllData();
             });
             
             exportMonthlyReport.addEventListener('click', function() {
-                exportMonthlyReportToText();
+                const selectedMonth = document.getElementById('exportMonthSelect').value;
+                exportMonthlyReportToText(selectedMonth);
+            });
+
+            exportMonthlyExcel.addEventListener('click', function() {
+                const selectedMonth = document.getElementById('exportMonthSelect').value;
+                exportMonthlyReportToExcel(selectedMonth);
             });
             
             clearData.addEventListener('click', function() {
@@ -1867,11 +2464,11 @@
             
             // Funzioni di utilità
             function loadSettings() {
-                const italianDateFormatValue = localStorage.getItem('italianDateFormat') === 'true';
                 const darkThemeValue = localStorage.getItem('darkTheme') === 'true';
+                const userNameValue = localStorage.getItem('userName') || '';
                 
-                italianDateFormat.checked = italianDateFormatValue;
                 darkTheme.checked = darkThemeValue;
+                document.getElementById('userName').value = userNameValue;
                 
                 applyTheme();
             }
@@ -1879,249 +2476,72 @@
             function applyTheme() {
                 if (darkTheme.checked) {
                     document.body.classList.add('dark-theme');
-                    document.body.style.backgroundColor = '#121212';
-                    document.body.style.color = '#f5f5f5';
-                    
-                    document.querySelector('header').style.backgroundColor = '#1e1e1e';
-                    document.querySelector('header').style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
-                    
-                    document.querySelectorAll('.card').forEach(card => {
-                        card.style.backgroundColor = '#1e1e1e';
-                        card.style.color = '#f5f5f5';
-                    });
-                    
-                    document.querySelectorAll('input, select').forEach(input => {
-                        input.style.backgroundColor = '#2d2d2d';
-                        input.style.color = '#f5f5f5';
-                        input.style.borderColor = '#444';
-                    });
-                    
-                    document.querySelector('.bottom-nav').style.backgroundColor = '#1e1e1e';
-                    
-                    // Migliora la visibilità dei testi nel tema scuro
-                    document.querySelectorAll('.time-entry-date, .time-entry-description, .stat-label, .monthly-stat-label').forEach(el => {
-                        el.style.color = '#f5f5f5';
-                    });
-                    
-                    document.querySelectorAll('.time-entry-details span, .day-entry-details span').forEach(el => {
-                        el.style.backgroundColor = '#2d2d2d';
-                        el.style.color = '#f5f5f5';
-                    });
-                    
-                    // Migliora la visibilità del modale
-                    const modalContent = document.querySelector('.modal-content');
-                    if (modalContent) {
-                        modalContent.style.backgroundColor = '#1e1e1e';
-                        modalContent.style.color = '#f5f5f5';
-                    }
-                    
-                    // Migliora la visibilità del riepilogo mensile
-                    document.querySelectorAll('.monthly-stat-item').forEach(el => {
-                        el.style.backgroundColor = '#2d2d2d';
-                    });
-                    
-                    document.querySelectorAll('.monthly-stat-label').forEach(el => {
-                        el.style.color = '#aaa';
-                    });
-                    
-                    // Migliora la visibilità del calendario
-                    document.querySelectorAll('.calendar-day').forEach(el => {
-                        if (!el.classList.contains('empty')) {
-                            el.style.backgroundColor = '#2d2d2d';
-                            el.style.color = '#f5f5f5';
-                        }
-                    });
-                    
-                    document.querySelectorAll('.calendar-day-number').forEach(el => {
-                        el.style.color = '#f5f5f5';
-                        el.style.backgroundColor = '#444';
-                    });
-                    
-                    document.querySelectorAll('.calendar-hours').forEach(el => {
-                        el.style.color = '#4CAF50';
-                    });
-                    
-                    // Migliora la visibilità della sezione impostazioni
-                    document.querySelectorAll('.setting-item').forEach(el => {
-                        el.style.backgroundColor = '#2d2d2d';
-                        el.style.color = '#f5f5f5';
-                    });
-                    
-                    document.querySelectorAll('.setting-label').forEach(el => {
-                        el.style.color = '#f5f5f5';
-                    });
-                    
-                    // Stile per i pulsanti nella sezione impostazioni
-                    document.querySelectorAll('#settings-section button').forEach(el => {
-                        if (el.id !== 'exportData') {
-                            el.style.backgroundColor = '#f44336';
-                            el.style.color = '#f5f5f5';
-                        } else {
-                            el.style.backgroundColor = '#4CAF50';
-                            el.style.color = '#f5f5f5';
-                        }
-                    });
-                    
-                    // Stile per il toggle switch
-                    document.querySelectorAll('.toggle-slider').forEach(el => {
-                        el.style.backgroundColor = '#444';
-                    });
-                    
-                    document.querySelectorAll('input:checked + .toggle-slider').forEach(el => {
-                        el.style.backgroundColor = '#4CAF50';
-                    });
-                    
-                    // Stile per il logo
-                    document.querySelector('.logo').style.color = '#4CAF50';
-                    
-                    // Stile per i titoli delle sezioni
-                    document.querySelectorAll('h2').forEach(el => {
-                        el.style.color = '#f5f5f5';
-                    });
-                    
-                    // Stile per la sezione contatti
-                    document.querySelectorAll('.contact-card').forEach(el => {
-                        el.style.backgroundColor = '#2d2d2d';
-                        el.style.color = '#f5f5f5';
-                    });
-                    
-                    document.querySelectorAll('.contact-name').forEach(el => {
-                        el.style.color = '#f5f5f5';
-                    });
-                    
-                    document.querySelectorAll('.contact-item a').forEach(el => {
-                        el.style.color = '#4CAF50';
-                    });
-                    
-                    // Aggiorna il calendario per applicare il tema scuro
-                    updateCalendar();
                 } else {
                     document.body.classList.remove('dark-theme');
-                    document.body.style.backgroundColor = '';
-                    document.body.style.color = '';
-                    
-                    document.querySelector('header').style.backgroundColor = '';
-                    document.querySelector('header').style.boxShadow = '';
-                    
-                    document.querySelectorAll('.card').forEach(card => {
-                        card.style.backgroundColor = '';
-                        card.style.color = '';
-                    });
-                    
-                    document.querySelectorAll('input, select').forEach(input => {
-                        input.style.backgroundColor = '';
-                        input.style.color = '';
-                        input.style.borderColor = '';
-                    });
-                    
-                    document.querySelector('.bottom-nav').style.backgroundColor = '';
-                    
-                    // Ripristina i colori originali
-                    document.querySelectorAll('.time-entry-date, .time-entry-description, .stat-label, .monthly-stat-label').forEach(el => {
-                        el.style.color = '';
-                    });
-                    
-                    document.querySelectorAll('.time-entry-details span, .day-entry-details span').forEach(el => {
-                        el.style.backgroundColor = '';
-                        el.style.color = '';
-                    });
-                    
-                    // Ripristina i colori del modale
-                    const modalContent = document.querySelector('.modal-content');
-                    if (modalContent) {
-                        modalContent.style.backgroundColor = '';
-                        modalContent.style.color = '';
-                    }
-                    
-                    // Ripristina i colori del riepilogo mensile
-                    document.querySelectorAll('.monthly-stat-item').forEach(el => {
-                        el.style.backgroundColor = '';
-                    });
-                    
-                    document.querySelectorAll('.monthly-stat-label').forEach(el => {
-                        el.style.color = '';
-                    });
-                    
-                    // Ripristina i colori del calendario
-                    document.querySelectorAll('.calendar-day').forEach(el => {
-                        if (!el.classList.contains('empty')) {
-                            el.style.backgroundColor = '';
-                            el.style.color = '';
-                        }
-                    });
-                    
-                    document.querySelectorAll('.calendar-day-number').forEach(el => {
-                        el.style.color = '';
-                        el.style.backgroundColor = '';
-                    });
-                    
-                    document.querySelectorAll('.calendar-hours').forEach(el => {
-                        el.style.color = '';
-                    });
-                    
-                    // Ripristina i colori della sezione impostazioni
-                    document.querySelectorAll('.setting-item').forEach(el => {
-                        el.style.backgroundColor = '';
-                        el.style.color = '';
-                    });
-                    
-                    document.querySelectorAll('.setting-label').forEach(el => {
-                        el.style.color = '';
-                    });
-                    
-                    // Ripristina i colori dei pulsanti nella sezione impostazioni
-                    document.querySelectorAll('#settings-section button').forEach(el => {
-                        el.style.backgroundColor = '';
-                        el.style.color = '';
-                    });
-                    
-                    // Ripristina i colori del toggle switch
-                    document.querySelectorAll('.toggle-slider').forEach(el => {
-                        el.style.backgroundColor = '';
-                    });
-                    
-                    document.querySelectorAll('input:checked + .toggle-slider').forEach(el => {
-                        el.style.backgroundColor = '';
-                    });
-                    
-                    // Ripristina i colori del logo
-                    document.querySelector('.logo').style.color = '';
-                    
-                    // Ripristina i colori dei titoli delle sezioni
-                    document.querySelectorAll('h2').forEach(el => {
-                        el.style.color = '';
-                    });
-                    
-                    // Ripristina i colori della sezione contatti
-                    document.querySelectorAll('.contact-card').forEach(el => {
-                        el.style.backgroundColor = '';
-                        el.style.color = '';
-                    });
-                    
-                    document.querySelectorAll('.contact-name').forEach(el => {
-                        el.style.color = '';
-                    });
-                    
-                    document.querySelectorAll('.contact-item a').forEach(el => {
-                        el.style.color = '';
-                    });
-                    
-                    // Aggiorna il calendario per applicare il tema chiaro
-                    updateCalendar();
                 }
             }
             
             function initDatepicker() {
+                // Forza l'uso del formato italiano
+                localStorage.setItem('italianDateFormat', 'true');
+                
                 const options = {
-                    dateFormat: 'd/m/Y',
+                    dateFormat: 'd/m/Y', // Formato italiano: giorno/mese/anno
                     locale: 'it',
                     allowInput: true,
                     defaultDate: 'today',
                     onChange: function(selectedDates, dateStr) {
-                        // Resetta il form quando si cambia data
-                        resetForm();
+                        console.log("Data selezionata:", dateStr);
+                        
+                        // IMPORTANTE: Forza l'aggiornamento del valore dell'input in modo sincrono
+                        dateInput.value = dateStr;
+                        
+                        // Aggiorna l'indicatore visivo
+                        updateDateIndicator(dateStr);
+                        
+                        // Invece di chiamare clearForm che non è visibile in questo scope,
+                        // eseguiamo direttamente le operazioni necessarie
+                        console.log("Reset form in corso...");
+                        const entryForm = document.getElementById('entryForm');
+                        if (entryForm) {
+                            entryForm.reset();
+                        }
+                        const messageDiv = document.getElementById('messageDiv');
+                        if (messageDiv) {
+                            messageDiv.style.display = 'none';
+                        }
+                        
                         // Quando cambia la data, controlla se esistono già entries per quella data
                         loadExistingEntry(dateStr);
+                        
+                        // Forza l'aggiornamento dell'interfaccia utente
+                        setTimeout(function() {
+                            // Trigger di un evento input per assicurarsi che tutti gli ascoltatori siano notificati
+                            const inputEvent = new Event('input', { bubbles: true });
+                            dateInput.dispatchEvent(inputEvent);
+                            
+                            // Forza un refresh completo dell'istanza flatpickr
+                            window.datepickerInstance.close();
+                            
+                            // Attiva un blur sull'input per assicurarsi che il focus venga perso
+                            dateInput.blur();
+                            
+                            // Forza l'aggiornamento del valore visualizzato
+                            console.log("Data selezionata e impostata:", dateStr);
+                        }, 50);
+                    },
+                    onReady: function(selectedDates, dateStr) {
+                        // Inizializza l'indicatore con la data corrente
+                        updateDateIndicator(dateStr);
+                    },
+                    onOpen: function(selectedDates, dateStr) {
+                        // Aggiorna l'UI quando si apre il calendario
+                        updateDateIndicator(dateStr);
+                    },
+                    onClose: function(selectedDates, dateStr) {
+                        // Assicura che il valore dell'input sia corretto alla chiusura
+                        dateInput.value = dateStr;
+                        console.log("Datepicker chiuso, data finale:", dateStr);
                     }
                 };
                 
@@ -2168,26 +2588,48 @@
                     console.log('Caricamento ultima entry:', lastEntry);
                     
                     // Popola il form con i dati dell'entry
-                    document.getElementById('startTime').value = lastEntry.startTime;
-                    document.getElementById('endTime').value = lastEntry.endTime;
-                    document.getElementById('breakTime').value = lastEntry.breakTime;
-                    document.getElementById('hours').value = lastEntry.hours;
-                    document.getElementById('transferta').value = lastEntry.transferta || '';
-                    document.getElementById('notturne').value = lastEntry.notturne || '';
-                    document.getElementById('description').value = lastEntry.description;
+                    const elements = {
+                        'startTime': lastEntry.startTime,
+                        'endTime': lastEntry.endTime,
+                        'breakTime': lastEntry.breakTime,
+                        'totalHours': lastEntry.hours,
+                        'transferta': lastEntry.transferta || '',
+                        'notturne': lastEntry.notturne || '',
+                        'description': lastEntry.description
+                    };
+
+                    for (const [id, value] of Object.entries(elements)) {
+                        const element = document.getElementById(id);
+                        if (element) {
+                            element.value = value;
+                        } else {
+                            console.warn(`Elemento con ID '${id}' non trovato nel DOM`);
+                        }
+                    }
                     
                     // Calcola le ore totali
                     calculateTotalHours();
                 } else {
                     console.log('Nessuna entry trovata per questa data, reset del form');
                     // Se non ci sono entries per questa data, resetta il form
-                    document.getElementById('startTime').value = '';
-                    document.getElementById('endTime').value = '';
-                    document.getElementById('breakTime').value = '0.5';
-                    document.getElementById('hours').value = '';
-                    document.getElementById('transferta').value = '';
-                    document.getElementById('notturne').value = '';
-                    document.getElementById('description').value = '';
+                    const resetValues = {
+                        'startTime': '',
+                        'endTime': '',
+                        'breakTime': '0.5',
+                        'totalHours': '',
+                        'transferta': '',
+                        'notturne': '',
+                        'description': ''
+                    };
+
+                    for (const [id, value] of Object.entries(resetValues)) {
+                        const element = document.getElementById(id);
+                        if (element) {
+                            element.value = value;
+                        } else {
+                            console.warn(`Elemento con ID '${id}' non trovato nel DOM durante il reset`);
+                        }
+                    }
                 }
             }
             
@@ -2467,282 +2909,37 @@
             }
             
             function updateCalendar() {
-                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
-                console.log('Entries totali:', entries);
-                
-                // Raggruppa le entries per data
-                const entriesByDate = {};
-                entries.forEach(entry => {
-                    // Usa direttamente la data nel formato originale (dd/mm/yyyy)
-                    const dateString = entry.date;
-                    
-                    if (!entriesByDate[dateString]) {
-                        entriesByDate[dateString] = [];
-                    }
-                    entriesByDate[dateString].push(entry);
-                });
-                
-                console.log('Entries raggruppate per data:', entriesByDate);
-                
-                // Ottieni la data corrente
                 const today = new Date();
                 const currentMonth = today.getMonth();
                 const currentYear = today.getFullYear();
-                
-                // Crea il calendario
-                let calendarHTML = `
-                    <div class="calendar-header">
-                        <button id="prevMonth"><i class="fas fa-chevron-left"></i></button>
-                        <div class="calendar-title">
-                            <div class="calendar-month" id="calendarMonth">${new Date(currentYear, currentMonth).toLocaleDateString('it-IT', { month: 'long' })}</div>
-                            <div class="calendar-year" id="calendarYear">${currentYear}</div>
-                        </div>
-                        <button id="nextMonth"><i class="fas fa-chevron-right"></i></button>
-                    </div>
-                    <div class="calendar-grid">
-                        <div class="calendar-weekday">LU</div>
-                        <div class="calendar-weekday">MA</div>
-                        <div class="calendar-weekday">ME</div>
-                        <div class="calendar-weekday">GI</div>
-                        <div class="calendar-weekday">VE</div>
-                        <div class="calendar-weekday">SA</div>
-                        <div class="calendar-weekday">DO</div>
-                `;
-                
-                // Ottieni il primo giorno del mese
-                const firstDay = new Date(currentYear, currentMonth, 1);
-                const startingDay = firstDay.getDay();
-                
-                // Ottieni l'ultimo giorno del mese
-                const lastDay = new Date(currentYear, currentMonth + 1, 0);
-                const totalDays = lastDay.getDate();
-                
-                // Aggiungi celle vuote per i giorni prima dell'inizio del mese
-                // Adjust for Monday being the first day (0 = Sunday, 1 = Monday, etc.)
-                const adjustedStartingDay = startingDay === 0 ? 6 : startingDay - 1;
-                for (let i = 0; i < adjustedStartingDay; i++) {
-                    calendarHTML += '<div class="calendar-day empty"></div>';
-                }
-                
-                // Variabili per il riepilogo mensile
-                let monthlyTotalHours = 0;
-                let monthlyWorkDays = 0;
-                let monthlyTransferta = 0;
-                let monthlyNotturne = 0;
-                
-                // Aggiungi i giorni del mese
-                for (let day = 1; day <= totalDays; day++) {
-                    const date = new Date(currentYear, currentMonth, day);
-                    // Formatta la data direttamente in formato italiano (dd/mm/yyyy)
-                    const dateString = date.toLocaleDateString('it-IT', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric'
-                    });
-                    
-                    // Cerca le entries per questo giorno
-                    const dayEntries = entriesByDate[dateString] || [];
-                    console.log(`Giorno ${dateString}:`, dayEntries);
-                    
-                    // Calcola le ore totali per il giorno
-                    const totalHours = dayEntries.reduce((sum, entry) => sum + parseFloat(entry.hours), 0);
-                    const totalTransferta = dayEntries.reduce((sum, entry) => sum + parseFloat(entry.transferta || 0), 0);
-                    const totalNotturne = dayEntries.reduce((sum, entry) => sum + parseFloat(entry.notturne || 0), 0);
-                    const hasTransferta = dayEntries.some(entry => parseFloat(entry.transferta) > 0);
-                    const hasNotturne = dayEntries.some(entry => parseFloat(entry.notturne) > 0);
-                    
-                    // Aggiorna le statistiche mensili
-                    if (dayEntries.length > 0) {
-                        monthlyTotalHours += totalHours;
-                        monthlyWorkDays++;
-                        monthlyTransferta += totalTransferta;
-                        monthlyNotturne += totalNotturne;
-                    }
-                    
-                    // Determina se il giorno è oggi
-                    const isToday = day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
-                    
-                    // Determina se il giorno è una festività
-                    const isHoliday = isItalianHoliday(date);
-                    
-                    // Crea la cella del calendario
-                    calendarHTML += `
-                        <div class="calendar-day ${isToday ? 'today' : ''} ${dayEntries.length > 0 ? 'has-entries' : ''} ${isHoliday ? 'holiday' : ''}" 
-                             data-date="${dateString}" 
-                             data-hours="${totalHours}"
-                             data-transferta="${totalTransferta}"
-                             data-notturne="${totalNotturne}">
-                            <div class="calendar-day-number">${day}</div>
-                            <div class="calendar-day-content">
-                                ${dayEntries.length > 0 ? `<div class="calendar-hours">${totalHours.toFixed(1)}h</div>` : ''}
-                                ${dayEntries.length > 0 ? `
-                                    <div class="calendar-icons">
-                                        ${hasTransferta ? `<span><i class="fas fa-car" title="Trasferta"></i> ${totalTransferta}h</span>` : ''}
-                                        ${hasNotturne ? `<span><i class="fas fa-moon" title="Notturne"></i> ${totalNotturne}h</span>` : ''}
-                                    </div>
-                                ` : ''}
-                                ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                calendarHTML += '</div>';
-                calendarEntries.innerHTML = calendarHTML;
-                
-                // Aggiorna il riepilogo mensile
-                document.getElementById('monthlyTotalHours').textContent = `${monthlyTotalHours.toFixed(1)}h`;
-                document.getElementById('monthlyWorkDays').textContent = monthlyWorkDays;
-                document.getElementById('monthlyTransferta').textContent = `${monthlyTransferta.toFixed(1)}h`;
-                document.getElementById('monthlyNotturne').textContent = `${monthlyNotturne.toFixed(1)}h`;
-                
-                // Variabili per la navigazione tra i mesi
-                let displayedMonth = currentMonth;
-                let displayedYear = currentYear;
-                
-                // Aggiungi event listener per i pulsanti di navigazione
-                document.getElementById('prevMonth').addEventListener('click', () => {
-                    displayedMonth--;
-                    if (displayedMonth < 0) {
-                        displayedMonth = 11;
-                        displayedYear--;
-                    }
-                    updateCalendarDisplay(displayedMonth, displayedYear);
-                    updateMonthlyReport(displayedMonth, displayedYear);
-                });
-                
-                document.getElementById('nextMonth').addEventListener('click', () => {
-                    displayedMonth++;
-                    if (displayedMonth > 11) {
-                        displayedMonth = 0;
-                        displayedYear++;
-                    }
-                    updateCalendarDisplay(displayedMonth, displayedYear);
-                    updateMonthlyReport(displayedMonth, displayedYear);
-                });
-                
-                // Aggiungi event listener per i giorni del calendario
-                document.querySelectorAll('.calendar-day:not(.empty)').forEach(day => {
-                    day.addEventListener('click', function() {
-                        const date = this.getAttribute('data-date');
-                        const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
-                        const dayEntries = entries.filter(e => e.date === date);
-
-                        // Calcola le ore totali per il giorno
-                        const totalHours = dayEntries.reduce((sum, entry) => sum + parseFloat(entry.hours), 0);
-                        const totalTransferta = dayEntries.reduce((sum, entry) => sum + parseFloat(entry.transferta || 0), 0);
-                        const totalNotturne = dayEntries.reduce((sum, entry) => sum + parseFloat(entry.notturne || 0), 0);
-
-                        // Aggiorna il titolo del modale
-                        document.getElementById('modalTitle').textContent = `Dettagli: ${date}`;
-                        document.getElementById('dayModal').setAttribute('data-original-date', date);
-
-                        // Controlla se il giorno è una festività
-                        const dateParts = date.split('/');
-                        const checkDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
-                        const isHoliday = isItalianHoliday(checkDate);
-
-                        // Aggiorna il riepilogo
-                        document.getElementById('modalTotalHours').textContent = `${totalHours.toFixed(1)}h`;
-                        document.getElementById('modalTransferta').textContent = `${totalTransferta.toFixed(1)}h`;
-                        document.getElementById('modalNotturne').textContent = `${totalNotturne.toFixed(1)}h`;
-
-                        // Aggiorna le entries nel modale
-                        const modalEntries = document.getElementById('modalEntries');
-                        let modalContent = '';
-
-                        // Se è una festività, mostra il nome della festività prima delle entries
-                        if (isHoliday) {
-                            modalContent = `<div class="holiday-name">${getHolidayName(checkDate)}</div>`;
-                        }
-
-                        if (dayEntries.length === 0) {
-                            modalContent += '<p>Nessuna entry per questo giorno</p>';
-                        } else {
-                            // Aggiungi il pulsante di modifica in alto
-                            modalContent += `
-                                <div class="modal-actions">
-                                    <button class="edit-all-btn" onclick="editDayEntries('${date}')">
-                                        <i class="fas fa-edit"></i> Modifica
-                                    </button>
-                                </div>`;
-
-                            modalContent += dayEntries.map(entry => `
-                                <div class="day-entry">
-                                    <div class="day-entry-header">
-                                        <span class="day-entry-hours">${entry.hours}h</span>
-                                        <button class="delete-btn" data-date="${entry.date}" data-hours="${entry.hours}" data-description="${entry.description}">X</button>
-                                    </div>
-                                    <div class="day-entry-details">
-                                        <span>Inizio: ${entry.startTime}h</span>
-                                        <span>Fine: ${entry.endTime}h</span>
-                                        <span>Pausa: ${entry.breakTime} ore</span>
-                                        ${entry.transferta > 0 ? `<span><i class="fas fa-car"></i> ${entry.transferta}h</span>` : ''}
-                                        ${entry.notturne > 0 ? `<span><i class="fas fa-moon"></i> ${entry.notturne}h</span>` : ''}
-                                    </div>
-                                    <div class="day-entry-description">${entry.description}</div>
-                                </div>
-                            `).join('');
-                        }
-
-                        // Imposta il contenuto del modale
-                        modalEntries.innerHTML = modalContent;
-
-                        // Aggiungi event listener per i pulsanti di eliminazione
-                        modalEntries.querySelectorAll('.delete-btn').forEach(btn => {
-                            btn.addEventListener('click', function(e) {
-                                e.stopPropagation();
-                                const date = this.getAttribute('data-date');
-                                const hours = this.getAttribute('data-hours');
-                                const description = this.getAttribute('data-description');
-                                
-                                deleteTimeEntry(date, hours, description);
-                                document.getElementById('dayModal').style.display = 'none';
-                            });
-                        });
-
-                        // Mostra il modale
-                        document.getElementById('dayModal').style.display = 'block';
-                    });
-                });
+                updateCalendarDisplay(currentMonth, currentYear);
             }
-            
-            // Funzione per aggiornare la visualizzazione del calendario con un mese e anno specifici
+
             function updateCalendarDisplay(month, year) {
+                const today = new Date();
                 const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
                 
                 // Raggruppa le entries per data
                 const entriesByDate = {};
                 entries.forEach(entry => {
-                    const dateString = entry.date;
-                    if (!entriesByDate[dateString]) {
-                        entriesByDate[dateString] = [];
+                    if (!entriesByDate[entry.date]) {
+                        entriesByDate[entry.date] = [];
                     }
-                    entriesByDate[dateString].push(entry);
+                    entriesByDate[entry.date].push(entry);
                 });
                 
-                // Aggiorna il titolo del calendario
-                document.getElementById('calendarMonth').textContent = new Date(year, month).toLocaleDateString('it-IT', { month: 'long' });
-                document.getElementById('calendarYear').textContent = year;
-                
-                // Ottieni il primo giorno del mese
                 const firstDay = new Date(year, month, 1);
-                const startingDay = firstDay.getDay();
-                
-                // Ottieni l'ultimo giorno del mese
                 const lastDay = new Date(year, month + 1, 0);
                 const totalDays = lastDay.getDate();
-                
-                // Ottieni la data corrente
-                const today = new Date();
+                const startingDay = firstDay.getDay(); // 0 = Domenica, 1 = Lunedì, ...
                 
                 // Crea il calendario
                 let calendarHTML = `
                     <div class="calendar-header">
                         <button id="prevMonth"><i class="fas fa-chevron-left"></i></button>
                         <div class="calendar-title">
-                            <div class="calendar-month" id="calendarMonth">${new Date(year, month).toLocaleDateString('it-IT', { month: 'long' })}</div>
-                            <div class="calendar-year" id="calendarYear">${year}</div>
+                            <div class="calendar-month">${new Date(year, month).toLocaleDateString('it-IT', { month: 'long' })}</div>
+                            <div class="calendar-year">${year}</div>
                         </div>
                         <button id="nextMonth"><i class="fas fa-chevron-right"></i></button>
                     </div>
@@ -2771,7 +2968,12 @@
                 // Aggiungi i giorni del mese
                 for (let day = 1; day <= totalDays; day++) {
                     const date = new Date(year, month, day);
-                    const dateString = `${day.toString().padStart(2, '0')}/${(month + 1).toString().padStart(2, '0')}/${year}`;
+                    const dateString = date.toLocaleDateString('it-IT', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    });
+                    
                     const dayEntries = entriesByDate[dateString] || [];
                     
                     // Calcola le ore totali per il giorno
@@ -2807,8 +3009,8 @@
                                 ${dayEntries.length > 0 ? `<div class="calendar-hours">${totalHours.toFixed(1)}h</div>` : ''}
                                 ${dayEntries.length > 0 ? `
                                     <div class="calendar-icons">
-                                        ${hasTransferta ? `<span><i class="fas fa-car" title="Trasferta"></i> ${totalTransferta}h</span>` : ''}
-                                        ${hasNotturne ? `<span><i class="fas fa-moon" title="Notturne"></i> ${totalNotturne}h</span>` : ''}
+                                        ${hasTransferta ? `<span><i class="fas fa-car" title="Trasferta"></i></span>` : ''}
+                                        ${hasNotturne ? `<span><i class="fas fa-moon" title="Notturne"></i></span>` : ''}
                                     </div>
                                 ` : ''}
                                 ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
@@ -2827,6 +3029,14 @@
                 document.getElementById('monthlyNotturne').textContent = `${monthlyNotturne.toFixed(1)}h`;
                 
                 // Aggiungi event listener per i pulsanti di navigazione
+                const prevMonthBtn = document.getElementById('prevMonth');
+                const nextMonthBtn = document.getElementById('nextMonth');
+                
+                // Rimuovi i vecchi event listener
+                prevMonthBtn.replaceWith(prevMonthBtn.cloneNode(true));
+                nextMonthBtn.replaceWith(nextMonthBtn.cloneNode(true));
+                
+                // Aggiungi i nuovi event listener
                 document.getElementById('prevMonth').addEventListener('click', () => {
                     month--;
                     if (month < 0) {
@@ -2834,7 +3044,6 @@
                         year--;
                     }
                     updateCalendarDisplay(month, year);
-                    updateMonthlyReport(month, year);
                 });
                 
                 document.getElementById('nextMonth').addEventListener('click', () => {
@@ -2844,7 +3053,6 @@
                         year++;
                     }
                     updateCalendarDisplay(month, year);
-                    updateMonthlyReport(month, year);
                 });
                 
                 // Aggiungi event listener per i giorni del calendario
@@ -2853,638 +3061,199 @@
                         const date = this.getAttribute('data-date');
                         const dayEntries = entriesByDate[date] || [];
                         
-                        // Calcola le ore totali per il giorno
-                        const totalHours = dayEntries.reduce((sum, entry) => sum + parseFloat(entry.hours), 0);
-                        const totalTransferta = dayEntries.reduce((sum, entry) => sum + parseFloat(entry.transferta || 0), 0);
-                        const totalNotturne = dayEntries.reduce((sum, entry) => sum + parseFloat(entry.notturne || 0), 0);
-                        
-                        // Aggiorna il titolo del modale
-                        document.getElementById('modalTitle').textContent = `Dettagli: ${date}`;
-                        
-                        // Salva la data originale nel modale per uso futuro
-                        document.getElementById('dayModal').setAttribute('data-original-date', date);
-                        
-                        // Controlla se il giorno è una festività
-                        const dateParts = date.split('/');
-                        const checkDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
-                        const isHoliday = isItalianHoliday(checkDate);
-                        
-                        // Aggiorna il riepilogo
-                        document.getElementById('modalTotalHours').textContent = `${totalHours.toFixed(1)}h`;
-                        document.getElementById('modalTransferta').textContent = `${totalTransferta.toFixed(1)}h`;
-                        document.getElementById('modalNotturne').textContent = `${totalNotturne.toFixed(1)}h`;
-                        
-                        // Aggiorna le entries nel modale
-                        const modalEntries = document.getElementById('modalEntries');
-                        
-                        let modalContent = '';
-                        
-                        // Se è una festività, mostra il nome della festività prima delle entries
-                        if (isHoliday) {
-                            modalContent = `<div class="holiday-name">${getHolidayName(checkDate)}</div>`;
+                        // Mostra il modale con i dettagli del giorno in tutti i casi
+                        showDayDetails(date);
+                    });
+                });
+            }
+            
+            /**
+             * Ottiene tutte le voci per una data specifica
+             * @param {string} date - La data in formato italiano (dd/mm/yyyy)
+             * @return {Array} Array di voci per la data specificata
+             */
+            function getEntriesForDate(date) {
+                console.log('Ottenimento entries per data:', date);
+                
+                try {
+                    // Ottieni tutte le entries dal localStorage
+                    const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                    
+                    if (entries.length === 0) {
+                        console.log('Nessuna entry presente nel localStorage');
+                        return [];
+                    }
+                    
+                    // Normalizza la data per il confronto
+                    let targetDate = date;
+                    
+                    // Converti la data dal formato italiano (dd/mm/yyyy) a quello standard (yyyy-mm-dd) se necessario
+                    if (date.includes('/')) {
+                        const [day, month, year] = date.split('/').map(part => part.padStart(2, '0'));
+                        targetDate = `${year}-${month}-${day}`;
+                    }
+                    
+                    console.log('Data normalizzata per la ricerca:', targetDate);
+                    
+                    // Filtra le entries per la data richiesta
+                    const matchingEntries = entries.filter(entry => {
+                        // Normalizza anche la data dell'entry
+                        let entryDate = entry.date;
+                        if (entryDate.includes('/')) {
+                            const [day, month, year] = entryDate.split('/').map(part => part.padStart(2, '0'));
+                            entryDate = `${year}-${month}-${day}`;
                         }
                         
-                        if (dayEntries.length === 0) {
-                            modalContent += '<p>Nessuna entry per questo giorno</p>';
-                        } else {
-                            modalContent += dayEntries.map(entry => `
-                                <div class="day-entry">
-                                    <div class="day-entry-header">
-                                        <span class="day-entry-hours">${entry.hours}h</span>
-                                        <button class="delete-btn" data-date="${entry.date}" data-hours="${entry.hours}" data-description="${entry.description}">X</button>
-                                    </div>
-                                    <div class="day-entry-details">
-                                        <span>Inizio: ${entry.startTime}h</span>
-                                        <span>Fine: ${entry.endTime}h</span>
-                                        <span>Pausa: ${entry.breakTime} ore</span>
-                                        ${entry.transferta > 0 ? `<span><i class="fas fa-car"></i> ${entry.transferta}h</span>` : ''}
-                                        ${entry.notturne > 0 ? `<span><i class="fas fa-moon"></i> ${entry.notturne}h</span>` : ''}
-                                    </div>
-                                    <div class="day-entry-description">${entry.description}</div>
+                        // Verifica più formati di data possibili per garantire corrispondenza
+                        return (
+                            entryDate === targetDate || 
+                            entry.date === date || 
+                            entryDate.replace(/-/g, '/') === date.replace(/-/g, '/') ||
+                            entryDate === date.split('/').reverse().join('-')
+                        );
+                    });
+                    
+                    console.log(`Trovate ${matchingEntries.length} entries per la data ${date}:`, matchingEntries);
+                    return matchingEntries;
+                } catch (error) {
+                    console.error('Errore durante il recupero delle entries per la data:', error);
+                    return [];
+                }
+            }
+            
+            function showDayDetails(date) {
+                const modal = document.getElementById('dayModal');
+                const modalTitle = document.getElementById('modalTitle');
+                const modalTotalHours = document.getElementById('modalTotalHours');
+                const modalTransferta = document.getElementById('modalTransferta');
+                const modalNotturne = document.getElementById('modalNotturne');
+                const modalEntries = document.getElementById('modalEntries');
+                const addEntryBtn = document.getElementById('addEntryBtn');
+                
+                const entries = getEntriesForDate(date);
+                
+                // Controllo se è un giorno festivo
+                const [day, month, year] = date.split('/').map(Number);
+                const dateObj = new Date(year, month - 1, day);
+                const isHoliday = isItalianHoliday(dateObj);
+                const holidayName = isHoliday ? getHolidayName(dateObj) : '';
+                
+                // Aggiorna il titolo del modale con il nome della festività
+                if (isHoliday) {
+                    modalTitle.innerHTML = `Dettagli del ${date} <br><span style="color:#ff5555; font-size:0.9em;"><i class="fas fa-star"></i> ${holidayName}</span>`;
+                } else {
+                    modalTitle.textContent = `Dettagli del ${date}`;
+                }
+                
+                // Calcola i totali
+                const totalHours = entries.reduce((sum, entry) => sum + parseFloat(entry.hours), 0);
+                const totalTransferta = entries.reduce((sum, entry) => sum + (parseFloat(entry.transferta) || 0), 0);
+                const totalNotturne = entries.reduce((sum, entry) => sum + (parseFloat(entry.notturne) || 0), 0);
+                
+                // Aggiorna i totali nel modale
+                modalTotalHours.textContent = `${totalHours.toFixed(1)}h`;
+                modalTransferta.textContent = `${totalTransferta.toFixed(1)}h`;
+                modalNotturne.textContent = `${totalNotturne.toFixed(1)}h`;
+                
+                // Aggiorna le entries nel modale
+                if (entries.length === 0) {
+                    modalEntries.innerHTML = '<p>Nessuna entry per questo giorno</p>';
+                } else {
+                    modalEntries.innerHTML = entries.map((entry, index) => `
+                        <div class="day-entry">
+                            <div class="day-entry-header">
+                                <span class="day-entry-hours">${entry.hours}h</span>
+                                <div class="entry-buttons">
+                                    <button class="edit-btn" data-date="${date}" data-index="${index}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="delete-btn" data-date="${entry.date}" data-hours="${entry.hours}" data-description="${entry.description}">X</button>
                                 </div>
-                            `).join('');
-                        }
+                            </div>
+                            <div class="day-entry-details">
+                                <span>Inizio: ${entry.startTime}h</span>
+                                <span>Fine: ${entry.endTime}h</span>
+                                <span>Pausa: ${entry.breakTime} ore</span>
+                                ${entry.transferta > 0 ? `<span><i class="fas fa-car"></i> ${entry.transferta}h</span>` : ''}
+                                ${entry.notturne > 0 ? `<span><i class="fas fa-moon"></i> ${entry.notturne}h</span>` : ''}
+                            </div>
+                            <div class="day-entry-description">${entry.description}</div>
+                        </div>
+                    `).join('');
+                    
+                    // Aggiungi event listener ai pulsanti di modifica
+                    setTimeout(() => {
+                        document.querySelectorAll('.edit-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const date = this.getAttribute('data-date');
+                                const index = parseInt(this.getAttribute('data-index'));
+                                editEntry(date, index);
+                            });
+                        });
                         
-                        // Imposta il contenuto del modale
-                        modalEntries.innerHTML = modalContent;
-                        
-                        // Aggiungi event listener per i pulsanti di eliminazione nel modale
-                        modalEntries.querySelectorAll('.delete-btn').forEach(btn => {
-                            btn.addEventListener('click', function(e) {
-                                e.stopPropagation();
+                        // Aggiungi event listener ai pulsanti di eliminazione
+                        document.querySelectorAll('.delete-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
                                 const date = this.getAttribute('data-date');
                                 const hours = this.getAttribute('data-hours');
                                 const description = this.getAttribute('data-description');
                                 
-                                deleteTimeEntry(date, hours, description);
-                                document.getElementById('dayModal').style.display = 'none';
+                                if (confirm('Sei sicuro di voler cancellare questa registrazione?')) {
+                                    deleteTimeEntry(date, hours, description);
+                                    // Chiudi il modale dopo l'eliminazione
+                                    modal.style.display = 'none';
+                                }
                             });
                         });
-                        
-                        // Mostra il modale
-                        document.getElementById('dayModal').style.display = 'block';
-                    });
-                });
-            }
-            
-            // Funzione per verificare se una data è una festività italiana
-            function isItalianHoliday(date) {
-                const day = date.getDate();
-                const month = date.getMonth() + 1; // I mesi in JavaScript sono 0-based
-                const year = date.getFullYear();
-                
-                // Festività fisse
-                if (day === 1 && month === 1) return true; // Capodanno
-                if (day === 6 && month === 1) return true; // Epifania
-                if (day === 25 && month === 4) return true; // Festa della Liberazione
-                if (day === 1 && month === 5) return true; // Festa del Lavoro
-                if (day === 2 && month === 6) return true; // Festa della Repubblica
-                if (day === 15 && month === 8) return true; // Ferragosto
-                if (day === 1 && month === 11) return true; // Tutti i Santi
-                if (day === 8 && month === 12) return true; // Immacolata Concezione
-                if (day === 25 && month === 12) return true; // Natale
-                if (day === 26 && month === 12) return true; // Santo Stefano
-                
-                // Festività mobili (Pasqua e Lunedì dell'Angelo)
-                const easter = calculateEaster(year);
-                const easterMonday = new Date(easter);
-                easterMonday.setDate(easterMonday.getDate() + 1);
-                
-                if (day === easter.getDate() && month === easter.getMonth() + 1) return true; // Pasqua
-                if (day === easterMonday.getDate() && month === easterMonday.getMonth() + 1) return true; // Lunedì dell'Angelo
-                
-                // San Giuseppe (19 marzo) - festivo solo in alcune regioni
-                if (day === 19 && month === 3) return true; // San Giuseppe
-                
-                // San Giovanni Battista (24 giugno) - festivo solo in alcune regioni
-                if (day === 24 && month === 6) return true; // San Giovanni Battista
-                
-                // San Pietro e Paolo (29 giugno) - festivo solo a Roma
-                if (day === 29 && month === 6) return true; // San Pietro e Paolo
-                
-                // Sant'Ambrogio (7 dicembre) - festivo solo a Milano
-                if (day === 7 && month === 12) return true; // Sant'Ambrogio
-                
-                return false;
-            }
-            
-            // Funzione per ottenere il nome della festività
-            function getHolidayName(date) {
-                const day = date.getDate();
-                const month = date.getMonth() + 1; // I mesi in JavaScript sono 0-based
-                const year = date.getFullYear();
-                
-                // Festività fisse
-                if (day === 1 && month === 1) return "Capodanno";
-                if (day === 6 && month === 1) return "Epifania";
-                if (day === 25 && month === 4) return "Festa della Liberazione";
-                if (day === 1 && month === 5) return "Festa del Lavoro";
-                if (day === 2 && month === 6) return "Festa della Repubblica";
-                if (day === 15 && month === 8) return "Ferragosto";
-                if (day === 1 && month === 11) return "Tutti i Santi";
-                if (day === 8 && month === 12) return "Immacolata Concezione";
-                if (day === 25 && month === 12) return "Natale";
-                if (day === 26 && month === 12) return "Santo Stefano";
-                
-                // Festività mobili (Pasqua e Lunedì dell'Angelo)
-                const easter = calculateEaster(year);
-                const easterMonday = new Date(easter);
-                easterMonday.setDate(easterMonday.getDate() + 1);
-                
-                if (day === easter.getDate() && month === easter.getMonth() + 1) return "Pasqua";
-                if (day === easterMonday.getDate() && month === easterMonday.getMonth() + 1) return "Lunedì dell'Angelo";
-                
-                // San Giuseppe (19 marzo) - festivo solo in alcune regioni
-                if (day === 19 && month === 3) return "San Giuseppe";
-                
-                // San Giovanni Battista (24 giugno) - festivo solo in alcune regioni
-                if (day === 24 && month === 6) return "San Giovanni Battista";
-                
-                // San Pietro e Paolo (29 giugno) - festivo solo a Roma
-                if (day === 29 && month === 6) return "San Pietro e Paolo";
-                
-                // Sant'Ambrogio (7 dicembre) - festivo solo a Milano
-                if (day === 7 && month === 12) return "Sant'Ambrogio";
-                
-                return "Festa";
-            }
-            
-            // Algoritmo di Meeus/Jones/Butcher per calcolare la data della Pasqua
-            function calculateEaster(year) {
-                const a = year % 19;
-                const b = Math.floor(year / 100);
-                const c = year % 100;
-                const d = Math.floor(b / 4);
-                const e = b % 4;
-                const f = Math.floor((b + 8) / 25);
-                const g = Math.floor((b - f + 1) / 3);
-                const h = (19 * a + b - d - g + 15) % 30;
-                const i = Math.floor(c / 4);
-                const k = c % 4;
-                const l = (32 + 2 * e + 2 * i - h - k) % 7;
-                const m = Math.floor((a + 11 * h + 22 * l) / 451);
-                
-                const month = Math.floor((h + l - 7 * m + 114) / 31);
-                const day = ((h + l - 7 * m + 114) % 31) + 1;
-                
-                return new Date(year, month - 1, day);
-            }
-            
-            function formatDate(dateString) {
-                console.log('Formattazione data:', dateString);
-                
-                // Gestione del formato data italiano (dd/mm/yyyy)
-                if (dateString.includes('/')) {
-                    const parts = dateString.split('/');
-                    if (parts.length === 3) {
-                        const day = parts[0];
-                        const month = parts[1];
-                        const year = parts[2];
-                        return `${day}/${month}/${year}`;
-                    }
+                    }, 100);
                 }
                 
-                // Gestione del formato data standard (yyyy-mm-dd)
-                const date = new Date(dateString);
-                
-                // Usa sempre il formato italiano (giorno/mese/anno)
-                return date.toLocaleDateString('it-IT', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric'
-                });
-            }
-            
-            function formatDateForStorage(date) {
-                if (italianDateFormat.checked) {
-                    return date.toLocaleDateString('it-IT', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric'
-                    }).split('/').reverse().join('-');
-                } else {
-                    return date.toISOString().split('T')[0];
-                }
-            }
-            
-            function exportToCSV() {
-                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
-                
-                if (entries.length === 0) {
-                    alert('Nessun dato da esportare');
-                    return;
-                }
-                
-                // Ordina le entries per data (più recenti prima)
-                entries.sort((a, b) => {
-                    // Normalizza le date per il confronto
-                    const dateA = a.date.includes('/') ? convertItalianToStandardDate(a.date) : a.date;
-                    const dateB = b.date.includes('/') ? convertItalianToStandardDate(b.date) : b.date;
-                    return new Date(dateB) - new Date(dateA);
-                });
-                
-                // Crea il contenuto del file di testo
-                let textContent = '';
-                
-                entries.forEach(entry => {
-                    // Formatta la data in formato dd/mm/yy
-                    let formattedDate;
+                // Aggiungi event listener per il pulsante di aggiunta
+                addEntryBtn.onclick = function() {
+                    modal.style.display = 'none';
+                    handleNavigation('home-section');
                     
-                    if (entry.date.includes('/')) {
-                        // Se la data è già in formato italiano, usa direttamente i primi due caratteri dell'anno
-                        const parts = entry.date.split('/');
-                        formattedDate = `${parts[0]}/${parts[1]}/${parts[2].substring(2)}`;
-                    } else {
-                        // Se la data è in formato standard, convertila
-                        const dateParts = entry.date.split('-');
-                        formattedDate = `${dateParts[2]}/${dateParts[1]}/${dateParts[0].substring(2)}`;
-                    }
-                    
-                    // Formatta gli orari
-                    const startTime = entry.startTime;
-                    const endTime = entry.endTime;
-                    const breakTime = entry.breakTime;
-                    const totalHours = entry.hours;
-                    const description = entry.description;
-                    
-                    // Crea la riga nel formato richiesto
-                    textContent += `${formattedDate} ${startTime}-${endTime} ${breakTime} tot ore ${totalHours} ---${description}\n`;
-                });
-                
-                // Crea un blob e un link per il download
-                const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.setAttribute('href', url);
-                link.setAttribute('download', 'ore_pws_export.txt');
-                link.style.display = 'none';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-            
-            // Funzione di utilità per convertire una data in formato italiano (dd/mm/yyyy) in formato standard (yyyy-mm-dd)
-            function convertItalianToStandardDate(italianDate) {
-                const parts = italianDate.split('/');
-                if (parts.length === 3) {
-                    return `${parts[2]}-${parts[1]}-${parts[0]}`;
-                }
-                return italianDate; // Ritorna la data originale se non è nel formato atteso
-            }
-
-            // Gestione del modale
-            const dayModal = document.getElementById('dayModal');
-            const closeModal = document.querySelector('.close-modal');
-            const addEntryBtn = document.getElementById('addEntryBtn');
-            
-            // Chiudi il modale quando si clicca sulla X
-            closeModal.addEventListener('click', function() {
-                dayModal.style.display = 'none';
-            });
-            
-            // Chiudi il modale quando si clicca fuori dal modale
-            window.addEventListener('click', function(event) {
-                if (event.target === dayModal) {
-                    dayModal.style.display = 'none';
-                }
-            });
-            
-            // Aggiungi una nuova entry quando si clicca sul pulsante "Aggiungi Entry"
-            addEntryBtn.addEventListener('click', function() {
-                // Ottieni la data originale dal modale
-                const originalDate = document.getElementById('dayModal').getAttribute('data-original-date');
-                console.log('Data originale dal modale:', originalDate);
-                
-                if (originalDate) {
-                    // Chiudi il modale
-                    dayModal.style.display = 'none';
-                    
-                    // Passa alla sezione Home
-                    navItems.forEach(nav => nav.classList.remove('active'));
-                    sections.forEach(section => section.classList.remove('active'));
-                    
-                    document.querySelector('.nav-item[data-section="home-section"]').classList.add('active');
-                    document.getElementById('home-section').classList.add('active');
-                    
-                    // Imposta la data nel form
+                    // Imposta la data sia nell'input che nell'istanza di flatpickr
                     const dateInput = document.getElementById('date');
-                    dateInput.value = originalDate;
                     
-                    // Aggiorna il datepicker
-                    const datepicker = dateInput._flatpickr;
-                    if (datepicker) {
-                        datepicker.setDate(originalDate);
-                    }
-                }
-            });
-
-            // Inizializza l'applicazione
-            document.addEventListener('DOMContentLoaded', function() {
-                loadTimeEntries();
-                updateCalendar();
-                updateMonthlyReport();
-                applyTheme();
-                
-                // Genera il QR code per il sito web
-                generateQRCode();
-            });
-            
-            // Funzione per generare il QR code
-            function generateQRCode() {
-                const qrcodeElement = document.getElementById("qrcode");
-                if (!qrcodeElement) {
-                    console.error("Elemento QR code non trovato");
-                    return;
-                }
-                
-                // Pulisci eventuali contenuti precedenti
-                qrcodeElement.innerHTML = '';
-                
-                try {
-                    // Crea un nuovo QR code con dimensioni maggiori e colori più visibili
-                    new QRCode(qrcodeElement, {
-                        text: "https://www.pwsgroup.eu/",
-                        width: 200,
-                        height: 200,
-                        colorDark: "#000000",
-                        colorLight: "#ffffff",
-                        correctLevel: QRCode.CorrectLevel.H
-                    });
+                    // Assicura che il valore sia aggiornato prima di procedere
+                    dateInput.value = date;
                     
-                    console.log("QR code generato con successo");
-                    
-                    // Verifica che l'immagine sia stata creata
-                    setTimeout(() => {
-                        const qrImage = qrcodeElement.querySelector('img');
-                        if (qrImage) {
-                            console.log("Immagine QR code trovata:", qrImage.src);
-                            qrImage.style.display = 'block';
-                            qrImage.style.maxWidth = '100%';
-                            qrImage.style.height = 'auto';
-                        } else {
-                            console.error("Immagine QR code non trovata");
-                        }
-                    }, 100);
-                } catch (error) {
-                    console.error("Errore durante la generazione del QR code:", error);
-                }
-                
-                // Genera il QR code per i contatti
-                generateContactsQRCode();
-            }
-            
-            // Funzione per generare il QR code dei contatti
-            function generateContactsQRCode() {
-                const contactsQrcodeElement = document.getElementById("contacts-qrcode");
-                if (!contactsQrcodeElement) {
-                    console.error("Elemento QR code contatti non trovato");
-                    return;
-                }
-                
-                // Pulisci eventuali contenuti precedenti
-                contactsQrcodeElement.innerHTML = '';
-                
-                // Crea il contenuto del file di testo con i contatti
-                let contactsText = "PWS GROUP - CONTATTI\n\n";
-                contactsText += "INDIRIZZO:\n";
-                contactsText += "Trezzano S.N(MI) 20090, via G.Boccaccio, 95/c\n";
-                contactsText += "Tel: 02 93219393\n";
-                contactsText += "Maps: https://maps.app.goo.gl/aoH4g28iEMoqiP2S9\n\n";
-                
-                contactsText += "CEO PWS GROUP\n";
-                contactsText += "Marcello Cipriani\n";
-                contactsText += "Tel: +39.348.1282035\n";
-                contactsText += "Email: m.cipriani@pwsdecoart.it\n\n";
-                
-                contactsText += "Operation Director\n";
-                contactsText += "Mauro Pirovano\n";
-                contactsText += "Tel: +39.334.1041545\n";
-                contactsText += "Email: m.pirovano@pwsdecoart.it\n\n";
-                
-                contactsText += "Sales Director\n";
-                contactsText += "Danilo Rosa\n";
-                contactsText += "Email: d.rosa@pwsdecoart.it\n\n";
-                
-                contactsText += "Commerciale\n";
-                contactsText += "Roberto Bonzanini\n";
-                contactsText += "Email: r.bonzanini@pwsdecoart.it\n\n";
-                
-                contactsText += "Ufficio Tecnico\n";
-                contactsText += "Nicola Manniello\n";
-                contactsText += "Email: n.manniello@pwsdecoart.it\n\n";
-                
-                contactsText += "Ufficio Grafico\n";
-                contactsText += "Claudia Favagrossa\n";
-                contactsText += "Email: c.favagrossa@pwsdecoart.it\n\n";
-                
-                contactsText += "Amministrazione\n";
-                contactsText += "Daniela Dicensi\n";
-                contactsText += "Email: d.dicensi@pwsdecoart.it\n\n";
-                
-                contactsText += "Sito web: https://www.pwsgroup.eu/";
-                
-                try {
-                    // Crea un nuovo QR code con il testo dei contatti
-                    new QRCode(contactsQrcodeElement, {
-                        text: contactsText,
-                        width: 200,
-                        height: 200,
-                        colorDark: "#000000",
-                        colorLight: "#ffffff",
-                        correctLevel: QRCode.CorrectLevel.H
-                    });
-                    
-                    console.log("QR code contatti generato con successo");
-                    
-                    // Verifica che l'immagine sia stata creata
-                    setTimeout(() => {
-                        const qrImage = contactsQrcodeElement.querySelector('img');
-                        if (qrImage) {
-                            console.log("Immagine QR code contatti trovata:", qrImage.src);
-                            qrImage.style.display = 'block';
-                            qrImage.style.maxWidth = '100%';
-                            qrImage.style.height = 'auto';
-                        } else {
-                            console.error("Immagine QR code contatti non trovata");
-                            // Se l'immagine non viene trovata, usa il fallback statico
-                            contactsQrcodeElement.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(contactsText) + '" alt="QR Code Contatti PWS Group" style="width: 200px; height: 200px;">';
-                        }
-                    }, 100);
-                } catch (error) {
-                    console.error("Errore durante la generazione del QR code contatti:", error);
-                    // In caso di errore, usa il fallback statico
-                    contactsQrcodeElement.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(contactsText) + '" alt="QR Code Contatti PWS Group" style="width: 200px; height: 200px;">';
-                }
-            }
-
-            // Funzione per aggiornare il riepilogo mensile
-            function updateMonthlyReport(month = null, year = null) {
-                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
-                const monthlyReportContent = document.getElementById('monthlyReportContent');
-                
-                // Se non vengono forniti mese e anno, usa quelli correnti
-                const today = new Date();
-                const currentMonth = month !== null ? month : today.getMonth();
-                const currentYear = year !== null ? year : today.getFullYear();
-                
-                // Filtra le entries per il mese e l'anno specificati
-                const monthlyEntries = entries.filter(entry => {
-                    const [day, month, year] = entry.date.split('/').map(Number);
-                    return month === currentMonth + 1 && year === currentYear;
-                });
-                
-                if (monthlyEntries.length === 0) {
-                    monthlyReportContent.innerHTML = '<div class="monthly-report-empty">Nessuna entry salvata</div>';
-                    return;
-                }
-                
-                // Ordina le entries per data (più recenti prima)
-                monthlyEntries.sort((a, b) => {
-                    // Normalizza le date per il confronto
-                    const dateA = a.date.includes('/') ? convertItalianToStandardDate(a.date) : a.date;
-                    const dateB = b.date.includes('/') ? convertItalianToStandardDate(b.date) : b.date;
-                    return new Date(dateB) - new Date(dateA);
-                });
-                
-                // Raggruppa le entries per mese
-                const entriesByMonth = {};
-                
-                monthlyEntries.forEach(entry => {
-                    // Normalizza la data per il raggruppamento
-                    let dateParts;
-                    if (entry.date.includes('/')) {
-                        dateParts = entry.date.split('/');
-                    } else {
-                        const dateObj = new Date(entry.date);
-                        dateParts = [
-                            dateObj.getDate().toString().padStart(2, '0'),
-                            (dateObj.getMonth() + 1).toString().padStart(2, '0'),
-                            dateObj.getFullYear().toString()
-                        ];
-                    }
-                    
-                    const monthKey = `${dateParts[1]}/${dateParts[2]}`; // mese/anno
-                    
-                    if (!entriesByMonth[monthKey]) {
-                        entriesByMonth[monthKey] = [];
-                    }
-                    
-                    entriesByMonth[monthKey].push(entry);
-                });
-                
-                // Crea l'HTML per il riepilogo mensile
-                let monthlyReportHTML = '';
-                
-                // Ordina i mesi (più recenti prima)
-                const sortedMonths = Object.keys(entriesByMonth).sort((a, b) => {
-                    const [monthA, yearA] = a.split('/');
-                    const [monthB, yearB] = b.split('/');
-                    return new Date(yearB, monthB - 1) - new Date(yearA, monthA - 1);
-                });
-                
-                sortedMonths.forEach(monthKey => {
-                    const [month, year] = monthKey.split('/');
-                    const monthName = new Date(year, month - 1).toLocaleDateString('it-IT', { month: 'long' });
-                    
-                    monthlyReportHTML += `
-                        <div class="monthly-report-month">
-                            <h3>${monthName} ${year}</h3>
-                    `;
-                    
-                    // Ordina le entries del mese per data (più recenti prima)
-                    entriesByMonth[monthKey].sort((a, b) => {
-                        const dateA = a.date.includes('/') ? convertItalianToStandardDate(a.date) : a.date;
-                        const dateB = b.date.includes('/') ? convertItalianToStandardDate(b.date) : b.date;
-                        return new Date(dateB) - new Date(dateA);
-                    });
-                    
-                    entriesByMonth[monthKey].forEach(entry => {
-                        const formattedDate = formatDate(entry.date);
+                    // Usa l'istanza globale di flatpickr per aggiornare la data
+                    if (window.datepickerInstance) {
+                        // Forza un aggiornamento sincrono e completo
+                        window.datepickerInstance.setDate(date, true);
                         
-                        monthlyReportHTML += `
-                            <div class="monthly-report-item">
-                                <div class="monthly-report-date">${formattedDate}</div>
-                                <div class="monthly-report-details">
-                                    <div class="monthly-report-detail">${entry.startTime}h - ${entry.endTime}h</div>
-                                    <div class="monthly-report-detail">Pausa: ${entry.breakTime} ore</div>
-                                    <div class="monthly-report-detail">Totale: ${entry.hours}h</div>
-                                    ${entry.transferta > 0 ? `<div class="monthly-report-detail"><i class="fas fa-car"></i> ${entry.transferta}h</div>` : ''}
-                                    ${entry.notturne > 0 ? `<div class="monthly-report-detail"><i class="fas fa-moon"></i> ${entry.notturne}h</div>` : ''}
-                                </div>
-                                <div class="monthly-report-description">${entry.description}</div>
-                            </div>
-                        `;
-                    });
+                        // Assicura che il datepicker abbia aggiornato il suo stato interno
+                        window.datepickerInstance.close();
+                        
+                        console.log("Calendario -> Home: Data impostata a", date);
+                    }
                     
-                    monthlyReportHTML += '</div>';
-                });
-                
-                monthlyReportContent.innerHTML = monthlyReportHTML;
-            }
-            
-            // Funzione per esportare il riepilogo mensile in formato testo
-            function exportMonthlyReportToText() {
-                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
-                
-                if (entries.length === 0) {
-                    alert('Nessun dato da esportare');
-                    return;
-                }
-                
-                // Ordina le entries per data (più recenti prima)
-                entries.sort((a, b) => {
-                    // Normalizza le date per il confronto
-                    const dateA = a.date.includes('/') ? convertItalianToStandardDate(a.date) : a.date;
-                    const dateB = b.date.includes('/') ? convertItalianToStandardDate(b.date) : b.date;
-                    return new Date(dateA) - new Date(dateB); // Ordine cronologico (più vecchie prima)
-                });
-                
-                // Crea il contenuto del file di testo
-                let textContent = 'RIEPILOGO ORE PWS GROUP\n\n';
-                
-                entries.forEach(entry => {
-                    // Formatta la data
-                    const formattedDate = formatDate(entry.date);
+                    // Aggiorna anche l'indicatore visivo
+                    updateDateIndicator(date);
                     
-                    // Crea la riga nel formato richiesto
-                    textContent += `${formattedDate} ${entry.startTime}-${entry.endTime} ${entry.breakTime} tot ore ${entry.hours} ---${entry.description}\n`;
-                });
+                    // Forza il caricamento delle entry esistenti per questa data
+                    setTimeout(function() {
+                        loadExistingEntry(date);
+                    }, 100);
+                };
                 
-                // Crea un blob e un link per il download
-                const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.setAttribute('href', url);
-                link.setAttribute('download', 'riepilogo_ore_pws.txt');
-                link.style.display = 'none';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-
-            function showDayDetails(date) {
-                const modal = document.getElementById('dayDetailsModal');
-                const modalContent = document.getElementById('dayDetailsContent');
-                const entries = getEntriesForDate(date);
-                
-                let content = `<h3>${date}</h3>`;
-                if (entries.length === 0) {
-                    content += '<p>Nessuna entry per questo giorno.</p>';
-                } else {
-                    content += '<ul>';
-                    entries.forEach((entry, index) => {
-                        content += `
-                            <li>
-                                ${entry.hours} ore - ${entry.description}
-                                <button class="edit-btn" onclick="editEntry('${date}', ${index})">Modifica</button>
-                                <button class="delete-btn" onclick="deleteEntry('${date}', ${index})">Elimina</button>
-                            </li>`;
-                    });
-                    content += '</ul>';
-                }
-                
-                modalContent.innerHTML = content;
+                // Mostra il modale
                 modal.style.display = 'block';
+                
+                // Aggiungi event listener per chiudere il modale
+                const closeModal = document.querySelector('.close-modal');
+                closeModal.onclick = function() {
+                    modal.style.display = 'none';
+                };
+                
+                // Chiudi il modale quando si clicca fuori
+                window.onclick = function(event) {
+                    if (event.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                };
             }
 
             // Funzioni globali
@@ -3508,12 +3277,20 @@
                 // Chiudi il modale
                 document.getElementById('dayModal').style.display = 'none';
 
-                // Vai alla home page
-                document.querySelector('[data-section="home-section"]').click();
+                // Vai alla home page utilizzando la funzione handleNavigation
+                handleNavigation('home-section');
 
                 // Imposta i valori nel form
                 setTimeout(() => {
-                    document.getElementById('date').value = entry.date;
+                    // Aggiorna la data sia nell'input che nell'istanza flatpickr
+                    const dateInput = document.getElementById('date');
+                    dateInput.value = entry.date;
+                    
+                    // Usa l'istanza globale di flatpickr per aggiornare la data
+                    if (window.datepickerInstance) {
+                        window.datepickerInstance.setDate(entry.date);
+                    }
+                    
                     document.getElementById('startTime').value = entry.startTime;
                     document.getElementById('endTime').value = entry.endTime;
                     document.getElementById('breakTime').value = entry.breakTime;
@@ -3562,13 +3339,27 @@
                         // Resetta il form
                         document.getElementById('timeEntryForm').reset();
                         submitBtn.textContent = 'Aggiungi Entry';
-                        submitBtn.onclick = submitTimeEntry;
+                        submitBtn.onclick = function(e) {
+                            e.preventDefault();
+                            
+                            const form = document.getElementById('timeEntryForm');
+                            if (form) {
+                                // Crea un evento di submit
+                                const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+                                form.dispatchEvent(submitEvent);
+                            }
+                        };
                         
                         // Aggiorna il calendario
                         updateCalendarDisplay(new Date().getMonth(), new Date().getFullYear());
                         
                         // Mostra messaggio di successo
-                        showMessage('Entry modificata con successo!', 'success');
+                        alert('Entry modificata con successo!');
+                        
+                        // Aggiorna le visualizzazioni
+                        loadTimeEntries();
+                        updateCalendar();
+                        updateMonthlyReport();
                     };
                 }, 100);
             }
@@ -3603,7 +3394,7 @@
                             <div class="day-entry-header">
                                 <span class="day-entry-hours">${entry.hours}h</span>
                                 <div class="entry-buttons">
-                                    <button class="edit-btn" onclick="editEntry('${date}', ${index})">
+                                    <button class="edit-btn" data-date="${date}" data-index="${index}">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <button class="delete-btn" data-date="${entry.date}" data-hours="${entry.hours}" data-description="${entry.description}">X</button>
@@ -3643,23 +3434,8 @@
                         console.log('Modale chiuso');
                     }
                     
-                    // Passa alla sezione Home
-                    const navItems = document.querySelectorAll('.nav-item');
-                    const sections = document.querySelectorAll('.section');
-                    
-                    if (navItems && sections) {
-                        navItems.forEach(nav => nav.classList.remove('active'));
-                        sections.forEach(section => section.classList.remove('active'));
-                        
-                        const homeNav = document.querySelector('.nav-item[data-section="home-section"]');
-                        const homeSection = document.getElementById('home-section');
-                        
-                        if (homeNav && homeSection) {
-                            homeNav.classList.add('active');
-                            homeSection.classList.add('active');
-                            console.log('Sezione home attivata');
-                        }
-                    }
+                    // Passa alla sezione Home usando handleNavigation
+                    handleNavigation('home-section');
                     
                     // Imposta i valori nel form
                     const dateInput = document.getElementById('date');
@@ -3690,118 +3466,1202 @@
                     if (notturneInput) notturneInput.value = entry.notturne || 0;
                     if (descriptionInput) descriptionInput.value = entry.description;
                     
+                    // Aggiorna direttamente il campo ore totali
+                    const totalHoursInput = document.getElementById('totalHours');
+                    if (totalHoursInput) {
+                        totalHoursInput.value = entry.hours;
+                    }
+
                     console.log('Tutti i campi del form sono stati impostati');
                 } else {
                     console.log('Nessuna entry trovata per questa data');
                 }
             };
 
-            // Aggiungi questa sezione per la gestione audio
-            let audioContext;
-            let audioElements = {};
-
-            async function initAudio() {
-                try {
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    // Inizializza gli elementi audio per ogni giorno
-                    for (let i = 1; i <= 31; i++) {
-                        audioElements[i] = new Audio();
-                    }
-                } catch (e) {
-                    console.error('Errore nell\'inizializzazione audio:', e);
-                }
-            }
-
-            async function playSound(day) {
-                try {
-                    const audio = audioElements[day];
-                    if (audio.src) {
-                        await audio.play();
-                    } else {
-                        // Se non c'è un file audio associato, usa un suono di default
-                        const defaultSound = new Audio('assets/sounds/default.mp3');
-                        await defaultSound.play();
-                    }
-                } catch (e) {
-                    console.error('Errore nella riproduzione audio:', e);
-                }
-            }
-
-            // Modifica la funzione createCalendar per aggiungere il supporto audio
-            function createCalendar(year, month) {
-                // ... existing code ...
-                const dayElement = document.createElement('div');
-                dayElement.className = `calendar-day ${isToday ? 'today' : ''} ${dayEntries.length > 0 ? 'has-entries' : ''} ${isHoliday ? 'holiday' : ''}`;
+            // Funzione globale per aggiornare l'indicatore della data
+            function updateDateIndicator(dateStr) {
+                console.log("Aggiornamento indicatore data:", dateStr);
                 
-                // Aggiungi l'evento click per la riproduzione audio
-                dayElement.addEventListener('click', () => playSound(day));
-                
-                // ... rest of the existing code ...
-            }
-
-            // Inizializza l'audio quando la pagina è caricata
-            document.addEventListener('DOMContentLoaded', initAudio);
-
-            // Inizializza il datepicker con la data odierna
-            document.addEventListener('DOMContentLoaded', function() {
-                const dateInput = document.getElementById('date');
-                if (dateInput) {
-                    flatpickr(dateInput, {
-                        dateFormat: "d/m/Y",
-                        defaultDate: "today",
-                        locale: "it"
-                    });
-                }
-            });
-
-            // Funzione per calcolare le ore totali
-            function calculateTotalHours() {
-                const startTime = parseFloat(document.getElementById('startTime').value) || 0;
-                const endTime = parseFloat(document.getElementById('endTime').value) || 0;
-                const breakTime = parseFloat(document.getElementById('breakTime').value) || 0;
-                
-                if (startTime && endTime) {
-                    // Gestione speciale per mezzanotte
-                    let start = startTime;
-                    let end = endTime;
-                    
-                    if (start === 24) start = 0;
-                    if (end === 24) end = 0;
-                    
-                    // Calcolo delle ore
-                    let totalHours;
-                    if (end >= start) {
-                        // Stesso giorno
-                        totalHours = end - start;
-                    } else {
-                        // Giorno successivo
-                        totalHours = (24 - start) + end;
+                const dateIndicator = document.getElementById('dateIndicator');
+                if (dateIndicator) {
+                    try {
+                        // Formatta la data per visualizzazione
+                        const dateParts = dateStr.split('/');
+                        if (dateParts.length === 3) {
+                            const day = parseInt(dateParts[0]);
+                            const month = parseInt(dateParts[1]) - 1;
+                            const year = parseInt(dateParts[2]);
+                            const dateObj = new Date(year, month, day);
+                            
+                            if (!isNaN(dateObj.getTime())) {
+                                const dayName = dateObj.toLocaleDateString('it-IT', { weekday: 'long' });
+                                const monthName = dateObj.toLocaleDateString('it-IT', { month: 'long' });
+                                
+                                // Rendi più visibile e chiara la data selezionata
+                                dateIndicator.innerHTML = `
+                                    <div style="background-color: #4b7bec; color: white; padding: 8px; border-radius: 5px; margin-top: 5px;">
+                                        <i class="fas fa-calendar-day"></i> 
+                                        <span style="font-size: 1.1rem; font-weight: bold;">${dayName}, ${day} ${monthName} ${year}</span>
+                                    </div>
+                                `;
+                                
+                                // Forza l'aggiornamento dell'input date
+                                const dateInput = document.getElementById('date');
+                                if (dateInput && dateInput.value !== dateStr) {
+                                    dateInput.value = dateStr;
+                                }
+                                
+                                // Aggiorna anche visualmente l'interfaccia del datepicker
+                                if (window.datepickerInstance) {
+                                    window.datepickerInstance.setDate(dateStr, false);
+                                }
+                            } else {
+                                console.error("Data non valida:", dateStr);
+                                dateIndicator.innerHTML = `<div style="color: red;"><i class="fas fa-exclamation-circle"></i> Formato data non valido</div>`;
+                            }
+                        } else {
+                            console.error("Formato data non valido:", dateStr);
+                            dateIndicator.innerHTML = `<div style="color: red;"><i class="fas fa-exclamation-circle"></i> Formato data non valido</div>`;
+                        }
+                    } catch (error) {
+                        console.error("Errore nell'aggiornamento dell'indicatore data:", error);
+                        dateIndicator.innerHTML = `<div style="color: red;"><i class="fas fa-exclamation-circle"></i> Errore nel formato data</div>`;
                     }
-                    
-                    // Sottrai la pausa
-                    totalHours = totalHours - breakTime;
-                    
-                    document.getElementById('totalHours').value = totalHours.toFixed(1);
                 }
             }
 
-            // Aggiungi event listener per il calcolo automatico
-            document.getElementById('startTime').addEventListener('input', calculateTotalHours);
-            document.getElementById('endTime').addEventListener('input', calculateTotalHours);
-            document.getElementById('breakTime').addEventListener('input', calculateTotalHours);
-
-            // ... existing code ...
+            // Funzione per evidenziare la data selezionata nel calendario mensile
+            function highlightSelectedDate(dateStr) {
+                // Rimuovi l'evidenziazione precedente
+                document.querySelectorAll('.calendar-day.selected').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                
+                // Converti in formato di comparazione standard
+                let normalizedDate = dateStr;
+                if (dateStr.includes('/')) {
+                    const parts = dateStr.split('/');
+                    if (parts.length === 3) {
+                        normalizedDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                    }
+                }
+                
+                // Trova e evidenzia la data nel calendario mensile
+                document.querySelectorAll('.calendar-day').forEach(dayEl => {
+                    const dayDate = dayEl.getAttribute('data-date');
+                    if (dayDate === normalizedDate || dayDate === dateStr) {
+                        dayEl.classList.add('selected');
+                    }
+                });
+            }
+            
             // Funzione per resettare il form
             function resetForm() {
-                document.getElementById('startTime').value = '';
-                document.getElementById('endTime').value = '';
-                document.getElementById('breakTime').value = '0.5';
-                document.getElementById('totalHours').value = '';
-                document.getElementById('transferta').value = '';
-                document.getElementById('notturne').value = '';
-                document.getElementById('description').value = '';
+                console.log("Resettaggio form");
+                
+                // Ottieni riferimento al form
+                const form = document.getElementById('timeEntryForm');
+                if (!form) {
+                    console.warn("Form non trovato");
+                    return;
+                }
+                
+                try {
+                    // Resetta tutti i campi del form tranne la data
+                    const currentDate = document.getElementById('date')?.value;
+                    
+                    // Resetta il form
+                    form.reset();
+                    
+                    // Ripristina la data (se era impostata)
+                    if (currentDate) {
+                        document.getElementById('date').value = currentDate;
+                    }
+                    
+                    // Imposta valori predefiniti
+                    document.getElementById('breakTime').value = '0.5';
+                    document.getElementById('transferta').value = '';
+                    document.getElementById('notturne').value = '';
+                    document.getElementById('description').value = '';
+                    document.getElementById('startTime').value = '';
+                    document.getElementById('endTime').value = '';
+                    document.getElementById('totalHours').value = '';
+                    
+                    // Rimuovi lo stato di modifica se attivo
+                    const submitBtn = document.getElementById('submitBtn');
+                    if (submitBtn) {
+                        submitBtn.textContent = 'Salva';
+                        
+                        // Rimuovi eventuale onclick personalizzato
+                        const newSubmitBtn = submitBtn.cloneNode(true);
+                        submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
+                    }
+                    
+                    // Rimuovi entry in modifica dal localStorage
+                    localStorage.removeItem('editingEntry');
+                    
+                    console.log("Form resettato con successo");
+                } catch (error) {
+                    console.error("Errore durante il reset del form:", error);
+                }
+            }
+            
+            // Funzione per aggiornare il riepilogo mensile
+            function updateMonthlyReport() {
+                console.log("Aggiornamento riepilogo mensile");
+                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                const monthlyReportContent = document.getElementById('monthlyReportContent');
+                const monthSelector = document.getElementById('exportMonthSelect');
+                
+                if (!monthlyReportContent || !monthSelector) {
+                    console.warn('Elemento monthlyReportContent o monthSelector non trovato');
+                    return;
+                }
+                
+                if (entries.length === 0) {
+                    monthlyReportContent.innerHTML = '<div class="monthly-report-empty">Nessuna entry registrata</div>';
+                    monthSelector.innerHTML = '<option value="">Nessun mese disponibile</option>';
+                    return;
+                }
+                
+                // Ordina le entries per data (più recenti prima) mantenendo il formato italiano
+                entries.sort((a, b) => {
+                    const dateObjA = getDateFromItalianFormat(a.date);
+                    const dateObjB = getDateFromItalianFormat(b.date);
+                    
+                    return dateObjB - dateObjA; // Ordine decrescente (più recenti prima)
+                });
+                
+                // Raggruppa le entries per mese
+                const entriesByMonth = {};
+                entries.forEach(entry => {
+                    // Usa la data direttamente in formato italiano
+                    const dateObj = getDateFromItalianFormat(entry.date);
+                    const monthYear = `${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
+                    
+                    if (!entriesByMonth[monthYear]) {
+                        entriesByMonth[monthYear] = [];
+                    }
+                    entriesByMonth[monthYear].push(entry);
+                });
+                
+                // Popola il selettore di mesi
+                monthSelector.innerHTML = '';
+                monthSelector.innerHTML = '<option value="all">Tutti i mesi</option>';
+                
+                Object.keys(entriesByMonth).forEach(monthYear => {
+                    const [month, year] = monthYear.split('/');
+                    const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long' });
+                    const optionText = `${monthName} ${year}`;
+                    const optionValue = monthYear;
+                    
+                    const option = document.createElement('option');
+                    option.value = optionValue;
+                    option.textContent = optionText;
+                    monthSelector.appendChild(option);
+                });
+                
+                let html = '';
+                
+                // Per ogni mese
+                Object.keys(entriesByMonth).forEach(monthYear => {
+                    const monthEntries = entriesByMonth[monthYear];
+                    const [month, year] = monthYear.split('/');
+                    const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long' });
+                    
+                    html += `
+                        <div class="monthly-report-group">
+                            <h3>${monthName} ${year}</h3>
+                            <div class="monthly-report-stats">
+                                <div class="monthly-stat-item">
+                                    <div class="monthly-stat-value">
+                                        ${monthEntries.reduce((sum, entry) => sum + parseFloat(entry.hours || 0), 0).toFixed(1)}h
+                                    </div>
+                                    <div class="monthly-stat-label">Ore Totali</div>
+                                </div>
+                                <div class="monthly-stat-item">
+                                    <div class="monthly-stat-value">
+                                        ${monthEntries.reduce((sum, entry) => sum + (parseFloat(entry.transferta || 0) || 0), 0).toFixed(1)}h
+                                    </div>
+                                    <div class="monthly-stat-label">Ore Trasferta</div>
+                                </div>
+                                <div class="monthly-stat-item">
+                                    <div class="monthly-stat-value">
+                                        ${monthEntries.reduce((sum, entry) => sum + (parseFloat(entry.notturne || 0) || 0), 0).toFixed(1)}h
+                                    </div>
+                                    <div class="monthly-stat-label">Ore Notturne</div>
+                                </div>
+                            </div>
+                            <div class="monthly-report-entries">
+                                ${monthEntries.map(entry => `
+                                    <div class="monthly-report-item">
+                                        <div class="monthly-report-date">${formatDate(entry.date)}</div>
+                                        <div class="monthly-report-details">
+                                            <span class="monthly-report-detail">${parseFloat(entry.hours || 0).toFixed(1)}h</span>
+                                            ${parseFloat(entry.transferta || 0) > 0 ? `<span class="monthly-report-detail"><i class="fas fa-car"></i> ${parseFloat(entry.transferta).toFixed(1)}h</span>` : ''}
+                                            ${parseFloat(entry.notturne || 0) > 0 ? `<span class="monthly-report-detail"><i class="fas fa-moon"></i> ${parseFloat(entry.notturne).toFixed(1)}h</span>` : ''}
+                                        </div>
+                                        <div class="monthly-report-description">${entry.description || ''}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                monthlyReportContent.innerHTML = html;
+            }
+            
+            // Funzione di supporto per normalizzare la data dal formato italiano a quello standard
+            function normalizeDate(dateStr) {
+                if (!dateStr.includes('/')) return dateStr;
+                
+                const [day, month, year] = dateStr.split('/');
+                return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+            }
+            
+            // Funzione di supporto per formattare la data
+            function formatDate(dateStr) {
+                if (!dateStr) return '';
+                
+                if (dateStr.includes('/')) {
+                    const [day, month, year] = dateStr.split('/');
+                    return `${day}/${month}/${year}`;
+                }
+                
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('it-IT');
+            }
+
+            // Funzione per ottenere il nome del giorno in italiano
+            function getDayName(dateStr) {
+                const [day, month, year] = dateStr.split('/').map(Number);
+                const date = new Date(year, month - 1, day);
+                const days = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+                return days[date.getDay()];
+            }
+
+            // Funzione per convertire le date dal formato italiano (GG/MM/AAAA) a oggetti Date
+            function getDateFromItalianFormat(dateStr) {
+                if (!dateStr || !dateStr.includes('/')) return new Date(dateStr);
+                const [day, month, year] = dateStr.split('/').map(Number);
+                return new Date(year, month - 1, day);
+            }
+
+            function exportMonthlyReportToText(selectedMonth = 'all') {
+                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                const userName = localStorage.getItem('userName') || '';
+                
+                if (entries.length === 0) {
+                    alert('Nessun dato da esportare');
+                    return;
+                }
+                
+                // Filtra le entries in base al mese selezionato
+                let filteredEntries = entries;
+                
+                if (selectedMonth !== 'all') {
+                    const [selectedMonthNum, selectedYear] = selectedMonth.split('/');
+                    
+                    filteredEntries = entries.filter(entry => {
+                        const dateObj = getDateFromItalianFormat(entry.date);
+                        const entryMonth = dateObj.getMonth() + 1;
+                        const entryYear = dateObj.getFullYear();
+                        
+                        return entryMonth === parseInt(selectedMonthNum) && entryYear === parseInt(selectedYear);
+                    });
+                    
+                    if (filteredEntries.length === 0) {
+                        alert('Nessun dato da esportare per il mese selezionato');
+                        return;
+                    }
+                }
+                
+                // Ordina le entries per data (più recenti prima) mantenendo il formato italiano
+                filteredEntries.sort((a, b) => {
+                    const dateObjA = getDateFromItalianFormat(a.date);
+                    const dateObjB = getDateFromItalianFormat(b.date);
+                    
+                    return dateObjB - dateObjA; // Ordine decrescente (più recenti prima)
+                });
+                
+                // Crea il contenuto del file di testo
+                let textContent = 'RIEPILOGO ORE PWS GROUP\n';
+                if (userName) {
+                    textContent += `Operatore: ${userName}\n`;
+                }
+                
+                // Aggiungi informazioni sul mese selezionato
+                if (selectedMonth !== 'all') {
+                    const [month, year] = selectedMonth.split('/');
+                    const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long' });
+                    textContent += `Periodo: ${monthName} ${year}\n`;
+                }
+                
+                textContent += '\n';
+                
+                // Calcola i totali
+                const totalHours = filteredEntries.reduce((sum, entry) => sum + parseFloat(entry.hours || 0), 0).toFixed(1);
+                const totalTransferta = filteredEntries.reduce((sum, entry) => sum + (parseFloat(entry.transferta || 0) || 0), 0).toFixed(1);
+                const totalNotturne = filteredEntries.reduce((sum, entry) => sum + (parseFloat(entry.notturne || 0) || 0), 0).toFixed(1);
+                
+                // Aggiungi riepilogo totali
+                textContent += `Ore Totali: ${totalHours}h\n`;
+                if (parseFloat(totalTransferta) > 0) {
+                    textContent += `Ore Trasferta: ${totalTransferta}h\n`;
+                }
+                if (parseFloat(totalNotturne) > 0) {
+                    textContent += `Ore Notturne: ${totalNotturne}h\n`;
+                }
+                textContent += '\n';
+                
+                filteredEntries.forEach(entry => {
+                    const formattedDate = formatDate(entry.date);
+                    const dayName = getDayName(entry.date);
+                    textContent += `${dayName} ${formattedDate} ${entry.startTime}-${entry.endTime} ${entry.breakTime} tot ore ${entry.hours} ---${entry.description}\n`;
+                });
+                
+                // Crea un blob e un link per il download
+                const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                
+                // Nome del file con eventuale indicazione del mese
+                let fileName = `riepilogo_ore_${userName || 'pws'}`;
+                if (selectedMonth !== 'all') {
+                    const [month, year] = selectedMonth.split('/');
+                    const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long' });
+                    fileName += `_${monthName.toLowerCase()}_${year}`;
+                }
+                fileName += '.txt';
+                
+                link.setAttribute('download', fileName);
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+            
+            /**
+             * Verifica se una data è una festività italiana
+             * @param {Date} date - L'oggetto data da verificare
+             * @return {boolean} true se la data è una festività, false altrimenti
+             */
+            function isItalianHoliday(date) {
+                const day = date.getDate();
+                const month = date.getMonth() + 1; // I mesi in JavaScript sono 0-based
+                const year = date.getFullYear();
+                
+                // Festività fisse
+                if (day === 1 && month === 1) return true; // Capodanno
+                if (day === 6 && month === 1) return true; // Epifania
+                if (day === 25 && month === 4) return true; // Festa della Liberazione
+                if (day === 1 && month === 5) return true; // Festa del Lavoro
+                if (day === 2 && month === 6) return true; // Festa della Repubblica
+                if (day === 15 && month === 8) return true; // Ferragosto
+                if (day === 1 && month === 11) return true; // Tutti i Santi
+                if (day === 8 && month === 12) return true; // Immacolata Concezione
+                if (day === 25 && month === 12) return true; // Natale
+                if (day === 26 && month === 12) return true; // Santo Stefano
+                
+                // Festività mobili (Pasqua e Lunedì dell'Angelo)
+                const easter = calculateEaster(year);
+                const easterMonday = new Date(easter);
+                easterMonday.setDate(easterMonday.getDate() + 1);
+                
+                if (day === easter.getDate() && month === easter.getMonth() + 1) return true; // Pasqua
+                if (day === easterMonday.getDate() && month === easterMonday.getMonth() + 1) return true; // Lunedì dell'Angelo
+                
+                // San Giuseppe (19 marzo) - festivo solo in alcune regioni
+                if (day === 19 && month === 3) return true; // San Giuseppe
+                
+                // San Giovanni Battista (24 giugno) - festivo solo in alcune regioni
+                if (day === 24 && month === 6) return true; // San Giovanni Battista
+                
+                // San Pietro e Paolo (29 giugno) - festivo solo a Roma
+                if (day === 29 && month === 6) return true; // San Pietro e Paolo
+                
+                // Sant'Ambrogio (7 dicembre) - festivo solo a Milano
+                if (day === 7 && month === 12) return true; // Sant'Ambrogio
+                
+                return false;
+            }
+            
+            /**
+             * Ottiene il nome della festività italiana per una data
+             * @param {Date} date - L'oggetto data per cui ottenere il nome della festività
+             * @return {string} Il nome della festività o "Festa" come valore predefinito
+             */
+            function getHolidayName(date) {
+                const day = date.getDate();
+                const month = date.getMonth() + 1; // I mesi in JavaScript sono 0-based
+                const year = date.getFullYear();
+                
+                // Festività fisse
+                if (day === 1 && month === 1) return "Capodanno";
+                if (day === 6 && month === 1) return "Epifania";
+                if (day === 25 && month === 4) return "Festa della Liberazione";
+                if (day === 1 && month === 5) return "Festa del Lavoro";
+                if (day === 2 && month === 6) return "Festa della Repubblica";
+                if (day === 15 && month === 8) return "Ferragosto";
+                if (day === 1 && month === 11) return "Tutti i Santi";
+                if (day === 8 && month === 12) return "Immacolata Concezione";
+                if (day === 25 && month === 12) return "Natale";
+                if (day === 26 && month === 12) return "Santo Stefano";
+                
+                // Pasqua e festività collegate
+                const easterDate = calculateEaster(year);
+                
+                // Pasqua
+                if (date.getTime() === easterDate.getTime()) return "Pasqua";
+                
+                // Lunedì dell'Angelo (Pasquetta) - giorno dopo Pasqua
+                const easterMonday = new Date(easterDate);
+                easterMonday.setDate(easterDate.getDate() + 1);
+                if (date.getTime() === easterMonday.getTime()) return "Lunedì dell'Angelo";
+                
+                return null;
+            }
+
+            function calculateEaster(year) {
+                // Algoritmo di Meeus/Jones/Butcher per calcolare la Pasqua
+                const a = year % 19;
+                const b = Math.floor(year / 100);
+                const c = year % 100;
+                const d = Math.floor(b / 4);
+                const e = b % 4;
+                const f = Math.floor((b + 8) / 25);
+                const g = Math.floor((b - f + 1) / 3);
+                const h = (19 * a + b - d - g + 15) % 30;
+                const i = Math.floor(c / 4);
+                const k = c % 4;
+                const l = (32 + 2 * e + 2 * i - h - k) % 7;
+                const m = Math.floor((a + 11 * h + 22 * l) / 451);
+                const month = Math.floor((h + l - 7 * m + 114) / 31);
+                const day = ((h + l - 7 * m + 114) % 31) + 1;
+                
+                return new Date(year, month - 1, day);
+            }
+
+            function exportToCSV() {
+                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                const userName = localStorage.getItem('userName') || '';
+                
+                if (entries.length === 0) {
+                    alert('Nessun dato da esportare');
+                    return;
+                }
+                
+                // Ordina le entries per data (più recenti prima)
+                entries.sort((a, b) => {
+                    const dateObjA = getDateFromItalianFormat(a.date);
+                    const dateObjB = getDateFromItalianFormat(b.date);
+                    return dateObjB - dateObjA; // Ordine decrescente (più recenti prima)
+                });
+                
+                // Crea intestazione CSV
+                let csvContent = 'Data,Inizio,Fine,Pausa,Ore Totali,Trasferta,Notturne,Descrizione\n';
+                
+                // Aggiungi ogni riga al file CSV
+                entries.forEach(entry => {
+                    const row = [
+                        entry.date,
+                        entry.startTime,
+                        entry.endTime,
+                        entry.breakTime,
+                        entry.hours,
+                        entry.transferta || '0',
+                        entry.notturne || '0',
+                        '"' + (entry.description || '').replace(/"/g, '""') + '"' // Escaping delle virgolette per CSV
+                    ];
+                    
+                    csvContent += row.join(',') + '\n';
+                });
+                
+                // Crea un blob e un link per il download
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', `ore_pws_${userName || 'export'}.csv`);
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            function exportAllData() {
+                const timeEntries = localStorage.getItem('timeEntries') || '[]';
+                const settings = {
+                    userName: localStorage.getItem('userName') || '',
+                    darkTheme: localStorage.getItem('darkTheme') || 'false'
+                };
+                
+                const exportData = {
+                    timeEntries: JSON.parse(timeEntries),
+                    settings: settings,
+                    version: '1.0'
+                };
+                
+                // Crea un blob e un link per il download
+                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', `orepws_backup_${new Date().toISOString().slice(0,10)}.json`);
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            function importAllData() {
+                // Crea un input file invisibile
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = '.json';
+                fileInput.style.display = 'none';
+                document.body.appendChild(fileInput);
+                
+                fileInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (!file) {
+                        document.body.removeChild(fileInput);
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        try {
+                            const data = JSON.parse(event.target.result);
+                            
+                            // Verifica che il file contenga i dati corretti
+                            if (!data.timeEntries || !data.settings || !data.version) {
+                                alert('Formato file non valido');
+                                document.body.removeChild(fileInput);
+                                return;
+                            }
+                            
+                            if (confirm('Questa operazione sovrascriverà tutti i dati esistenti. Continuare?')) {
+                                // Salva i dati importati
+                                localStorage.setItem('timeEntries', JSON.stringify(data.timeEntries));
+                                localStorage.setItem('userName', data.settings.userName);
+                                localStorage.setItem('darkTheme', data.settings.darkTheme);
+                                
+                                // Ricarica la pagina per applicare le modifiche
+                                alert('Dati importati con successo!');
+                                window.location.reload();
+                            }
+                        } catch (error) {
+                            alert('Errore durante l\'importazione: ' + error.message);
+                        }
+                        document.body.removeChild(fileInput);
+                    };
+                    
+                    reader.readAsText(file);
+                });
+                
+                fileInput.click();
+            }
+
+            /**
+             * Funzione per esportare il riepilogo mensile in formato Excel
+             * @param {string} selectedMonth - Il mese selezionato nel formato "MM/YYYY" o "all" per tutti i mesi
+             */
+            function exportMonthlyReportToExcel(selectedMonth = 'all') {
+                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                const userName = localStorage.getItem('userName') || 'Utente';
+                
+                if (entries.length === 0) {
+                    alert('Nessun dato da esportare');
+                    return;
+                }
+                
+                // Filtra le entries in base al mese selezionato
+                let filteredEntries = entries;
+                
+                if (selectedMonth !== 'all') {
+                    const [selectedMonthNum, selectedYear] = selectedMonth.split('/');
+                    
+                    filteredEntries = entries.filter(entry => {
+                        const dateObj = getDateFromItalianFormat(entry.date);
+                        const entryMonth = dateObj.getMonth() + 1;
+                        const entryYear = dateObj.getFullYear();
+                        
+                        return entryMonth === parseInt(selectedMonthNum) && entryYear === parseInt(selectedYear);
+                    });
+                    
+                    if (filteredEntries.length === 0) {
+                        alert('Nessun dato da esportare per il mese selezionato');
+                        return;
+                    }
+                }
+                
+                // Ordina le entries per data (crescente)
+                filteredEntries.sort((a, b) => {
+                    const dateObjA = getDateFromItalianFormat(a.date);
+                    const dateObjB = getDateFromItalianFormat(b.date);
+                    
+                    return dateObjA - dateObjB; // Ordine crescente
+                });
+                
+                // Array per tenere traccia delle celle con colori diversi
+                const holidayCells = [];
+                const saturdayCells = [];
+                const sundayCells = [];
+                
+                // Crea un nuovo workbook
+                const wb = XLSX.utils.book_new();
+                
+                // Prepara i dati per l'Excel con formattazione per il centramento
+                // Intestazione con nome utente
+                let headerData = [];
+                
+                // Intestazione principale
+                headerData.push(['RIEPILOGO ORE PWS GROUP']);
+                headerData.push([`Operatore: ${userName}`]);
+                
+                // Aggiungi leggenda per i giorni speciali
+                headerData.push(['★ = Giorno Festivo', '', '', '', '', '', '', '']);
+                headerData.push(['◆ = Sabato', '', '', '', '', '', '', '']);
+                headerData.push(['■ = Domenica', '', '', '', '', '', '', '']);
+                headerData.push([]); // Riga vuota dopo la leggenda
+                
+                // Aggiungi informazioni sul mese selezionato
+                if (selectedMonth !== 'all') {
+                    const [month, year] = selectedMonth.split('/');
+                    const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long' });
+                    headerData.push([`Periodo: ${monthName.toUpperCase()} ${year}`]);
+                } else {
+                    headerData.push(['Periodo: TUTTI I MESI']);
+                }
+
+                // Aggiungi riga vuota
+                headerData.push([]);
+
+                // Determina il numero massimo di lavori in una descrizione
+                let maxWorkplaces = 1;
+                filteredEntries.forEach(entry => {
+                    if (entry.description) {
+                        // Divide la descrizione usando virgole, punti o trattini come separatori
+                        const workplaces = entry.description.split(/[,.;-]/);
+                        const filteredWorkplaces = workplaces.filter(wp => wp.trim().length > 0);
+                        maxWorkplaces = Math.max(maxWorkplaces, filteredWorkplaces.length);
+                    }
+                });
+
+                // Prepara le intestazioni con colonne aggiuntive per i lavori
+                const baseHeaders = ['Giorno', 'Data', 'Ora Inizio', 'Pausa', 'Ora Fine', 'Ore Trasferta', 'Ore Notturne', 'Ore Totali'];
+                const workplaceHeaders = Array.from({length: maxWorkplaces}, (_, i) => `Lavoro ${i+1}`);
+                const allHeaders = [...baseHeaders, ...workplaceHeaders];
+
+                // Intestazioni colonne
+                headerData.push(allHeaders);
+
+                // Aggiungi ogni riga di dati
+                filteredEntries.forEach((entry, rowIndex) => {
+                    const dayName = getDayName(entry.date);
+                    
+                    // Suddivide la descrizione in lavori separati
+                    let workplaces = [];
+                    if (entry.description) {
+                        workplaces = entry.description.split(/[,.;-]/).map(wp => wp.trim()).filter(wp => wp.length > 0);
+                    }
+                    
+                    // Riempie l'array fino alla lunghezza massima con celle vuote
+                    while (workplaces.length < maxWorkplaces) {
+                        workplaces.push('');
+                    }
+                    
+                    // Determina il tipo di giorno per applicare lo stile
+                    const [day, month, year] = entry.date.split('/').map(Number);
+                    const dateObj = new Date(year, month - 1, day);
+                    const dayOfWeek = dateObj.getDay(); // 0 = Domenica, 6 = Sabato
+                    
+                    // Verifica se è un giorno festivo
+                    const isHoliday = isItalianHoliday(dateObj);
+                    const isSaturday = dayOfWeek === 6;
+                    const isSunday = dayOfWeek === 0;
+                    
+                    // Formatta il nome del giorno in base al tipo
+                    let formattedDayName = dayName;
+                    if (isHoliday && parseFloat(entry.hours || 0) > 0) {
+                        formattedDayName = "★ " + dayName;
+                    } else if (isSaturday) {
+                        formattedDayName = "◆ " + dayName; // Simbolo diamante per sabato
+                    } else if (isSunday) {
+                        formattedDayName = "■ " + dayName; // Simbolo quadrato per domenica
+                    }
+                    // Non aggiungiamo simboli per sabato e domenica, li distingueremo con la formattazione
+                    
+                    // Combina i dati base con i lavori separati
+                    const rowData = [
+                        formattedDayName,
+                        entry.date,
+                        entry.startTime,
+                        entry.breakTime,
+                        entry.endTime,
+                        parseFloat(entry.transferta || 0).toFixed(1),
+                        parseFloat(entry.notturne || 0).toFixed(1),
+                        parseFloat(entry.hours || 0).toFixed(1),
+                        ...workplaces
+                    ];
+                    
+                    headerData.push(rowData);
+                    
+                    // Salva l'indice della riga per applicare gli stili dopo
+                    const dataRowIndex = headerData.length - 1;
+                    
+                    // Definisci lo stile in base al tipo di giorno
+                    if (isHoliday) {
+                        // Festa (rosso)
+                        holidayCells.push({ row: dataRowIndex, cols: [1, 7] }); // Colonne Data e Ore Totali
+                    } else if (dayOfWeek === 0) {
+                        // Domenica (grigio scuro)
+                        sundayCells.push({ row: dataRowIndex, cols: [1, 7] });
+                    } else if (dayOfWeek === 6) {
+                        // Sabato (grigio chiaro)
+                        saturdayCells.push({ row: dataRowIndex, cols: [1, 7] });
+                    }
+                });
+
+                // Aggiungi riga vuota e totali
+                headerData.push([]);
+
+                // Calcola i totali
+                const totalHours = filteredEntries.reduce((sum, entry) => sum + parseFloat(entry.hours || 0), 0).toFixed(1);
+                const totalTransferta = filteredEntries.reduce((sum, entry) => sum + (parseFloat(entry.transferta || 0) || 0), 0).toFixed(1);
+                const totalNotturne = filteredEntries.reduce((sum, entry) => sum + (parseFloat(entry.notturne || 0) || 0), 0).toFixed(1);
+
+                // Riga per le etichette dei totali con celle vuote per le colonne dei lavori
+                const totalLabelsRow = ['', '', '', '', '', 'Totale Trasferta', 'Totale Notturne', 'Totale Ore'];
+                for (let i = 0; i < maxWorkplaces; i++) {
+                    totalLabelsRow.push('');
+                }
+                headerData.push(totalLabelsRow);
+
+                // Riga per i valori dei totali con celle vuote per le colonne dei lavori
+                const totalValuesRow = ['', '', '', '', '', totalTransferta, totalNotturne, totalHours];
+                for (let i = 0; i < maxWorkplaces; i++) {
+                    totalValuesRow.push('');
+                }
+                headerData.push(totalValuesRow);
+
+                // Crea il foglio di lavoro
+                const ws = XLSX.utils.aoa_to_sheet(headerData);
+
+                // Stile e formattazione (intestazioni in grassetto, larghezza colonne)
+                const defaultColWidth = 10;
+                ws['!cols'] = [
+                    { wch: 15 }, // Giorno
+                    { wch: 12 }, // Data
+                    { wch: 10 }, // Ora Inizio
+                    { wch: 10 }, // Pausa
+                    { wch: 10 }, // Ora Fine
+                    { wch: 13 }, // Ore Trasferta
+                    { wch: 13 }, // Ore Notturne
+                    { wch: 10 }  // Ore Totali
+                ];
+
+                // Aggiungi larghezza per le colonne dei luoghi di lavoro
+                for (let i = 0; i < maxWorkplaces; i++) {
+                    ws['!cols'].push({ wch: 15 }); // Lavoro X
+                }
+
+                // Applicazione avanzata degli stili con SheetJS - creazione di un foglio di stile
+                const stylesheet = {};
+                const numRows = headerData.length;
+                const numCols = 8 + maxWorkplaces; // Numero di colonne base + colonne lavoro
+
+                // Crea un oggetto stile per il testo centrato
+                const centeredStyle = { alignment: { horizontal: 'center', vertical: 'center', wrapText: true } };
+
+                // Applica lo stile a tutte le celle nel range usato
+                for (let r = 0; r < numRows; r++) {
+                    for (let c = 0; c < numCols; c++) {
+                        const cellRef = XLSX.utils.encode_cell({r: r, c: c});
+                        stylesheet[cellRef] = { ...centeredStyle };
+                        
+                        // Assicurati che tutte le colonne numeriche (pausa, ore trasferta, ore notturne, ore totali) 
+                        // abbiano lo stesso allineamento
+                        if (r > 0 && (c === 3 || c === 5 || c === 6 || c === 7)) {
+                            stylesheet[cellRef] = { 
+                                ...centeredStyle,
+                                alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+                                numFmt: "0.0" // Formato numerico con 1 decimale
+                            };
+                        }
+                    }
+                }
+                
+                // Aggiungi stile specifico per la leggenda
+                const legendCellRef = XLSX.utils.encode_cell({r: 0, c: 0});
+                stylesheet[legendCellRef] = {
+                    ...centeredStyle,
+                    font: { color: { rgb: "FFFF0000" }, bold: true, size: 12 },
+                    alignment: { horizontal: 'left', vertical: 'center' }
+                };
+
+                // Stile per la nota sui giorni di sabato e domenica
+                const noteCellRef = XLSX.utils.encode_cell({r: 3, c: 0});
+                stylesheet[noteCellRef] = {
+                    ...centeredStyle,
+                    font: { color: { rgb: "FFFF0000" }, bold: true, size: 12 },
+                    alignment: { horizontal: 'left', vertical: 'center' }
+                };
+
+                // Stile per la nota su domenica
+                const sundayLegendRef = XLSX.utils.encode_cell({r: 4, c: 0});
+                stylesheet[sundayLegendRef] = {
+                    ...centeredStyle,
+                    font: { color: { rgb: "FFFF0000" }, bold: true, size: 12 },
+                    alignment: { horizontal: 'left', vertical: 'center' }
+                };
+
+                // Aggiungi gli stili specifici per i giorni speciali
+                holidayCells.forEach(cell => {
+                    cell.cols.forEach(col => {
+                        const cellRef = XLSX.utils.encode_cell({r: cell.row, c: col});
+                        stylesheet[cellRef] = {
+                            ...centeredStyle,
+                            fill: { fgColor: { rgb: "FFFF9999" }, patternType: "solid" }, // Rosso chiaro
+                            font: { color: { rgb: "FFFF0000" }, bold: true } // Testo rosso e grassetto
+                        };
+                    });
+                    
+                    // Aggiungi stile rosso alla colonna del nome del giorno per i giorni festivi
+                    const dayNameCellRef = XLSX.utils.encode_cell({r: cell.row, c: 0});
+                    stylesheet[dayNameCellRef] = {
+                        ...centeredStyle,
+                        font: { color: { rgb: "FFFF0000" }, bold: true } // Testo rosso e grassetto
+                    };
+                });
+
+                // Sabato - formattazione speciale per il nome del giorno
+                saturdayCells.forEach(cell => {
+                    cell.cols.forEach(col => {
+                        const cellRef = XLSX.utils.encode_cell({r: cell.row, c: col});
+                        stylesheet[cellRef] = {
+                            ...centeredStyle,
+                            fill: { fgColor: { rgb: "FFE0E0E0" }, patternType: "solid" } // Grigio chiaro
+                        };
+                    });
+                    
+                    // Stile per il nome del giorno (sabato)
+                    const dayNameCellRef = XLSX.utils.encode_cell({r: cell.row, c: 0});
+                    stylesheet[dayNameCellRef] = {
+                        ...centeredStyle,
+                        font: { color: { rgb: "FFFF0000" }, bold: true, underline: true } // Rosso, grassetto e sottolineato
+                    };
+                });
+
+                // Domenica - formattazione speciale per il nome del giorno
+                sundayCells.forEach(cell => {
+                    cell.cols.forEach(col => {
+                        const cellRef = XLSX.utils.encode_cell({r: cell.row, c: col});
+                        stylesheet[cellRef] = {
+                            ...centeredStyle,
+                            fill: { fgColor: { rgb: "FFA0A0A0" }, patternType: "solid" }, // Grigio scuro
+                            font: { color: { rgb: "FFFFFFFF" } } // Testo bianco
+                        };
+                    });
+                    
+                    // Stile per il nome del giorno (domenica)
+                    const dayNameCellRef = XLSX.utils.encode_cell({r: cell.row, c: 0});
+                    stylesheet[dayNameCellRef] = {
+                        ...centeredStyle,
+                        font: { color: { rgb: "FFFF0000" }, bold: true, underline: true } // Rosso, grassetto e sottolineato
+                    };
+                });
+
+                // Applica il foglio di stile al foglio di lavoro
+                ws['!styles'] = stylesheet;
+
+                // Nome del foglio e del file
+                let fileName = `ore_pws_${userName.replace(/\s+/g, '_')}`;
+                let sheetName = 'Riepilogo Ore';
+
+                if (selectedMonth !== 'all') {
+                    const [month, year] = selectedMonth.split('/');
+                    const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long' });
+                    fileName += `_${monthName.toLowerCase()}_${year}`;
+                    sheetName = `${monthName} ${year}`;
+                }
+
+                // Aggiungi il foglio al workbook
+                XLSX.utils.book_append_sheet(wb, ws, sheetName);
+
+                // Scarica il file Excel
+                XLSX.writeFile(wb, `${fileName}.xlsx`);
+                
+                // Restituisci il nome del file per eventuali usi aggiuntivi
+                return fileName;
+            }
+            
+            /**
+             * Funzione per condividere un report via email
+             * @param {string} format - Il formato del file ('excel' o 'txt')
+             * @param {string} selectedMonth - Il mese selezionato
+             */
+            function shareReportViaEmail(format, selectedMonth = 'all') {
+                const userName = localStorage.getItem('userName') || 'Utente';
+                let subject, body, fileName;
+                
+                if (format === 'excel') {
+                    // Per Excel, genera prima il file e ottieni il nome
+                    fileName = exportMonthlyReportToExcel(selectedMonth);
+                    subject = `Riepilogo Ore PWS - ${userName}`;
+                    body = `Ciao,\n\nIn allegato il riepilogo ore di ${userName}.\n\nCordiali saluti`;
+                } else {
+                    // Per TXT, usa il nome file generato dal metodo di esportazione TXT
+                    exportMonthlyReport(selectedMonth);
+                    
+                    const [month, year] = selectedMonth !== 'all' 
+                        ? selectedMonth.split('/') 
+                        : [new Date().getMonth() + 1, new Date().getFullYear()];
+                        
+                    const monthName = selectedMonth !== 'all' 
+                        ? new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long' })
+                        : 'tutti i mesi';
+                        
+                    fileName = `ore_pws_${userName.replace(/\s+/g, '_')}`;
+                    if (selectedMonth !== 'all') {
+                        fileName += `_${monthName.toLowerCase()}_${year}`;
+                    }
+                    fileName += '.txt';
+                    
+                    subject = `Riepilogo Ore PWS (TXT) - ${userName}`;
+                    body = `Ciao,\n\nIn allegato il riepilogo ore (formato testo) di ${userName}.\n\nCordiali saluti`;
+                }
+                
+                // Crea il link mailto (nota: non è garantito che gli allegati funzionino in tutti i client email)
+                const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                
+                // Apri il client email
+                window.location.href = mailtoLink;
+                
+                // Mostra messaggio informativo sull'allegato
+                alert(`Si aprirà il tuo client email. Il file ${fileName} è stato scaricato e dovrai allegarlo manualmente all'email.`);
+            }
+            
+            /**
+             * Funzione per condividere un report via WhatsApp
+             * @param {string} format - Il formato del file ('excel' o 'txt')
+             * @param {string} selectedMonth - Il mese selezionato
+             */
+            function shareReportViaWhatsApp(format, selectedMonth = 'all') {
+                const userName = localStorage.getItem('userName') || 'Utente';
+                let fileName, message;
+                
+                if (format === 'excel') {
+                    // Per Excel, genera prima il file
+                    fileName = exportMonthlyReportToExcel(selectedMonth);
+                    message = `Ecco il riepilogo ore di ${userName} in formato Excel. Il file è stato scaricato sul mio dispositivo.`;
+                } else {
+                    // Per TXT, usa il nome file generato dal metodo di esportazione TXT
+                    exportMonthlyReport(selectedMonth);
+                    
+                    const [month, year] = selectedMonth !== 'all' 
+                        ? selectedMonth.split('/') 
+                        : [new Date().getMonth() + 1, new Date().getFullYear()];
+                        
+                    const monthName = selectedMonth !== 'all' 
+                        ? new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long' })
+                        : 'tutti i mesi';
+                        
+                    fileName = `ore_pws_${userName.replace(/\s+/g, '_')}`;
+                    if (selectedMonth !== 'all') {
+                        fileName += `_${monthName.toLowerCase()}_${year}`;
+                    }
+                    fileName += '.txt';
+                    
+                    message = `Ecco il riepilogo ore di ${userName} in formato testo. Il file è stato scaricato sul mio dispositivo.`;
+                }
+                
+                // Crea il link per WhatsApp Web
+                const whatsappLink = `https://wa.me/?text=${encodeURIComponent(message)}`;
+                
+                // Apri WhatsApp Web
+                window.open(whatsappLink, '_blank');
+                
+                // Mostra messaggio informativo
+                alert(`Si aprirà WhatsApp. Il file ${fileName} è stato scaricato e dovrai inviarlo manualmente dal tuo dispositivo.`);
+            }
+
+            /**
+             * Funzione globale per pulire il form di input
+             */
+            function clearForm() {
+                console.log("Pulizia form");
+                
+                // Resetta tutti i campi del form
+                const form = document.getElementById('entryForm');
+                if (form) {
+                    form.reset();
+                    
+                    // Ripristina la data corrente
+                    const today = new Date();
+                    const dateString = formatDateForInput(today);
+                    const dateInput = document.getElementById('date');
+                    if (dateInput) {
+                        dateInput.value = dateString;
+                    }
+                    
+                    // Aggiorna l'indicatore della data se la funzione è disponibile
+                    if (typeof updateDateIndicator === 'function') {
+                        updateDateIndicator(dateString);
+                    }
+                }
+                
+                // Nascondi il messaggio di successo/errore
+                const messageDiv = document.getElementById('messageDiv');
+                if (messageDiv) {
+                    messageDiv.style.display = 'none';
+                }
+            }
+
+            // Aggiungi event listeners per i bottoni di condivisione
+            document.getElementById('emailExcelBtn').addEventListener('click', function() {
+                const selectedMonth = document.getElementById('exportMonthSelect').value;
+                shareReportViaEmail('excel', selectedMonth);
+            });
+            
+            document.getElementById('whatsappExcelBtn').addEventListener('click', function() {
+                const selectedMonth = document.getElementById('exportMonthSelect').value;
+                shareReportViaWhatsApp('excel', selectedMonth);
+            });
+            
+            document.getElementById('emailTxtBtn').addEventListener('click', function() {
+                const selectedMonth = document.getElementById('exportMonthSelect').value;
+                shareReportViaEmail('txt', selectedMonth);
+            });
+            
+            document.getElementById('whatsappTxtBtn').addEventListener('click', function() {
+                const selectedMonth = document.getElementById('exportMonthSelect').value;
+                shareReportViaWhatsApp('txt', selectedMonth);
+            });
+
+            // Inizializza gli elementi dell'interfaccia utente
+            // ... existing code ...
+        });
+
+        // Inizializza il datepicker con la data odierna
+        document.addEventListener('DOMContentLoaded', function() {
+            // Funzione globale per aggiornare l'indicatore della data
+            function updateDateIndicator(dateStr) {
+                console.log("Aggiornamento indicatore data:", dateStr);
+                
+                const dateIndicator = document.getElementById('dateIndicator');
+                if (dateIndicator) {
+                    try {
+                        // Formatta la data per visualizzazione
+                        const dateParts = dateStr.split('/');
+                        if (dateParts.length === 3) {
+                            const day = parseInt(dateParts[0]);
+                            const month = parseInt(dateParts[1]) - 1;
+                            const year = parseInt(dateParts[2]);
+                            const dateObj = new Date(year, month, day);
+                            
+                            if (!isNaN(dateObj.getTime())) {
+                                const dayName = dateObj.toLocaleDateString('it-IT', { weekday: 'long' });
+                                const monthName = dateObj.toLocaleDateString('it-IT', { month: 'long' });
+                                
+                                // Rendi più visibile e chiara la data selezionata
+                                dateIndicator.innerHTML = `
+                                    <div style="background-color: #4b7bec; color: white; padding: 8px; border-radius: 5px; margin-top: 5px;">
+                                        <i class="fas fa-calendar-day"></i> 
+                                        <span style="font-size: 1.1rem; font-weight: bold;">${dayName}, ${day} ${monthName} ${year}</span>
+                                    </div>
+                                `;
+                                
+                                // Forza l'aggiornamento dell'input date
+                                const dateInput = document.getElementById('date');
+                                if (dateInput && dateInput.value !== dateStr) {
+                                    dateInput.value = dateStr;
+                                }
+                                
+                                // Aggiorna anche visualmente l'interfaccia del datepicker
+                                if (window.datepickerInstance) {
+                                    window.datepickerInstance.setDate(dateStr, false);
+                                }
+                            } else {
+                                console.error("Data non valida:", dateStr);
+                                dateIndicator.innerHTML = `<div style="color: red;"><i class="fas fa-exclamation-circle"></i> Formato data non valido</div>`;
+                            }
+                        } else {
+                            console.error("Formato data non valido:", dateStr);
+                            dateIndicator.innerHTML = `<div style="color: red;"><i class="fas fa-exclamation-circle"></i> Formato data non valido</div>`;
+                        }
+                    } catch (error) {
+                        console.error("Errore nell'aggiornamento dell'indicatore data:", error);
+                        dateIndicator.innerHTML = `<div style="color: red;"><i class="fas fa-exclamation-circle"></i> Errore nel formato data</div>`;
+                    }
+                }
+            }
+
+            const dateInput = document.getElementById('date');
+            
+            if (dateInput) {
+                // Crea un'istanza globale del datepicker per facilitare l'accesso e la manipolazione
+                window.datepickerInstance = flatpickr(dateInput, {
+                    dateFormat: "d/m/Y",
+                    defaultDate: "today",
+                    locale: "it",
+                    disableMobile: false, // Assicura che usi l'interfaccia flatpickr anche su mobile
+                    allowInput: true,     // Permette l'input diretto
+                    static: true,         // Mantiene il calendario visibile durante la selezione
+                    clickOpens: true,     // Assicura che il click apra il calendario
+                    time_24hr: true,      // Usa il formato 24 ore
+                    onChange: function(selectedDates, dateStr) {
+                        console.log("Data selezionata:", dateStr);
+                        
+                        // IMPORTANTE: Forza l'aggiornamento del valore dell'input in modo sincrono
+                        dateInput.value = dateStr;
+                        
+                        // Aggiorna l'indicatore visivo
+                        updateDateIndicator(dateStr);
+                        
+                        // Resetta il form quando si cambia data
+                        clearForm();
+                        
+                        // Quando cambia la data, controlla se esistono già entries per quella data
+                        loadExistingEntry(dateStr);
+                        
+                        // Forza l'aggiornamento dell'interfaccia utente
+                        setTimeout(function() {
+                            // Trigger di un evento input per assicurarsi che tutti gli ascoltatori siano notificati
+                            const inputEvent = new Event('input', { bubbles: true });
+                            dateInput.dispatchEvent(inputEvent);
+                            
+                            // Forza un refresh completo dell'istanza flatpickr
+                            window.datepickerInstance.close();
+                            
+                            // Attiva un blur sull'input per assicurarsi che il focus venga perso
+                            dateInput.blur();
+                            
+                            // Forza l'aggiornamento del valore visualizzato
+                            console.log("Data selezionata e impostata:", dateStr);
+                        }, 50);
+                    },
+                    onReady: function(selectedDates, dateStr) {
+                        // Inizializza l'indicatore con la data corrente
+                        updateDateIndicator(dateStr);
+                    },
+                    onOpen: function(selectedDates, dateStr) {
+                        // Aggiorna l'UI quando si apre il calendario
+                        updateDateIndicator(dateStr);
+                    },
+                    onClose: function(selectedDates, dateStr) {
+                        // Assicura che il valore dell'input sia corretto alla chiusura
+                        dateInput.value = dateStr;
+                        console.log("Datepicker chiuso, data finale:", dateStr);
+                    }
+                });
+                
+                // La definizione locale viene rimossa poiché ora è globale
             }
         });
     </script>
 </body>
-</html> 
+</html>
