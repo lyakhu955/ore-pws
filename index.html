@@ -1786,6 +1786,38 @@
         .dark-theme .dropdown-content a:hover {
             background-color: var(--dark-hover-bg-color);
         }
+
+        /* Toast notification style */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 12px 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+        .toast.success {
+            border-left-color: #4CAF50;
+        }
+        .toast.error {
+            border-left-color: #F44336;
+        }
+        .toast.warning {
+            border-left-color: #FF9800;
+        }
+        .toast.info {
+            border-left-color: #2196F3;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
@@ -1909,7 +1941,10 @@
                         </div>
                         <div class="setting-item">
                             <div class="setting-label">Nome Utente</div>
-                            <input type="text" id="userName" class="settings-input" placeholder="Inserisci il tuo nome">
+                            <div style="display: flex; gap: 10px; width: 100%;">
+                                <input type="text" id="userName" class="settings-input" placeholder="Inserisci il tuo nome" style="flex-grow: 1;">
+                                <button id="saveUserName" style="background-color: var(--primary-color); color: white; border: none; border-radius: 4px; padding: 8px 12px; cursor: pointer;">Salva</button>
+                            </div>
                         </div>
                         <div class="setting-item">
                             <div class="setting-label">Esporta Dati</div>
@@ -2071,9 +2106,6 @@
                             <div class="month-selector">
                                 <select id="exportMonthSelect"></select>
                             </div>
-                            <button id="exportMonthlyReport" class="export-btn">
-                                <i class="fas fa-file-export"></i> Esporta TXT
-                            </button>
                             <button id="exportMonthlyExcel" class="export-btn excel-btn">
                                 <i class="fas fa-file-excel"></i> Esporta Excel
                             </button>
@@ -2082,10 +2114,7 @@
                                     <i class="fas fa-share-alt"></i> Condividi
                                 </button>
                                 <div class="dropdown-content">
-                                    <a href="#" id="emailExcelBtn"><i class="fas fa-envelope"></i> Email (Excel)</a>
-                                    <a href="#" id="whatsappExcelBtn"><i class="fab fa-whatsapp"></i> WhatsApp (Excel)</a>
-                                    <a href="#" id="emailTxtBtn"><i class="fas fa-envelope"></i> Email (TXT)</a>
-                                    <a href="#" id="whatsappTxtBtn"><i class="fab fa-whatsapp"></i> WhatsApp (TXT)</a>
+                                    <a href="#" id="shareExcelBtn"><i class="fas fa-share-alt"></i> Condividi Excel</a>
                                 </div>
                             </div>
                         </div>
@@ -2330,7 +2359,6 @@
             const darkTheme = document.getElementById('darkTheme');
             const exportData = document.getElementById('exportData');
             const clearData = document.getElementById('clearData');
-            const exportMonthlyReport = document.getElementById('exportMonthlyReport');
             const exportMonthlyExcel = document.getElementById('exportMonthlyExcel');
             
             // Carica le impostazioni
@@ -2442,10 +2470,12 @@
             importData.addEventListener('click', function() {
                 importAllData();
             });
-            
-            exportMonthlyReport.addEventListener('click', function() {
-                const selectedMonth = document.getElementById('exportMonthSelect').value;
-                exportMonthlyReportToText(selectedMonth);
+
+            // Event listener per salvare il nome utente
+            document.getElementById('saveUserName').addEventListener('click', function() {
+                const userName = document.getElementById('userName').value.trim();
+                localStorage.setItem('userName', userName);
+                alert('Nome utente salvato con successo!');
             });
 
             exportMonthlyExcel.addEventListener('click', function() {
@@ -3695,8 +3725,9 @@
                             <div class="monthly-report-entries">
                                 ${monthEntries.map(entry => `
                                     <div class="monthly-report-item">
-                                        <div class="monthly-report-date">${formatDate(entry.date)}</div>
+                                        <div class="monthly-report-date">${getDayName(entry.date)}, ${formatDate(entry.date)}</div>
                                         <div class="monthly-report-details">
+                                            <span class="monthly-report-detail"><i class="fas fa-clock"></i> ${entry.startTime}-${entry.endTime} (Pausa: ${entry.breakTime}h)</span>
                                             <span class="monthly-report-detail">${parseFloat(entry.hours || 0).toFixed(1)}h</span>
                                             ${parseFloat(entry.transferta || 0) > 0 ? `<span class="monthly-report-detail"><i class="fas fa-car"></i> ${parseFloat(entry.transferta).toFixed(1)}h</span>` : ''}
                                             ${parseFloat(entry.notturne || 0) > 0 ? `<span class="monthly-report-detail"><i class="fas fa-moon"></i> ${parseFloat(entry.notturne).toFixed(1)}h</span>` : ''}
@@ -4069,7 +4100,7 @@
              * Funzione per esportare il riepilogo mensile in formato Excel
              * @param {string} selectedMonth - Il mese selezionato nel formato "MM/YYYY" o "all" per tutti i mesi
              */
-            function exportMonthlyReportToExcel(selectedMonth = 'all') {
+            function exportMonthlyReportToExcel(selectedMonth = 'all', shouldDownload = true) {
                 const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
                 const userName = localStorage.getItem('userName') || 'Utente';
                 
@@ -4392,103 +4423,63 @@
                 // Aggiungi il foglio al workbook
                 XLSX.utils.book_append_sheet(wb, ws, sheetName);
 
-                // Scarica il file Excel
-                XLSX.writeFile(wb, `${fileName}.xlsx`);
+                if (shouldDownload) {
+                    // Scarica il file Excel
+                    XLSX.writeFile(wb, `${fileName}.xlsx`);
+                }
                 
-                // Restituisci il nome del file per eventuali usi aggiuntivi
-                return fileName;
+                // Restituisci l'oggetto workbook e il nome del file
+                return { 
+                    workbook: wb, 
+                    fileName: fileName 
+                };
             }
             
             /**
-             * Funzione per condividere un report via email
-             * @param {string} format - Il formato del file ('excel' o 'txt')
+             * Funzione per condividere un file Excel usando l'API di condivisione nativa
              * @param {string} selectedMonth - Il mese selezionato
              */
-            function shareReportViaEmail(format, selectedMonth = 'all') {
+            function shareExcelFile(selectedMonth = 'all') {
                 const userName = localStorage.getItem('userName') || 'Utente';
-                let subject, body, fileName;
                 
-                if (format === 'excel') {
-                    // Per Excel, genera prima il file e ottieni il nome
-                    fileName = exportMonthlyReportToExcel(selectedMonth);
-                    subject = `Riepilogo Ore PWS - ${userName}`;
-                    body = `Ciao,\n\nIn allegato il riepilogo ore di ${userName}.\n\nCordiali saluti`;
-                } else {
-                    // Per TXT, usa il nome file generato dal metodo di esportazione TXT
-                    exportMonthlyReport(selectedMonth);
+                try {
+                    // Genera il file Excel senza scaricarlo
+                    const result = exportMonthlyReportToExcel(selectedMonth, false);
                     
-                    const [month, year] = selectedMonth !== 'all' 
-                        ? selectedMonth.split('/') 
-                        : [new Date().getMonth() + 1, new Date().getFullYear()];
-                        
-                    const monthName = selectedMonth !== 'all' 
-                        ? new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long' })
-                        : 'tutti i mesi';
-                        
-                    fileName = `ore_pws_${userName.replace(/\s+/g, '_')}`;
-                    if (selectedMonth !== 'all') {
-                        fileName += `_${monthName.toLowerCase()}_${year}`;
+                    if (!result) return; // Se c'è stato un errore, esci
+                    
+                    const { workbook, fileName } = result;
+                    
+                    // Converti il workbook in un blob
+                    const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                    const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                    
+                    // Crea un file da condividere
+                    const file = new File([blob], `${fileName}.xlsx`, { type: blob.type });
+                    
+                    // Verifica se il browser supporta la Web Share API con file sharing
+                    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                        // Condividi direttamente usando l'API del dispositivo
+                        navigator.share({
+                            files: [file],
+                            title: 'Riepilogo Ore PWS',
+                            text: `Riepilogo ore di ${userName}`
+                        }).catch(error => {
+                            console.error('Errore durante la condivisione:', error);
+                            // Se fallisce, scarica il file come fallback
+                            XLSX.writeFile(workbook, `${fileName}.xlsx`);
+                        });
+                    } else {
+                        // Fallback: scarica il file se l'API di condivisione non è supportata
+                        XLSX.writeFile(workbook, `${fileName}.xlsx`);
                     }
-                    fileName += '.txt';
-                    
-                    subject = `Riepilogo Ore PWS (TXT) - ${userName}`;
-                    body = `Ciao,\n\nIn allegato il riepilogo ore (formato testo) di ${userName}.\n\nCordiali saluti`;
+                } catch (error) {
+                    console.error('Errore durante la creazione o condivisione del file:', error);
+                    // Fallback al metodo tradizionale
+                    exportMonthlyReportToExcel(selectedMonth, true);
                 }
-                
-                // Crea il link mailto (nota: non è garantito che gli allegati funzionino in tutti i client email)
-                const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                
-                // Apri il client email
-                window.location.href = mailtoLink;
-                
-                // Mostra messaggio informativo sull'allegato
-                alert(`Si aprirà il tuo client email. Il file ${fileName} è stato scaricato e dovrai allegarlo manualmente all'email.`);
             }
             
-            /**
-             * Funzione per condividere un report via WhatsApp
-             * @param {string} format - Il formato del file ('excel' o 'txt')
-             * @param {string} selectedMonth - Il mese selezionato
-             */
-            function shareReportViaWhatsApp(format, selectedMonth = 'all') {
-                const userName = localStorage.getItem('userName') || 'Utente';
-                let fileName, message;
-                
-                if (format === 'excel') {
-                    // Per Excel, genera prima il file
-                    fileName = exportMonthlyReportToExcel(selectedMonth);
-                    message = `Ecco il riepilogo ore di ${userName} in formato Excel. Il file è stato scaricato sul mio dispositivo.`;
-                } else {
-                    // Per TXT, usa il nome file generato dal metodo di esportazione TXT
-                    exportMonthlyReport(selectedMonth);
-                    
-                    const [month, year] = selectedMonth !== 'all' 
-                        ? selectedMonth.split('/') 
-                        : [new Date().getMonth() + 1, new Date().getFullYear()];
-                        
-                    const monthName = selectedMonth !== 'all' 
-                        ? new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long' })
-                        : 'tutti i mesi';
-                        
-                    fileName = `ore_pws_${userName.replace(/\s+/g, '_')}`;
-                    if (selectedMonth !== 'all') {
-                        fileName += `_${monthName.toLowerCase()}_${year}`;
-                    }
-                    fileName += '.txt';
-                    
-                    message = `Ecco il riepilogo ore di ${userName} in formato testo. Il file è stato scaricato sul mio dispositivo.`;
-                }
-                
-                // Crea il link per WhatsApp Web
-                const whatsappLink = `https://wa.me/?text=${encodeURIComponent(message)}`;
-                
-                // Apri WhatsApp Web
-                window.open(whatsappLink, '_blank');
-                
-                // Mostra messaggio informativo
-                alert(`Si aprirà WhatsApp. Il file ${fileName} è stato scaricato e dovrai inviarlo manualmente dal tuo dispositivo.`);
-            }
-
             /**
              * Funzione globale per pulire il form di input
              */
@@ -4521,29 +4512,76 @@
                 }
             }
 
-            // Aggiungi event listeners per i bottoni di condivisione
-            document.getElementById('emailExcelBtn').addEventListener('click', function() {
+            // Aggiungi event listeners per il bottone di condivisione
+            document.getElementById('shareExcelBtn').addEventListener('click', function() {
                 const selectedMonth = document.getElementById('exportMonthSelect').value;
-                shareReportViaEmail('excel', selectedMonth);
+                const userName = localStorage.getItem('userName') || 'Utente';
+                
+                try {
+                    // Verifica se siamo in un contesto sicuro (HTTPS)
+                    const isSecureContext = window.isSecureContext;
+                    
+                    // Genera il file Excel
+                    const result = exportMonthlyReportToExcel(selectedMonth, false);
+                    
+                    if (!result) return; // Se c'è stato un errore, esci
+                    
+                    const { workbook, fileName } = result;
+                    
+                    // Converti il workbook in un blob
+                    const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                    const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                    
+                    // Crea un file da condividere
+                    const file = new File([blob], `${fileName}.xlsx`, { type: blob.type });
+                    
+                    // Verifica se il browser supporta la Web Share API con file sharing
+                    // e se siamo in un contesto sicuro
+                    if (isSecureContext && navigator.share && 
+                        navigator.canShare && navigator.canShare({ files: [file] })) {
+                        
+                        // Mostra messaggio di condivisione in corso
+                        showToast('Apertura menu di condivisione...', 'info');
+                        
+                        // Condividi direttamente usando l'API del dispositivo
+                        navigator.share({
+                            files: [file],
+                            title: 'Riepilogo Ore PWS',
+                            text: `Riepilogo ore di ${userName}`
+                        }).then(() => {
+                            showToast('File condiviso con successo!', 'success');
+                        }).catch(error => {
+                            console.error('Errore durante la condivisione:', error);
+                            
+                            if (error.name === 'NotAllowedError') {
+                                showToast('Permesso di condivisione negato. Il file verrà scaricato.', 'warning');
+                            } else if (error.name === 'AbortError') {
+                                showToast('Condivisione annullata', 'info');
+                                return; // Non scaricare se l'utente ha annullato
+                            } else {
+                                showToast('Impossibile condividere. Il file verrà scaricato.', 'warning');
+                            }
+                            
+                            // Se fallisce, scarica il file come fallback
+                            XLSX.writeFile(workbook, `${fileName}.xlsx`);
+                        });
+                    } else {
+                        // Fallback: scarica il file se l'API di condivisione non è supportata
+                        // o non siamo in un contesto sicuro
+                        if (!isSecureContext) {
+                            showToast('La condivisione richiede una connessione sicura (HTTPS). Il file verrà scaricato.', 'warning');
+                        } else {
+                            showToast('La condivisione non è supportata su questo dispositivo. Il file verrà scaricato.', 'info');
+                        }
+                        XLSX.writeFile(workbook, `${fileName}.xlsx`);
+                    }
+                } catch (error) {
+                    console.error('Errore durante la creazione o condivisione del file:', error);
+                    showToast('Si è verificato un errore. Il file verrà scaricato.', 'error');
+                    // Fallback al metodo tradizionale
+                    exportMonthlyReportToExcel(selectedMonth, true);
+                }
             });
-            
-            document.getElementById('whatsappExcelBtn').addEventListener('click', function() {
-                const selectedMonth = document.getElementById('exportMonthSelect').value;
-                shareReportViaWhatsApp('excel', selectedMonth);
-            });
-            
-            document.getElementById('emailTxtBtn').addEventListener('click', function() {
-                const selectedMonth = document.getElementById('exportMonthSelect').value;
-                shareReportViaEmail('txt', selectedMonth);
-            });
-            
-            document.getElementById('whatsappTxtBtn').addEventListener('click', function() {
-                const selectedMonth = document.getElementById('exportMonthSelect').value;
-                shareReportViaWhatsApp('txt', selectedMonth);
-            });
-
-            // Inizializza gli elementi dell'interfaccia utente
-            // ... existing code ...
         });
 
         // Inizializza il datepicker con la data odierna
@@ -4662,6 +4700,37 @@
                 // La definizione locale viene rimossa poiché ora è globale
             }
         });
+
+        /**
+         * Mostra un messaggio toast all'utente
+         * @param {string} message - Il messaggio da mostrare
+         * @param {string} type - Il tipo di messaggio (success, error, warning, info)
+         * @param {number} duration - Durata in millisecondi
+         */
+        function showToast(message, type = 'info', duration = 3000) {
+            // Rimuovi eventuali toast esistenti
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+            
+            // Crea un nuovo elemento toast
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            
+            // Aggiungi al body
+            document.body.appendChild(toast);
+            
+            // Mostra il toast
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            // Rimuovi dopo la durata specificata
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
     </script>
 </body>
 </html>
