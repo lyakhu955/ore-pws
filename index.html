@@ -2186,118 +2186,237 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/it.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
-        // Funzione globale per modificare una entry
-        function editEntry(date, index) {
-            console.log('editEntry chiamata con:', date, index);
-            const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
-            const dayEntries = entries.filter(e => e.date === date);
-            const entry = dayEntries[index];
-            
-            if (!entry) {
-                console.error('Entry non trovata');
-                return;
-            }
-
-            // Salva l'entry da modificare nel localStorage
-            localStorage.setItem('editingEntry', JSON.stringify({
-                index: entries.findIndex(e => e.date === date && e.description === entry.description),
-                entry: entry
-            }));
-
-            // Chiudi il modale
-            document.getElementById('dayModal').style.display = 'none';
-
-            // Vai alla home page utilizzando la funzione handleNavigation
-            handleNavigation('home-section');
-
-            // Imposta i valori nel form
-            setTimeout(() => {
-                // Aggiorna la data sia nell'input che nell'istanza flatpickr
-                const dateInput = document.getElementById('date');
-                dateInput.value = entry.date;
+        // Funzioni globali
+        
+        /**
+         * Calcola le ore totali in base a orario di inizio, fine e pausa
+         */
+        function calculateTotalHours() {
+            try {
+                const startTime = parseFloat(document.getElementById('startTime').value) || 0;
+                const endTime = parseFloat(document.getElementById('endTime').value) || 0;
+                const breakTime = parseFloat(document.getElementById('breakTime').value) || 0;
                 
-                // Usa l'istanza globale di flatpickr per aggiornare la data
-                if (window.datepickerInstance) {
-                    window.datepickerInstance.setDate(entry.date);
+                if (startTime && endTime) {
+                    // Gestione speciale per mezzanotte
+                    let start = startTime;
+                    let end = endTime;
+                    
+                    if (start === 24) start = 0;
+                    if (end === 24) end = 0;
+                    
+                    // Calcolo delle ore
+                    let totalHours;
+                    if (end >= start) {
+                        // Stesso giorno
+                        totalHours = end - start;
+                    } else {
+                        // Giorno successivo
+                        totalHours = (24 - start) + end;
+                    }
+                    
+                    // Sottrai la pausa
+                    totalHours = totalHours - breakTime;
+                    
+                    // Imposta il valore nel campo totalHours
+                    const totalHoursField = document.getElementById('totalHours');
+                    if (totalHoursField) {
+                        totalHoursField.value = totalHours.toFixed(1);
+                    }
+                }
+            } catch (error) {
+                console.error('Errore nel calcolo delle ore totali:', error);
+            }
+        }
+        
+        /**
+         * Formatta la data per l'input nel formato dd/mm/yyyy
+         * @param {Date} date - Oggetto Date da formattare
+         * @returns {string} - Data formattata
+         */
+        function formatDateForInput(date) {
+            if (!date || !(date instanceof Date)) {
+                console.error('formatDateForInput: data non valida', date);
+                return '';
+            }
+            
+            try {
+                const day = date.getDate().toString().padStart(2, '0');
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const year = date.getFullYear();
+                return `${day}/${month}/${year}`;
+            } catch (error) {
+                console.error('Errore nella formattazione della data:', error);
+                return '';
+            }
+        }
+        
+        /**
+         * Funzione per caricare le entries esistenti per una data
+         * @param {string} date - La data per cui caricare i dati
+         */
+        function loadExistingEntry(date) {
+            console.log('==== INIZIO CARICAMENTO ENTRY ====');
+            console.log('Caricamento entry per data:', date);
+            
+            try {
+                // Carica tutte le entries e stampale per debug
+                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                console.log('Tutte le entries in localStorage:', entries);
+                
+                if (!date || entries.length === 0) {
+                    console.log('Nessuna data specificata o nessuna entry trovata in localStorage');
+                    clearForm();
+                    console.log('==== FINE CARICAMENTO: FORM PULITO ====');
+                    return;
                 }
                 
-                document.getElementById('startTime').value = entry.startTime;
-                document.getElementById('endTime').value = entry.endTime;
-                document.getElementById('breakTime').value = entry.breakTime;
-                document.getElementById('transferta').value = entry.transferta || 0;
-                document.getElementById('notturne').value = entry.notturne || 0;
-                document.getElementById('description').value = entry.description;
+                // Debug: stampa il tipo e il formato della data
+                console.log('Tipo data input:', typeof date, 'Valore:', date);
                 
-                // Aggiorna direttamente il campo ore totali
-                document.getElementById('totalHours').value = entry.hours;
-
-                // Modifica il testo del pulsante di submit
-                const submitBtn = document.getElementById('submitBtn');
-                submitBtn.textContent = 'Modifica Entry';
-                submitBtn.onclick = function(e) {
-                    e.preventDefault();
+                // Normalizza la data di input per il confronto a formato ISO (yyyy-mm-dd)
+                let normalizedDateInput;
+                
+                // Se la data è in formato italiano (dd/mm/yyyy), convertila
+                if (date.includes('/')) {
+                    const parts = date.split('/');
+                    console.log('Parti della data di input:', parts);
                     
-                    // Prendi i valori dal form
-                    const formDate = document.getElementById('date').value;
-                    const formStartTime = parseFloat(document.getElementById('startTime').value);
-                    const formEndTime = parseFloat(document.getElementById('endTime').value);
-                    const formBreakTime = parseFloat(document.getElementById('breakTime').value);
-                    const formTransferta = parseFloat(document.getElementById('transferta').value);
-                    const formNotturne = parseFloat(document.getElementById('notturne').value);
-                    const formDescription = document.getElementById('description').value;
+                    if (parts.length === 3) {
+                        // Assicura che i mesi e i giorni abbiano sempre due cifre
+                        normalizedDateInput = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                    } else {
+                        normalizedDateInput = date;
+                    }
+                } else {
+                    normalizedDateInput = date;
+                }
+                
+                console.log('Data di input normalizzata:', normalizedDateInput);
+                
+                // Itera su tutte le entries per debug dettagliato
+                console.log('==== ANALISI CONFRONTO DATE ====');
+                for (let i = 0; i < entries.length; i++) {
+                    const entry = entries[i];
+                    console.log(`Analisi entry ${i}:`, entry);
                     
-                    // Calcola le ore totali
-                    const hours = formEndTime - formStartTime - formBreakTime;
+                    // Estrai e normalizza la data dell'entry
+                    let entryDate = entry.date;
+                    console.log(`Entry ${i} - data originale:`, entryDate, 'tipo:', typeof entryDate);
                     
-                    // Prendi l'indice dell'entry da modificare
-                    const editingData = JSON.parse(localStorage.getItem('editingEntry'));
-                    const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                    let normalizedEntryDate = '';
                     
-                    // Aggiorna l'entry
-                    entries[editingData.index] = {
-                        date: formDate,
-                        startTime: formStartTime,
-                        endTime: formEndTime,
-                        breakTime: formBreakTime,
-                        transferta: formTransferta,
-                        notturne: formNotturne,
-                        description: formDescription,
-                        hours: hours
-                    };
-                    
-                    // Salva nel localStorage
-                    localStorage.setItem('timeEntries', JSON.stringify(entries));
-                    localStorage.removeItem('editingEntry');
-                    
-                    // Resetta il form
-                    document.getElementById('timeEntryForm').reset();
-                    submitBtn.textContent = 'Aggiungi Entry';
-                    submitBtn.onclick = function(e) {
-                        e.preventDefault();
-                        
-                        const form = document.getElementById('timeEntryForm');
-                        if (form) {
-                            // Crea un evento di submit
-                            const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-                            form.dispatchEvent(submitEvent);
+                    // Assicurati che entryDate sia una stringa valida
+                    if (entryDate && typeof entryDate === 'string') {
+                        if (entryDate.includes('/')) {
+                            const parts = entryDate.split('/');
+                            console.log(`Entry ${i} - parti della data:`, parts);
+                            
+                            if (parts.length === 3) {
+                                normalizedEntryDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                            } else {
+                                normalizedEntryDate = entryDate;
+                            }
+                        } else {
+                            normalizedEntryDate = entryDate;
                         }
-                    };
+                    }
                     
-                    // Aggiorna il calendario
-                    updateCalendarDisplay(new Date().getMonth(), new Date().getFullYear());
+                    console.log(`Entry ${i} - data normalizzata:`, normalizedEntryDate);
                     
-                    // Mostra un messaggio di successo
-                    alert('Entry modificata con successo!');
+                    // Verifica se c'è corrispondenza
+                    const isMatch = normalizedEntryDate === normalizedDateInput;
+                    console.log(`Entry ${i} - corrisponde? ${isMatch}`);
                     
-                    // Aggiorna le visualizzazioni
-                    loadTimeEntries();
-                    updateCalendar();
-                    updateMonthlyReport();
-                };
-            }, 100);
+                    // Se c'è corrispondenza, carica i dati
+                    if (isMatch) {
+                        console.log(`==== TROVATA CORRISPONDENZA con entry ${i} ====`);
+                        console.log('Dati da caricare:', entry);
+                        
+                        // Popola il form con i dati dell'entry
+                        const elements = {
+                            'startTime': entry.startTime,
+                            'endTime': entry.endTime,
+                            'breakTime': entry.breakTime,
+                            'totalHours': entry.hours,
+                            'transferta': entry.transferta || '',
+                            'notturne': entry.notturne || '',
+                            'description': entry.description
+                        };
+                        
+                        // Debug: verifica se tutti gli elementi del DOM esistono
+                        console.log('==== VERIFICA ESISTENZA ELEMENTI DOM ====');
+                        for (const [id, value] of Object.entries(elements)) {
+                            const element = document.getElementById(id);
+                            console.log(`Elemento ${id} esiste?`, element ? 'SÌ' : 'NO', 'Valore da impostare:', value);
+                            
+                            if (element) {
+                                element.value = value;
+                                console.log(`Impostato valore per ${id}: ${value}`);
+                            } else {
+                                console.warn(`ATTENZIONE: Elemento con ID '${id}' non trovato nel DOM`);
+                            }
+                        }
+                        
+                        // Calcola le ore totali per assicurare coerenza
+                        calculateTotalHours();
+                        
+                        // Mostra un messaggio all'utente
+                        showToast(`Caricati i dati esistenti per il ${date}`, 'info');
+                        console.log('==== CARICAMENTO COMPLETATO CON SUCCESSO ====');
+                        return;
+                    }
+                }
+                
+                // Se arriviamo qui, non abbiamo trovato corrispondenze
+                console.log('Nessuna entry trovata per questa data, reset del form');
+                clearForm();
+                console.log('==== FINE CARICAMENTO: NESSUNA CORRISPONDENZA ====');
+            } catch (error) {
+                console.error('Errore durante il caricamento dei dati:', error);
+                showToast('Errore durante il caricamento dei dati', 'error');
+            }
         }
-
+        
+        // Anche clearForm deve essere globale
+        function clearForm() {
+            console.log("Pulizia form");
+            
+            try {
+                // Resetta tutti i campi del form
+                const form = document.getElementById('timeEntryForm'); // ID corretto
+                if (form) {
+                    form.reset();
+                    
+                    // Ripristina la data corrente
+                    const today = new Date();
+                    const dateString = formatDateForInput(today);
+                    const dateInput = document.getElementById('date');
+                    if (dateInput) {
+                        dateInput.value = dateString;
+                    }
+                    
+                    // Aggiorna l'indicatore della data se la funzione è disponibile
+                    if (typeof updateDateIndicator === 'function') {
+                        updateDateIndicator(dateString);
+                    }
+                } else {
+                    console.error("Form non trovato con ID 'timeEntryForm'");
+                }
+                
+                // Nascondi il messaggio di successo/errore
+                const messageDiv = document.getElementById('messageDiv');
+                if (messageDiv) {
+                    messageDiv.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Errore durante la pulizia del form:', error);
+            }
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
+            // ... resto del codice esistente ...
+        
             // Funzione globale per aggiornare l'indicatore della data
             function updateDateIndicator(dateStr) {
                 console.log("Aggiornamento indicatore data:", dateStr);
@@ -2529,19 +2648,8 @@
                         // Aggiorna l'indicatore visivo
                         updateDateIndicator(dateStr);
                         
-                        // Invece di chiamare clearForm che non è visibile in questo scope,
-                        // eseguiamo direttamente le operazioni necessarie
-                        console.log("Reset form in corso...");
-                        const entryForm = document.getElementById('entryForm');
-                        if (entryForm) {
-                            entryForm.reset();
-                        }
-                        const messageDiv = document.getElementById('messageDiv');
-                        if (messageDiv) {
-                            messageDiv.style.display = 'none';
-                        }
-                        
-                        // Quando cambia la data, controlla se esistono già entries per quella data
+                        // Prima verifica se esistono già entries per quella data
+                        // e poi se necessario resetta il form
                         loadExistingEntry(dateStr);
                         
                         // Forza l'aggiornamento dell'interfaccia utente
@@ -2578,125 +2686,10 @@
                 flatpickr('.datepicker', options);
             }
             
-            // Funzione per caricare le entries esistenti per una data
-            function loadExistingEntry(date) {
-                console.log('Caricamento entry per data:', date);
-                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
-                console.log('Tutte le entries:', entries);
-                
-                // Normalizza la data per il confronto
-                let normalizedDate = date;
-                
-                // Se la data è in formato italiano (dd/mm/yyyy), convertila in formato standard (yyyy-mm-dd)
-                if (date.includes('/')) {
-                    const parts = date.split('/');
-                    if (parts.length === 3) {
-                        normalizedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
-                    }
-                }
-                
-                console.log('Data normalizzata per ricerca:', normalizedDate);
-                
-                // Cerca le entries per questa data
-                const existingEntries = entries.filter(entry => {
-                    // Normalizza anche la data dell'entry per il confronto
-                    let entryDate = entry.date;
-                    if (entryDate.includes('/')) {
-                        const parts = entryDate.split('/');
-                        if (parts.length === 3) {
-                            entryDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
-                        }
-                    }
-                    return entryDate === normalizedDate;
-                });
-                
-                console.log('Entries trovate per questa data:', existingEntries);
-                
-                if (existingEntries.length > 0) {
-                    // Carica automaticamente l'ultima entry per questa data
-                    const lastEntry = existingEntries[existingEntries.length - 1];
-                    console.log('Caricamento ultima entry:', lastEntry);
-                    
-                    // Popola il form con i dati dell'entry
-                    const elements = {
-                        'startTime': lastEntry.startTime,
-                        'endTime': lastEntry.endTime,
-                        'breakTime': lastEntry.breakTime,
-                        'totalHours': lastEntry.hours,
-                        'transferta': lastEntry.transferta || '',
-                        'notturne': lastEntry.notturne || '',
-                        'description': lastEntry.description
-                    };
-
-                    for (const [id, value] of Object.entries(elements)) {
-                        const element = document.getElementById(id);
-                        if (element) {
-                            element.value = value;
-                        } else {
-                            console.warn(`Elemento con ID '${id}' non trovato nel DOM`);
-                        }
-                    }
-                    
-                    // Calcola le ore totali
-                    calculateTotalHours();
-                } else {
-                    console.log('Nessuna entry trovata per questa data, reset del form');
-                    // Se non ci sono entries per questa data, resetta il form
-                    const resetValues = {
-                        'startTime': '',
-                        'endTime': '',
-                        'breakTime': '0.5',
-                        'totalHours': '',
-                        'transferta': '',
-                        'notturne': '',
-                        'description': ''
-                    };
-
-                    for (const [id, value] of Object.entries(resetValues)) {
-                        const element = document.getElementById(id);
-                        if (element) {
-                            element.value = value;
-                        } else {
-                            console.warn(`Elemento con ID '${id}' non trovato nel DOM durante il reset`);
-                        }
-                    }
-                }
-            }
-            
             // Aggiungi event listener per il calcolo automatico delle ore
             document.getElementById('startTime').addEventListener('change', calculateTotalHours);
             document.getElementById('endTime').addEventListener('change', calculateTotalHours);
             document.getElementById('breakTime').addEventListener('change', calculateTotalHours);
-            
-            function calculateTotalHours() {
-                const startTime = parseFloat(document.getElementById('startTime').value) || 0;
-                const endTime = parseFloat(document.getElementById('endTime').value) || 0;
-                const breakTime = parseFloat(document.getElementById('breakTime').value) || 0;
-                
-                if (startTime && endTime) {
-                    // Gestione speciale per mezzanotte
-                    let start = startTime;
-                    let end = endTime;
-                    
-                    if (start === 24) start = 0;
-                    if (end === 24) end = 0;
-                    
-                    // Calcolo delle ore
-                    let totalHours;
-                    if (end >= start) {
-                        // Stesso giorno
-                        totalHours = end - start;
-                    } else {
-                        // Giorno successivo
-                        totalHours = (24 - start) + end;
-                    }
-                    
-                    // Sottrai la pausa
-                    totalHours = totalHours - breakTime;
-                    
-                    document.getElementById('totalHours').value = totalHours.toFixed(1);
-                }
-            }
             
             function calculateHours(startTime, endTime, breakTime) {
                 // Log dei valori di input
@@ -4487,7 +4480,7 @@
                 console.log("Pulizia form");
                 
                 // Resetta tutti i campi del form
-                const form = document.getElementById('entryForm');
+                const form = document.getElementById('timeEntryForm'); // ID corretto
                 if (form) {
                     form.reset();
                     
@@ -4503,6 +4496,8 @@
                     if (typeof updateDateIndicator === 'function') {
                         updateDateIndicator(dateString);
                     }
+                } else {
+                    console.error("Form non trovato con ID 'timeEntryForm'");
                 }
                 
                 // Nascondi il messaggio di successo/errore
@@ -4580,6 +4575,39 @@
                     showToast('Si è verificato un errore. Il file verrà scaricato.', 'error');
                     // Fallback al metodo tradizionale
                     exportMonthlyReportToExcel(selectedMonth, true);
+                }
+            });
+
+            // Aggiungi un gestore di scorciatoie da tastiera per il debug
+            document.addEventListener('keydown', function(e) {
+                // Shift+D per attivare il debug
+                if (e.shiftKey && e.key === 'D') {
+                    console.log("Attivata funzione di debug con Shift+D");
+                    debugTimeEntries();
+                    
+                    // Verifica se ci sono problemi con l'elemento form
+                    const form = document.getElementById('timeEntryForm'); // ID corretto
+                    if (form) {
+                        console.log("Form trovato:", form);
+                        
+                        // Verifica tutti i campi del form
+                        const inputs = form.querySelectorAll('input, textarea, select');
+                        console.log("Campi input nel form:", inputs.length);
+                        
+                        inputs.forEach(input => {
+                            console.log(`Input: id=${input.id}, name=${input.name}, type=${input.type}, value="${input.value}"`);
+                        });
+                        
+                        // Simula la selezione di una data di oggi
+                        const today = new Date();
+                        const dateStr = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
+                        console.log("Simulazione caricamento per data:", dateStr);
+                        
+                        // Forza il caricamento
+                        loadExistingEntry(dateStr);
+                    } else {
+                        console.error("Form non trovato! Verificare l'ID 'timeEntryForm'");
+                    }
                 }
             });
         });
@@ -4660,10 +4688,8 @@
                         // Aggiorna l'indicatore visivo
                         updateDateIndicator(dateStr);
                         
-                        // Resetta il form quando si cambia data
-                        clearForm();
-                        
-                        // Quando cambia la data, controlla se esistono già entries per quella data
+                        // Prima verifica se esistono già entries per quella data
+                        // e poi se necessario resetta il form
                         loadExistingEntry(dateStr);
                         
                         // Forza l'aggiornamento dell'interfaccia utente
@@ -4730,6 +4756,76 @@
                 toast.classList.remove('show');
                 setTimeout(() => toast.remove(), 300);
             }, duration);
+        }
+
+        /**
+         * Funzione di debug per analizzare tutte le time entries nel localStorage
+         * Può essere chiamata dalla console per diagnosticare problemi
+         */
+        function debugTimeEntries() {
+            console.log('%c==== DEBUG TIME ENTRIES ====', 'background: #000; color: #fff; padding: 5px;');
+            
+            // Recupera tutte le entries
+            const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+            console.log(`%cTrovate ${entries.length} entries nel localStorage`, 'color: blue; font-weight: bold;');
+            
+            if (entries.length === 0) {
+                console.log('%cNessuna entry trovata!', 'color: red;');
+                return;
+            }
+            
+            // Analizza ogni entry
+            entries.forEach((entry, index) => {
+                console.log(`%cEntry #${index}:`, 'color: green; font-weight: bold;');
+                console.log('Data completa:', entry);
+                
+                // Analizza specificamente la data
+                const dateStr = entry.date;
+                console.log('Data originale:', dateStr, 'Tipo:', typeof dateStr);
+                
+                // Prova a normalizzare la data
+                let normalizedDate = '';
+                if (dateStr && typeof dateStr === 'string') {
+                    if (dateStr.includes('/')) {
+                        const parts = dateStr.split('/');
+                        console.log('Parti della data:', parts);
+                        
+                        if (parts.length === 3) {
+                            normalizedDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                        }
+                    } else {
+                        normalizedDate = dateStr;
+                    }
+                }
+                
+                console.log('Data normalizzata:', normalizedDate);
+                
+                // Verifica che i campi essenziali siano presenti
+                const requiredFields = ['startTime', 'endTime', 'breakTime', 'hours', 'description'];
+                requiredFields.forEach(field => {
+                    const exists = field in entry;
+                    const value = entry[field];
+                    console.log(`Campo '${field}': ${exists ? 'presente' : 'MANCANTE'}, valore: ${value}, tipo: ${typeof value}`);
+                });
+                
+                console.log('------------------');
+            });
+            
+            // Verifica gli elementi del form
+            console.log('%cVerifica elementi del form:', 'color: purple; font-weight: bold;');
+            const formElements = ['date', 'startTime', 'endTime', 'breakTime', 'totalHours', 'transferta', 'notturne', 'description'];
+            
+            formElements.forEach(id => {
+                const element = document.getElementById(id);
+                console.log(`Elemento '${id}': ${element ? 'trovato' : 'NON TROVATO'}`);
+                if (element) {
+                    console.log(`  - Tipo: ${element.tagName}`);
+                    console.log(`  - Valore attuale: "${element.value}"`);
+                }
+            });
+            
+            console.log('%c==== FINE DEBUG ====', 'background: #000; color: #fff; padding: 5px;');
+            return "Debug completato. Controlla la console per i risultati.";
         }
     </script>
 </body>
