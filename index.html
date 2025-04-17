@@ -3672,6 +3672,11 @@
                 monthSelector.innerHTML = '';
                 monthSelector.innerHTML = '<option value="all">Tutti i mesi</option>';
                 
+                // Ottieni il mese corrente nel formato 'MM/YYYY'
+                const today = new Date();
+                const currentMonth = `${today.getMonth() + 1}/${today.getFullYear()}`;
+                let currentMonthExists = false;
+                
                 Object.keys(entriesByMonth).forEach(monthYear => {
                     const [month, year] = monthYear.split('/');
                     const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long' });
@@ -3681,8 +3686,20 @@
                     const option = document.createElement('option');
                     option.value = optionValue;
                     option.textContent = optionText;
+                    
+                    // Verifica se questo mese è il mese corrente
+                    if (monthYear === currentMonth) {
+                        option.selected = true;
+                        currentMonthExists = true;
+                    }
+                    
                     monthSelector.appendChild(option);
                 });
+                
+                // Se non esistono entries per il mese corrente, lascia selezionato "Tutti i mesi"
+                if (!currentMonthExists) {
+                    monthSelector.value = "all";
+                }
                 
                 let html = '';
                 
