@@ -2675,6 +2675,18 @@
             console.log("Inizializzazione datepicker migliorata per mobile");
             
             try {
+                // Hide the date input field visually since we're using only the blue indicator
+                dateInput.style.display = 'none';
+                
+                // Also hide the label for the date input
+                const dateLabels = document.querySelectorAll('label');
+                dateLabels.forEach(label => {
+                    if (label.textContent.trim() === 'Data:') {
+                        console.log("Nascondo etichetta data");
+                        label.style.display = 'none';
+                    }
+                });
+                
                 // Destroy any existing instance
                 const oldInstance = dateInput._flatpickr;
                 if (oldInstance) {
@@ -2707,7 +2719,7 @@
                 console.log("Data iniziale salvata globalmente:", window.lastSelectedDate);
                 
                 // Configure flatpickr
-                flatpickr(dateInput, {
+                const fp = flatpickr(dateInput, {
                     dateFormat: "d/m/Y", 
                     locale: "it",
                     allowInput: true,
@@ -2761,43 +2773,45 @@
                     }
                 });
                 
-                // Add extra handlers for mobile
-                if (isMobile) {
-                    // Add a manual change handler as backup
-                    dateInput.addEventListener('change', function(e) {
-                        console.log("Input date change event:", this.value);
-                        
-                        // Store selected date globally
-                        window.lastSelectedDate = this.value;
-                        
-                        // Update the date indicator
-                        if (typeof updateDateIndicator === 'function') {
-                            updateDateIndicator(this.value);
-                        }
-                        
-                        // Load any existing entries
-                        if (typeof loadExistingEntry === 'function') {
-                            setTimeout(() => {
-                                loadExistingEntry(this.value);
-                                
-                                // Re-verify date after loading
-                                setTimeout(() => {
-                                    if (this.value !== window.lastSelectedDate) {
-                                        console.log("Data persa dopo caricamento mobile, ripristino:", window.lastSelectedDate);
-                                        this.value = window.lastSelectedDate;
-                                    }
-                                }, 100);
-                            }, 50);
+                // Make the date indicator clickable to open the datepicker
+                const dateIndicator = document.querySelector('.date-indicator') || document.getElementById('dateIndicator');
+                if (dateIndicator) {
+                    // Make it look clickable
+                    dateIndicator.style.cursor = 'pointer';
+                    dateIndicator.title = 'Clicca per cambiare data';
+                    
+                    // Add click handler to open the datepicker
+                    dateIndicator.addEventListener('click', function() {
+                        console.log("Click sull'indicatore data - apertura datepicker");
+                        if (fp) {
+                            fp.open();
                         }
                     });
+                    
+                    // Initial update of the date indicator to make it look nice
+                    const dateParts = dateInput.value.split('/');
+                    if (dateParts.length === 3) {
+                        const day = parseInt(dateParts[0]);
+                        const month = parseInt(dateParts[1]) - 1;
+                        const year = parseInt(dateParts[2]);
+                        const dateObj = new Date(year, month, day);
+                        
+                        if (!isNaN(dateObj.getTime())) {
+                            const dayName = dateObj.toLocaleDateString('it-IT', { weekday: 'long' });
+                            const monthName = dateObj.toLocaleDateString('it-IT', { month: 'long' });
+                            
+                            // Set initial nice looking date indicator
+                            dateIndicator.innerHTML = `
+                                <div style="background-color: #4b7bec; color: white; padding: 12px; border-radius: 8px; margin: 10px 0; font-size: 1.2rem; text-align: center;">
+                                    <i class="fas fa-calendar-day"></i> 
+                                    <span style="font-weight: bold;">${dayName}, ${day} ${monthName} ${year}</span>
+                                </div>
+                            `;
+                        }
+                    }
                 }
                 
-                // Initial update of the date indicator
-                if (typeof updateDateIndicator === 'function') {
-                    updateDateIndicator(dateInput.value);
-                }
-                
-                console.log("Datepicker inizializzato con successo");
+                console.log("Datepicker inizializzato con successo - input nascosto e indicatore data cliccabile");
             } catch (error) {
                 console.error("Errore nell'inizializzazione del datepicker:", error);
                 // Fallback to manual date
