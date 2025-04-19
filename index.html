@@ -2667,6 +2667,36 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/it.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
+        // Fixed initDatepicker definition to prevent ReferenceError
+        function initDatepicker() {
+            const dateInput = document.getElementById('date');
+            if (!dateInput) return;
+            try {
+                flatpickr(dateInput, {
+                    dateFormat: "d/m/Y", 
+                    locale: "it",
+                    defaultDate: "today",
+                    onChange: function(selectedDates, dateStr) {
+                        // Update date display on change
+                        const dateIndicator = document.querySelector('.date-indicator');
+                        if (dateIndicator) {
+                            try {
+                                // Convert date to Italian format with day name
+                                const date = new Date(selectedDates[0]);
+                                const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+                                const italianDate = date.toLocaleDateString('it-IT', options);
+                                dateIndicator.innerHTML = `<i class="fas fa-calendar"></i> ${italianDate}`;
+                            } catch (e) {
+                                console.error("Error updating date indicator:", e);
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error("Errore inizializzazione datepicker:", error);
+            }
+        }
+        
         // Funzioni globali
         
         /**
@@ -6497,7 +6527,7 @@
         // Inizializza il datepicker con la data odierna
         document.addEventListener('DOMContentLoaded', function() {
             // Inizializza il datepicker
-            // initDatepicker(); // Temporarily commented out
+            initDatepicker(); // Restored to fix date synchronization
         });
 
         /**
