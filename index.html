@@ -2273,7 +2273,7 @@
                                 <div class="vehicles-form">
                                     <div style="display: flex; gap: 10px; width: 100%; margin-bottom: 10px;">
                                         <input type="text" id="vehicleName" class="settings-input" placeholder="Nome mezzo" style="flex: 2;">
-                                        <input type="text" id="vehiclePlate" class="settings-input" placeholder="Targa" style="flex: 1;">
+                                        <input type="text" id="vehiclePlate" class="settings-input" placeholder="Targa (opzionale)" style="flex: 1;">
                                         <button id="addVehicle" style="background-color: var(--primary-color); color: white; border: none; border-radius: 4px; padding: 8px 12px; cursor: pointer;">Aggiungi</button>
                                     </div>
                                 </div>
@@ -3000,6 +3000,11 @@
                 allOption.textContent = 'Tutti i mesi';
                 exportMonthSelect.appendChild(allOption);
                 
+                // Ottieni il mese e anno corrente per selezionarlo di default
+                const now = new Date();
+                const currentMonthKey = `${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+                let currentMonthExists = false;
+                
                 // Aggiungi un'opzione per ogni mese
                 sortedMonths.forEach(monthKey => {
                     const [month, year] = monthKey.split('/');
@@ -3009,8 +3014,23 @@
                     const option = document.createElement('option');
                     option.value = monthKey;
                     option.textContent = `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} ${year}`;
+                    
+                    // Seleziona il mese corrente se esiste
+                    if (monthKey === currentMonthKey) {
+                        option.selected = true;
+                        currentMonthExists = true;
+                    }
+                    
                     exportMonthSelect.appendChild(option);
                 });
+                
+                // Se il mese corrente non esiste tra le entry, seleziona il primo mese disponibile
+                if (!currentMonthExists && sortedMonths.length > 0) {
+                    const firstMonthOption = exportMonthSelect.querySelector(`option[value="${sortedMonths[0]}"]`);
+                    if (firstMonthOption) {
+                        firstMonthOption.selected = true;
+                    }
+                }
                 
                 // Genera il contenuto HTML per il report mensile
                 let reportHTML = '';
