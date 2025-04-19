@@ -2099,17 +2099,51 @@
             
             /* Migliora la visibilità della data selezionata su mobile */
             #date {
-                font-size: 16px; /* Previene lo zoom su iOS */
+                font-size: 16px !important; /* Previene lo zoom automatico su iOS */
                 text-align: center;
-                background-color: #f9f9f9;
-                padding: 10px;
-                border-radius: 5px;
-                border: 2px solid #4b7bec;
+                background-color: #f8f9fa !important;
+                padding: 12px !important;
+                border-radius: 8px !important;
+                border: 2px solid #4b7bec !important;
+                margin-bottom: 10px;
             }
             
             #dateIndicator {
-                margin: 10px 0;
+                margin: 15px 0;
                 padding: 10px;
+                border-radius: 8px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
+            
+            #dateIndicator div {
+                padding: 12px !important;
+                border-radius: 8px !important;
+                font-size: 1.3rem !important;
+            }
+            
+            /* Evidenzia meglio il giorno selezionato nel calendario */
+            .flatpickr-day.selected, 
+            .flatpickr-day.startRange, 
+            .flatpickr-day.endRange, 
+            .flatpickr-day.selected.inRange, 
+            .flatpickr-day.startRange.inRange, 
+            .flatpickr-day.endRange.inRange, 
+            .flatpickr-day.selected:focus, 
+            .flatpickr-day.startRange:focus, 
+            .flatpickr-day.endRange:focus, 
+            .flatpickr-day.selected:hover, 
+            .flatpickr-day.startRange:hover, 
+            .flatpickr-day.endRange:hover, 
+            .flatpickr-day.selected.prevMonthDay, 
+            .flatpickr-day.startRange.prevMonthDay, 
+            .flatpickr-day.endRange.prevMonthDay, 
+            .flatpickr-day.selected.nextMonthDay, 
+            .flatpickr-day.startRange.nextMonthDay, 
+            .flatpickr-day.endRange.nextMonthDay {
+                background: #4b7bec !important;
+                color: white !important;
+                font-weight: bold !important;
+                border-color: #4b7bec !important;
             }
             
             .datepicker-input {
@@ -3952,11 +3986,16 @@
                         }
                     }
                     
+                    // Per i dispositivi mobili, potrebbe essere meglio usare l'input nativo
+                    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                    console.log("Rilevato dispositivo mobile:", isMobile);
+                    
                     const options = {
                         dateFormat: 'd/m/Y', // Formato italiano: giorno/mese/anno
                         locale: 'it',
                         allowInput: true,
-                        defaultDate: 'today',
+                        defaultDate: dateInput.value || 'today',
+                        disableMobile: false, // Forza l'uso dell'interfaccia flatpickr anche su mobile
                         onChange: function(selectedDates, dateStr) {
                             console.log("Data selezionata:", dateStr);
                             
@@ -3990,6 +4029,8 @@
                             try {
                                 // Assicura che il valore dell'input sia corretto alla chiusura
                                 dateInput.value = dateStr;
+                                // Aggiorna l'indicatore per assicurarsi che rifletta la data selezionata
+                                updateDateIndicator(dateStr);
                             } catch (err) {
                                 console.error("Errore nella chiusura del datepicker:", err);
                             }
@@ -3998,6 +4039,15 @@
                     
                     // Inizializza l'istanza di flatpickr SENZA salvarla in una variabile globale
                     flatpickr(dateInput, options);
+                    
+                    // Su mobile aggiungiamo anche un listener per input nativo
+                    if (isMobile) {
+                        dateInput.addEventListener('change', function(e) {
+                            console.log("Evento change input nativo:", this.value);
+                            updateDateIndicator(this.value);
+                            loadExistingEntry(this.value);
+                        });
+                    }
                     
                     console.log("Datepicker inizializzato con successo");
                 } catch (error) {
@@ -4701,8 +4751,13 @@
                         if (dateInput) {
                             dateInput.value = date;
                             
-                            // Aggiorna l'indicatore della data in modo sicuro
+                            // Genera un evento change per assicurarsi che flatpickr aggiorni il suo stato interno
+                            // Questo è fondamentale per i dispositivi mobili
                             try {
+                                const changeEvent = new Event('change', { bubbles: true });
+                                dateInput.dispatchEvent(changeEvent);
+                                
+                                // Aggiorna l'indicatore della data in modo sicuro
                                 updateDateIndicator(date);
                             } catch (err) {
                                 console.error("Errore nell'aggiornamento dell'indicatore data:", err);
