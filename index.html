@@ -2677,6 +2677,9 @@
                     locale: "it",
                     defaultDate: "today",
                     onChange: function(selectedDates, dateStr) {
+                        // Store selected date to prevent it from being reset
+                        const selectedDate = dateStr;
+                        
                         // Update date display on change
                         const dateIndicator = document.querySelector('.date-indicator');
                         if (dateIndicator) {
@@ -2688,6 +2691,22 @@
                                 dateIndicator.innerHTML = `<i class="fas fa-calendar"></i> ${italianDate}`;
                             } catch (e) {
                                 console.error("Error updating date indicator:", e);
+                            }
+                        }
+                        
+                        // If loadExistingEntry exists, call it but protect the selected date
+                        if (typeof loadExistingEntry === 'function') {
+                            try {
+                                loadExistingEntry(selectedDate);
+                                // Make sure the date input still has our selected date
+                                setTimeout(() => {
+                                    if (dateInput.value !== selectedDate) {
+                                        console.log("Date was reset, restoring to:", selectedDate);
+                                        dateInput.value = selectedDate;
+                                    }
+                                }, 50);
+                            } catch (e) {
+                                console.error("Error in loadExistingEntry:", e);
                             }
                         }
                     }
@@ -6528,6 +6547,28 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Inizializza il datepicker
             initDatepicker(); // Restored to fix date synchronization
+            
+            // Make sure input date and date indicator stay in sync
+            const dateInput = document.getElementById('date');
+            const dateIndicator = document.querySelector('.date-indicator');
+            
+            if (dateInput && dateIndicator) {
+                // If we have a date value, ensure the indicator shows the same date
+                if (dateInput.value) {
+                    try {
+                        const dateParts = dateInput.value.split('/');
+                        if (dateParts.length === 3) {
+                            // Format is dd/mm/yyyy
+                            const date = new Date(dateParts[2], dateParts[1]-1, dateParts[0]);
+                            const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+                            const italianDate = date.toLocaleDateString('it-IT', options);
+                            dateIndicator.innerHTML = `<i class="fas fa-calendar"></i> ${italianDate}`;
+                        }
+                    } catch (e) {
+                        console.error("Error synchronizing dates on load:", e);
+                    }
+                }
+            }
         });
 
         /**
