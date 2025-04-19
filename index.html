@@ -3413,6 +3413,18 @@
             console.log('==== INIZIO CARICAMENTO ENTRY ====');
             console.log('Caricamento entry per data:', date);
             
+            // Assicurati che la data selezionata venga sempre preservata nell'input visibile
+            const dateInput = document.getElementById('date');
+            if (dateInput && date) {
+                console.log('Imposto preventivamente la data nell\'input:', date);
+                dateInput.value = date;
+                
+                // Aggiorna sempre l'indicatore visivo della data
+                if (typeof updateDateIndicator === 'function') {
+                    updateDateIndicator(date);
+                }
+            }
+            
             try {
                 // Carica tutte le entries e stampale per debug
                 const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
@@ -3423,15 +3435,13 @@
                     clearForm();
                     
                     // Ripristina la data selezionata dopo il clear
-                    if (date) {
-                        const dateInput = document.getElementById('date');
-                        if (dateInput) {
-                            dateInput.value = date;
-                            
-                            // Aggiorna l'indicatore della data
-                            if (typeof updateDateIndicator === 'function') {
-                                updateDateIndicator(date);
-                            }
+                    if (date && dateInput) {
+                        console.log('Ripristino data dopo clearForm:', date);
+                        dateInput.value = date;
+                        
+                        // Aggiorna l'indicatore della data
+                        if (typeof updateDateIndicator === 'function') {
+                            updateDateIndicator(date);
                         }
                     }
                     
@@ -3568,30 +3578,31 @@
                 
                 // Salva la data corrente prima di resettare il form
                 const currentDate = document.getElementById('date') ? document.getElementById('date').value : '';
+                console.log("Data salvata prima del reset:", currentDate);
                 
                 if (form) {
                     form.reset();
                     
-                    // Mantieni la data selezionata invece di ripristinare la data corrente
+                    // Mantieni SEMPRE la data selezionata
                     const dateInput = document.getElementById('date');
                     if (dateInput && currentDate) {
+                        console.log("Ripristino la data salvata:", currentDate);
                         dateInput.value = currentDate;
                         
                         // Aggiorna l'indicatore della data con la data selezionata
                         if (typeof updateDateIndicator === 'function') {
                             updateDateIndicator(currentDate);
                         }
-                    } else {
-                        // Solo se non c'è una data già selezionata, usa la data corrente
-                    const today = new Date();
-                    const dateString = formatDateForInput(today);
-                    if (dateInput) {
+                    } else if (dateInput) {
+                        // Solo se non c'è assolutamente una data, usa oggi come fallback
+                        const today = new Date();
+                        const dateString = formatDateForInput(today);
+                        console.log("Nessuna data trovata, uso data odierna:", dateString);
                         dateInput.value = dateString;
-                    }
-                    
-                    // Aggiorna l'indicatore della data se la funzione è disponibile
-                    if (typeof updateDateIndicator === 'function') {
-                        updateDateIndicator(dateString);
+                        
+                        // Aggiorna l'indicatore della data se la funzione è disponibile
+                        if (typeof updateDateIndicator === 'function') {
+                            updateDateIndicator(dateString);
                         }
                     }
                     
@@ -3608,11 +3619,11 @@
                 const messageDiv = document.getElementById('messageDiv');
                 if (messageDiv) {
                     messageDiv.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Errore durante la pulizia del form:', error);
                 }
-            } catch (error) {
-                console.error('Errore durante la pulizia del form:', error);
             }
-        }
         
         document.addEventListener('DOMContentLoaded', function() {
             console.log("DOM caricato, inizializzazione dell'applicazione...");
