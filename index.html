@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ore PWS</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Ore PWS Group</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         :root {
@@ -1818,8 +1818,149 @@
         .toast.info {
             border-left-color: #2196F3;
         }
+
+        /* Stili per la sezione Ferie/malattie */
+        .ferie-malattie-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .ferie-malattie-form {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        
+        .checkbox-label input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+        
+        .ferie-malattie-list {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .ferie-malattie-entry {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 10px;
+        }
+        
+        .ferie-malattie-entry:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .ferie-malattie-type {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .ferie-malattie-date {
+            color: #666;
+            margin: 5px 0;
+        }
+        
+        .ferie-malattie-note {
+            color: #666;
+            font-style: italic;
+        }
+        
+        .ferie-malattie-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .ferie-malattie-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .delete-ferie-btn {
+            background-color: var(--button-danger);
+            color: white;
+            border: none;
+            border-radius: 3px;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .delete-ferie-btn:hover {
+            background-color: var(--button-danger-hover);
+        }
+
+        /* Stili per ferie e malattie nel calendario */
+        .calendar-day.ferie {
+            background-color: rgba(0, 191, 255, 0.15);
+        }
+        
+        .calendar-day.malattia {
+            background-color: rgba(255, 99, 71, 0.15);
+        }
+        
+        .ferie-icon, .malattia-icon {
+            font-size: 1.2rem;
+            margin-left: 2px;
+            margin-right: 2px;
+        }
+        
+        @media (max-width: 768px) {
+            .ferie-icon, .malattia-icon {
+                font-size: 1rem;
+            }
+        }
+
+        /* Stili per ferie e malattie nel riepilogo mensile */
+        .ferie-malattia-indicator {
+            display: inline-block;
+            margin-left: 8px;
+            font-size: 1.2rem;
+            vertical-align: middle;
+        }
+        
+        .monthly-report-item.has-ferie-malattia {
+            border-left: 3px solid #ff6347;
+            padding-left: 17px;
+        }
+        
+        .monthly-report-item.ferie-entry {
+            background-color: rgba(0, 191, 255, 0.1);
+            border-left: 3px solid #00bfff;
+        }
+        
+        .monthly-report-item.malattia-entry {
+            background-color: rgba(255, 99, 71, 0.1);
+            border-left: 3px solid #ff6347;
+        }
+        
+        .ferie-malattia-detail {
+            padding: 5px 10px !important;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/it.js"></script>
 </head>
 <body>
     <header>
@@ -2109,18 +2250,59 @@
                             <button id="exportMonthlyExcel" class="export-btn excel-btn">
                                 <i class="fas fa-file-excel"></i> Esporta Excel
                             </button>
-                            <div class="dropdown">
-                                <button class="export-btn" id="shareOptionsBtn">
-                                    <i class="fas fa-share-alt"></i> Condividi
-                                </button>
-                                <div class="dropdown-content">
-                                    <a href="#" id="shareExcelBtn"><i class="fas fa-share-alt"></i> Condividi Excel</a>
-                                </div>
-                            </div>
                         </div>
                     </div>
                     <div id="monthlyReportContent" class="monthly-report-content">
                         <!-- Il contenuto del riepilogo mensile verrà generato dinamicamente -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sezione Ferie/malattie -->
+            <div id="ferie-malattie-section" class="section">
+                <div class="card">
+                    <h2>Ferie e Malattie</h2>
+                    <div class="ferie-malattie-content">
+                        <div class="ferie-malattie-form">
+                            <div class="form-group">
+                                <label for="ferieMalattieType">Tipo</label>
+                                <select id="ferieMalattieType" class="form-control">
+                                    <option value="ferie">Ferie</option>
+                                    <option value="malattia">Malattia</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="multipleDays" class="form-control">
+                                    Più giorni
+                                </label>
+                            </div>
+                            <div id="singleDateGroup" class="form-group">
+                                <label for="ferieMalattieDate">Data</label>
+                                <input type="text" id="ferieMalattieDate" class="form-control datepicker-ferie">
+                            </div>
+                            <div id="dateRangeGroup" class="form-group" style="display: none;">
+                                <div class="form-row">
+                                    <div class="form-group-inline">
+                                        <label for="ferieMalattieStartDate">Data inizio</label>
+                                        <input type="text" id="ferieMalattieStartDate" class="form-control datepicker-ferie">
+                                    </div>
+                                    <div class="form-group-inline">
+                                        <label for="ferieMalattieEndDate">Data fine</label>
+                                        <input type="text" id="ferieMalattieEndDate" class="form-control datepicker-ferie">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="ferieMalattieNote">Note</label>
+                                <textarea id="ferieMalattieNote" class="form-control" rows="3"></textarea>
+                            </div>
+                            <button id="saveFerieMalattie" class="btn btn-primary">Salva</button>
+                        </div>
+                        <div class="ferie-malattie-list">
+                            <h3>Riepilogo</h3>
+                            <div id="ferieMalattieEntries"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2139,6 +2321,10 @@
         <a href="#" class="nav-item" data-section="monthly-report-section">
             <i class="fas fa-list-alt"></i>
             <span>Riepilogo Mese</span>
+        </a>
+        <a href="#" class="nav-item" data-section="ferie-malattie-section">
+            <i class="fas fa-calendar-times"></i>
+            <span>Ferie/malattie</span>
         </a>
         <a href="#" class="nav-item" data-section="contacts-section">
             <i class="fas fa-address-book"></i>
@@ -2479,6 +2665,7 @@
             const exportData = document.getElementById('exportData');
             const clearData = document.getElementById('clearData');
             const exportMonthlyExcel = document.getElementById('exportMonthlyExcel');
+            const saveFerieMalattie = document.getElementById('saveFerieMalattie');
             
             // Carica le impostazioni
             loadSettings();
@@ -2490,6 +2677,7 @@
             loadTimeEntries();
             updateCalendar();
             updateMonthlyReport();
+            loadFerieMalattie();
 
             // Funzione per gestire la navigazione
             function handleNavigation(sectionId) {
@@ -2518,6 +2706,9 @@
                             break;
                         case 'home-section':
                             loadTimeEntries();
+                            break;
+                        case 'ferie-malattie-section':
+                            loadFerieMalattie();
                             break;
                     }
                     
@@ -2941,6 +3132,7 @@
             function updateCalendarDisplay(month, year) {
                 const today = new Date();
                 const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                const ferieEntries = JSON.parse(localStorage.getItem('ferieMalattieEntries') || '[]');
                 
                 // Raggruppa le entries per data
                 const entriesByDate = {};
@@ -2949,6 +3141,61 @@
                         entriesByDate[entry.date] = [];
                     }
                     entriesByDate[entry.date].push(entry);
+                });
+                
+                // Crea un oggetto per tenere traccia delle ferie e malattie
+                const ferieMalattieByDate = {};
+                ferieEntries.forEach(entry => {
+                    if (entry.isMultipleDays) {
+                        // Usa le date specifiche se disponibili (esclusi i weekend)
+                        if (entry.specificDates && entry.specificDates.length > 0) {
+                            entry.specificDates.forEach(dateStr => {
+                                ferieMalattieByDate[dateStr] = {
+                                    type: entry.type,
+                                    note: entry.note || ''
+                                };
+                            });
+                        } else {
+                            // Fallback al vecchio metodo se non sono disponibili le date specifiche
+                            if (entry.startDate && entry.endDate) {
+                                const startParts = entry.startDate.split('/');
+                                const endParts = entry.endDate.split('/');
+                                
+                                if (startParts.length === 3 && endParts.length === 3) {
+                                    const startDate = new Date(startParts[2], startParts[1] - 1, startParts[0]);
+                                    const endDate = new Date(endParts[2], endParts[1] - 1, endParts[0]);
+                                    
+                                    // Cicla attraverso tutte le date nell'intervallo
+                                    const currentDate = new Date(startDate);
+                                    while (currentDate <= endDate) {
+                                        const dateStr = currentDate.toLocaleDateString('it-IT', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric'
+                                        });
+                                        
+                                        // Controlla se dobbiamo escludere i weekend
+                                        const dayOfWeek = currentDate.getDay();
+                                        if (!entry.excludeWeekends || (dayOfWeek !== 0 && dayOfWeek !== 6)) {
+                                            ferieMalattieByDate[dateStr] = {
+                                                type: entry.type,
+                                                note: entry.note || ''
+                                            };
+                                        }
+                                        
+                                        // Passa al giorno successivo
+                                        currentDate.setDate(currentDate.getDate() + 1);
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        // Gestisci date singole
+                        ferieMalattieByDate[entry.date] = {
+                            type: entry.type,
+                            note: entry.note || ''
+                        };
+                    }
                 });
                 
                 const firstDay = new Date(year, month, 1);
@@ -3006,6 +3253,11 @@
                     const hasTransferta = dayEntries.some(entry => parseFloat(entry.transferta) > 0);
                     const hasNotturne = dayEntries.some(entry => parseFloat(entry.notturne) > 0);
                     
+                    // Controlla se il giorno è ferie o malattia
+                    const ferieMalattiaInfo = ferieMalattieByDate[dateString];
+                    const isFerie = ferieMalattiaInfo && ferieMalattiaInfo.type === 'ferie';
+                    const isMalattia = ferieMalattiaInfo && ferieMalattiaInfo.type === 'malattia';
+                    
                     // Aggiorna le statistiche mensili
                     if (dayEntries.length > 0) {
                         monthlyTotalHours += totalHours;
@@ -3022,20 +3274,21 @@
                     
                     // Crea la cella del calendario
                     calendarHTML += `
-                        <div class="calendar-day ${isToday ? 'today' : ''} ${dayEntries.length > 0 ? 'has-entries' : ''} ${isHoliday ? 'holiday' : ''}" 
+                        <div class="calendar-day ${isToday ? 'today' : ''} ${dayEntries.length > 0 ? 'has-entries' : ''} ${isHoliday ? 'holiday' : ''} ${isFerie ? 'ferie' : ''} ${isMalattia ? 'malattia' : ''}" 
                              data-date="${dateString}" 
                              data-hours="${totalHours}"
                              data-transferta="${totalTransferta}"
-                             data-notturne="${totalNotturne}">
+                             data-notturne="${totalNotturne}"
+                             data-ferie-malattia="${ferieMalattiaInfo ? ferieMalattiaInfo.type : ''}">
                             <div class="calendar-day-number">${day}</div>
                             <div class="calendar-day-content">
                                 ${dayEntries.length > 0 ? `<div class="calendar-hours">${totalHours.toFixed(1)}h</div>` : ''}
-                                ${dayEntries.length > 0 ? `
-                                    <div class="calendar-icons">
-                                        ${hasTransferta ? `<span><i class="fas fa-car" title="Trasferta"></i></span>` : ''}
-                                        ${hasNotturne ? `<span><i class="fas fa-moon" title="Notturne"></i></span>` : ''}
-                                    </div>
-                                ` : ''}
+                                <div class="calendar-icons">
+                                    ${hasTransferta ? `<span><i class="fas fa-car" title="Trasferta"></i></span>` : ''}
+                                    ${hasNotturne ? `<span><i class="fas fa-moon" title="Notturne"></i></span>` : ''}
+                                    ${isFerie ? `<span class="ferie-icon" title="Ferie">🏖️</span>` : ''}
+                                    ${isMalattia ? `<span class="malattia-icon" title="Malattia">💀</span>` : ''}
+                                </div>
                                 ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
                             </div>
                         </div>
@@ -3155,18 +3408,65 @@
                 
                 const entries = getEntriesForDate(date);
                 
+                // Controlla se il giorno ha ferie o malattie
+                const ferieEntries = JSON.parse(localStorage.getItem('ferieMalattieEntries') || '[]');
+                let ferieMalattia = null;
+                
+                // Cerca nelle singole date
+                ferieEntries.forEach(entry => {
+                    if (!entry.isMultipleDays && entry.date === date) {
+                        ferieMalattia = entry;
+                    }
+                });
+                
+                // Se non trovato, cerca negli intervalli di date
+                if (!ferieMalattia) {
+                    const [day, month, year] = date.split('/').map(Number);
+                    const dateObj = new Date(year, month - 1, day);
+                    
+                    ferieEntries.forEach(entry => {
+                        if (entry.isMultipleDays && entry.startDate && entry.endDate) {
+                            const startParts = entry.startDate.split('/').map(Number);
+                            const endParts = entry.endDate.split('/').map(Number);
+                            
+                            const startDate = new Date(startParts[2], startParts[1] - 1, startParts[0]);
+                            const endDate = new Date(endParts[2], endParts[1] - 1, endParts[0]);
+                            
+                            if (dateObj >= startDate && dateObj <= endDate) {
+                                ferieMalattia = entry;
+                            }
+                        }
+                    });
+                }
+                
                 // Controllo se è un giorno festivo
                 const [day, month, year] = date.split('/').map(Number);
                 const dateObj = new Date(year, month - 1, day);
                 const isHoliday = isItalianHoliday(dateObj);
                 const holidayName = isHoliday ? getHolidayName(dateObj) : '';
                 
-                // Aggiorna il titolo del modale con il nome della festività
+                // Aggiorna il titolo del modale
+                let titleHTML = `Dettagli del ${date}`;
+                
                 if (isHoliday) {
-                    modalTitle.innerHTML = `Dettagli del ${date} <br><span style="color:#ff5555; font-size:0.9em;"><i class="fas fa-star"></i> ${holidayName}</span>`;
-                } else {
-                    modalTitle.textContent = `Dettagli del ${date}`;
+                    titleHTML += `<br><span style="color:#ff5555; font-size:0.9em;"><i class="fas fa-star"></i> ${holidayName}</span>`;
                 }
+                
+                if (ferieMalattia) {
+                    const emoji = ferieMalattia.type === 'ferie' ? '🏖️' : '💀';
+                    const tipoText = ferieMalattia.type === 'ferie' ? 'Ferie' : 'Malattia';
+                    const color = ferieMalattia.type === 'ferie' ? '#00bfff' : '#ff6347';
+                    
+                    titleHTML += `<br><span style="color:${color}; font-size:0.9em;">${emoji} ${tipoText}`;
+                    
+                    if (ferieMalattia.note) {
+                        titleHTML += `: ${ferieMalattia.note}`;
+                    }
+                    
+                    titleHTML += '</span>';
+                }
+                
+                modalTitle.innerHTML = titleHTML;
                 
                 // Calcola i totali
                 const totalHours = entries.reduce((sum, entry) => sum + parseFloat(entry.hours), 0);
@@ -3180,98 +3480,79 @@
                 
                 // Aggiorna le entries nel modale
                 if (entries.length === 0) {
-                    modalEntries.innerHTML = '<p>Nessuna entry per questo giorno</p>';
+                    modalEntries.innerHTML = '<div class="no-entries">Nessuna entry registrata per questa data</div>';
                 } else {
                     modalEntries.innerHTML = entries.map((entry, index) => `
                         <div class="day-entry">
                             <div class="day-entry-header">
-                                <span class="day-entry-hours">${entry.hours}h</span>
-                                <div class="entry-buttons">
-                                    <button class="edit-btn" data-date="${date}" data-index="${index}">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="delete-btn" data-date="${entry.date}" data-hours="${entry.hours}" data-description="${entry.description}">X</button>
+                                <div class="day-entry-hours">${entry.hours}h</div>
+                                <div class="day-entry-actions">
+                                    <button class="edit-btn" data-index="${index}" data-date="${date}"><i class="fas fa-pencil-alt"></i></button>
+                                    <button class="delete-btn" data-index="${index}" data-date="${date}"><i class="fas fa-trash"></i></button>
                                 </div>
                             </div>
                             <div class="day-entry-details">
-                                <span>Inizio: ${entry.startTime}h</span>
-                                <span>Fine: ${entry.endTime}h</span>
-                                <span>Pausa: ${entry.breakTime} ore</span>
-                                ${entry.transferta > 0 ? `<span><i class="fas fa-car"></i> ${entry.transferta}h</span>` : ''}
-                                ${entry.notturne > 0 ? `<span><i class="fas fa-moon"></i> ${entry.notturne}h</span>` : ''}
+                                <span>${entry.startTime} - ${entry.endTime}</span>
+                                <span>Pausa: ${entry.breakTime}h</span>
+                                ${entry.transferta > 0 ? `<span>Trasferta: ${entry.transferta}h</span>` : ''}
+                                ${entry.notturne > 0 ? `<span>Notturne: ${entry.notturne}h</span>` : ''}
                             </div>
                             <div class="day-entry-description">${entry.description}</div>
                         </div>
                     `).join('');
-                    
-                    // Aggiungi event listener ai pulsanti di modifica
-                    setTimeout(() => {
-                        document.querySelectorAll('.edit-btn').forEach(btn => {
-                            btn.addEventListener('click', function() {
-                                const date = this.getAttribute('data-date');
-                                const index = parseInt(this.getAttribute('data-index'));
-                                editEntry(date, index);
-                            });
-                        });
-                        
-                        // Aggiungi event listener ai pulsanti di eliminazione
-                        document.querySelectorAll('.delete-btn').forEach(btn => {
-                            btn.addEventListener('click', function() {
-                                const date = this.getAttribute('data-date');
-                                const hours = this.getAttribute('data-hours');
-                                const description = this.getAttribute('data-description');
-                                
-                                if (confirm('Sei sicuro di voler cancellare questa registrazione?')) {
-                                    deleteTimeEntry(date, hours, description);
-                                    // Chiudi il modale dopo l'eliminazione
-                                    modal.style.display = 'none';
-                                }
-                            });
-                        });
-                    }, 100);
                 }
                 
-                // Aggiungi event listener per il pulsante di aggiunta
+                // Aggiungi event listener per i pulsanti di modifica e eliminazione
+                document.querySelectorAll('.day-entry .edit-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = this.getAttribute('data-index');
+                        const date = this.getAttribute('data-date');
+                        editEntry(date, index);
+                    });
+                });
+                
+                document.querySelectorAll('.day-entry .delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = this.getAttribute('data-index');
+                        const date = this.getAttribute('data-date');
+                        deleteEntry(date, index);
+                    });
+                });
+                
+                // Aggiungi event listener per il pulsante "Aggiungi Entry"
                 addEntryBtn.onclick = function() {
+                    // Chiudi il modale
                     modal.style.display = 'none';
+                    
+                    // Vai alla sezione home
                     handleNavigation('home-section');
                     
-                    // Imposta la data sia nell'input che nell'istanza di flatpickr
-                    const dateInput = document.getElementById('date');
+                    // Imposta la data nel form
+                    document.getElementById('date').value = date;
                     
-                    // Assicura che il valore sia aggiornato prima di procedere
-                    dateInput.value = date;
-                    
-                    // Usa l'istanza globale di flatpickr per aggiornare la data
-                    if (window.datepickerInstance) {
-                        // Forza un aggiornamento sincrono e completo
-                        window.datepickerInstance.setDate(date, true);
-                        
-                        // Assicura che il datepicker abbia aggiornato il suo stato interno
-                        window.datepickerInstance.close();
-                        
-                        console.log("Calendario -> Home: Data impostata a", date);
-                    }
-                    
-                    // Aggiorna anche l'indicatore visivo
+                    // Aggiorna l'indicatore della data
                     updateDateIndicator(date);
                     
-                    // Forza il caricamento delle entry esistenti per questa data
-                    setTimeout(function() {
-                        loadExistingEntry(date);
-                    }, 100);
+                    // Pulisci gli altri campi del form se necessario
+                    document.getElementById('startTime').value = '';
+                    document.getElementById('endTime').value = '';
+                    document.getElementById('breakTime').value = '0.5';
+                    document.getElementById('transferta').value = '';
+                    document.getElementById('notturne').value = '';
+                    document.getElementById('totalHours').value = '';
+                    document.getElementById('description').value = '';
                 };
                 
                 // Mostra il modale
                 modal.style.display = 'block';
                 
                 // Aggiungi event listener per chiudere il modale
-                const closeModal = document.querySelector('.close-modal');
-                closeModal.onclick = function() {
+                const closeBtn = document.querySelector('.close-modal');
+                closeBtn.onclick = function() {
                     modal.style.display = 'none';
                 };
                 
-                // Chiudi il modale quando si clicca fuori
+                // Chiudi il modale quando si fa clic all'esterno
                 window.onclick = function(event) {
                     if (event.target === modal) {
                         modal.style.display = 'none';
@@ -3410,25 +3691,22 @@
                 // ... rest of the existing code ...
 
                 if (dayEntries.length === 0) {
-                    modalEntries.innerHTML = '<p>Nessuna entry per questo giorno</p>';
+                    modalEntries.innerHTML = '<div class="no-entries">Nessuna entry registrata per questa data</div>';
                 } else {
                     modalEntries.innerHTML = dayEntries.map((entry, index) => `
                         <div class="day-entry">
                             <div class="day-entry-header">
-                                <span class="day-entry-hours">${entry.hours}h</span>
-                                <div class="entry-buttons">
-                                    <button class="edit-btn" data-date="${date}" data-index="${index}">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="delete-btn" data-date="${entry.date}" data-hours="${entry.hours}" data-description="${entry.description}">X</button>
+                                <div class="day-entry-hours">${entry.hours}h</div>
+                                <div class="day-entry-actions">
+                                    <button class="edit-btn" data-index="${index}" data-date="${date}"><i class="fas fa-pencil-alt"></i></button>
+                                    <button class="delete-btn" data-index="${index}" data-date="${date}"><i class="fas fa-trash"></i></button>
                                 </div>
                             </div>
                             <div class="day-entry-details">
-                                <span>Inizio: ${entry.startTime}h</span>
-                                <span>Fine: ${entry.endTime}h</span>
-                                <span>Pausa: ${entry.breakTime} ore</span>
-                                ${entry.transferta > 0 ? `<span><i class="fas fa-car"></i> ${entry.transferta}h</span>` : ''}
-                                ${entry.notturne > 0 ? `<span><i class="fas fa-moon"></i> ${entry.notturne}h</span>` : ''}
+                                <span>${entry.startTime} - ${entry.endTime}</span>
+                                <span>Pausa: ${entry.breakTime}h</span>
+                                ${entry.transferta > 0 ? `<span>Trasferta: ${entry.transferta}h</span>` : ''}
+                                ${entry.notturne > 0 ? `<span>Notturne: ${entry.notturne}h</span>` : ''}
                             </div>
                             <div class="day-entry-description">${entry.description}</div>
                         </div>
@@ -3633,6 +3911,7 @@
             function updateMonthlyReport() {
                 console.log("Aggiornamento riepilogo mensile");
                 const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                const ferieEntries = JSON.parse(localStorage.getItem('ferieMalattieEntries') || '[]');
                 const monthlyReportContent = document.getElementById('monthlyReportContent');
                 const monthSelector = document.getElementById('exportMonthSelect');
                 
@@ -3641,7 +3920,7 @@
                     return;
                 }
                 
-                if (entries.length === 0) {
+                if (entries.length === 0 && ferieEntries.length === 0) {
                     monthlyReportContent.innerHTML = '<div class="monthly-report-empty">Nessuna entry registrata</div>';
                     monthSelector.innerHTML = '<option value="">Nessun mese disponibile</option>';
                     return;
@@ -3655,17 +3934,96 @@
                     return dateObjB - dateObjA; // Ordine decrescente (più recenti prima)
                 });
                 
+                // Crea un oggetto per tenere traccia delle ferie e malattie per data
+                const ferieMalattieByDate = {};
+                ferieEntries.forEach(entry => {
+                    if (entry.isMultipleDays) {
+                        // Usa le date specifiche se disponibili (esclusi i weekend)
+                        if (entry.specificDates && entry.specificDates.length > 0) {
+                            entry.specificDates.forEach(dateStr => {
+                                ferieMalattieByDate[dateStr] = {
+                                    type: entry.type,
+                                    note: entry.note || ''
+                                };
+                            });
+                        } else {
+                            // Fallback al vecchio metodo se non sono disponibili le date specifiche
+                            if (entry.startDate && entry.endDate) {
+                                const startParts = entry.startDate.split('/');
+                                const endParts = entry.endDate.split('/');
+                                
+                                if (startParts.length === 3 && endParts.length === 3) {
+                                    const startDate = new Date(startParts[2], startParts[1] - 1, startParts[0]);
+                                    const endDate = new Date(endParts[2], endParts[1] - 1, endParts[0]);
+                                    
+                                    // Cicla attraverso tutte le date nell'intervallo
+                                    const currentDate = new Date(startDate);
+                                    while (currentDate <= endDate) {
+                                        const dateStr = currentDate.toLocaleDateString('it-IT', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric'
+                                        });
+                                        
+                                        // Controlla se dobbiamo escludere i weekend
+                                        const dayOfWeek = currentDate.getDay();
+                                        if (!entry.excludeWeekends || (dayOfWeek !== 0 && dayOfWeek !== 6)) {
+                                            ferieMalattieByDate[dateStr] = {
+                                                type: entry.type,
+                                                note: entry.note || ''
+                                            };
+                                        }
+                                        
+                                        // Passa al giorno successivo
+                                        currentDate.setDate(currentDate.getDate() + 1);
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        // Gestisci date singole
+                        ferieMalattieByDate[entry.date] = {
+                            type: entry.type,
+                            note: entry.note || ''
+                        };
+                    }
+                });
+                
                 // Raggruppa le entries per mese
                 const entriesByMonth = {};
+                
+                // Aggiungi le entries di lavoro
                 entries.forEach(entry => {
                     // Usa la data direttamente in formato italiano
                     const dateObj = getDateFromItalianFormat(entry.date);
                     const monthYear = `${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
                     
                     if (!entriesByMonth[monthYear]) {
-                        entriesByMonth[monthYear] = [];
+                        entriesByMonth[monthYear] = {
+                            workEntries: [],
+                            ferieEntries: []
+                        };
                     }
-                    entriesByMonth[monthYear].push(entry);
+                    entriesByMonth[monthYear].workEntries.push(entry);
+                });
+                
+                // Aggiungi le entries di ferie/malattie ai mesi corretti
+                Object.keys(ferieMalattieByDate).forEach(dateStr => {
+                    const dateObj = getDateFromItalianFormat(dateStr);
+                    const monthYear = `${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
+                    
+                    if (!entriesByMonth[monthYear]) {
+                        entriesByMonth[monthYear] = {
+                            workEntries: [],
+                            ferieEntries: []
+                        };
+                    }
+                    
+                    // Aggiungi l'entry di ferie/malattia con la data
+                    entriesByMonth[monthYear].ferieEntries.push({
+                        date: dateStr,
+                        ...ferieMalattieByDate[dateStr]
+                    });
                 });
                 
                 // Popola il selettore di mesi
@@ -3705,7 +4063,10 @@
                 
                 // Per ogni mese
                 Object.keys(entriesByMonth).forEach(monthYear => {
-                    const monthEntries = entriesByMonth[monthYear];
+                    const monthData = entriesByMonth[monthYear];
+                    const monthWorkEntries = monthData.workEntries;
+                    const monthFerieEntries = monthData.ferieEntries;
+                    
                     const [month, year] = monthYear.split('/');
                     const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long' });
                     
@@ -3715,36 +4076,129 @@
                             <div class="monthly-report-stats">
                                 <div class="monthly-stat-item">
                                     <div class="monthly-stat-value">
-                                        ${monthEntries.reduce((sum, entry) => sum + parseFloat(entry.hours || 0), 0).toFixed(1)}h
+                                        ${monthWorkEntries.reduce((sum, entry) => sum + parseFloat(entry.hours || 0), 0).toFixed(1)}h
                                     </div>
                                     <div class="monthly-stat-label">Ore Totali</div>
                                 </div>
                                 <div class="monthly-stat-item">
                                     <div class="monthly-stat-value">
-                                        ${monthEntries.reduce((sum, entry) => sum + (parseFloat(entry.transferta || 0) || 0), 0).toFixed(1)}h
+                                        ${monthWorkEntries.reduce((sum, entry) => sum + (parseFloat(entry.transferta || 0) || 0), 0).toFixed(1)}h
                                     </div>
                                     <div class="monthly-stat-label">Ore Trasferta</div>
                                 </div>
                                 <div class="monthly-stat-item">
                                     <div class="monthly-stat-value">
-                                        ${monthEntries.reduce((sum, entry) => sum + (parseFloat(entry.notturne || 0) || 0), 0).toFixed(1)}h
+                                        ${monthWorkEntries.reduce((sum, entry) => sum + (parseFloat(entry.notturne || 0) || 0), 0).toFixed(1)}h
                                     </div>
                                     <div class="monthly-stat-label">Ore Notturne</div>
                                 </div>
+                                <div class="monthly-stat-item">
+                                    <div class="monthly-stat-value">
+                                        ${monthFerieEntries.filter(entry => entry.type === 'ferie').length}
+                                    </div>
+                                    <div class="monthly-stat-label">Giorni Ferie</div>
+                                </div>
+                                <div class="monthly-stat-item">
+                                    <div class="monthly-stat-value">
+                                        ${monthFerieEntries.filter(entry => entry.type === 'malattia').length}
+                                    </div>
+                                    <div class="monthly-stat-label">Giorni Malattia</div>
+                                </div>
                             </div>
                             <div class="monthly-report-entries">
-                                ${monthEntries.map(entry => `
-                                    <div class="monthly-report-item">
-                                        <div class="monthly-report-date">${getDayName(entry.date)}, ${formatDate(entry.date)}</div>
-                                        <div class="monthly-report-details">
-                                            <span class="monthly-report-detail"><i class="fas fa-clock"></i> ${entry.startTime}-${entry.endTime} (Pausa: ${entry.breakTime}h)</span>
-                                            <span class="monthly-report-detail">${parseFloat(entry.hours || 0).toFixed(1)}h</span>
-                                            ${parseFloat(entry.transferta || 0) > 0 ? `<span class="monthly-report-detail"><i class="fas fa-car"></i> ${parseFloat(entry.transferta).toFixed(1)}h</span>` : ''}
-                                            ${parseFloat(entry.notturne || 0) > 0 ? `<span class="monthly-report-detail"><i class="fas fa-moon"></i> ${parseFloat(entry.notturne).toFixed(1)}h</span>` : ''}
-                                        </div>
-                                        <div class="monthly-report-description">${entry.description || ''}</div>
+                    `;
+                    
+                    // Combina le entries di lavoro e ferie/malattie e ordinale per data
+                    let allEntries = [];
+                    
+                    // Converti le entries di lavoro
+                    monthWorkEntries.forEach(entry => {
+                        allEntries.push({
+                            date: entry.date,
+                            isWork: true,
+                            workData: entry
+                        });
+                    });
+                    
+                    // Converti le entries di ferie/malattie
+                    monthFerieEntries.forEach(entry => {
+                        // Verifica se esiste già un'entry di lavoro per questa data
+                        const existingEntry = allEntries.find(e => e.date === entry.date && e.isWork);
+                        
+                        if (!existingEntry) {
+                            // Se non c'è un'entry di lavoro, aggiungi una nuova entry di ferie/malattie
+                            allEntries.push({
+                                date: entry.date,
+                                isWork: false,
+                                ferieData: entry
+                            });
+                        } else {
+                            // Se c'è già un'entry di lavoro, aggiungi le informazioni di ferie/malattie
+                            existingEntry.hasFerieMalattia = true;
+                            existingEntry.ferieData = entry;
+                        }
+                    });
+                    
+                    // Ordina le entries per data (più recenti prima)
+                    allEntries.sort((a, b) => {
+                        const dateObjA = getDateFromItalianFormat(a.date);
+                        const dateObjB = getDateFromItalianFormat(b.date);
+                        
+                        return dateObjB - dateObjA; // Ordine decrescente (più recenti prima)
+                    });
+                    
+                    // Genera l'HTML per ogni entry
+                    html += allEntries.map(entry => {
+                        if (entry.isWork) {
+                            // Entry di lavoro
+                            const workEntry = entry.workData;
+                            let entryHtml = `
+                                <div class="monthly-report-item ${entry.hasFerieMalattia ? 'has-ferie-malattia' : ''}">
+                                    <div class="monthly-report-date">${getDayName(workEntry.date)}, ${formatDate(workEntry.date)}`;
+                                    
+                            // Aggiungi icona di ferie/malattia se presente
+                            if (entry.hasFerieMalattia) {
+                                const ferieMalattia = entry.ferieData;
+                                const emoji = ferieMalattia.type === 'ferie' ? '🏖️' : '💀';
+                                const tipo = ferieMalattia.type === 'ferie' ? 'Ferie' : 'Malattia';
+                                entryHtml += `<span class="ferie-malattia-indicator" title="${tipo}${ferieMalattia.note ? ': ' + ferieMalattia.note : ''}">${emoji}</span>`;
+                            }
+                            
+                            entryHtml += `</div>
+                                    <div class="monthly-report-details">
+                                        <span class="monthly-report-detail"><i class="fas fa-clock"></i> ${workEntry.startTime}-${workEntry.endTime} (Pausa: ${workEntry.breakTime}h)</span>
+                                        <span class="monthly-report-detail">${parseFloat(workEntry.hours || 0).toFixed(1)}h</span>
+                                        ${parseFloat(workEntry.transferta || 0) > 0 ? `<span class="monthly-report-detail"><i class="fas fa-car"></i> ${parseFloat(workEntry.transferta).toFixed(1)}h</span>` : ''}
+                                        ${parseFloat(workEntry.notturne || 0) > 0 ? `<span class="monthly-report-detail"><i class="fas fa-moon"></i> ${parseFloat(workEntry.notturne).toFixed(1)}h</span>` : ''}
                                     </div>
-                                `).join('')}
+                                    <div class="monthly-report-description">${workEntry.description || ''}</div>
+                                </div>
+                            `;
+                            return entryHtml;
+                        } else {
+                            // Entry di ferie/malattia
+                            const ferieEntry = entry.ferieData;
+                            const emoji = ferieEntry.type === 'ferie' ? '🏖️' : '💀';
+                            const tipo = ferieEntry.type === 'ferie' ? 'Ferie' : 'Malattia';
+                            const classeAddizionale = ferieEntry.type === 'ferie' ? 'ferie-entry' : 'malattia-entry';
+                            
+                            return `
+                                <div class="monthly-report-item ${classeAddizionale}">
+                                    <div class="monthly-report-date">
+                                        ${getDayName(ferieEntry.date)}, ${formatDate(ferieEntry.date)}
+                                        <span class="ferie-malattia-indicator" title="${tipo}">${emoji}</span>
+                                    </div>
+                                    <div class="monthly-report-details">
+                                        <span class="monthly-report-detail ferie-malattia-detail">
+                                            <strong>${tipo}</strong>${ferieEntry.note ? ': ' + ferieEntry.note : ''}
+                                        </span>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }).join('');
+                    
+                    html += `
                             </div>
                         </div>
                     `;
@@ -4112,15 +4566,72 @@
              */
             function exportMonthlyReportToExcel(selectedMonth = 'all', shouldDownload = true) {
                 const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                const ferieEntries = JSON.parse(localStorage.getItem('ferieMalattieEntries') || '[]');
                 const userName = localStorage.getItem('userName') || 'Utente';
                 
-                if (entries.length === 0) {
+                if (entries.length === 0 && ferieEntries.length === 0) {
                     alert('Nessun dato da esportare');
                     return;
                 }
                 
+                // Crea un oggetto per tenere traccia delle ferie e malattie per data
+                const ferieMalattieByDate = {};
+                ferieEntries.forEach(entry => {
+                    if (entry.isMultipleDays) {
+                        // Usa le date specifiche se disponibili (esclusi i weekend)
+                        if (entry.specificDates && entry.specificDates.length > 0) {
+                            entry.specificDates.forEach(dateStr => {
+                                ferieMalattieByDate[dateStr] = {
+                                    type: entry.type,
+                                    note: entry.note || ''
+                                };
+                            });
+                        } else {
+                            // Fallback al vecchio metodo se non sono disponibili le date specifiche
+                            if (entry.startDate && entry.endDate) {
+                                const startParts = entry.startDate.split('/');
+                                const endParts = entry.endDate.split('/');
+                                
+                                if (startParts.length === 3 && endParts.length === 3) {
+                                    const startDate = new Date(startParts[2], startParts[1] - 1, startParts[0]);
+                                    const endDate = new Date(endParts[2], endParts[1] - 1, endParts[0]);
+                                    
+                                    // Cicla attraverso tutte le date nell'intervallo
+                                    const currentDate = new Date(startDate);
+                                    while (currentDate <= endDate) {
+                                        const dateStr = currentDate.toLocaleDateString('it-IT', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric'
+                                        });
+                                        
+                                        // Controlla se dobbiamo escludere i weekend
+                                        const dayOfWeek = currentDate.getDay();
+                                        if (!entry.excludeWeekends || (dayOfWeek !== 0 && dayOfWeek !== 6)) {
+                                            ferieMalattieByDate[dateStr] = {
+                                                type: entry.type,
+                                                note: entry.note || ''
+                                            };
+                                        }
+                                        
+                                        // Passa al giorno successivo
+                                        currentDate.setDate(currentDate.getDate() + 1);
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        // Gestisci date singole
+                        ferieMalattieByDate[entry.date] = {
+                            type: entry.type,
+                            note: entry.note || ''
+                        };
+                    }
+                });
+                
                 // Filtra le entries in base al mese selezionato
                 let filteredEntries = entries;
+                let filteredFerieDates = Object.keys(ferieMalattieByDate);
                 
                 if (selectedMonth !== 'all') {
                     const [selectedMonthNum, selectedYear] = selectedMonth.split('/');
@@ -4133,7 +4644,16 @@
                         return entryMonth === parseInt(selectedMonthNum) && entryYear === parseInt(selectedYear);
                     });
                     
-                    if (filteredEntries.length === 0) {
+                    // Filtra anche le date di ferie/malattie per il mese selezionato
+                    filteredFerieDates = filteredFerieDates.filter(dateStr => {
+                        const dateObj = getDateFromItalianFormat(dateStr);
+                        const entryMonth = dateObj.getMonth() + 1;
+                        const entryYear = dateObj.getFullYear();
+                        
+                        return entryMonth === parseInt(selectedMonthNum) && entryYear === parseInt(selectedYear);
+                    });
+                    
+                    if (filteredEntries.length === 0 && filteredFerieDates.length === 0) {
                         alert('Nessun dato da esportare per il mese selezionato');
                         return;
                     }
@@ -4148,9 +4668,11 @@
                 });
                 
                 // Array per tenere traccia delle celle con colori diversi
-                const holidayCells = [];
-                const saturdayCells = [];
-                const sundayCells = [];
+                let holidayCells = [];
+                let saturdayCells = [];
+                let sundayCells = [];
+                let ferieCells = [];
+                let malattiaCells = [];
                 
                 // Crea un nuovo workbook
                 const wb = XLSX.utils.book_new();
@@ -4167,6 +4689,8 @@
                 headerData.push(['★ = Giorno Festivo', '', '', '', '', '', '', '']);
                 headerData.push(['◆ = Sabato', '', '', '', '', '', '', '']);
                 headerData.push(['■ = Domenica', '', '', '', '', '', '', '']);
+                headerData.push(['🏖️ = Ferie', '', '', '', '', '', '', '']);
+                headerData.push(['💀 = Malattia', '', '', '', '', '', '', '']);
                 headerData.push([]); // Riga vuota dopo la leggenda
                 
                 // Aggiungi informazioni sul mese selezionato
@@ -4193,16 +4717,29 @@
                 });
 
                 // Prepara le intestazioni con colonne aggiuntive per i lavori
-                const baseHeaders = ['Giorno', 'Data', 'Ora Inizio', 'Pausa', 'Ora Fine', 'Ore Trasferta', 'Ore Notturne', 'Ore Totali'];
+                const baseHeaders = ['Giorno', 'Data', 'Tipo', 'Ora Inizio', 'Pausa', 'Ora Fine', 'Ore Trasferta', 'Ore Notturne', 'Ore Totali'];
                 const workplaceHeaders = Array.from({length: maxWorkplaces}, (_, i) => `Lavoro ${i+1}`);
                 const allHeaders = [...baseHeaders, ...workplaceHeaders];
 
                 // Intestazioni colonne
                 headerData.push(allHeaders);
-
-                // Aggiungi ogni riga di dati
+                
+                // Crea un set di date già aggiunte per evitare duplicati
+                const addedDates = new Set();
+                
+                // Inizializza l'oggetto per raggruppare le righe per data
+                const rowsByDate = {};
+                
+                // Aggiungi ogni riga di dati per le entries di lavoro
                 filteredEntries.forEach((entry, rowIndex) => {
-                    const dayName = getDayName(entry.date);
+                    const dateStr = entry.date;
+                    
+                    // Inizializza l'array per questa data se non esiste
+                    if (!rowsByDate[dateStr]) {
+                        rowsByDate[dateStr] = [];
+                    }
+                    
+                    const dayName = getDayName(dateStr);
                     
                     // Suddivide la descrizione in lavori separati
                     let workplaces = [];
@@ -4216,14 +4753,16 @@
                     }
                     
                     // Determina il tipo di giorno per applicare lo stile
-                    const [day, month, year] = entry.date.split('/').map(Number);
+                    const [day, month, year] = dateStr.split('/').map(Number);
                     const dateObj = new Date(year, month - 1, day);
                     const dayOfWeek = dateObj.getDay(); // 0 = Domenica, 6 = Sabato
                     
-                    // Verifica se è un giorno festivo
+                    // Verifica se è un giorno festivo o se c'è una ferie/malattia
                     const isHoliday = isItalianHoliday(dateObj);
                     const isSaturday = dayOfWeek === 6;
                     const isSunday = dayOfWeek === 0;
+                    const hasFerieMalattia = ferieMalattieByDate[dateStr] != null;
+                    const ferieMalattiaType = hasFerieMalattia ? ferieMalattieByDate[dateStr].type : null;
                     
                     // Formatta il nome del giorno in base al tipo
                     let formattedDayName = dayName;
@@ -4234,12 +4773,20 @@
                     } else if (isSunday) {
                         formattedDayName = "■ " + dayName; // Simbolo quadrato per domenica
                     }
-                    // Non aggiungiamo simboli per sabato e domenica, li distingueremo con la formattazione
+                    
+                    if (hasFerieMalattia) {
+                        if (ferieMalattiaType === 'ferie') {
+                            formattedDayName = "🏖️ " + formattedDayName;
+                        } else if (ferieMalattiaType === 'malattia') {
+                            formattedDayName = "💀 " + formattedDayName;
+                        }
+                    }
                     
                     // Combina i dati base con i lavori separati
                     const rowData = [
                         formattedDayName,
-                        entry.date,
+                        dateStr,
+                        hasFerieMalattia ? (ferieMalattiaType === 'ferie' ? 'Ferie' : 'Malattia') : 'Lavoro',
                         entry.startTime,
                         entry.breakTime,
                         entry.endTime,
@@ -4249,23 +4796,144 @@
                         ...workplaces
                     ];
                     
-                    headerData.push(rowData);
+                    // Aggiungi questa riga all'array per questa data
+                    rowsByDate[dateStr].push({
+                        rowData,
+                        isHoliday,
+                        isSaturday,
+                        isSunday,
+                        hasFerieMalattia,
+                        ferieMalattiaType
+                    });
                     
-                    // Salva l'indice della riga per applicare gli stili dopo
-                    const dataRowIndex = headerData.length - 1;
-                    
-                    // Definisci lo stile in base al tipo di giorno
-                    if (isHoliday) {
-                        // Festa (rosso)
-                        holidayCells.push({ row: dataRowIndex, cols: [1, 7] }); // Colonne Data e Ore Totali
-                    } else if (dayOfWeek === 0) {
-                        // Domenica (grigio scuro)
-                        sundayCells.push({ row: dataRowIndex, cols: [1, 7] });
-                    } else if (dayOfWeek === 6) {
-                        // Sabato (grigio chiaro)
-                        saturdayCells.push({ row: dataRowIndex, cols: [1, 7] });
-                    }
+                    // Segna questa data come già elaborata
+                    addedDates.add(dateStr);
                 });
+                
+                // Aggiungi le date con ferie/malattie che non hanno entry di lavoro
+                filteredFerieDates.forEach(dateStr => {
+                    // Salta le date già aggiunte
+                    if (addedDates.has(dateStr)) {
+                        return;
+                    }
+                    
+                    // Inizializza l'array per questa data se non esiste
+                    if (!rowsByDate[dateStr]) {
+                        rowsByDate[dateStr] = [];
+                    }
+                    
+                    const dayName = getDayName(dateStr);
+                    const [day, month, year] = dateStr.split('/').map(Number);
+                    const dateObj = new Date(year, month - 1, day);
+                    const dayOfWeek = dateObj.getDay(); // 0 = Domenica, 6 = Sabato
+                    
+                    // Verifica se è un giorno festivo
+                    const isHoliday = isItalianHoliday(dateObj);
+                    const isSaturday = dayOfWeek === 6;
+                    const isSunday = dayOfWeek === 0;
+                    const ferieMalattiaInfo = ferieMalattieByDate[dateStr];
+                    const ferieMalattiaType = ferieMalattiaInfo ? ferieMalattiaInfo.type : null;
+                    
+                    // Formatta il nome del giorno in base al tipo
+                    let formattedDayName = dayName;
+                    if (isHoliday) {
+                        formattedDayName = "★ " + dayName;
+                    } else if (isSaturday) {
+                        formattedDayName = "◆ " + dayName;
+                    } else if (isSunday) {
+                        formattedDayName = "■ " + dayName;
+                    }
+                    
+                    if (ferieMalattiaType === 'ferie') {
+                        formattedDayName = "🏖️ " + formattedDayName;
+                    } else if (ferieMalattiaType === 'malattia') {
+                        formattedDayName = "💀 " + formattedDayName;
+                    }
+                    
+                    // Prepara riga dati con celle vuote per i lavori
+                    const rowWorkplaces = Array(maxWorkplaces).fill('');
+                    
+                    // Crea la riga dati
+                    const rowData = [
+                        formattedDayName,
+                        dateStr,
+                        ferieMalattiaType === 'ferie' ? 'Ferie' : 'Malattia',
+                        '', // Ora inizio
+                        '', // Pausa
+                        '', // Ora fine
+                        '', // Trasferta
+                        '', // Notturne
+                        '', // Ore totali
+                        ...rowWorkplaces
+                    ];
+                    
+                    // Aggiungi questa riga all'array per questa data
+                    rowsByDate[dateStr].push({
+                        rowData,
+                        isHoliday,
+                        isSaturday,
+                        isSunday,
+                        hasFerieMalattia: true,
+                        ferieMalattiaType
+                    });
+                });
+                
+                // Ordina le date
+                const sortedDates = Object.keys(rowsByDate).sort((a, b) => {
+                    const dateA = getDateFromItalianFormat(a);
+                    const dateB = getDateFromItalianFormat(b);
+                    return dateA - dateB; // Ordine crescente
+                });
+                
+                // Numero di righe di intestazione
+                const headerRows = 13;
+                
+                // Array per tenere traccia delle celle con stili speciali
+                holidayCells = [];
+                saturdayCells = [];
+                sundayCells = [];
+                ferieCells = [];
+                malattiaCells = [];
+                
+                // Costruisci l'array dei dati finali con righe vuote tra date diverse
+                let finalData = [];
+                let currentRow = headerRows;
+                
+                // Per ogni data, aggiungi tutte le relative righe
+                sortedDates.forEach((dateStr, dateIndex) => {
+                    // Aggiungi una riga vuota tra le date (tranne prima della prima data)
+                    if (dateIndex > 0) {
+                        finalData.push(Array(9 + maxWorkplaces).fill(''));
+                        currentRow++;
+                    }
+                    
+                    // Aggiungi tutte le righe per questa data
+                    rowsByDate[dateStr].forEach(entry => {
+                        finalData.push(entry.rowData);
+                        
+                        // Salva gli stili per questa riga
+                        if (entry.isHoliday) {
+                            holidayCells.push({ row: currentRow, cols: [1, 8] });
+                        } else if (entry.isSunday) {
+                            sundayCells.push({ row: currentRow, cols: [1, 8] });
+                        } else if (entry.isSaturday) {
+                            saturdayCells.push({ row: currentRow, cols: [1, 8] });
+                        }
+                        
+                        if (entry.hasFerieMalattia) {
+                            if (entry.ferieMalattiaType === 'ferie') {
+                                ferieCells.push({ row: currentRow, cols: [2] });
+                            } else if (entry.ferieMalattiaType === 'malattia') {
+                                malattiaCells.push({ row: currentRow, cols: [2] });
+                            }
+                        }
+                        
+                        currentRow++;
+                    });
+                });
+                
+                // Usa il nuovo array di dati
+                headerData = [...headerData.slice(0, headerRows), ...finalData];
 
                 // Aggiungi riga vuota e totali
                 headerData.push([]);
@@ -4274,20 +4942,26 @@
                 const totalHours = filteredEntries.reduce((sum, entry) => sum + parseFloat(entry.hours || 0), 0).toFixed(1);
                 const totalTransferta = filteredEntries.reduce((sum, entry) => sum + (parseFloat(entry.transferta || 0) || 0), 0).toFixed(1);
                 const totalNotturne = filteredEntries.reduce((sum, entry) => sum + (parseFloat(entry.notturne || 0) || 0), 0).toFixed(1);
+                const totalFerie = filteredFerieDates.filter(dateStr => ferieMalattieByDate[dateStr] && ferieMalattieByDate[dateStr].type === 'ferie').length;
+                const totalMalattia = filteredFerieDates.filter(dateStr => ferieMalattieByDate[dateStr] && ferieMalattieByDate[dateStr].type === 'malattia').length;
 
                 // Riga per le etichette dei totali con celle vuote per le colonne dei lavori
-                const totalLabelsRow = ['', '', '', '', '', 'Totale Trasferta', 'Totale Notturne', 'Totale Ore'];
+                const totalLabelsRow = ['', '', '', '', '', '', 'Totale Trasferta', 'Totale Notturne', 'Totale Ore'];
                 for (let i = 0; i < maxWorkplaces; i++) {
                     totalLabelsRow.push('');
                 }
                 headerData.push(totalLabelsRow);
 
                 // Riga per i valori dei totali con celle vuote per le colonne dei lavori
-                const totalValuesRow = ['', '', '', '', '', totalTransferta, totalNotturne, totalHours];
+                const totalValuesRow = ['', '', '', '', '', '', totalTransferta, totalNotturne, totalHours];
                 for (let i = 0; i < maxWorkplaces; i++) {
                     totalValuesRow.push('');
                 }
                 headerData.push(totalValuesRow);
+                
+                // Aggiungi totali per ferie e malattie
+                headerData.push(['', '', '', '', '', '', '', '', '']);
+                headerData.push(['', '', 'Totale Giorni:', `Malattie: ${totalMalattia} - Ferie: ${totalFerie}`, '', '', '', '', '']);
 
                 // Crea il foglio di lavoro
                 const ws = XLSX.utils.aoa_to_sheet(headerData);
@@ -4297,6 +4971,7 @@
                 ws['!cols'] = [
                     { wch: 15 }, // Giorno
                     { wch: 12 }, // Data
+                    { wch: 10 }, // Tipo
                     { wch: 10 }, // Ora Inizio
                     { wch: 10 }, // Pausa
                     { wch: 10 }, // Ora Fine
@@ -4313,7 +4988,7 @@
                 // Applicazione avanzata degli stili con SheetJS - creazione di un foglio di stile
                 const stylesheet = {};
                 const numRows = headerData.length;
-                const numCols = 8 + maxWorkplaces; // Numero di colonne base + colonne lavoro
+                const numCols = 9 + maxWorkplaces; // Numero di colonne base + colonne lavoro
 
                 // Crea un oggetto stile per il testo centrato
                 const centeredStyle = { alignment: { horizontal: 'center', vertical: 'center', wrapText: true } };
@@ -4326,7 +5001,7 @@
                         
                         // Assicurati che tutte le colonne numeriche (pausa, ore trasferta, ore notturne, ore totali) 
                         // abbiano lo stesso allineamento
-                        if (r > 0 && (c === 3 || c === 5 || c === 6 || c === 7)) {
+                        if (r > 0 && (c === 4 || c === 6 || c === 7 || c === 8)) {
                             stylesheet[cellRef] = { 
                                 ...centeredStyle,
                                 alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
@@ -4359,62 +5034,22 @@
                     font: { color: { rgb: "FFFF0000" }, bold: true, size: 12 },
                     alignment: { horizontal: 'left', vertical: 'center' }
                 };
-
-                // Aggiungi gli stili specifici per i giorni speciali
-                holidayCells.forEach(cell => {
-                    cell.cols.forEach(col => {
-                        const cellRef = XLSX.utils.encode_cell({r: cell.row, c: col});
-                        stylesheet[cellRef] = {
-                            ...centeredStyle,
-                            fill: { fgColor: { rgb: "FFFF9999" }, patternType: "solid" }, // Rosso chiaro
-                            font: { color: { rgb: "FFFF0000" }, bold: true } // Testo rosso e grassetto
-                        };
-                    });
-                    
-                    // Aggiungi stile rosso alla colonna del nome del giorno per i giorni festivi
-                    const dayNameCellRef = XLSX.utils.encode_cell({r: cell.row, c: 0});
-                    stylesheet[dayNameCellRef] = {
-                        ...centeredStyle,
-                        font: { color: { rgb: "FFFF0000" }, bold: true } // Testo rosso e grassetto
-                    };
-                });
-
-                // Sabato - formattazione speciale per il nome del giorno
-                saturdayCells.forEach(cell => {
-                    cell.cols.forEach(col => {
-                        const cellRef = XLSX.utils.encode_cell({r: cell.row, c: col});
-                        stylesheet[cellRef] = {
-                            ...centeredStyle,
-                            fill: { fgColor: { rgb: "FFE0E0E0" }, patternType: "solid" } // Grigio chiaro
-                        };
-                    });
-                    
-                    // Stile per il nome del giorno (sabato)
-                    const dayNameCellRef = XLSX.utils.encode_cell({r: cell.row, c: 0});
-                    stylesheet[dayNameCellRef] = {
-                        ...centeredStyle,
-                        font: { color: { rgb: "FFFF0000" }, bold: true, underline: true } // Rosso, grassetto e sottolineato
-                    };
-                });
-
-                // Domenica - formattazione speciale per il nome del giorno
-                sundayCells.forEach(cell => {
-                    cell.cols.forEach(col => {
-                        const cellRef = XLSX.utils.encode_cell({r: cell.row, c: col});
-                        stylesheet[cellRef] = {
-                            ...centeredStyle,
-                            fill: { fgColor: { rgb: "FFA0A0A0" }, patternType: "solid" }, // Grigio scuro
-                            font: { color: { rgb: "FFFFFFFF" } } // Testo bianco
-                        };
-                    });
-                    
-                    // Stile per il nome del giorno (domenica)
-                    const dayNameCellRef = XLSX.utils.encode_cell({r: cell.row, c: 0});
-                    stylesheet[dayNameCellRef] = {
-                        ...centeredStyle,
-                        font: { color: { rgb: "FFFF0000" }, bold: true, underline: true } // Rosso, grassetto e sottolineato
-                    };
-                });
+                
+                // Stile per la leggenda delle ferie
+                const ferieLegendRef = XLSX.utils.encode_cell({r: 5, c: 0});
+                stylesheet[ferieLegendRef] = {
+                    ...centeredStyle,
+                    font: { color: { rgb: "FF0000FF" }, bold: true, size: 12 }, // Blu
+                    alignment: { horizontal: 'left', vertical: 'center' }
+                };
+                
+                // Stile per la leggenda delle malattie
+                const malattiaLegendRef = XLSX.utils.encode_cell({r: 6, c: 0});
+                stylesheet[malattiaLegendRef] = {
+                    ...centeredStyle,
+                    font: { color: { rgb: "FFFF0000" }, bold: true, size: 12 }, // Rosso
+                    alignment: { horizontal: 'left', vertical: 'center' }
+                };
 
                 // Applica il foglio di stile al foglio di lavoro
                 ws['!styles'] = stylesheet;
@@ -4525,75 +5160,78 @@
             }
 
             // Aggiungi event listeners per il bottone di condivisione
-            document.getElementById('shareExcelBtn').addEventListener('click', function() {
-                const selectedMonth = document.getElementById('exportMonthSelect').value;
-                const userName = localStorage.getItem('userName') || 'Utente';
-                
-                try {
-                    // Verifica se siamo in un contesto sicuro (HTTPS)
-                    const isSecureContext = window.isSecureContext;
+            const shareExcelBtn = document.getElementById('shareExcelBtn');
+            if (shareExcelBtn) {
+                shareExcelBtn.addEventListener('click', function() {
+                    const selectedMonth = document.getElementById('exportMonthSelect').value;
+                    const userName = localStorage.getItem('userName') || 'Utente';
                     
-                    // Genera il file Excel
-                    const result = exportMonthlyReportToExcel(selectedMonth, false);
-                    
-                    if (!result) return; // Se c'è stato un errore, esci
-                    
-                    const { workbook, fileName } = result;
-                    
-                    // Converti il workbook in un blob
-                    const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-                    const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                    
-                    // Crea un file da condividere
-                    const file = new File([blob], `${fileName}.xlsx`, { type: blob.type });
-                    
-                    // Verifica se il browser supporta la Web Share API con file sharing
-                    // e se siamo in un contesto sicuro
-                    if (isSecureContext && navigator.share && 
-                        navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try {
+                        // Verifica se siamo in un contesto sicuro (HTTPS)
+                        const isSecureContext = window.isSecureContext;
                         
-                        // Mostra messaggio di condivisione in corso
-                        showToast('Apertura menu di condivisione...', 'info');
+                        // Genera il file Excel
+                        const result = exportMonthlyReportToExcel(selectedMonth, false);
                         
-                        // Condividi direttamente usando l'API del dispositivo
-                        navigator.share({
-                            files: [file],
-                            title: 'Riepilogo Ore PWS',
-                            text: `Riepilogo ore di ${userName}`
-                        }).then(() => {
-                            showToast('File condiviso con successo!', 'success');
-                        }).catch(error => {
-                            console.error('Errore durante la condivisione:', error);
+                        if (!result) return; // Se c'è stato un errore, esci
+                        
+                        const { workbook, fileName } = result;
+                        
+                        // Converti il workbook in un blob
+                        const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                        const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                        
+                        // Crea un file da condividere
+                        const file = new File([blob], `${fileName}.xlsx`, { type: blob.type });
+                        
+                        // Verifica se il browser supporta la Web Share API con file sharing
+                        // e se siamo in un contesto sicuro
+                        if (isSecureContext && navigator.share && 
+                            navigator.canShare && navigator.canShare({ files: [file] })) {
                             
-                            if (error.name === 'NotAllowedError') {
-                                showToast('Permesso di condivisione negato. Il file verrà scaricato.', 'warning');
-                            } else if (error.name === 'AbortError') {
-                                showToast('Condivisione annullata', 'info');
-                                return; // Non scaricare se l'utente ha annullato
-                            } else {
-                                showToast('Impossibile condividere. Il file verrà scaricato.', 'warning');
-                            }
+                            // Mostra messaggio di condivisione in corso
+                            showToast('Apertura menu di condivisione...', 'info');
                             
-                            // Se fallisce, scarica il file come fallback
-                            XLSX.writeFile(workbook, `${fileName}.xlsx`);
-                        });
-                    } else {
-                        // Fallback: scarica il file se l'API di condivisione non è supportata
-                        // o non siamo in un contesto sicuro
-                        if (!isSecureContext) {
-                            showToast('La condivisione richiede una connessione sicura (HTTPS). Il file verrà scaricato.', 'warning');
+                            // Condividi direttamente usando l'API del dispositivo
+                            navigator.share({
+                                files: [file],
+                                title: 'Riepilogo Ore PWS',
+                                text: `Riepilogo ore di ${userName}`
+                            }).then(() => {
+                                showToast('File condiviso con successo!', 'success');
+                            }).catch(error => {
+                                console.error('Errore durante la condivisione:', error);
+                                
+                                if (error.name === 'NotAllowedError') {
+                                    showToast('Permesso di condivisione negato. Il file verrà scaricato.', 'warning');
+                                } else if (error.name === 'AbortError') {
+                                    showToast('Condivisione annullata', 'info');
+                                    return; // Non scaricare se l'utente ha annullato
+                                } else {
+                                    showToast('Impossibile condividere. Il file verrà scaricato.', 'warning');
+                                }
+                                
+                                // Se fallisce, scarica il file come fallback
+                                XLSX.writeFile(workbook, `${fileName}.xlsx`);
+                            });
                         } else {
-                            showToast('La condivisione non è supportata su questo dispositivo. Il file verrà scaricato.', 'info');
+                            // Fallback: scarica il file se l'API di condivisione non è supportata
+                            // o non siamo in un contesto sicuro
+                            if (!isSecureContext) {
+                                showToast('La condivisione richiede una connessione sicura (HTTPS). Il file verrà scaricato.', 'warning');
+                            } else {
+                                showToast('La condivisione non è supportata su questo dispositivo. Il file verrà scaricato.', 'info');
+                            }
+                            XLSX.writeFile(workbook, `${fileName}.xlsx`);
                         }
-                        XLSX.writeFile(workbook, `${fileName}.xlsx`);
+                    } catch (error) {
+                        console.error('Errore durante la creazione o condivisione del file:', error);
+                        showToast('Si è verificato un errore. Il file verrà scaricato.', 'error');
+                        // Fallback al metodo tradizionale
+                        exportMonthlyReportToExcel(selectedMonth, true);
                     }
-                } catch (error) {
-                    console.error('Errore durante la creazione o condivisione del file:', error);
-                    showToast('Si è verificato un errore. Il file verrà scaricato.', 'error');
-                    // Fallback al metodo tradizionale
-                    exportMonthlyReportToExcel(selectedMonth, true);
-                }
-            });
+                });
+            }
 
             // Aggiungi un gestore di scorciatoie da tastiera per il debug
             document.addEventListener('keydown', function(e) {
@@ -4627,6 +5265,184 @@
                     }
                 }
             });
+
+            // Event listener per il checkbox "più giorni"
+            document.getElementById('multipleDays').addEventListener('change', function() {
+                const singleDateGroup = document.getElementById('singleDateGroup');
+                const dateRangeGroup = document.getElementById('dateRangeGroup');
+                
+                if (this.checked) {
+                    singleDateGroup.style.display = 'none';
+                    dateRangeGroup.style.display = 'block';
+                } else {
+                    singleDateGroup.style.display = 'block';
+                    dateRangeGroup.style.display = 'none';
+                }
+            });
+
+            // Inizializza i datepicker per ferie/malattie con formato italiano
+            flatpickr(".datepicker-ferie", {
+                dateFormat: 'd/m/Y', // Formato italiano: giorno/mese/anno
+                locale: 'it',
+                allowInput: true
+            });
+
+            // Event listener per salvare ferie/malattie
+            saveFerieMalattie.addEventListener('click', function() {
+                const type = document.getElementById('ferieMalattieType').value;
+                const isMultipleDays = document.getElementById('multipleDays').checked;
+                const note = document.getElementById('ferieMalattieNote').value;
+                const excludeWeekends = true; // Escludiamo sempre sabato e domenica
+                
+                let date, startDate, endDate, specificDates = [];
+                
+                if (isMultipleDays) {
+                    startDate = document.getElementById('ferieMalattieStartDate').value;
+                    endDate = document.getElementById('ferieMalattieEndDate').value;
+                    
+                    if (!startDate || !endDate) {
+                        alert('Per favore seleziona sia la data di inizio che di fine');
+                        return;
+                    }
+                    
+                    // Converti le date per il confronto
+                    const startParts = startDate.split('/');
+                    const endParts = endDate.split('/');
+                    const startDateObj = new Date(startParts[2], startParts[1] - 1, startParts[0]);
+                    const endDateObj = new Date(endParts[2], endParts[1] - 1, endParts[0]);
+                    
+                    if (startDateObj > endDateObj) {
+                        alert('La data di inizio deve essere precedente alla data di fine');
+                        return;
+                    }
+                    
+                    // Generiamo le date specifiche del periodo, escludendo sabato e domenica se richiesto
+                    const currentDate = new Date(startDateObj);
+                    while (currentDate <= endDateObj) {
+                        const dayOfWeek = currentDate.getDay(); // 0 = domenica, 6 = sabato
+                        
+                        // Aggiungi la data solo se non è un weekend o se i weekend non sono esclusi
+                        if (!excludeWeekends || (dayOfWeek !== 0 && dayOfWeek !== 6)) {
+                            const formattedDate = currentDate.toLocaleDateString('it-IT', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric'
+                            });
+                            specificDates.push(formattedDate);
+                        }
+                        
+                        // Passa al giorno successivo
+                        currentDate.setDate(currentDate.getDate() + 1);
+                    }
+                    
+                    // Se dopo l'esclusione dei weekend non ci sono date, mostra un messaggio
+                    if (specificDates.length === 0) {
+                        alert('Il periodo selezionato contiene solo weekend, che vengono esclusi automaticamente.');
+                        return;
+                    }
+                    
+                    date = `Dal ${startDate} al ${endDate}` + (excludeWeekends ? ' (esclusi weekend)' : '');
+                } else {
+                    date = document.getElementById('ferieMalattieDate').value;
+                    
+                    if (!date) {
+                        alert('Per favore seleziona una data');
+                        return;
+                    }
+                    
+                    // Verifica che la data singola non sia un weekend
+                    const dateParts = date.split('/');
+                    const dateObj = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
+                    const dayOfWeek = dateObj.getDay(); // 0 = domenica, 6 = sabato
+                    
+                    if (excludeWeekends && (dayOfWeek === 0 || dayOfWeek === 6)) {
+                        alert('Hai selezionato un giorno di weekend (sabato o domenica), che viene escluso automaticamente.');
+                        return;
+                    }
+                    
+                    specificDates.push(date);
+                }
+                
+                const entries = JSON.parse(localStorage.getItem('ferieMalattieEntries') || '[]');
+                entries.push({ 
+                    type, 
+                    date,
+                    isMultipleDays,
+                    startDate: isMultipleDays ? startDate : null,
+                    endDate: isMultipleDays ? endDate : null,
+                    excludeWeekends,
+                    specificDates, // Aggiungiamo le date specifiche (esclusi i weekend se richiesto)
+                    note 
+                });
+                localStorage.setItem('ferieMalattieEntries', JSON.stringify(entries));
+                
+                // Resetta il form
+                document.getElementById('multipleDays').checked = false;
+                document.getElementById('ferieMalattieDate').value = '';
+                document.getElementById('ferieMalattieStartDate').value = '';
+                document.getElementById('ferieMalattieEndDate').value = '';
+                document.getElementById('ferieMalattieNote').value = '';
+                document.getElementById('singleDateGroup').style.display = 'block';
+                document.getElementById('dateRangeGroup').style.display = 'none';
+                
+                // Aggiorna la lista
+                loadFerieMalattie();
+                
+                // Aggiorna il calendario e il riepilogo
+                updateCalendar();
+                updateMonthlyReport();
+                
+                // Mostra un messaggio di conferma
+                showToast(`${type === 'ferie' ? 'Ferie' : 'Malattia'} registrate con successo`, 'success');
+            });
+
+            // Funzione per caricare le ferie/malattie
+            function loadFerieMalattie() {
+                const entries = JSON.parse(localStorage.getItem('ferieMalattieEntries') || '[]');
+                const container = document.getElementById('ferieMalattieEntries');
+                
+                if (entries.length === 0) {
+                    container.innerHTML = '<div class="no-entries">Nessuna ferie o malattia registrata</div>';
+                    return;
+                }
+                
+                container.innerHTML = entries.map((entry, index) => `
+                    <div class="ferie-malattie-entry">
+                        <div class="ferie-malattie-header">
+                            <div class="ferie-malattie-type">${entry.type === 'ferie' ? 'Ferie' : 'Malattia'}</div>
+                            <div class="ferie-malattie-actions">
+                                <button class="delete-ferie-btn" data-index="${index}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="ferie-malattie-date">${entry.date}</div>
+                        ${entry.note ? `<div class="ferie-malattie-note">${entry.note}</div>` : ''}
+                    </div>
+                `).join('');
+                
+                // Aggiungi event listener per i pulsanti di eliminazione
+                document.querySelectorAll('.delete-ferie-btn').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        deleteFerieMalattie(index);
+                    });
+                });
+            }
+            
+            // Funzione per eliminare una entry di ferie/malattie
+            function deleteFerieMalattie(index) {
+                if (confirm('Sei sicuro di voler eliminare questa registrazione?')) {
+                    const entries = JSON.parse(localStorage.getItem('ferieMalattieEntries') || '[]');
+                    
+                    if (index >= 0 && index < entries.length) {
+                        entries.splice(index, 1);
+                        localStorage.setItem('ferieMalattieEntries', JSON.stringify(entries));
+                        loadFerieMalattie();
+                        showToast('Registrazione eliminata con successo', 'success');
+                    }
+                }
+            }
         });
 
         // Inizializza il datepicker con la data odierna
