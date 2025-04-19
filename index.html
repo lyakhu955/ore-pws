@@ -3540,6 +3540,10 @@
             updateMonthlyReport();
             loadFerieMalattie();
 
+            // Assicura che i mezzi predefiniti siano presenti
+            const initialVehicles = JSON.parse(localStorage.getItem('vehicles') || '[]');
+            ensureDefaultVehicles(initialVehicles);
+
             // Funzione per gestire la navigazione
             function handleNavigation(sectionId) {
                 // Rimuovi classe active da tutti gli elementi
@@ -3693,9 +3697,15 @@
             
             // Funzioni per la gestione dei mezzi di trasporto
             function loadVehicles() {
-                const vehicles = JSON.parse(localStorage.getItem('vehicles') || '[]');
+                let vehicles = JSON.parse(localStorage.getItem('vehicles') || '[]');
                 const vehiclesList = document.getElementById('vehiclesList');
                 const vehicleSelect = document.getElementById('vehicleSelect');
+                
+                // Verifica se ci sono i mezzi predefiniti e aggiungili se mancano
+                ensureDefaultVehicles(vehicles);
+                
+                // Recupera i veicoli aggiornati dopo aver aggiunto quelli predefiniti
+                vehicles = JSON.parse(localStorage.getItem('vehicles') || '[]');
                 
                 // Aggiorna la lista nella sezione impostazioni
                 if (vehiclesList) {
@@ -3708,9 +3718,11 @@
                                     <div class="vehicle-name">${vehicle.name}</div>
                                     ${vehicle.plate ? `<div class="vehicle-plate">${vehicle.plate}</div>` : ''}
                                 </div>
+                                ${!vehicle.isDefault ? `
                                 <button class="delete-vehicle-btn" data-index="${index}">
                                     <i class="fas fa-trash"></i>
                                 </button>
+                                ` : ''}
                             </div>
                         `).join('');
                         
@@ -3741,6 +3753,45 @@
                 }
             }
             
+            // Funzione per assicurare che i veicoli predefiniti siano sempre presenti
+            function ensureDefaultVehicles(vehicles) {
+                // Lista dei mezzi predefiniti
+                const defaultVehicles = [
+                    { name: 'Panda', plate: '', isDefault: true },
+                    { name: 'Doblò Metano', plate: '', isDefault: true },
+                    { name: 'Doblò 1', plate: '', isDefault: true },
+                    { name: 'Doblò 2', plate: '', isDefault: true },
+                    { name: 'Personale', plate: '', isDefault: true }
+                ];
+                
+                let needsUpdate = false;
+                
+                // Controlla ogni veicolo predefinito e aggiungilo se manca
+                defaultVehicles.forEach(defaultVehicle => {
+                    // Cerca se il mezzo predefinito esiste già
+                    const exists = vehicles.some(v => 
+                        v.isDefault && v.name === defaultVehicle.name
+                    );
+                    
+                    // Se non esiste, aggiungilo
+                    if (!exists) {
+                        const id = 'v_default_' + defaultVehicle.name.toLowerCase().replace(/\s+/g, '_');
+                        vehicles.push({
+                            id: id,
+                            name: defaultVehicle.name,
+                            plate: defaultVehicle.plate,
+                            isDefault: true
+                        });
+                        needsUpdate = true;
+                    }
+                });
+                
+                // Salva i veicoli aggiornati se necessario
+                if (needsUpdate) {
+                    localStorage.setItem('vehicles', JSON.stringify(vehicles));
+                }
+            }
+            
             function addVehicle(name, plate) {
                 // Pulisci gli input
                 name = name.trim();
@@ -3754,9 +3805,10 @@
                 // Carica i mezzi esistenti
                 let vehicles = JSON.parse(localStorage.getItem('vehicles') || '[]');
                 
-                // Controlla il limite massimo
-                if (vehicles.length >= 10) {
-                    showToast('Hai raggiunto il limite massimo di 10 mezzi', 'error');
+                // Controlla il limite massimo (esclusi i mezzi predefiniti)
+                const userVehicles = vehicles.filter(v => !v.isDefault);
+                if (userVehicles.length >= 10) {
+                    showToast('Hai raggiunto il limite massimo di 10 mezzi personalizzati', 'error');
                     return false;
                 }
                 
@@ -3767,7 +3819,8 @@
                 vehicles.push({
                     id: id,
                     name: name,
-                    plate: plate
+                    plate: plate,
+                    isDefault: false
                 });
                 
                 // Salva nel localStorage
@@ -3788,6 +3841,12 @@
                     
                     if (index >= 0 && index < vehicles.length) {
                         const deletedVehicle = vehicles[index];
+                        
+                        // Controlla se il veicolo è predefinito
+                        if (deletedVehicle.isDefault) {
+                            showToast('Non è possibile eliminare i mezzi predefiniti', 'error');
+                            return;
+                        }
                         
                         // Rimuovi il mezzo
                         vehicles.splice(index, 1);
@@ -4638,6 +4697,29 @@
                     document.getElementById('transferta').value = entry.transferta || 0;
                     document.getElementById('notturne').value = entry.notturne || 0;
                     document.getElementById('description').value = entry.description;
+                    document.getElementById('totalHours').value = entry.hours;
+                    
+                    // Simula eventi input per attivare i listener che calcolano le ore
+                    const simulateInputEvent = (elementId) => {
+                        const element = document.getElementById(elementId);
+                        if (element) {
+                            const event = new Event('change', { bubbles: true });
+                            element.dispatchEvent(event);
+                        }
+                    };
+                    
+                    // Simula eventi sui campi che influenzano il calcolo delle ore
+                    simulateInputEvent('startTime');
+                    simulateInputEvent('endTime');
+                    simulateInputEvent('breakTime');
+                    
+                    // Come fallback, ricalcola manualmente le ore totali
+                    calculateTotalHours();
+                    
+                    // Se il calcolo automatico fallisce, usa il valore esistente
+                    if (!document.getElementById('totalHours').value && entry.hours) {
+                        document.getElementById('totalHours').value = entry.hours;
+                    }
                     
                     // Imposta il mezzo se presente
                     const vehicleSelect = document.getElementById('vehicleSelect');
