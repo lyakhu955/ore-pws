@@ -3637,6 +3637,9 @@
                 if (targetSection) {
                     targetSection.classList.add('active');
                     
+                    // Preserva la data attualmente selezionata quando si naviga tra le sezioni
+                    const currentDate = document.getElementById('date')?.value;
+                    
                     // Aggiorna il contenuto in base alla sezione
                     switch(sectionId) {
                         case 'calendar-section':
@@ -3646,14 +3649,46 @@
                             updateMonthlyReport();
                             break;
                         case 'home-section':
+                            // Se stiamo navigando verso la home, preserva l'input data e assicurati che l'indicatore sia aggiornato
                             loadTimeEntries();
+                            
+                            // Assicuriamo che la data selezionata sia preservata
+                            if (currentDate) {
+                                setTimeout(() => {
+                                    try {
+                                        const dateInput = document.getElementById('date');
+                                        if (dateInput) {
+                                            dateInput.value = currentDate;
+                                            
+                                            // Forza l'aggiornamento del datepicker e dell'indicatore
+                                            try {
+                                                console.log("Aggiornamento forzato data dopo navigazione:", currentDate);
+                                                
+                                                // Aggiorna l'indicatore della data
+                                                updateDateIndicator(currentDate);
+                                                
+                                                // Invia un evento change all'input per aggiornare flatpickr
+                                                const event = new Event('change', { bubbles: true });
+                                                dateInput.dispatchEvent(event);
+                                                
+                                                // Controlla se esiste un'entry per questa data
+                                                loadExistingEntry(currentDate);
+                                            } catch (err) {
+                                                console.error("Errore nell'aggiornamento della data dopo navigazione:", err);
+                                            }
+                                        }
+                                    } catch (err) {
+                                        console.error("Errore durante la preservazione della data:", err);
+                                    }
+                                }, 100); // Breve timeout per assicurarsi che il DOM sia pronto
+                            }
                             break;
                         case 'ferie-malattie-section':
                             loadFerieMalattie();
                             break;
                     }
                     
-                    // Resetta il form solo se si sta lasciando la sezione home
+                    // Resetta il form solo se si sta lasciando la sezione home (non è necessario quando si naviga VERSO la home)
                     if (sectionId !== 'home-section') {
                         resetForm();
                     }
@@ -4740,44 +4775,74 @@
                 // Aggiungi event listener per il pulsante "Aggiungi Entry"
                 addEntryBtn.onclick = function() {
                     try {
+                        console.log("Click su Aggiungi Entry, data selezionata:", date);
+                        
+                        // Salviamo temporaneamente la data in localStorage per assicurarci che non venga persa durante la navigazione
+                        localStorage.setItem('tempSelectedDate', date);
+                        
                         // Chiudi il modale
                         modal.style.display = 'none';
                         
                         // Vai alla sezione home
                         handleNavigation('home-section');
                         
-                        // Imposta la data nel form in modo sicuro
-                        const dateInput = document.getElementById('date');
-                        if (dateInput) {
-                            dateInput.value = date;
-                            
-                            // Genera un evento change per assicurarsi che flatpickr aggiorni il suo stato interno
-                            // Questo è fondamentale per i dispositivi mobili
+                        // Dopo la navigazione, forziamo l'aggiornamento della data con un piccolo ritardo
+                        // per permettere alla navigazione di completarsi
+                        setTimeout(function() {
                             try {
-                                const changeEvent = new Event('change', { bubbles: true });
-                                dateInput.dispatchEvent(changeEvent);
+                                // Imposta la data nel form in modo sicuro
+                                const dateInput = document.getElementById('date');
+                                const savedDate = localStorage.getItem('tempSelectedDate') || date;
+                                console.log("Dopo navigazione, imposto data:", savedDate);
                                 
-                                // Aggiorna l'indicatore della data in modo sicuro
-                                updateDateIndicator(date);
+                                if (dateInput) {
+                                    dateInput.value = savedDate;
+                                    
+                                    // Su dispositivi mobili, assicurati che l'indicatore sia visibile scrollando alla sua posizione
+                                    const dateIndicator = document.getElementById('dateIndicator');
+                                    if (dateIndicator) {
+                                        dateIndicator.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                    }
+                                    
+                                    // Genera un evento change per assicurarsi che flatpickr aggiorni il suo stato interno
+                                    // Questo è fondamentale per i dispositivi mobili
+                                    try {
+                                        const changeEvent = new Event('change', { bubbles: true });
+                                        dateInput.dispatchEvent(changeEvent);
+                                        
+                                        // Aggiorna l'indicatore della data in modo sicuro
+                                        updateDateIndicator(savedDate);
+                                        
+                                        // Mostra un messaggio di conferma per debug
+                                        console.log("Data impostata correttamente:", savedDate);
+                                    } catch (err) {
+                                        console.error("Errore nell'aggiornamento dell'indicatore data:", err);
+                                    }
+                                } else {
+                                    console.error("Elemento input date non trovato dopo navigazione");
+                                }
+                                
+                                // Pulisci gli altri campi del form se necessario
+                                const setFieldValue = (id, value) => {
+                                    const field = document.getElementById(id);
+                                    if (field) field.value = value;
+                                };
+                                
+                                setFieldValue('startTime', '');
+                                setFieldValue('endTime', '');
+                                setFieldValue('breakTime', '0.5');
+                                setFieldValue('transferta', '');
+                                setFieldValue('notturne', '');
+                                setFieldValue('totalHours', '');
+                                setFieldValue('description', '');
+                                setFieldValue('vehicleSelect', '');
+                                
+                                // Rimuovi la data temporanea dal localStorage
+                                localStorage.removeItem('tempSelectedDate');
                             } catch (err) {
-                                console.error("Errore nell'aggiornamento dell'indicatore data:", err);
+                                console.error("Errore nell'aggiornamento della data dopo il click su Aggiungi Entry:", err);
                             }
-                        }
-                        
-                        // Pulisci gli altri campi del form se necessario
-                        const setFieldValue = (id, value) => {
-                            const field = document.getElementById(id);
-                            if (field) field.value = value;
-                        };
-                        
-                        setFieldValue('startTime', '');
-                        setFieldValue('endTime', '');
-                        setFieldValue('breakTime', '0.5');
-                        setFieldValue('transferta', '');
-                        setFieldValue('notturne', '');
-                        setFieldValue('totalHours', '');
-                        setFieldValue('description', '');
-                        setFieldValue('vehicleSelect', '');
+                        }, 200); // Un ritardo leggermente più lungo per dispositivi mobili
                     } catch (err) {
                         console.error("Errore durante l'aggiunta di una nuova entry:", err);
                     }
@@ -5130,11 +5195,6 @@
                                 const dateInput = document.getElementById('date');
                                 if (dateInput && dateInput.value !== dateStr) {
                                     dateInput.value = dateStr;
-                                }
-                                
-                                // Aggiorna anche visualmente l'interfaccia del datepicker
-                                if (window.datepickerInstance) {
-                                    window.datepickerInstance.setDate(dateStr, false);
                                 }
                             } else {
                                 console.error("Data non valida:", dateStr);
@@ -6154,6 +6214,120 @@
                         loadFerieMalattie();
                         showToast('Registrazione eliminata con successo', 'success');
                     }
+                }
+            }
+
+            // Funzione per esportare tutti i dati in un file JSON
+            function exportAllData() {
+                try {
+                    // Raccogli tutti i dati dal localStorage
+                    const data = {
+                        timeEntries: JSON.parse(localStorage.getItem('timeEntries') || '[]'),
+                        ferieMalattieEntries: JSON.parse(localStorage.getItem('ferieMalattieEntries') || '[]'),
+                        vehicles: JSON.parse(localStorage.getItem('vehicles') || '[]'),
+                        userName: localStorage.getItem('userName') || '',
+                        darkTheme: localStorage.getItem('darkTheme') === 'true'
+                    };
+                    
+                    // Converti i dati in una stringa JSON
+                    const jsonStr = JSON.stringify(data, null, 2);
+                    
+                    // Crea un blob con i dati
+                    const blob = new Blob([jsonStr], { type: 'application/json' });
+                    
+                    // Crea un URL per il blob
+                    const url = URL.createObjectURL(blob);
+                    
+                    // Crea un elemento <a> per scaricare il file
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `ore_pws_backup_${new Date().toISOString().split('T')[0]}.json`;
+                    
+                    // Aggiungi l'elemento al documento
+                    document.body.appendChild(a);
+                    
+                    // Fai clic sull'elemento per avviare il download
+                    a.click();
+                    
+                    // Rimuovi l'elemento dopo un breve ritardo
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }, 100);
+                    
+                    showToast('Dati esportati con successo', 'success');
+                } catch (error) {
+                    console.error('Errore durante l\'esportazione dei dati:', error);
+                    showToast('Errore durante l\'esportazione dei dati', 'error');
+                }
+            }
+            
+            // Funzione per importare dati da un file JSON
+            function importAllData() {
+                try {
+                    // Crea un elemento <input> per selezionare il file
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = '.json';
+                    
+                    // Aggiungi un event listener per quando l'utente seleziona un file
+                    input.addEventListener('change', function(e) {
+                        const file = e.target.files[0];
+                        if (!file) {
+                            showToast('Nessun file selezionato', 'warning');
+                            return;
+                        }
+                        
+                        const reader = new FileReader();
+                        
+                        reader.onload = function(e) {
+                            try {
+                                // Leggi e parsa il file JSON
+                                const data = JSON.parse(e.target.result);
+                                
+                                // Verifica che i dati contengano le informazioni necessarie
+                                if (!data.timeEntries && !data.ferieMalattieEntries && !data.vehicles) {
+                                    showToast('Il file selezionato non contiene dati validi', 'error');
+                                    return;
+                                }
+                                
+                                // Chiedi conferma all'utente prima di sovrascrivere i dati esistenti
+                                if (confirm('Sei sicuro di voler importare questi dati? Tutti i dati esistenti verranno sovrascritti.')) {
+                                    // Importa i dati nel localStorage
+                                    if (data.timeEntries) localStorage.setItem('timeEntries', JSON.stringify(data.timeEntries));
+                                    if (data.ferieMalattieEntries) localStorage.setItem('ferieMalattieEntries', JSON.stringify(data.ferieMalattieEntries));
+                                    if (data.vehicles) localStorage.setItem('vehicles', JSON.stringify(data.vehicles));
+                                    if (data.userName) localStorage.setItem('userName', data.userName);
+                                    if (data.darkTheme !== undefined) localStorage.setItem('darkTheme', data.darkTheme);
+                                    
+                                    // Aggiorna l'interfaccia utente
+                                    loadSettings();
+                                    loadTimeEntries();
+                                    updateCalendar();
+                                    updateMonthlyReport();
+                                    loadFerieMalattie();
+                                    
+                                    showToast('Dati importati con successo', 'success');
+                                }
+                            } catch (error) {
+                                console.error('Errore durante l\'importazione dei dati:', error);
+                                showToast('Errore durante il parsing del file: ' + error.message, 'error');
+                            }
+                        };
+                        
+                        reader.onerror = function() {
+                            showToast('Errore durante la lettura del file', 'error');
+                        };
+                        
+                        // Inizia la lettura del file come testo
+                        reader.readAsText(file);
+                    });
+                    
+                    // Fai clic sull'elemento per aprire il selettore di file
+                    input.click();
+                } catch (error) {
+                    console.error('Errore durante l\'importazione dei dati:', error);
+                    showToast('Errore durante l\'importazione dei dati', 'error');
                 }
             }
         });
