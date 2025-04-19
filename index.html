@@ -2074,21 +2074,54 @@
             /* Inverti l'ordine tra label e valore nel riepilogo mensile */
             .stat-item {
                 display: flex;
-                flex-direction: column-reverse;
-                align-items: center;
+                flex-direction: column;
+            }
+            
+            /* Mette l'etichetta sopra al valore */
+            .stat-label {
+                order: -1;
+                margin-bottom: 5px;
+                width: 100%;
                 text-align: center;
             }
             
-            /* Assicura che i numeri siano centrati */
+            /* Centra i valori */
             .stat-value {
                 width: 100%;
                 text-align: center;
             }
             
-            .stat-label {
-                width: 100%;
+            /* Assicura che tutti i numeri siano allineati orizzontalmente */
+            .monthly-report-stats {
+                justify-content: center;
                 text-align: center;
-                margin-bottom: 5px;
+            }
+            
+            /* Migliora la visibilità della data selezionata su mobile */
+            #date {
+                font-size: 16px; /* Previene lo zoom su iOS */
+                text-align: center;
+                background-color: #f9f9f9;
+                padding: 10px;
+                border-radius: 5px;
+                border: 2px solid #4b7bec;
+            }
+            
+            #dateIndicator {
+                margin: 10px 0;
+                padding: 10px;
+            }
+            
+            .datepicker-input {
+                width: 100%;
+            }
+            
+            /* Nasconde l'input date (visivamente) e mostra solo l'indicatore */
+            .form-group label[for="date"] {
+                display: block;
+                text-align: center;
+                font-size: 1.1rem;
+                margin-bottom: 10px;
             }
         }
 
@@ -2122,6 +2155,7 @@
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Manteniamo solo questa istanza di flatpickr -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/it.js"></script>
 </head>
@@ -2150,7 +2184,7 @@
                             <div class="form-group">
                                 <label for="date">Data:</label>
                                 <input type="text" id="date" class="form-control datepicker" required>
-                                <div id="dateIndicator" style="display: none; text-align: center; font-weight: bold; margin-top: 5px; padding: 5px; background-color: rgba(76, 175, 80, 0.1); border-radius: 5px; color: #3a8a3d;"></div>
+                                <div id="dateIndicator" style="text-align: center; font-weight: bold; margin-top: 5px; padding: 5px; background-color: rgba(76, 175, 80, 0.1); border-radius: 5px; color: #3a8a3d;"></div>
                             </div>
                             
                             <div class="form-group">
@@ -3430,15 +3464,15 @@
                         }
                     } else {
                         // Solo se non c'è una data già selezionata, usa la data corrente
-                        const today = new Date();
-                        const dateString = formatDateForInput(today);
-                        if (dateInput) {
-                            dateInput.value = dateString;
-                        }
-                        
-                        // Aggiorna l'indicatore della data se la funzione è disponibile
-                        if (typeof updateDateIndicator === 'function') {
-                            updateDateIndicator(dateString);
+                    const today = new Date();
+                    const dateString = formatDateForInput(today);
+                    if (dateInput) {
+                        dateInput.value = dateString;
+                    }
+                    
+                    // Aggiorna l'indicatore della data se la funzione è disponibile
+                    if (typeof updateDateIndicator === 'function') {
+                        updateDateIndicator(dateString);
                         }
                     }
                     
@@ -3485,9 +3519,9 @@
                                 
                                 // Rendi più visibile e chiara la data selezionata
                                 dateIndicator.innerHTML = `
-                                    <div style="background-color: #4b7bec; color: white; padding: 8px; border-radius: 5px; margin-top: 5px;">
+                                    <div style="background-color: #4b7bec; color: white; padding: 8px; border-radius: 5px; margin: 8px 0; font-size: 1.2rem;">
                                         <i class="fas fa-calendar-day"></i> 
-                                        <span style="font-size: 1.1rem; font-weight: bold;">${dayName}, ${day} ${monthName} ${year}</span>
+                                        <span style="font-weight: bold;">${dayName}, ${day} ${monthName} ${year}</span>
                                     </div>
                                 `;
                                 
@@ -3495,11 +3529,19 @@
                                 const dateInput = document.getElementById('date');
                                 if (dateInput && dateInput.value !== dateStr) {
                                     dateInput.value = dateStr;
-                                }
-                                
-                                // Aggiorna anche visualmente l'interfaccia del datepicker
-                                if (window.datepickerInstance) {
-                                    window.datepickerInstance.setDate(dateStr, false);
+                                    
+                                    // IMPORTANTE: NON tentiamo di aggiornare flatpickr direttamente qui,
+                                    // questo causa errori perché l'istanza potrebbe non essere completamente inizializzata
+                                    // o potrebbe essere in uno stato inconsistente
+                                    
+                                    // Invece, creiamo un evento change sull'input che flatpickr ascolterà
+                                    // e si aggiornerà da solo se necessario
+                                    try {
+                                        const event = new Event('change', { bubbles: true });
+                                        dateInput.dispatchEvent(event);
+                                    } catch (err) {
+                                        console.log("Impossibile inviare evento change:", err);
+                                    }
                                 }
                             } else {
                                 console.error("Data non valida:", dateStr);
@@ -3892,56 +3934,87 @@
                 // Forza l'uso del formato italiano
                 localStorage.setItem('italianDateFormat', 'true');
                 
-                const options = {
-                    dateFormat: 'd/m/Y', // Formato italiano: giorno/mese/anno
-                    locale: 'it',
-                    allowInput: true,
-                    defaultDate: 'today',
-                    onChange: function(selectedDates, dateStr) {
-                        console.log("Data selezionata:", dateStr);
-                        
-                        // IMPORTANTE: Forza l'aggiornamento del valore dell'input in modo sincrono
-                        dateInput.value = dateStr;
-                        
-                        // Aggiorna l'indicatore visivo
-                        updateDateIndicator(dateStr);
-                        
-                        // Prima verifica se esistono già entries per quella data
-                        // e poi se necessario resetta il form
-                        loadExistingEntry(dateStr);
-                        
-                        // Forza l'aggiornamento dell'interfaccia utente
-                        setTimeout(function() {
-                            // Trigger di un evento input per assicurarsi che tutti gli ascoltatori siano notificati
-                            const inputEvent = new Event('input', { bubbles: true });
-                            dateInput.dispatchEvent(inputEvent);
-                            
-                            // Forza un refresh completo dell'istanza flatpickr
-                            window.datepickerInstance.close();
-                            
-                            // Attiva un blur sull'input per assicurarsi che il focus venga perso
-                            dateInput.blur();
-                            
-                            // Forza l'aggiornamento del valore visualizzato
-                            console.log("Data selezionata e impostata:", dateStr);
-                        }, 50);
-                    },
-                    onReady: function(selectedDates, dateStr) {
-                        // Inizializza l'indicatore con la data corrente
-                        updateDateIndicator(dateStr);
-                    },
-                    onOpen: function(selectedDates, dateStr) {
-                        // Aggiorna l'UI quando si apre il calendario
-                        updateDateIndicator(dateStr);
-                    },
-                    onClose: function(selectedDates, dateStr) {
-                        // Assicura che il valore dell'input sia corretto alla chiusura
-                        dateInput.value = dateStr;
-                        console.log("Datepicker chiuso, data finale:", dateStr);
-                    }
-                };
+                const dateInput = document.getElementById('date');
+                if (!dateInput) {
+                    console.error('Elemento date input non trovato');
+                    return;
+                }
                 
-                flatpickr('.datepicker', options);
+                try {
+                    // Cerca e distruggi eventuali istanze precedenti
+                    const oldInstance = dateInput._flatpickr;
+                    if (oldInstance) {
+                        try {
+                            oldInstance.destroy();
+                            console.log("Istanza precedente del datepicker distrutta");
+                        } catch (err) {
+                            console.warn("Impossibile distruggere l'istanza precedente:", err);
+                        }
+                    }
+                    
+                    const options = {
+                        dateFormat: 'd/m/Y', // Formato italiano: giorno/mese/anno
+                        locale: 'it',
+                        allowInput: true,
+                        defaultDate: 'today',
+                        onChange: function(selectedDates, dateStr) {
+                            console.log("Data selezionata:", dateStr);
+                            
+                            try {
+                                // IMPORTANTE: Forza l'aggiornamento del valore dell'input in modo sincrono
+                                dateInput.value = dateStr;
+                                
+                                // Aggiorna l'indicatore visivo con la data selezionata
+                                updateDateIndicator(dateStr);
+                                
+                                // Prima verifica se esistono già entries per quella data
+                                loadExistingEntry(dateStr);
+                            } catch (err) {
+                                console.error("Errore nel gestore onChange del datepicker:", err);
+                            }
+                        },
+                        onReady: function(selectedDates, dateStr) {
+                            console.log("Flatpickr pronto, data iniziale:", dateStr);
+                            // Inizializza l'indicatore con la data corrente
+                            try {
+                                updateDateIndicator(dateStr || dateInput.value);
+                            } catch (err) {
+                                console.error("Errore nell'inizializzazione dell'indicatore:", err);
+                            }
+                        },
+                        onOpen: function(selectedDates, dateStr) {
+                            console.log("Datepicker aperto, data corrente:", dateStr);
+                        },
+                        onClose: function(selectedDates, dateStr) {
+                            console.log("Datepicker chiuso, data finale:", dateStr);
+                            try {
+                                // Assicura che il valore dell'input sia corretto alla chiusura
+                                dateInput.value = dateStr;
+                            } catch (err) {
+                                console.error("Errore nella chiusura del datepicker:", err);
+                            }
+                        }
+                    };
+                    
+                    // Inizializza l'istanza di flatpickr SENZA salvarla in una variabile globale
+                    flatpickr(dateInput, options);
+                    
+                    console.log("Datepicker inizializzato con successo");
+                } catch (error) {
+                    console.error("Errore critico nell'inizializzazione del datepicker:", error);
+                    // Fallback: imposta manualmente la data di oggi senza datepicker
+                    const today = new Date();
+                    const day = String(today.getDate()).padStart(2, '0');
+                    const month = String(today.getMonth() + 1).padStart(2, '0');
+                    const year = today.getFullYear();
+                    dateInput.value = `${day}/${month}/${year}`;
+                    
+                    try {
+                        updateDateIndicator(dateInput.value);
+                    } catch (err) {
+                        console.error("Errore nell'aggiornamento dell'indicatore:", err);
+                    }
+                }
             }
             
             // Aggiungi event listener per il calcolo automatico delle ore
@@ -4616,27 +4689,43 @@
                 
                 // Aggiungi event listener per il pulsante "Aggiungi Entry"
                 addEntryBtn.onclick = function() {
-                    // Chiudi il modale
-                    modal.style.display = 'none';
-                    
-                    // Vai alla sezione home
-                    handleNavigation('home-section');
-                    
-                    // Imposta la data nel form
-                    document.getElementById('date').value = date;
-                    
-                    // Aggiorna l'indicatore della data
-                    updateDateIndicator(date);
-                    
-                    // Pulisci gli altri campi del form se necessario
-                    document.getElementById('startTime').value = '';
-                    document.getElementById('endTime').value = '';
-                    document.getElementById('breakTime').value = '0.5';
-                    document.getElementById('transferta').value = '';
-                    document.getElementById('notturne').value = '';
-                    document.getElementById('totalHours').value = '';
-                    document.getElementById('description').value = '';
-                    document.getElementById('vehicleSelect').value = '';
+                    try {
+                        // Chiudi il modale
+                        modal.style.display = 'none';
+                        
+                        // Vai alla sezione home
+                        handleNavigation('home-section');
+                        
+                        // Imposta la data nel form in modo sicuro
+                        const dateInput = document.getElementById('date');
+                        if (dateInput) {
+                            dateInput.value = date;
+                            
+                            // Aggiorna l'indicatore della data in modo sicuro
+                            try {
+                                updateDateIndicator(date);
+                            } catch (err) {
+                                console.error("Errore nell'aggiornamento dell'indicatore data:", err);
+                            }
+                        }
+                        
+                        // Pulisci gli altri campi del form se necessario
+                        const setFieldValue = (id, value) => {
+                            const field = document.getElementById(id);
+                            if (field) field.value = value;
+                        };
+                        
+                        setFieldValue('startTime', '');
+                        setFieldValue('endTime', '');
+                        setFieldValue('breakTime', '0.5');
+                        setFieldValue('transferta', '');
+                        setFieldValue('notturne', '');
+                        setFieldValue('totalHours', '');
+                        setFieldValue('description', '');
+                        setFieldValue('vehicleSelect', '');
+                    } catch (err) {
+                        console.error("Errore durante l'aggiunta di una nuova entry:", err);
+                    }
                 };
                 
                 // Mostra il modale
@@ -4682,118 +4771,135 @@
 
                 // Imposta i valori nel form
                 setTimeout(() => {
-                    // Aggiorna la data sia nell'input che nell'istanza flatpickr
-                    const dateInput = document.getElementById('date');
-                    dateInput.value = entry.date;
-                    
-                    // Usa l'istanza globale di flatpickr per aggiornare la data
-                    if (window.datepickerInstance) {
-                        window.datepickerInstance.setDate(entry.date);
-                    }
-                    
-                    document.getElementById('startTime').value = entry.startTime;
-                    document.getElementById('endTime').value = entry.endTime;
-                    document.getElementById('breakTime').value = entry.breakTime;
-                    document.getElementById('transferta').value = entry.transferta || 0;
-                    document.getElementById('notturne').value = entry.notturne || 0;
-                    document.getElementById('description').value = entry.description;
-                    document.getElementById('totalHours').value = entry.hours;
-                    
-                    // Simula eventi input per attivare i listener che calcolano le ore
-                    const simulateInputEvent = (elementId) => {
-                        const element = document.getElementById(elementId);
-                        if (element) {
-                            const event = new Event('change', { bubbles: true });
-                            element.dispatchEvent(event);
+                    try {
+                        // Aggiorna la data sia nell'input che nell'indicatore visuale
+                        const dateInput = document.getElementById('date');
+                        if (dateInput) {
+                            dateInput.value = entry.date;
+                            
+                            // Aggiorna l'indicatore della data
+                            updateDateIndicator(entry.date);
+                            
+                            // Non tentiamo più di aggiornare flatpickr direttamente
+                            // Questo è stato rimosso perché causava errori
+                            // L'aggiornamento dell'input e la generazione dell'evento change è sufficiente
                         }
-                    };
-                    
-                    // Simula eventi sui campi che influenzano il calcolo delle ore
-                    simulateInputEvent('startTime');
-                    simulateInputEvent('endTime');
-                    simulateInputEvent('breakTime');
-                    
-                    // Come fallback, ricalcola manualmente le ore totali
-                    calculateTotalHours();
-                    
-                    // Se il calcolo automatico fallisce, usa il valore esistente
-                    if (!document.getElementById('totalHours').value && entry.hours) {
-                        document.getElementById('totalHours').value = entry.hours;
-                    }
-                    
-                    // Imposta il mezzo se presente
-                    const vehicleSelect = document.getElementById('vehicleSelect');
-                    if (vehicleSelect && entry.vehicleId) {
-                        vehicleSelect.value = entry.vehicleId;
-                    } else if (vehicleSelect) {
-                        vehicleSelect.value = '';
-                    }
-
-                    // Modifica il testo del pulsante di submit
-                    const submitBtn = document.getElementById('submitBtn');
-                    submitBtn.textContent = 'Modifica Entry';
-                    submitBtn.onclick = function(e) {
-                        e.preventDefault();
                         
-                        // Prendi i valori dal form
-                        const formDate = document.getElementById('date').value;
-                        const formStartTime = parseFloat(document.getElementById('startTime').value);
-                        const formEndTime = parseFloat(document.getElementById('endTime').value);
-                        const formBreakTime = parseFloat(document.getElementById('breakTime').value);
-                        const formTransferta = parseFloat(document.getElementById('transferta').value);
-                        const formNotturne = parseFloat(document.getElementById('notturne').value);
-                        const formDescription = document.getElementById('description').value;
-                        const formVehicleId = document.getElementById('vehicleSelect').value || '';
-                        
-                        // Calcola le ore totali
-                        const hours = formEndTime - formStartTime - formBreakTime;
-                        
-                        // Prendi l'indice dell'entry da modificare
-                        const editingData = JSON.parse(localStorage.getItem('editingEntry'));
-                        const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
-                        
-                        // Aggiorna l'entry
-                        entries[editingData.index] = {
-                            date: formDate,
-                            startTime: formStartTime,
-                            endTime: formEndTime,
-                            breakTime: formBreakTime,
-                            transferta: formTransferta,
-                            notturne: formNotturne,
-                            description: formDescription,
-                            hours: hours,
-                            vehicleId: formVehicleId
+                        // Imposta i valori degli altri campi
+                        const setFieldValue = (id, value) => {
+                            const field = document.getElementById(id);
+                            if (field) field.value = value;
                         };
                         
-                        // Salva nel localStorage
-                        localStorage.setItem('timeEntries', JSON.stringify(entries));
-                        localStorage.removeItem('editingEntry');
+                        setFieldValue('startTime', entry.startTime);
+                        setFieldValue('endTime', entry.endTime);
+                        setFieldValue('breakTime', entry.breakTime);
+                        setFieldValue('transferta', entry.transferta || 0);
+                        setFieldValue('notturne', entry.notturne || 0);
+                        setFieldValue('description', entry.description);
+                        setFieldValue('totalHours', entry.hours);
                         
-                        // Resetta il form
-                        document.getElementById('timeEntryForm').reset();
-                        submitBtn.textContent = 'Aggiungi Entry';
-                        submitBtn.onclick = function(e) {
-                            e.preventDefault();
-                            
-                            const form = document.getElementById('timeEntryForm');
-                            if (form) {
-                                // Crea un evento di submit
-                                const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-                                form.dispatchEvent(submitEvent);
+                        // Simula eventi input per attivare i listener che calcolano le ore
+                        const simulateInputEvent = (elementId) => {
+                            const element = document.getElementById(elementId);
+                            if (element) {
+                                const event = new Event('change', { bubbles: true });
+                                element.dispatchEvent(event);
                             }
                         };
                         
-                        // Aggiorna il calendario
-                        updateCalendarDisplay(new Date().getMonth(), new Date().getFullYear());
+                        // Simula eventi sui campi che influenzano il calcolo delle ore
+                        simulateInputEvent('startTime');
+                        simulateInputEvent('endTime');
+                        simulateInputEvent('breakTime');
                         
-                        // Mostra messaggio di successo
-                        alert('Entry modificata con successo!');
+                        // Come fallback, ricalcola manualmente le ore totali
+                        calculateTotalHours();
                         
-                        // Aggiorna le visualizzazioni
-                        loadTimeEntries();
-                        updateCalendar();
-                        updateMonthlyReport();
-                    };
+                        // Se il calcolo automatico fallisce, usa il valore esistente
+                        if (!document.getElementById('totalHours').value && entry.hours) {
+                            document.getElementById('totalHours').value = entry.hours;
+                        }
+                        
+                        // Imposta il mezzo se presente
+                        const vehicleSelect = document.getElementById('vehicleSelect');
+                        if (vehicleSelect && entry.vehicleId) {
+                            vehicleSelect.value = entry.vehicleId;
+                        } else if (vehicleSelect) {
+                            vehicleSelect.value = '';
+                        }
+
+                        // Modifica il testo del pulsante di submit
+                        const submitBtn = document.getElementById('submitBtn');
+                        if (submitBtn) {
+                            submitBtn.textContent = 'Modifica Entry';
+                            submitBtn.onclick = function(e) {
+                                e.preventDefault();
+                                
+                                // Prendi i valori dal form
+                                const formDate = document.getElementById('date').value;
+                                const formStartTime = parseFloat(document.getElementById('startTime').value);
+                                const formEndTime = parseFloat(document.getElementById('endTime').value);
+                                const formBreakTime = parseFloat(document.getElementById('breakTime').value);
+                                const formTransferta = parseFloat(document.getElementById('transferta').value);
+                                const formNotturne = parseFloat(document.getElementById('notturne').value);
+                                const formDescription = document.getElementById('description').value;
+                                const formVehicleId = document.getElementById('vehicleSelect').value || '';
+                                
+                                // Calcola le ore totali
+                                const hours = formEndTime - formStartTime - formBreakTime;
+                                
+                                // Prendi l'indice dell'entry da modificare
+                                const editingData = JSON.parse(localStorage.getItem('editingEntry'));
+                                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                                
+                                // Aggiorna l'entry
+                                entries[editingData.index] = {
+                                    date: formDate,
+                                    startTime: formStartTime,
+                                    endTime: formEndTime,
+                                    breakTime: formBreakTime,
+                                    transferta: formTransferta,
+                                    notturne: formNotturne,
+                                    description: formDescription,
+                                    hours: hours,
+                                    vehicleId: formVehicleId
+                                };
+                                
+                                // Salva nel localStorage
+                                localStorage.setItem('timeEntries', JSON.stringify(entries));
+                                localStorage.removeItem('editingEntry');
+                                
+                                // Resetta il form
+                                document.getElementById('timeEntryForm').reset();
+                                submitBtn.textContent = 'Aggiungi Entry';
+                                submitBtn.onclick = function(e) {
+                                    e.preventDefault();
+                                    
+                                    const form = document.getElementById('timeEntryForm');
+                                    if (form) {
+                                        // Crea un evento di submit
+                                        const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+                                        form.dispatchEvent(submitEvent);
+                                    }
+                                };
+                                
+                                // Aggiorna il calendario
+                                updateCalendarDisplay(new Date().getMonth(), new Date().getFullYear());
+                                
+                                // Mostra messaggio di successo
+                                alert('Entry modificata con successo!');
+                                
+                                // Aggiorna le visualizzazioni
+                                loadTimeEntries();
+                                updateCalendar();
+                                updateMonthlyReport();
+                            };
+                        }
+                    } catch (err) {
+                        console.error("Errore durante l'aggiornamento del form:", err);
+                        alert("Si è verificato un errore durante la modifica dell'entry. Riprova.");
+                    }
                 }, 100);
             }
 
@@ -4959,9 +5065,9 @@
                                 
                                 // Rendi più visibile e chiara la data selezionata
                                 dateIndicator.innerHTML = `
-                                    <div style="background-color: #4b7bec; color: white; padding: 8px; border-radius: 5px; margin-top: 5px;">
+                                    <div style="background-color: #4b7bec; color: white; padding: 8px; border-radius: 5px; margin: 8px 0; font-size: 1.2rem;">
                                         <i class="fas fa-calendar-day"></i> 
-                                        <span style="font-size: 1.1rem; font-weight: bold;">${dayName}, ${day} ${monthName} ${year}</span>
+                                        <span style="font-weight: bold;">${dayName}, ${day} ${monthName} ${year}</span>
                                     </div>
                                 `;
                                 
@@ -5660,15 +5766,15 @@
                 console.log("Pulizia form");
                 
                 try {
-                    // Resetta tutti i campi del form
-                    const form = document.getElementById('timeEntryForm'); // ID corretto
+                // Resetta tutti i campi del form
+                const form = document.getElementById('timeEntryForm'); // ID corretto
                     
                     // Salva la data corrente prima di resettare il form
                     const currentDate = document.getElementById('date') ? document.getElementById('date').value : '';
                     
-                    if (form) {
-                        form.reset();
-                        
+                if (form) {
+                    form.reset();
+                    
                         // Mantieni la data selezionata invece di ripristinare la data corrente
                         const dateInput = document.getElementById('date');
                         if (dateInput && currentDate) {
@@ -5680,15 +5786,15 @@
                             }
                         } else {
                             // Solo se non c'è una data già selezionata, usa la data corrente
-                            const today = new Date();
-                            const dateString = formatDateForInput(today);
-                            if (dateInput) {
-                                dateInput.value = dateString;
-                            }
-                            
-                            // Aggiorna l'indicatore della data se la funzione è disponibile
-                            if (typeof updateDateIndicator === 'function') {
-                                updateDateIndicator(dateString);
+                    const today = new Date();
+                    const dateString = formatDateForInput(today);
+                    if (dateInput) {
+                        dateInput.value = dateString;
+                    }
+                    
+                    // Aggiorna l'indicatore della data se la funzione è disponibile
+                    if (typeof updateDateIndicator === 'function') {
+                        updateDateIndicator(dateString);
                             }
                         }
                         
@@ -5696,15 +5802,15 @@
                         const vehicleSelect = document.getElementById('vehicleSelect');
                         if (vehicleSelect) {
                             vehicleSelect.value = '';
-                        }
-                    } else {
-                        console.error("Form non trovato con ID 'timeEntryForm'");
                     }
-                    
-                    // Nascondi il messaggio di successo/errore
-                    const messageDiv = document.getElementById('messageDiv');
-                    if (messageDiv) {
-                        messageDiv.style.display = 'none';
+                } else {
+                    console.error("Form non trovato con ID 'timeEntryForm'");
+                }
+                
+                // Nascondi il messaggio di successo/errore
+                const messageDiv = document.getElementById('messageDiv');
+                if (messageDiv) {
+                    messageDiv.style.display = 'none';
                     }
                 } catch (error) {
                     console.error('Errore durante la pulizia del form:', error);
@@ -5999,117 +6105,8 @@
 
         // Inizializza il datepicker con la data odierna
         document.addEventListener('DOMContentLoaded', function() {
-            // Funzione globale per aggiornare l'indicatore della data
-            function updateDateIndicator(dateStr) {
-                console.log("Aggiornamento indicatore data:", dateStr);
-                
-                const dateIndicator = document.getElementById('dateIndicator');
-                if (dateIndicator) {
-                    try {
-                        // Formatta la data per visualizzazione
-                        const dateParts = dateStr.split('/');
-                        if (dateParts.length === 3) {
-                            const day = parseInt(dateParts[0]);
-                            const month = parseInt(dateParts[1]) - 1;
-                            const year = parseInt(dateParts[2]);
-                            const dateObj = new Date(year, month, day);
-                            
-                            if (!isNaN(dateObj.getTime())) {
-                                const dayName = dateObj.toLocaleDateString('it-IT', { weekday: 'long' });
-                                const monthName = dateObj.toLocaleDateString('it-IT', { month: 'long' });
-                                
-                                // Rendi più visibile e chiara la data selezionata
-                                dateIndicator.innerHTML = `
-                                    <div style="background-color: #4b7bec; color: white; padding: 8px; border-radius: 5px; margin-top: 5px;">
-                                        <i class="fas fa-calendar-day"></i> 
-                                        <span style="font-size: 1.1rem; font-weight: bold;">${dayName}, ${day} ${monthName} ${year}</span>
-                                    </div>
-                                `;
-                                
-                                // Forza l'aggiornamento dell'input date
-                                const dateInput = document.getElementById('date');
-                                if (dateInput && dateInput.value !== dateStr) {
-                                    dateInput.value = dateStr;
-                                }
-                                
-                                // Aggiorna anche visualmente l'interfaccia del datepicker
-                                if (window.datepickerInstance) {
-                                    window.datepickerInstance.setDate(dateStr, false);
-                                }
-                            } else {
-                                console.error("Data non valida:", dateStr);
-                                dateIndicator.innerHTML = `<div style="color: red;"><i class="fas fa-exclamation-circle"></i> Formato data non valido</div>`;
-                            }
-                        } else {
-                            console.error("Formato data non valido:", dateStr);
-                            dateIndicator.innerHTML = `<div style="color: red;"><i class="fas fa-exclamation-circle"></i> Formato data non valido</div>`;
-                        }
-                    } catch (error) {
-                        console.error("Errore nell'aggiornamento dell'indicatore data:", error);
-                        dateIndicator.innerHTML = `<div style="color: red;"><i class="fas fa-exclamation-circle"></i> Errore nel formato data</div>`;
-                    }
-                }
-            }
-
-            const dateInput = document.getElementById('date');
-            
-            if (dateInput) {
-                // Crea un'istanza globale del datepicker per facilitare l'accesso e la manipolazione
-                window.datepickerInstance = flatpickr(dateInput, {
-                    dateFormat: "d/m/Y",
-                    defaultDate: "today",
-                    locale: "it",
-                    disableMobile: false, // Assicura che usi l'interfaccia flatpickr anche su mobile
-                    allowInput: true,     // Permette l'input diretto
-                    static: true,         // Mantiene il calendario visibile durante la selezione
-                    clickOpens: true,     // Assicura che il click apra il calendario
-                    time_24hr: true,      // Usa il formato 24 ore
-                    onChange: function(selectedDates, dateStr) {
-                        console.log("Data selezionata:", dateStr);
-                        
-                        // IMPORTANTE: Forza l'aggiornamento del valore dell'input in modo sincrono
-                        dateInput.value = dateStr;
-                        
-                        // Aggiorna l'indicatore visivo
-                        updateDateIndicator(dateStr);
-                        
-                        // Prima verifica se esistono già entries per quella data
-                        // e poi se necessario resetta il form
-                        loadExistingEntry(dateStr);
-                        
-                        // Forza l'aggiornamento dell'interfaccia utente
-                        setTimeout(function() {
-                            // Trigger di un evento input per assicurarsi che tutti gli ascoltatori siano notificati
-                            const inputEvent = new Event('input', { bubbles: true });
-                            dateInput.dispatchEvent(inputEvent);
-                            
-                            // Forza un refresh completo dell'istanza flatpickr
-                            window.datepickerInstance.close();
-                            
-                            // Attiva un blur sull'input per assicurarsi che il focus venga perso
-                            dateInput.blur();
-                            
-                            // Forza l'aggiornamento del valore visualizzato
-                            console.log("Data selezionata e impostata:", dateStr);
-                        }, 50);
-                    },
-                    onReady: function(selectedDates, dateStr) {
-                        // Inizializza l'indicatore con la data corrente
-                        updateDateIndicator(dateStr);
-                    },
-                    onOpen: function(selectedDates, dateStr) {
-                        // Aggiorna l'UI quando si apre il calendario
-                        updateDateIndicator(dateStr);
-                    },
-                    onClose: function(selectedDates, dateStr) {
-                        // Assicura che il valore dell'input sia corretto alla chiusura
-                        dateInput.value = dateStr;
-                        console.log("Datepicker chiuso, data finale:", dateStr);
-                    }
-                });
-                
-                // La definizione locale viene rimossa poiché ora è globale
-            }
+            // Inizializza il datepicker
+            initDatepicker();
         });
 
         /**
@@ -6239,6 +6236,116 @@
             
             console.log('%c==== FINE DEBUG ====', 'background: #000; color: #fff; padding: 5px;');
             return "Debug completato. Controlla la console per i risultati.";
+        }
+
+        /**
+         * Aggiorna l'indicatore visivo della data selezionata
+         * @param {string} dateStr - La data in formato italiano dd/mm/yyyy
+         */
+        function updateDateIndicator(dateStr) {
+            console.log("Aggiornamento indicatore data:", dateStr);
+            
+            const dateIndicator = document.getElementById('dateIndicator');
+            if (dateIndicator) {
+                try {
+                    // Formatta la data per visualizzazione
+                    const dateParts = dateStr.split('/');
+                    if (dateParts.length === 3) {
+                        const day = parseInt(dateParts[0]);
+                        const month = parseInt(dateParts[1]) - 1;
+                        const year = parseInt(dateParts[2]);
+                        const dateObj = new Date(year, month, day);
+                        
+                        if (!isNaN(dateObj.getTime())) {
+                            const dayName = dateObj.toLocaleDateString('it-IT', { weekday: 'long' });
+                            const monthName = dateObj.toLocaleDateString('it-IT', { month: 'long' });
+                            
+                            // Rendi più visibile e chiara la data selezionata
+                            dateIndicator.innerHTML = `
+                                <div style="background-color: #4b7bec; color: white; padding: 8px; border-radius: 5px; margin: 8px 0; font-size: 1.2rem;">
+                                    <i class="fas fa-calendar-day"></i> 
+                                    <span style="font-weight: bold;">${dayName}, ${day} ${monthName} ${year}</span>
+                                </div>
+                            `;
+                            
+                            // Forza l'aggiornamento dell'input date
+                            const dateInput = document.getElementById('date');
+                            if (dateInput && dateInput.value !== dateStr) {
+                                dateInput.value = dateStr;
+                            }
+                        } else {
+                            console.error("Data non valida:", dateStr);
+                            dateIndicator.innerHTML = `<div style="color: red;"><i class="fas fa-exclamation-circle"></i> Formato data non valido</div>`;
+                        }
+                    } else {
+                        console.error("Formato data non valido:", dateStr);
+                        dateIndicator.innerHTML = `<div style="color: red;"><i class="fas fa-exclamation-circle"></i> Formato data non valido</div>`;
+                    }
+                } catch (error) {
+                    console.error("Errore nell'aggiornamento dell'indicatore data:", error);
+                    dateIndicator.innerHTML = `<div style="color: red;"><i class="fas fa-exclamation-circle"></i> Errore nel formato data</div>`;
+                }
+            }
+        }
+
+        // Funzione di inizializzazione del datepicker
+        function initDatepicker() {
+            const dateInput = document.getElementById('date');
+            if (!dateInput) {
+                console.error("Elemento input date non trovato");
+                return;
+            }
+
+            try {
+                // Inizializza con la data corrente se vuoto
+                if (!dateInput.value) {
+                    const today = new Date();
+                    const day = today.getDate().toString().padStart(2, '0');
+                    const month = (today.getMonth() + 1).toString().padStart(2, '0');
+                    const year = today.getFullYear();
+                    dateInput.value = `${day}/${month}/${year}`;
+                }
+
+                // IMPORTANTE: Non salviamo più l'istanza in window.datepickerInstance
+                // Questo elimina i problemi di gestione del riferimento globale
+                
+                // Configurazione semplificata per flatpickr
+                flatpickr(dateInput, {
+                    dateFormat: "d/m/Y", 
+                    locale: "it",
+                    allowInput: true,
+                    defaultDate: dateInput.value || "today",
+                    onChange: function(selectedDates, dateStr) {
+                        console.log("Data selezionata:", dateStr);
+                        dateInput.value = dateStr;
+                        
+                        // Aggiorna l'indicatore visivo
+                        try {
+                            updateDateIndicator(dateStr);
+                        } catch (err) {
+                            console.error("Errore durante l'aggiornamento dell'indicatore:", err);
+                        }
+                        
+                        // Carica entries esistenti
+                        try {
+                            loadExistingEntry(dateStr);
+                        } catch (err) {
+                            console.error("Errore durante il caricamento delle entry esistenti:", err);
+                        }
+                    }
+                });
+                
+                // Mostra l'indicatore con la data iniziale
+                try {
+                    updateDateIndicator(dateInput.value);
+                } catch (err) {
+                    console.error("Errore durante l'inizializzazione dell'indicatore:", err);
+                }
+                
+                console.log("Datepicker inizializzato con successo");
+            } catch (error) {
+                console.error("Errore nell'inizializzazione del datepicker:", error);
+            }
         }
     </script>
 </body>
