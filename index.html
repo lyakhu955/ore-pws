@@ -1957,6 +1957,100 @@
             background-color: #f1f1f1;
             border-radius: 4px;
         }
+        
+        /* Stili per la gestione dei mezzi */
+        .vehicles-list {
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .vehicle-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            margin-bottom: 5px;
+            background-color: var(--card-bg);
+            border-radius: 4px;
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .vehicle-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .vehicle-name {
+            font-weight: bold;
+        }
+        
+        .vehicle-plate {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        
+        .delete-vehicle-btn {
+            background-color: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .delete-vehicle-btn:hover {
+            background-color: #cc0000;
+        }
+
+        .dark-theme .vehicles-list {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .dark-theme .vehicle-plate {
+            color: #aaa;
+        }
+
+        .monthly-report-description {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 2px;
+        }
+        
+        .monthly-report-vehicle {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 2px;
+            padding-left: 4px;
+            border-left: 2px solid #ddd;
+        }
+        
+        .dark-theme .monthly-report-vehicle {
+            color: #aaa;
+            border-left-color: #444;
+        }
+        
+        .dark-theme .monthly-report-description {
+            color: #bbb;
+        }
+        
+        .day-entry-vehicle {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 4px;
+            padding-left: 8px;
+            border-left: 2px solid #ddd;
+        }
+        
+        .dark-theme .day-entry-vehicle {
+            color: #aaa;
+            border-left-color: #444;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -1988,6 +2082,14 @@
                                 <label for="date">Data:</label>
                                 <input type="text" id="date" class="form-control datepicker" required>
                                 <div id="dateIndicator" style="display: none; text-align: center; font-weight: bold; margin-top: 5px; padding: 5px; background-color: rgba(76, 175, 80, 0.1); border-radius: 5px; color: #3a8a3d;"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="vehicleSelect">Mezzo:</label>
+                                <select id="vehicleSelect" class="form-control">
+                                    <option value="">-- Seleziona un mezzo --</option>
+                                    <!-- Le opzioni saranno caricate dinamicamente -->
+                                </select>
                             </div>
                             
                             <div class="time-row">
@@ -2095,6 +2197,26 @@
                             <div class="setting-label">Importa Dati</div>
                             <button id="importData">Importa Dati</button>
                         </div>
+                        
+                        <div class="setting-item">
+                            <div class="setting-label">Gestione Mezzi</div>
+                            <div class="vehicles-manager">
+                                <div class="vehicles-form">
+                                    <div style="display: flex; gap: 10px; width: 100%; margin-bottom: 10px;">
+                                        <input type="text" id="vehicleName" class="settings-input" placeholder="Nome mezzo" style="flex: 2;">
+                                        <input type="text" id="vehiclePlate" class="settings-input" placeholder="Targa" style="flex: 1;">
+                                        <button id="addVehicle" style="background-color: var(--primary-color); color: white; border: none; border-radius: 4px; padding: 8px 12px; cursor: pointer;">Aggiungi</button>
+                                    </div>
+                                </div>
+                                <div id="vehiclesList" class="vehicles-list" style="margin-top: 10px; max-height: 200px; overflow-y: auto;">
+                                    <!-- La lista dei mezzi verrà caricata dinamicamente -->
+                                </div>
+                                <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                                    Nota: è possibile inserire fino a un massimo di 10 mezzi.
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="setting-item">
                             <div class="setting-label">Cancella Dati</div>
                             <button id="clearData" class="delete-btn">Cancella Tutto</button>
@@ -2438,6 +2560,615 @@
         }
         
         /**
+         * Formatta la data per la visualizzazione nel formato dd/mm/yyyy
+         * @param {string|Date} date - Data da formattare (stringa o oggetto Date)
+         * @returns {string} - Data formattata
+         */
+        function formatDate(date) {
+            if (!date) {
+                console.error('formatDate: data non valida', date);
+                return '';
+            }
+            
+            try {
+                // Se la data è già una stringa nel formato dd/mm/yyyy, restituiscila così com'è
+                if (typeof date === 'string') {
+                    // Se è già nel formato italiano dd/mm/yyyy
+                    if (/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
+                        return date;
+                    }
+                    
+                    // Se è in formato ISO (yyyy-mm-dd)
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+                        const parts = date.split('-');
+                        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                    }
+                    
+                    // Prova a creare un oggetto Date
+                    date = new Date(date);
+                }
+                
+                // Se è un oggetto Date valido
+                if (date instanceof Date && !isNaN(date)) {
+                    const day = date.getDate().toString().padStart(2, '0');
+                    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                    const year = date.getFullYear();
+                    return `${day}/${month}/${year}`;
+                } else {
+                    console.error('formatDate: impossibile convertire in data valida', date);
+                    return '';
+                }
+            } catch (error) {
+                console.error('Errore nella formattazione della data:', error);
+                return '';
+            }
+        }
+        
+        /**
+         * Verifica se una data è una festività italiana
+         * @param {Date} date - La data da verificare
+         * @returns {boolean} - True se è una festività, false altrimenti
+         */
+        function isItalianHoliday(date) {
+            if (!date || !(date instanceof Date) || isNaN(date)) {
+                console.error('isItalianHoliday: data non valida', date);
+                return false;
+            }
+            
+            const day = date.getDate();
+            const month = date.getMonth() + 1; // getMonth() restituisce 0-11
+            const year = date.getFullYear();
+            
+            // Verifica se è domenica (0 = domenica, 6 = sabato)
+            if (date.getDay() === 0) {
+                return true;
+            }
+            
+            // Festività fisse italiane
+            const fixedHolidays = [
+                { day: 1, month: 1 },    // Capodanno
+                { day: 6, month: 1 },    // Epifania
+                { day: 25, month: 4 },   // Festa della Liberazione
+                { day: 1, month: 5 },    // Festa del Lavoro
+                { day: 2, month: 6 },    // Festa della Repubblica
+                { day: 15, month: 8 },   // Ferragosto
+                { day: 1, month: 11 },   // Tutti i Santi
+                { day: 8, month: 12 },   // Immacolata Concezione
+                { day: 25, month: 12 },  // Natale
+                { day: 26, month: 12 },  // Santo Stefano
+            ];
+            
+            // Verifica festività fisse
+            for (const holiday of fixedHolidays) {
+                if (day === holiday.day && month === holiday.month) {
+                    return true;
+                }
+            }
+            
+            // Calcolo della Pasqua (algoritmo di Butcher/Meeus)
+            function getEasterDate(y) {
+                const a = y % 19;
+                const b = Math.floor(y / 100);
+                const c = y % 100;
+                const d = Math.floor(b / 4);
+                const e = b % 4;
+                const f = Math.floor((b + 8) / 25);
+                const g = Math.floor((b - f + 1) / 3);
+                const h = (19 * a + b - d - g + 15) % 30;
+                const i = Math.floor(c / 4);
+                const k = c % 4;
+                const l = (32 + 2 * e + 2 * i - h - k) % 7;
+                const m = Math.floor((a + 11 * h + 22 * l) / 451);
+                const month = Math.floor((h + l - 7 * m + 114) / 31);
+                const day = ((h + l - 7 * m + 114) % 31) + 1;
+                
+                return new Date(y, month - 1, day);
+            }
+            
+            // Calcola Pasqua e Pasquetta
+            const easter = getEasterDate(year);
+            
+            // Pasqua
+            if (day === easter.getDate() && month === easter.getMonth() + 1) {
+                return true;
+            }
+            
+            // Pasquetta (Lunedì dell'Angelo) - giorno dopo Pasqua
+            const easterMonday = new Date(easter);
+            easterMonday.setDate(easter.getDate() + 1);
+            if (day === easterMonday.getDate() && month === easterMonday.getMonth() + 1) {
+                return true;
+            }
+            
+            return false;
+        }
+        
+        /**
+         * Ottiene il nome della festività italiana per una data specificata
+         * @param {Date} date - La data per cui ottenere il nome della festività
+         * @returns {string} - Il nome della festività o stringa vuota se non è una festività
+         */
+        function getHolidayName(date) {
+            if (!date || !(date instanceof Date) || isNaN(date)) {
+                console.error('getHolidayName: data non valida', date);
+                return '';
+            }
+            
+            const day = date.getDate();
+            const month = date.getMonth() + 1; // getMonth() restituisce 0-11
+            const year = date.getFullYear();
+            
+            // Verifica se è domenica
+            if (date.getDay() === 0) {
+                return 'Domenica';
+            }
+            
+            // Dizionario delle festività fisse
+            const holidayNames = {
+                '1/1': 'Capodanno',
+                '6/1': 'Epifania',
+                '25/4': 'Festa della Liberazione',
+                '1/5': 'Festa del Lavoro',
+                '2/6': 'Festa della Repubblica',
+                '15/8': 'Ferragosto',
+                '1/11': 'Tutti i Santi',
+                '8/12': 'Immacolata Concezione',
+                '25/12': 'Natale',
+                '26/12': 'Santo Stefano'
+            };
+            
+            const dateKey = `${day}/${month}`;
+            if (holidayNames[dateKey]) {
+                return holidayNames[dateKey];
+            }
+            
+            // Calcolo della Pasqua (algoritmo di Butcher/Meeus)
+            function getEasterDate(y) {
+                const a = y % 19;
+                const b = Math.floor(y / 100);
+                const c = y % 100;
+                const d = Math.floor(b / 4);
+                const e = b % 4;
+                const f = Math.floor((b + 8) / 25);
+                const g = Math.floor((b - f + 1) / 3);
+                const h = (19 * a + b - d - g + 15) % 30;
+                const i = Math.floor(c / 4);
+                const k = c % 4;
+                const l = (32 + 2 * e + 2 * i - h - k) % 7;
+                const m = Math.floor((a + 11 * h + 22 * l) / 451);
+                const month = Math.floor((h + l - 7 * m + 114) / 31);
+                const day = ((h + l - 7 * m + 114) % 31) + 1;
+                
+                return new Date(y, month - 1, day);
+            }
+            
+            // Calcola Pasqua e Pasquetta
+            const easter = getEasterDate(year);
+            
+            // Pasqua
+            if (day === easter.getDate() && month === easter.getMonth() + 1) {
+                return 'Pasqua';
+            }
+            
+            // Pasquetta (Lunedì dell'Angelo)
+            const easterMonday = new Date(easter);
+            easterMonday.setDate(easter.getDate() + 1);
+            if (day === easterMonday.getDate() && month === easterMonday.getMonth() + 1) {
+                return 'Pasquetta';
+            }
+            
+            return '';
+        }
+        
+        /**
+         * Ottiene un oggetto Date da un formato italiano (dd/mm/yyyy)
+         * @param {string} dateStr - Data nel formato italiano dd/mm/yyyy
+         * @returns {Date} - Oggetto Date
+         */
+        function getDateFromItalianFormat(dateStr) {
+            if (!dateStr) {
+                console.error('getDateFromItalianFormat: data non valida', dateStr);
+                return new Date();
+            }
+            
+            try {
+                const [day, month, year] = dateStr.split('/').map(part => part.trim());
+                return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+            } catch (error) {
+                console.error('Errore nella conversione della data:', error);
+                return new Date();
+            }
+        }
+        
+        /**
+         * Ottiene il nome del giorno della settimana
+         * @param {string} dateStr - Data nel formato italiano dd/mm/yyyy
+         * @returns {string} - Nome del giorno della settimana
+         */
+        function getDayName(dateStr) {
+            try {
+                const date = getDateFromItalianFormat(dateStr);
+                return date.toLocaleDateString('it-IT', { weekday: 'long' });
+            } catch (error) {
+                console.error('Errore nel recupero del nome del giorno:', error);
+                return '';
+            }
+        }
+        
+        /**
+         * Aggiorna il report mensile con le entries raggruppate per data
+         */
+        function updateMonthlyReport() {
+            console.log('Aggiornamento report mensile...');
+            const monthlyReportContent = document.getElementById('monthlyReportContent');
+            const exportMonthSelect = document.getElementById('exportMonthSelect');
+            
+            if (!monthlyReportContent || !exportMonthSelect) {
+                console.error('Elementi DOM non trovati per il report mensile');
+                return;
+            }
+            
+            try {
+                // Carica le entries dal localStorage
+                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                const ferieMalattieEntries = JSON.parse(localStorage.getItem('ferieMalattieEntries') || '[]');
+                
+                if (entries.length === 0 && ferieMalattieEntries.length === 0) {
+                    monthlyReportContent.innerHTML = `
+                        <div class="monthly-report-empty">
+                            <i class="fas fa-calendar-day"></i>
+                            <p>Nessuna entry registrata</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Crea un oggetto per tenere traccia delle ferie e malattie per data
+                const ferieMalattieByDate = {};
+                
+                // Elabora le entries di ferie/malattie
+                ferieMalattieEntries.forEach(entry => {
+                    if (entry.isMultipleDays) {
+                        // Intervallo di più giorni
+                        if (entry.startDate && entry.endDate) {
+                            const startDate = getDateFromItalianFormat(entry.startDate);
+                            const endDate = getDateFromItalianFormat(entry.endDate);
+                            
+                            // Cicla attraverso i giorni
+                            const currentDate = new Date(startDate);
+                            while (currentDate <= endDate) {
+                                const dateStr = formatDate(currentDate);
+                                
+                                // Controlla se dobbiamo escludere i weekend
+                                const dayOfWeek = currentDate.getDay();
+                                if (!entry.excludeWeekends || (dayOfWeek !== 0 && dayOfWeek !== 6)) {
+                                    ferieMalattieByDate[dateStr] = {
+                                        type: entry.type,
+                                        note: entry.note || ''
+                                    };
+                                }
+                                
+                                // Passa al giorno successivo
+                                currentDate.setDate(currentDate.getDate() + 1);
+                            }
+                        }
+                    } else {
+                        // Giorno singolo
+                        ferieMalattieByDate[entry.date] = {
+                            type: entry.type,
+                            note: entry.note || ''
+                        };
+                    }
+                });
+                
+                // Ordina le entries per data
+                entries.sort((a, b) => {
+                    const dateA = getDateFromItalianFormat(a.date);
+                    const dateB = getDateFromItalianFormat(b.date);
+                    return dateA - dateB;
+                });
+                
+                // Raggruppa le entries per mese/anno
+                const entriesByMonth = {};
+                
+                // Aggiungi le entries di lavoro ai gruppi mensili
+                entries.forEach(entry => {
+                    const dateObj = getDateFromItalianFormat(entry.date);
+                    const month = dateObj.getMonth();
+                    const year = dateObj.getFullYear();
+                    const monthKey = `${(month + 1).toString().padStart(2, '0')}/${year}`;
+                    
+                    if (!entriesByMonth[monthKey]) {
+                        entriesByMonth[monthKey] = [];
+                    }
+                    
+                    entriesByMonth[monthKey].push(entry);
+                });
+                
+                // Aggiungi le entries di ferie/malattie ai gruppi mensili
+                Object.keys(ferieMalattieByDate).forEach(dateStr => {
+                    const ferieMalattiaInfo = ferieMalattieByDate[dateStr];
+                    const dateObj = getDateFromItalianFormat(dateStr);
+                    const month = dateObj.getMonth();
+                    const year = dateObj.getFullYear();
+                    const monthKey = `${(month + 1).toString().padStart(2, '0')}/${year}`;
+                    
+                    if (!entriesByMonth[monthKey]) {
+                        entriesByMonth[monthKey] = [];
+                    }
+                    
+                    // Crea una entry virtuale per ferie/malattie se non c'è già una entry per questa data
+                    const hasEntryForDate = entriesByMonth[monthKey].some(e => e.date === dateStr);
+                    
+                    if (!hasEntryForDate) {
+                        entriesByMonth[monthKey].push({
+                            date: dateStr,
+                            hours: 0,
+                            description: `${ferieMalattiaInfo.type === 'ferie' ? 'Ferie' : 'Malattia'}${ferieMalattiaInfo.note ? ': ' + ferieMalattiaInfo.note : ''}`,
+                            startTime: '',
+                            endTime: '',
+                            breakTime: '',
+                            transferta: false,
+                            notturne: false,
+                            isVirtualEntry: true,
+                            ferieMalattiaType: ferieMalattiaInfo.type
+                        });
+                    }
+                });
+                
+                // Ordina i mesi in ordine cronologico inverso (il più recente per primo)
+                const sortedMonths = Object.keys(entriesByMonth).sort((a, b) => {
+                    const [monthA, yearA] = a.split('/').map(Number);
+                    const [monthB, yearB] = b.split('/').map(Number);
+                    
+                    if (yearA !== yearB) {
+                        return yearB - yearA; // Anni più recenti prima
+                    }
+                    return monthB - monthA; // Mesi più recenti prima
+                });
+                
+                // Popola il menu a tendina per l'export
+                exportMonthSelect.innerHTML = '';
+                
+                // Opzione per tutti i mesi
+                const allOption = document.createElement('option');
+                allOption.value = 'all';
+                allOption.textContent = 'Tutti i mesi';
+                exportMonthSelect.appendChild(allOption);
+                
+                // Aggiungi un'opzione per ogni mese
+                sortedMonths.forEach(monthKey => {
+                    const [month, year] = monthKey.split('/');
+                    const dateObj = new Date(parseInt(year), parseInt(month) - 1, 1);
+                    const monthName = dateObj.toLocaleDateString('it-IT', { month: 'long' });
+                    
+                    const option = document.createElement('option');
+                    option.value = monthKey;
+                    option.textContent = `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} ${year}`;
+                    exportMonthSelect.appendChild(option);
+                });
+                
+                // Genera il contenuto HTML per il report mensile
+                let reportHTML = '';
+                
+                sortedMonths.forEach(monthKey => {
+                    const [month, year] = monthKey.split('/');
+                    const dateObj = new Date(parseInt(year), parseInt(month) - 1, 1);
+                    const monthName = dateObj.toLocaleDateString('it-IT', { month: 'long' });
+                    
+                    const monthEntries = entriesByMonth[monthKey];
+                    
+                    // Calcola le statistiche del mese
+                    let totalHours = 0;
+                    let totalTransferta = 0;
+                    let totalNotturne = 0;
+                    let workDays = 0;
+                    let ferieDays = 0;
+                    let malattiaDays = 0;
+                    
+                    // Raggruppa le entries per data
+                    const entriesByDate = {};
+                    monthEntries.forEach(entry => {
+                        if (!entriesByDate[entry.date]) {
+                            entriesByDate[entry.date] = [];
+                        }
+                        entriesByDate[entry.date].push(entry);
+                    });
+                    
+                    // Calcola le statistiche
+                    Object.keys(entriesByDate).forEach(dateStr => {
+                        const dateEntries = entriesByDate[dateStr];
+                        
+                        // Verifica se la data ha una ferie o malattia
+                        const hasFerieMalattia = dateEntries.some(entry => entry.isVirtualEntry && entry.ferieMalattiaType);
+                        const isFerie = hasFerieMalattia && dateEntries.some(entry => entry.ferieMalattiaType === 'ferie');
+                        const isMalattia = hasFerieMalattia && dateEntries.some(entry => entry.ferieMalattiaType === 'malattia');
+                        
+                        if (isFerie) {
+                            ferieDays++;
+                        } else if (isMalattia) {
+                            malattiaDays++;
+                        } else {
+                            const dayHours = dateEntries.reduce((sum, entry) => sum + (parseFloat(entry.hours) || 0), 0);
+                            const dayTransferta = dateEntries.reduce((sum, entry) => sum + (parseFloat(entry.transferta) || 0), 0);
+                            const dayNotturne = dateEntries.reduce((sum, entry) => sum + (parseFloat(entry.notturne) || 0), 0);
+                            
+                            if (dayHours > 0) {
+                                workDays++;
+                                totalHours += dayHours;
+                                totalTransferta += dayTransferta;
+                                totalNotturne += dayNotturne;
+                            }
+                        }
+                    });
+                    
+                    // Crea il gruppo del mese
+                    reportHTML += `
+                        <div class="monthly-report-group">
+                            <h3>${monthName.charAt(0).toUpperCase() + monthName.slice(1)} ${year}</h3>
+                            <div class="monthly-report-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value">${totalHours.toFixed(1)}h</div>
+                                    <div class="stat-label">Ore totali</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${workDays}</div>
+                                    <div class="stat-label">Giorni lavorati</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${totalTransferta.toFixed(1)}h</div>
+                                    <div class="stat-label">Trasferta</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${totalNotturne.toFixed(1)}h</div>
+                                    <div class="stat-label">Notturne</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${ferieDays}</div>
+                                    <div class="stat-label">Giorni ferie</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${malattiaDays}</div>
+                                    <div class="stat-label">Giorni malattia</div>
+                                </div>
+                            </div>
+                    `;
+                    
+                    // Ordina le date in ordine decrescente (più recenti prima)
+                    const sortedDates = Object.keys(entriesByDate).sort((a, b) => {
+                        const dateA = getDateFromItalianFormat(a);
+                        const dateB = getDateFromItalianFormat(b);
+                        return dateB - dateA;
+                    });
+                    
+                    // Aggiungi le entries di ogni giorno
+                    sortedDates.forEach(dateStr => {
+                        const dateEntries = entriesByDate[dateStr];
+                        const dateObj = getDateFromItalianFormat(dateStr);
+                        
+                        // Determina se il giorno è un festivo
+                        const isHoliday = isItalianHoliday(dateObj);
+                        const isSaturday = dateObj.getDay() === 6;
+                        const isSunday = dateObj.getDay() === 0;
+                        const dayName = getDayName(dateStr);
+                        
+                        // Verifica se la data ha una ferie o malattia
+                        const hasFerieMalattia = dateEntries.some(entry => entry.isVirtualEntry && entry.ferieMalattiaType);
+                        const isFerie = hasFerieMalattia && dateEntries.some(entry => entry.ferieMalattiaType === 'ferie');
+                        const isMalattia = hasFerieMalattia && dateEntries.some(entry => entry.ferieMalattiaType === 'malattia');
+                        
+                        // Calcola le ore totali, trasferta e notturne per il giorno
+                        let dayHours = 0;
+                        let dayTransferta = 0;
+                        let dayNotturne = 0;
+                        let dayEntryCount = 0;
+                        
+                        dateEntries.forEach(entry => {
+                            if (!entry.isVirtualEntry) {
+                                dayHours += parseFloat(entry.hours) || 0;
+                                dayTransferta += parseFloat(entry.transferta) || 0;
+                                dayNotturne += parseFloat(entry.notturne) || 0;
+                                dayEntryCount++;
+                            }
+                        });
+                        
+                        // Crea una classe CSS per il tipo di giorno
+                        let dayClass = '';
+                        if (isHoliday) dayClass = 'holiday';
+                        else if (isSaturday) dayClass = 'saturday';
+                        else if (isSunday) dayClass = 'sunday';
+                        
+                        if (isFerie) dayClass = 'ferie-entry';
+                        else if (isMalattia) dayClass = 'malattia-entry';
+                        
+                        reportHTML += `
+                            <div class="monthly-report-item ${dayClass} ${hasFerieMalattia ? 'has-ferie-malattia' : ''}">
+                                <div class="monthly-report-date">
+                                    <div class="date-wrapper">
+                                        <span class="date-day">${dateStr.split('/')[0]}</span>
+                                        <span class="date-weekday">${dayName}</span>
+                                    </div>
+                                </div>
+                                <div class="monthly-report-details">
+                        `;
+                        
+                        // Mostra un riepilogo per le ferie/malattie
+                        if (hasFerieMalattia) {
+                            const ferieMalattiaEntry = dateEntries.find(entry => entry.isVirtualEntry && entry.ferieMalattiaType);
+                            reportHTML += `
+                                <div class="monthly-report-detail">
+                                    <span class="detail-type">${ferieMalattiaEntry.ferieMalattiaType === 'ferie' ? '🏖️ Ferie' : '💀 Malattia'}</span>
+                                    ${ferieMalattiaEntry.description.replace(/^(Ferie|Malattia)(:)?/i, '') ? 
+                                        `<span class="detail-description">${ferieMalattiaEntry.description.replace(/^(Ferie|Malattia)(:)?/i, '')}</span>` : ''}
+                                </div>
+                            `;
+                        }
+                        
+                        // Mostra le entries di lavoro (solo se non ci sono ferie/malattie o se ci sono entries oltre alle ferie/malattie)
+                        if (!hasFerieMalattia || dateEntries.some(entry => !entry.isVirtualEntry)) {
+                            // Aggiungi un riepilogo se ci sono più entries
+                            if (dayEntryCount > 0) {
+                                reportHTML += `
+                                    <div class="monthly-report-detail summary">
+                                        <span class="detail-hours">${dayHours.toFixed(1)}h</span>
+                                        ${dayTransferta > 0 ? `<span class="detail-transferta" title="Trasferta"><i class="fas fa-car"></i> ${dayTransferta.toFixed(1)}h</span>` : ''}
+                                        ${dayNotturne > 0 ? `<span class="detail-notturne" title="Notturne"><i class="fas fa-moon"></i> ${dayNotturne.toFixed(1)}h</span>` : ''}
+                                    </div>
+                                `;
+                            }
+                            
+                            // Mostra le singole entries di lavoro
+                            dateEntries.forEach(entry => {
+                                if (!entry.isVirtualEntry) {
+                                    // Trova il veicolo se presente
+                                    let vehicleText = '';
+                                    if (entry.vehicleId) {
+                                        const vehicles = JSON.parse(localStorage.getItem('vehicles') || '[]');
+                                        const vehicle = vehicles.find(v => v.id === entry.vehicleId);
+                                        if (vehicle) {
+                                            vehicleText = `<div class="monthly-report-vehicle"><i class="fas fa-truck"></i> ${vehicle.name} (${vehicle.plate})</div>`;
+                                        }
+                                    }
+                                    
+                                    reportHTML += `
+                                        <div class="monthly-report-detail">
+                                            ${entry.startTime && entry.endTime ? 
+                                                `<span class="detail-time">${entry.startTime} - ${entry.endTime}</span>` : ''}
+                                            <span class="detail-hours">${parseFloat(entry.hours).toFixed(1)}h</span>
+                                            ${entry.transferta > 0 ? '<span class="detail-transferta" title="Trasferta"><i class="fas fa-car"></i></span>' : ''}
+                                            ${entry.notturne > 0 ? '<span class="detail-notturne" title="Notturne"><i class="fas fa-moon"></i></span>' : ''}
+                                        </div>
+                                        <div class="monthly-report-description">${entry.description}</div>
+                                        ${vehicleText}
+                                    `;
+                                }
+                            });
+                        }
+                        
+                        reportHTML += `
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    reportHTML += '</div>'; // Chiude monthly-report-group
+                });
+                
+                // Aggiorna il contenuto del report
+                monthlyReportContent.innerHTML = reportHTML;
+                
+            } catch (error) {
+                console.error('Errore durante l\'aggiornamento del report mensile:', error);
+                monthlyReportContent.innerHTML = `
+                    <div class="monthly-report-empty">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Errore durante il caricamento del report mensile</p>
+                    </div>
+                `;
+            }
+        }
+        
+        /**
          * Funzione per caricare le entries esistenti per una data
          * @param {string} date - La data per cui caricare i dati
          */
@@ -2453,6 +3184,20 @@
                 if (!date || entries.length === 0) {
                     console.log('Nessuna data specificata o nessuna entry trovata in localStorage');
                     clearForm();
+                    
+                    // Ripristina la data selezionata dopo il clear
+                    if (date) {
+                        const dateInput = document.getElementById('date');
+                        if (dateInput) {
+                            dateInput.value = date;
+                            
+                            // Aggiorna l'indicatore della data
+                            if (typeof updateDateIndicator === 'function') {
+                                updateDateIndicator(date);
+                            }
+                        }
+                    }
+                    
                     console.log('==== FINE CARICAMENTO: FORM PULITO ====');
                     return;
                 }
@@ -2556,7 +3301,19 @@
                 
                 // Se arriviamo qui, non abbiamo trovato corrispondenze
                 console.log('Nessuna entry trovata per questa data, reset del form');
+                
+                // Pulisci il form ma mantieni la data selezionata
                 clearForm();
+                const dateInput = document.getElementById('date');
+                if (dateInput && date) {
+                    dateInput.value = date;
+                    
+                    // Aggiorna l'indicatore della data
+                    if (typeof updateDateIndicator === 'function') {
+                        updateDateIndicator(date);
+                    }
+                }
+                
                 console.log('==== FINE CARICAMENTO: NESSUNA CORRISPONDENZA ====');
             } catch (error) {
                 console.error('Errore durante il caricamento dei dati:', error);
@@ -2571,20 +3328,40 @@
             try {
                 // Resetta tutti i campi del form
                 const form = document.getElementById('timeEntryForm'); // ID corretto
+                
+                // Salva la data corrente prima di resettare il form
+                const currentDate = document.getElementById('date') ? document.getElementById('date').value : '';
+                
                 if (form) {
                     form.reset();
                     
-                    // Ripristina la data corrente
-                    const today = new Date();
-                    const dateString = formatDateForInput(today);
+                    // Mantieni la data selezionata invece di ripristinare la data corrente
                     const dateInput = document.getElementById('date');
-                    if (dateInput) {
-                        dateInput.value = dateString;
+                    if (dateInput && currentDate) {
+                        dateInput.value = currentDate;
+                        
+                        // Aggiorna l'indicatore della data con la data selezionata
+                        if (typeof updateDateIndicator === 'function') {
+                            updateDateIndicator(currentDate);
+                        }
+                    } else {
+                        // Solo se non c'è una data già selezionata, usa la data corrente
+                        const today = new Date();
+                        const dateString = formatDateForInput(today);
+                        if (dateInput) {
+                            dateInput.value = dateString;
+                        }
+                        
+                        // Aggiorna l'indicatore della data se la funzione è disponibile
+                        if (typeof updateDateIndicator === 'function') {
+                            updateDateIndicator(dateString);
+                        }
                     }
                     
-                    // Aggiorna l'indicatore della data se la funzione è disponibile
-                    if (typeof updateDateIndicator === 'function') {
-                        updateDateIndicator(dateString);
+                    // Reset del campo veicolo
+                    const vehicleSelect = document.getElementById('vehicleSelect');
+                    if (vehicleSelect) {
+                        vehicleSelect.value = '';
                     }
                 } else {
                     console.error("Form non trovato con ID 'timeEntryForm'");
@@ -2748,6 +3525,8 @@
                 const breakTime = document.getElementById('breakTime').value;
                 const hours = calculateHours(startTime, endTime, breakTime);
                 const description = document.getElementById('description').value;
+                const transferta = document.getElementById('transferta').value || '0';
+                const notturne = document.getElementById('notturne').value || '0';
                 
                 if (!date || !startTime || !endTime || !breakTime || !description) {
                     alert('Per favore compila tutti i campi obbligatori');
@@ -2755,7 +3534,7 @@
                 }
                 
                 // Salva l'entry
-                saveTimeEntry(date, hours, description);
+                saveTimeEntry(date, hours, description, transferta, notturne);
                 
                 // Resetta il form
                 form.reset();
@@ -2788,6 +3567,18 @@
                 alert('Nome utente salvato con successo!');
             });
 
+            // Event listener per aggiungere un mezzo
+            document.getElementById('addVehicle').addEventListener('click', function() {
+                const vehicleName = document.getElementById('vehicleName').value;
+                const vehiclePlate = document.getElementById('vehiclePlate').value;
+                
+                if (addVehicle(vehicleName, vehiclePlate)) {
+                    // Pulisci gli input se l'aggiunta è avvenuta con successo
+                    document.getElementById('vehicleName').value = '';
+                    document.getElementById('vehiclePlate').value = '';
+                }
+            });
+
             exportMonthlyExcel.addEventListener('click', function() {
                 const selectedMonth = document.getElementById('exportMonthSelect').value;
                 exportMonthlyReportToExcel(selectedMonth);
@@ -2811,6 +3602,137 @@
                 document.getElementById('userName').value = userNameValue;
                 
                 applyTheme();
+                
+                // Carica anche i mezzi di trasporto
+                loadVehicles();
+            }
+            
+            // Funzioni per la gestione dei mezzi di trasporto
+            function loadVehicles() {
+                const vehicles = JSON.parse(localStorage.getItem('vehicles') || '[]');
+                const vehiclesList = document.getElementById('vehiclesList');
+                const vehicleSelect = document.getElementById('vehicleSelect');
+                
+                // Aggiorna la lista nella sezione impostazioni
+                if (vehiclesList) {
+                    if (vehicles.length === 0) {
+                        vehiclesList.innerHTML = '<div style="padding: 10px; text-align: center; color: #666;">Nessun mezzo registrato</div>';
+                    } else {
+                        vehiclesList.innerHTML = vehicles.map((vehicle, index) => `
+                            <div class="vehicle-item">
+                                <div class="vehicle-info">
+                                    <div class="vehicle-name">${vehicle.name}</div>
+                                    <div class="vehicle-plate">${vehicle.plate}</div>
+                                </div>
+                                <button class="delete-vehicle-btn" data-index="${index}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `).join('');
+                        
+                        // Aggiungi event listener per i pulsanti di eliminazione
+                        document.querySelectorAll('.delete-vehicle-btn').forEach(button => {
+                            button.addEventListener('click', function() {
+                                const index = parseInt(this.getAttribute('data-index'));
+                                deleteVehicle(index);
+                            });
+                        });
+                    }
+                }
+                
+                // Aggiorna il menu a tendina nella home
+                if (vehicleSelect) {
+                    // Mantieni l'opzione vuota
+                    vehicleSelect.innerHTML = '<option value="">-- Seleziona un mezzo --</option>';
+                    
+                    // Aggiungi i mezzi al select
+                    vehicles.forEach(vehicle => {
+                        const option = document.createElement('option');
+                        option.value = vehicle.id;
+                        option.textContent = `${vehicle.name} (${vehicle.plate})`;
+                        vehicleSelect.appendChild(option);
+                    });
+                }
+            }
+            
+            function addVehicle(name, plate) {
+                // Pulisci gli input
+                name = name.trim();
+                plate = plate.trim();
+                
+                if (!name || !plate) {
+                    showToast('Inserisci sia il nome che la targa del mezzo', 'error');
+                    return false;
+                }
+                
+                // Carica i mezzi esistenti
+                let vehicles = JSON.parse(localStorage.getItem('vehicles') || '[]');
+                
+                // Controlla il limite massimo
+                if (vehicles.length >= 10) {
+                    showToast('Hai raggiunto il limite massimo di 10 mezzi', 'error');
+                    return false;
+                }
+                
+                // Genera un ID univoco per il mezzo
+                const id = 'v_' + Date.now();
+                
+                // Aggiungi il nuovo mezzo
+                vehicles.push({
+                    id: id,
+                    name: name,
+                    plate: plate
+                });
+                
+                // Salva nel localStorage
+                localStorage.setItem('vehicles', JSON.stringify(vehicles));
+                
+                // Aggiorna la visualizzazione
+                loadVehicles();
+                
+                // Mostra il messaggio di successo
+                showToast('Mezzo aggiunto con successo', 'success');
+                
+                return true;
+            }
+            
+            function deleteVehicle(index) {
+                if (confirm('Sei sicuro di voler eliminare questo mezzo?')) {
+                    const vehicles = JSON.parse(localStorage.getItem('vehicles') || '[]');
+                    
+                    if (index >= 0 && index < vehicles.length) {
+                        const deletedVehicle = vehicles[index];
+                        
+                        // Rimuovi il mezzo
+                        vehicles.splice(index, 1);
+                        localStorage.setItem('vehicles', JSON.stringify(vehicles));
+                        
+                        // Aggiorna gli entries che usavano questo mezzo
+                        updateEntriesAfterVehicleDeletion(deletedVehicle.id);
+                        
+                        // Aggiorna la visualizzazione
+                        loadVehicles();
+                        
+                        showToast('Mezzo eliminato con successo', 'success');
+                    }
+                }
+            }
+            
+            function updateEntriesAfterVehicleDeletion(vehicleId) {
+                // Aggiorna tutte le entry che usavano questo mezzo
+                let entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                let updated = false;
+                
+                entries.forEach(entry => {
+                    if (entry.vehicleId === vehicleId) {
+                        entry.vehicleId = '';
+                        updated = true;
+                    }
+                });
+                
+                if (updated) {
+                    localStorage.setItem('timeEntries', JSON.stringify(entries));
+                }
             }
             
             function applyTheme() {
@@ -2926,13 +3848,12 @@
                 return hours;
             }
             
-            function saveTimeEntry(date, hours, description) {
+            function saveTimeEntry(date, hours, description, transferta, notturne) {
                 let entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
                 const startTime = document.getElementById('startTime').value;
                 const endTime = document.getElementById('endTime').value;
                 const breakTime = document.getElementById('breakTime').value;
-                const transferta = document.getElementById('transferta').value || '';
-                const notturne = document.getElementById('notturne').value || '';
+                const vehicleId = document.getElementById('vehicleSelect').value || '';
                 
                 // Normalizza la data per il confronto
                 let normalizedDate = date;
@@ -2973,8 +3894,9 @@
                         startTime: startTime,
                         endTime: endTime,
                         breakTime: parseFloat(breakTime),
-                        transferta: transferta ? parseFloat(transferta) : 0,
-                        notturne: notturne ? parseFloat(notturne) : 0
+                        transferta: parseFloat(transferta) || 0,
+                        notturne: parseFloat(notturne) || 0,
+                        vehicleId: vehicleId
                     };
                 } else {
                     // Se non esiste un'entry per questa data, creane una nuova
@@ -2987,8 +3909,9 @@
                         startTime,
                         endTime,
                         breakTime: parseFloat(breakTime),
-                        transferta: transferta ? parseFloat(transferta) : 0,
-                        notturne: notturne ? parseFloat(notturne) : 0
+                        transferta: parseFloat(transferta) || 0,
+                        notturne: parseFloat(notturne) || 0,
+                        vehicleId: vehicleId
                     });
                 }
                 
@@ -3002,6 +3925,7 @@
             
             function loadTimeEntries() {
                 const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                const vehicles = JSON.parse(localStorage.getItem('vehicles') || '[]');
                 
                 if (entries.length === 0) {
                     timeEntries.innerHTML = '<p>Nessuna entry salvata</p>';
@@ -3016,6 +3940,15 @@
                     const transfertaText = entry.transferta > 0 ? `<i class="fas fa-car" title="Trasferta"></i> ${entry.transferta}h` : '';
                     const notturneText = entry.notturne > 0 ? `<i class="fas fa-moon" title="Notturne"></i> ${entry.notturne}h` : '';
                     
+                    // Trova il veicolo se presente
+                    let vehicleText = '';
+                    if (entry.vehicleId) {
+                        const vehicle = vehicles.find(v => v.id === entry.vehicleId);
+                        if (vehicle) {
+                            vehicleText = `<div style="margin-top: 5px; font-size: 0.85rem;"><i class="fas fa-truck"></i> ${vehicle.name} (${vehicle.plate})</div>`;
+                        }
+                    }
+                    
                     return `
                         <div class="time-entry">
                             <div class="time-entry-header">
@@ -3029,6 +3962,7 @@
                                 <span>Pausa: ${entry.breakTime} ore</span>
                             </div>
                             <div class="time-entry-description">${entry.description}</div>
+                            ${vehicleText}
                         </div>
                     `;
                 }).join('');
@@ -3283,12 +4217,12 @@
                             <div class="calendar-day-number">${day}</div>
                             <div class="calendar-day-content">
                                 ${dayEntries.length > 0 ? `<div class="calendar-hours">${totalHours.toFixed(1)}h</div>` : ''}
-                                <div class="calendar-icons">
-                                    ${hasTransferta ? `<span><i class="fas fa-car" title="Trasferta"></i></span>` : ''}
-                                    ${hasNotturne ? `<span><i class="fas fa-moon" title="Notturne"></i></span>` : ''}
+                                    <div class="calendar-icons">
+                                        ${hasTransferta ? `<span><i class="fas fa-car" title="Trasferta"></i></span>` : ''}
+                                        ${hasNotturne ? `<span><i class="fas fa-moon" title="Notturne"></i></span>` : ''}
                                     ${isFerie ? `<span class="ferie-icon" title="Ferie">🏖️</span>` : ''}
                                     ${isMalattia ? `<span class="malattia-icon" title="Malattia">💀</span>` : ''}
-                                </div>
+                                    </div>
                                 ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
                             </div>
                         </div>
@@ -3482,7 +4416,22 @@
                 if (entries.length === 0) {
                     modalEntries.innerHTML = '<div class="no-entries">Nessuna entry registrata per questa data</div>';
                 } else {
-                    modalEntries.innerHTML = entries.map((entry, index) => `
+                    modalEntries.innerHTML = entries.map((entry, index) => {
+                        // Trova il veicolo se presente
+                        let vehicleHTML = '';
+                        if (entry.vehicleId) {
+                            const vehicles = JSON.parse(localStorage.getItem('vehicles') || '[]');
+                            const vehicle = vehicles.find(v => v.id === entry.vehicleId);
+                            if (vehicle) {
+                                vehicleHTML = `
+                                    <div class="day-entry-vehicle">
+                                        <i class="fas fa-truck"></i> ${vehicle.name} (${vehicle.plate})
+                                    </div>
+                                `;
+                            }
+                        }
+                        
+                        return `
                         <div class="day-entry">
                             <div class="day-entry-header">
                                 <div class="day-entry-hours">${entry.hours}h</div>
@@ -3498,26 +4447,28 @@
                                 ${entry.notturne > 0 ? `<span>Notturne: ${entry.notturne}h</span>` : ''}
                             </div>
                             <div class="day-entry-description">${entry.description}</div>
+                            ${vehicleHTML}
                         </div>
-                    `).join('');
+                    `;
+                    }).join('');
                 }
-                
+                    
                 // Aggiungi event listener per i pulsanti di modifica e eliminazione
                 document.querySelectorAll('.day-entry .edit-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
+                            btn.addEventListener('click', function() {
                         const index = this.getAttribute('data-index');
-                        const date = this.getAttribute('data-date');
-                        editEntry(date, index);
-                    });
-                });
-                
+                                const date = this.getAttribute('data-date');
+                                editEntry(date, index);
+                            });
+                        });
+                        
                 document.querySelectorAll('.day-entry .delete-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
+                            btn.addEventListener('click', function() {
                         const index = this.getAttribute('data-index');
-                        const date = this.getAttribute('data-date');
+                                const date = this.getAttribute('data-date');
                         deleteEntry(date, index);
-                    });
-                });
+                            });
+                        });
                 
                 // Aggiungi event listener per il pulsante "Aggiungi Entry"
                 addEntryBtn.onclick = function() {
@@ -3541,6 +4492,7 @@
                     document.getElementById('notturne').value = '';
                     document.getElementById('totalHours').value = '';
                     document.getElementById('description').value = '';
+                    document.getElementById('vehicleSelect').value = '';
                 };
                 
                 // Mostra il modale
@@ -3601,6 +4553,14 @@
                     document.getElementById('transferta').value = entry.transferta || 0;
                     document.getElementById('notturne').value = entry.notturne || 0;
                     document.getElementById('description').value = entry.description;
+                    
+                    // Imposta il mezzo se presente
+                    const vehicleSelect = document.getElementById('vehicleSelect');
+                    if (vehicleSelect && entry.vehicleId) {
+                        vehicleSelect.value = entry.vehicleId;
+                    } else if (vehicleSelect) {
+                        vehicleSelect.value = '';
+                    }
 
                     // Modifica il testo del pulsante di submit
                     const submitBtn = document.getElementById('submitBtn');
@@ -3616,6 +4576,7 @@
                         const formTransferta = parseFloat(document.getElementById('transferta').value);
                         const formNotturne = parseFloat(document.getElementById('notturne').value);
                         const formDescription = document.getElementById('description').value;
+                        const formVehicleId = document.getElementById('vehicleSelect').value || '';
                         
                         // Calcola le ore totali
                         const hours = formEndTime - formStartTime - formBreakTime;
@@ -3633,7 +4594,8 @@
                             transferta: formTransferta,
                             notturne: formNotturne,
                             description: formDescription,
-                            hours: hours
+                            hours: hours,
+                            vehicleId: formVehicleId
                         };
                         
                         // Salva nel localStorage
@@ -3716,7 +4678,7 @@
             });
 
             // Funzione per modificare le entries di un giorno
-            window.editDayEntries = function(date) {
+            window.editDayEntries = function(date, index) {
                 console.log('Funzione editDayEntries chiamata con data:', date);
                 
                 // Recupera le entries esistenti per questa data
@@ -3746,6 +4708,7 @@
                     const transfertaInput = document.getElementById('transferta');
                     const notturneInput = document.getElementById('notturne');
                     const descriptionInput = document.getElementById('description');
+                    const vehicleSelect = document.getElementById('vehicleSelect');
                     
                     if (dateInput) {
                         dateInput.value = date;
@@ -3766,6 +4729,13 @@
                     if (transfertaInput) transfertaInput.value = entry.transferta || 0;
                     if (notturneInput) notturneInput.value = entry.notturne || 0;
                     if (descriptionInput) descriptionInput.value = entry.description;
+                    
+                    // Imposta il veicolo se disponibile
+                    if (vehicleSelect && entry.vehicleId) {
+                        vehicleSelect.value = entry.vehicleId;
+                    } else if (vehicleSelect) {
+                        vehicleSelect.value = '';
+                    }
                     
                     // Aggiorna direttamente il campo ore totali
                     const totalHoursInput = document.getElementById('totalHours');
@@ -3879,685 +4849,45 @@
                         document.getElementById('date').value = currentDate;
                     }
                     
-                    // Imposta valori predefiniti
+                    // Imposta valori predefiniti per alcuni campi
                     document.getElementById('breakTime').value = '0.5';
                     document.getElementById('transferta').value = '';
                     document.getElementById('notturne').value = '';
-                    document.getElementById('description').value = '';
+                    document.getElementById('totalHours').value = '';
                     document.getElementById('startTime').value = '';
                     document.getElementById('endTime').value = '';
-                    document.getElementById('totalHours').value = '';
+                    document.getElementById('description').value = '';
                     
-                    // Rimuovi lo stato di modifica se attivo
-                    const submitBtn = document.getElementById('submitBtn');
-                    if (submitBtn) {
-                        submitBtn.textContent = 'Salva';
-                        
-                        // Rimuovi eventuale onclick personalizzato
-                        const newSubmitBtn = submitBtn.cloneNode(true);
-                        submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
+                    // Reset del campo veicolo
+                    const vehicleSelect = document.getElementById('vehicleSelect');
+                    if (vehicleSelect) {
+                        vehicleSelect.value = '';
                     }
                     
-                    // Rimuovi entry in modifica dal localStorage
+                    // Controlla se è in corso una modifica di un'entry esistente
+                    if (localStorage.getItem('editingEntry')) {
                     localStorage.removeItem('editingEntry');
                     
-                    console.log("Form resettato con successo");
+                        // Ripristina il pulsante al testo predefinito
+                        const submitBtn = document.getElementById('submitBtn');
+                        if (submitBtn) {
+                            submitBtn.textContent = 'Aggiungi Entry';
+                            
+                            // Ripristina l'event handler originale (submit del form)
+                            submitBtn.onclick = function(e) {
+                                e.preventDefault();
+                                const form = document.getElementById('timeEntryForm');
+                                if (form) {
+                                    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+                                }
+                            };
+                        }
+                    }
+                    
+                    console.log("Form resettato");
                 } catch (error) {
                     console.error("Errore durante il reset del form:", error);
                 }
-            }
-            
-            // Funzione per aggiornare il riepilogo mensile
-            function updateMonthlyReport() {
-                console.log("Aggiornamento riepilogo mensile");
-                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
-                const ferieEntries = JSON.parse(localStorage.getItem('ferieMalattieEntries') || '[]');
-                const monthlyReportContent = document.getElementById('monthlyReportContent');
-                const monthSelector = document.getElementById('exportMonthSelect');
-                
-                if (!monthlyReportContent || !monthSelector) {
-                    console.warn('Elemento monthlyReportContent o monthSelector non trovato');
-                    return;
-                }
-                
-                if (entries.length === 0 && ferieEntries.length === 0) {
-                    monthlyReportContent.innerHTML = '<div class="monthly-report-empty">Nessuna entry registrata</div>';
-                    monthSelector.innerHTML = '<option value="">Nessun mese disponibile</option>';
-                    return;
-                }
-                
-                // Ordina le entries per data (più recenti prima) mantenendo il formato italiano
-                entries.sort((a, b) => {
-                    const dateObjA = getDateFromItalianFormat(a.date);
-                    const dateObjB = getDateFromItalianFormat(b.date);
-                    
-                    return dateObjB - dateObjA; // Ordine decrescente (più recenti prima)
-                });
-                
-                // Crea un oggetto per tenere traccia delle ferie e malattie per data
-                const ferieMalattieByDate = {};
-                ferieEntries.forEach(entry => {
-                    if (entry.isMultipleDays) {
-                        // Usa le date specifiche se disponibili (esclusi i weekend)
-                        if (entry.specificDates && entry.specificDates.length > 0) {
-                            entry.specificDates.forEach(dateStr => {
-                                ferieMalattieByDate[dateStr] = {
-                                    type: entry.type,
-                                    note: entry.note || ''
-                                };
-                            });
-                        } else {
-                            // Fallback al vecchio metodo se non sono disponibili le date specifiche
-                            if (entry.startDate && entry.endDate) {
-                                const startParts = entry.startDate.split('/');
-                                const endParts = entry.endDate.split('/');
-                                
-                                if (startParts.length === 3 && endParts.length === 3) {
-                                    const startDate = new Date(startParts[2], startParts[1] - 1, startParts[0]);
-                                    const endDate = new Date(endParts[2], endParts[1] - 1, endParts[0]);
-                                    
-                                    // Cicla attraverso tutte le date nell'intervallo
-                                    const currentDate = new Date(startDate);
-                                    while (currentDate <= endDate) {
-                                        const dateStr = currentDate.toLocaleDateString('it-IT', {
-                                            day: '2-digit',
-                                            month: '2-digit',
-                                            year: 'numeric'
-                                        });
-                                        
-                                        // Controlla se dobbiamo escludere i weekend
-                                        const dayOfWeek = currentDate.getDay();
-                                        if (!entry.excludeWeekends || (dayOfWeek !== 0 && dayOfWeek !== 6)) {
-                                            ferieMalattieByDate[dateStr] = {
-                                                type: entry.type,
-                                                note: entry.note || ''
-                                            };
-                                        }
-                                        
-                                        // Passa al giorno successivo
-                                        currentDate.setDate(currentDate.getDate() + 1);
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        // Gestisci date singole
-                        ferieMalattieByDate[entry.date] = {
-                            type: entry.type,
-                            note: entry.note || ''
-                        };
-                    }
-                });
-                
-                // Raggruppa le entries per mese
-                const entriesByMonth = {};
-                
-                // Aggiungi le entries di lavoro
-                entries.forEach(entry => {
-                    // Usa la data direttamente in formato italiano
-                    const dateObj = getDateFromItalianFormat(entry.date);
-                    const monthYear = `${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
-                    
-                    if (!entriesByMonth[monthYear]) {
-                        entriesByMonth[monthYear] = {
-                            workEntries: [],
-                            ferieEntries: []
-                        };
-                    }
-                    entriesByMonth[monthYear].workEntries.push(entry);
-                });
-                
-                // Aggiungi le entries di ferie/malattie ai mesi corretti
-                Object.keys(ferieMalattieByDate).forEach(dateStr => {
-                    const dateObj = getDateFromItalianFormat(dateStr);
-                    const monthYear = `${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
-                    
-                    if (!entriesByMonth[monthYear]) {
-                        entriesByMonth[monthYear] = {
-                            workEntries: [],
-                            ferieEntries: []
-                        };
-                    }
-                    
-                    // Aggiungi l'entry di ferie/malattia con la data
-                    entriesByMonth[monthYear].ferieEntries.push({
-                        date: dateStr,
-                        ...ferieMalattieByDate[dateStr]
-                    });
-                });
-                
-                // Popola il selettore di mesi
-                monthSelector.innerHTML = '';
-                monthSelector.innerHTML = '<option value="all">Tutti i mesi</option>';
-                
-                // Ottieni il mese corrente nel formato 'MM/YYYY'
-                const today = new Date();
-                const currentMonth = `${today.getMonth() + 1}/${today.getFullYear()}`;
-                let currentMonthExists = false;
-                
-                Object.keys(entriesByMonth).forEach(monthYear => {
-                    const [month, year] = monthYear.split('/');
-                    const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long' });
-                    const optionText = `${monthName} ${year}`;
-                    const optionValue = monthYear;
-                    
-                    const option = document.createElement('option');
-                    option.value = optionValue;
-                    option.textContent = optionText;
-                    
-                    // Verifica se questo mese è il mese corrente
-                    if (monthYear === currentMonth) {
-                        option.selected = true;
-                        currentMonthExists = true;
-                    }
-                    
-                    monthSelector.appendChild(option);
-                });
-                
-                // Se non esistono entries per il mese corrente, lascia selezionato "Tutti i mesi"
-                if (!currentMonthExists) {
-                    monthSelector.value = "all";
-                }
-                
-                let html = '';
-                
-                // Per ogni mese
-                Object.keys(entriesByMonth).forEach(monthYear => {
-                    const monthData = entriesByMonth[monthYear];
-                    const monthWorkEntries = monthData.workEntries;
-                    const monthFerieEntries = monthData.ferieEntries;
-                    
-                    const [month, year] = monthYear.split('/');
-                    const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long' });
-                    
-                    html += `
-                        <div class="monthly-report-group">
-                            <h3>${monthName} ${year}</h3>
-                            <div class="monthly-report-stats">
-                                <div class="monthly-stat-item">
-                                    <div class="monthly-stat-value">
-                                        ${monthWorkEntries.reduce((sum, entry) => sum + parseFloat(entry.hours || 0), 0).toFixed(1)}h
-                                    </div>
-                                    <div class="monthly-stat-label">Ore Totali</div>
-                                </div>
-                                <div class="monthly-stat-item">
-                                    <div class="monthly-stat-value">
-                                        ${monthWorkEntries.reduce((sum, entry) => sum + (parseFloat(entry.transferta || 0) || 0), 0).toFixed(1)}h
-                                    </div>
-                                    <div class="monthly-stat-label">Ore Trasferta</div>
-                                </div>
-                                <div class="monthly-stat-item">
-                                    <div class="monthly-stat-value">
-                                        ${monthWorkEntries.reduce((sum, entry) => sum + (parseFloat(entry.notturne || 0) || 0), 0).toFixed(1)}h
-                                    </div>
-                                    <div class="monthly-stat-label">Ore Notturne</div>
-                                </div>
-                                <div class="monthly-stat-item">
-                                    <div class="monthly-stat-value">
-                                        ${monthFerieEntries.filter(entry => entry.type === 'ferie').length}
-                                    </div>
-                                    <div class="monthly-stat-label">Giorni Ferie</div>
-                                </div>
-                                <div class="monthly-stat-item">
-                                    <div class="monthly-stat-value">
-                                        ${monthFerieEntries.filter(entry => entry.type === 'malattia').length}
-                                    </div>
-                                    <div class="monthly-stat-label">Giorni Malattia</div>
-                                </div>
-                            </div>
-                            <div class="monthly-report-entries">
-                    `;
-                    
-                    // Combina le entries di lavoro e ferie/malattie e ordinale per data
-                    let allEntries = [];
-                    
-                    // Converti le entries di lavoro
-                    monthWorkEntries.forEach(entry => {
-                        allEntries.push({
-                            date: entry.date,
-                            isWork: true,
-                            workData: entry
-                        });
-                    });
-                    
-                    // Converti le entries di ferie/malattie
-                    monthFerieEntries.forEach(entry => {
-                        // Verifica se esiste già un'entry di lavoro per questa data
-                        const existingEntry = allEntries.find(e => e.date === entry.date && e.isWork);
-                        
-                        if (!existingEntry) {
-                            // Se non c'è un'entry di lavoro, aggiungi una nuova entry di ferie/malattie
-                            allEntries.push({
-                                date: entry.date,
-                                isWork: false,
-                                ferieData: entry
-                            });
-                        } else {
-                            // Se c'è già un'entry di lavoro, aggiungi le informazioni di ferie/malattie
-                            existingEntry.hasFerieMalattia = true;
-                            existingEntry.ferieData = entry;
-                        }
-                    });
-                    
-                    // Ordina le entries per data (più recenti prima)
-                    allEntries.sort((a, b) => {
-                        const dateObjA = getDateFromItalianFormat(a.date);
-                        const dateObjB = getDateFromItalianFormat(b.date);
-                        
-                        return dateObjB - dateObjA; // Ordine decrescente (più recenti prima)
-                    });
-                    
-                    // Genera l'HTML per ogni entry
-                    html += allEntries.map(entry => {
-                        if (entry.isWork) {
-                            // Entry di lavoro
-                            const workEntry = entry.workData;
-                            let entryHtml = `
-                                <div class="monthly-report-item ${entry.hasFerieMalattia ? 'has-ferie-malattia' : ''}">
-                                    <div class="monthly-report-date">${getDayName(workEntry.date)}, ${formatDate(workEntry.date)}`;
-                                    
-                            // Aggiungi icona di ferie/malattia se presente
-                            if (entry.hasFerieMalattia) {
-                                const ferieMalattia = entry.ferieData;
-                                const emoji = ferieMalattia.type === 'ferie' ? '🏖️' : '💀';
-                                const tipo = ferieMalattia.type === 'ferie' ? 'Ferie' : 'Malattia';
-                                entryHtml += `<span class="ferie-malattia-indicator" title="${tipo}${ferieMalattia.note ? ': ' + ferieMalattia.note : ''}">${emoji}</span>`;
-                            }
-                            
-                            entryHtml += `</div>
-                                    <div class="monthly-report-details">
-                                        <span class="monthly-report-detail"><i class="fas fa-clock"></i> ${workEntry.startTime}-${workEntry.endTime} (Pausa: ${workEntry.breakTime}h)</span>
-                                        <span class="monthly-report-detail">${parseFloat(workEntry.hours || 0).toFixed(1)}h</span>
-                                        ${parseFloat(workEntry.transferta || 0) > 0 ? `<span class="monthly-report-detail"><i class="fas fa-car"></i> ${parseFloat(workEntry.transferta).toFixed(1)}h</span>` : ''}
-                                        ${parseFloat(workEntry.notturne || 0) > 0 ? `<span class="monthly-report-detail"><i class="fas fa-moon"></i> ${parseFloat(workEntry.notturne).toFixed(1)}h</span>` : ''}
-                                    </div>
-                                    <div class="monthly-report-description">${workEntry.description || ''}</div>
-                                </div>
-                            `;
-                            return entryHtml;
-                        } else {
-                            // Entry di ferie/malattia
-                            const ferieEntry = entry.ferieData;
-                            const emoji = ferieEntry.type === 'ferie' ? '🏖️' : '💀';
-                            const tipo = ferieEntry.type === 'ferie' ? 'Ferie' : 'Malattia';
-                            const classeAddizionale = ferieEntry.type === 'ferie' ? 'ferie-entry' : 'malattia-entry';
-                            
-                            return `
-                                <div class="monthly-report-item ${classeAddizionale}">
-                                    <div class="monthly-report-date">
-                                        ${getDayName(ferieEntry.date)}, ${formatDate(ferieEntry.date)}
-                                        <span class="ferie-malattia-indicator" title="${tipo}">${emoji}</span>
-                                    </div>
-                                    <div class="monthly-report-details">
-                                        <span class="monthly-report-detail ferie-malattia-detail">
-                                            <strong>${tipo}</strong>${ferieEntry.note ? ': ' + ferieEntry.note : ''}
-                                        </span>
-                                    </div>
-                                </div>
-                            `;
-                        }
-                    }).join('');
-                    
-                    html += `
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                monthlyReportContent.innerHTML = html;
-            }
-            
-            // Funzione di supporto per normalizzare la data dal formato italiano a quello standard
-            function normalizeDate(dateStr) {
-                if (!dateStr.includes('/')) return dateStr;
-                
-                const [day, month, year] = dateStr.split('/');
-                return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-            }
-            
-            // Funzione di supporto per formattare la data
-            function formatDate(dateStr) {
-                if (!dateStr) return '';
-                
-                if (dateStr.includes('/')) {
-                    const [day, month, year] = dateStr.split('/');
-                    return `${day}/${month}/${year}`;
-                }
-                
-                const date = new Date(dateStr);
-                return date.toLocaleDateString('it-IT');
-            }
-
-            // Funzione per ottenere il nome del giorno in italiano
-            function getDayName(dateStr) {
-                const [day, month, year] = dateStr.split('/').map(Number);
-                const date = new Date(year, month - 1, day);
-                const days = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
-                return days[date.getDay()];
-            }
-
-            // Funzione per convertire le date dal formato italiano (GG/MM/AAAA) a oggetti Date
-            function getDateFromItalianFormat(dateStr) {
-                if (!dateStr || !dateStr.includes('/')) return new Date(dateStr);
-                const [day, month, year] = dateStr.split('/').map(Number);
-                return new Date(year, month - 1, day);
-            }
-
-            function exportMonthlyReportToText(selectedMonth = 'all') {
-                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
-                const userName = localStorage.getItem('userName') || '';
-                
-                if (entries.length === 0) {
-                    alert('Nessun dato da esportare');
-                    return;
-                }
-                
-                // Filtra le entries in base al mese selezionato
-                let filteredEntries = entries;
-                
-                if (selectedMonth !== 'all') {
-                    const [selectedMonthNum, selectedYear] = selectedMonth.split('/');
-                    
-                    filteredEntries = entries.filter(entry => {
-                        const dateObj = getDateFromItalianFormat(entry.date);
-                        const entryMonth = dateObj.getMonth() + 1;
-                        const entryYear = dateObj.getFullYear();
-                        
-                        return entryMonth === parseInt(selectedMonthNum) && entryYear === parseInt(selectedYear);
-                    });
-                    
-                    if (filteredEntries.length === 0) {
-                        alert('Nessun dato da esportare per il mese selezionato');
-                        return;
-                    }
-                }
-                
-                // Ordina le entries per data (più recenti prima) mantenendo il formato italiano
-                filteredEntries.sort((a, b) => {
-                    const dateObjA = getDateFromItalianFormat(a.date);
-                    const dateObjB = getDateFromItalianFormat(b.date);
-                    
-                    return dateObjB - dateObjA; // Ordine decrescente (più recenti prima)
-                });
-                
-                // Crea il contenuto del file di testo
-                let textContent = 'RIEPILOGO ORE PWS GROUP\n';
-                if (userName) {
-                    textContent += `Operatore: ${userName}\n`;
-                }
-                
-                // Aggiungi informazioni sul mese selezionato
-                if (selectedMonth !== 'all') {
-                    const [month, year] = selectedMonth.split('/');
-                    const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long' });
-                    textContent += `Periodo: ${monthName} ${year}\n`;
-                }
-                
-                textContent += '\n';
-                
-                // Calcola i totali
-                const totalHours = filteredEntries.reduce((sum, entry) => sum + parseFloat(entry.hours || 0), 0).toFixed(1);
-                const totalTransferta = filteredEntries.reduce((sum, entry) => sum + (parseFloat(entry.transferta || 0) || 0), 0).toFixed(1);
-                const totalNotturne = filteredEntries.reduce((sum, entry) => sum + (parseFloat(entry.notturne || 0) || 0), 0).toFixed(1);
-                
-                // Aggiungi riepilogo totali
-                textContent += `Ore Totali: ${totalHours}h\n`;
-                if (parseFloat(totalTransferta) > 0) {
-                    textContent += `Ore Trasferta: ${totalTransferta}h\n`;
-                }
-                if (parseFloat(totalNotturne) > 0) {
-                    textContent += `Ore Notturne: ${totalNotturne}h\n`;
-                }
-                textContent += '\n';
-                
-                filteredEntries.forEach(entry => {
-                    const formattedDate = formatDate(entry.date);
-                    const dayName = getDayName(entry.date);
-                    textContent += `${dayName} ${formattedDate} ${entry.startTime}-${entry.endTime} ${entry.breakTime} tot ore ${entry.hours} ---${entry.description}\n`;
-                });
-                
-                // Crea un blob e un link per il download
-                const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.setAttribute('href', url);
-                
-                // Nome del file con eventuale indicazione del mese
-                let fileName = `riepilogo_ore_${userName || 'pws'}`;
-                if (selectedMonth !== 'all') {
-                    const [month, year] = selectedMonth.split('/');
-                    const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long' });
-                    fileName += `_${monthName.toLowerCase()}_${year}`;
-                }
-                fileName += '.txt';
-                
-                link.setAttribute('download', fileName);
-                link.style.display = 'none';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-            
-            /**
-             * Verifica se una data è una festività italiana
-             * @param {Date} date - L'oggetto data da verificare
-             * @return {boolean} true se la data è una festività, false altrimenti
-             */
-            function isItalianHoliday(date) {
-                const day = date.getDate();
-                const month = date.getMonth() + 1; // I mesi in JavaScript sono 0-based
-                const year = date.getFullYear();
-                
-                // Festività fisse
-                if (day === 1 && month === 1) return true; // Capodanno
-                if (day === 6 && month === 1) return true; // Epifania
-                if (day === 25 && month === 4) return true; // Festa della Liberazione
-                if (day === 1 && month === 5) return true; // Festa del Lavoro
-                if (day === 2 && month === 6) return true; // Festa della Repubblica
-                if (day === 15 && month === 8) return true; // Ferragosto
-                if (day === 1 && month === 11) return true; // Tutti i Santi
-                if (day === 8 && month === 12) return true; // Immacolata Concezione
-                if (day === 25 && month === 12) return true; // Natale
-                if (day === 26 && month === 12) return true; // Santo Stefano
-                
-                // Festività mobili (Pasqua e Lunedì dell'Angelo)
-                const easter = calculateEaster(year);
-                const easterMonday = new Date(easter);
-                easterMonday.setDate(easterMonday.getDate() + 1);
-                
-                if (day === easter.getDate() && month === easter.getMonth() + 1) return true; // Pasqua
-                if (day === easterMonday.getDate() && month === easterMonday.getMonth() + 1) return true; // Lunedì dell'Angelo
-                
-                // San Giuseppe (19 marzo) - festivo solo in alcune regioni
-                if (day === 19 && month === 3) return true; // San Giuseppe
-                
-                // San Giovanni Battista (24 giugno) - festivo solo in alcune regioni
-                if (day === 24 && month === 6) return true; // San Giovanni Battista
-                
-                // San Pietro e Paolo (29 giugno) - festivo solo a Roma
-                if (day === 29 && month === 6) return true; // San Pietro e Paolo
-                
-                // Sant'Ambrogio (7 dicembre) - festivo solo a Milano
-                if (day === 7 && month === 12) return true; // Sant'Ambrogio
-                
-                return false;
-            }
-            
-            /**
-             * Ottiene il nome della festività italiana per una data
-             * @param {Date} date - L'oggetto data per cui ottenere il nome della festività
-             * @return {string} Il nome della festività o "Festa" come valore predefinito
-             */
-            function getHolidayName(date) {
-                const day = date.getDate();
-                const month = date.getMonth() + 1; // I mesi in JavaScript sono 0-based
-                const year = date.getFullYear();
-                
-                // Festività fisse
-                if (day === 1 && month === 1) return "Capodanno";
-                if (day === 6 && month === 1) return "Epifania";
-                if (day === 25 && month === 4) return "Festa della Liberazione";
-                if (day === 1 && month === 5) return "Festa del Lavoro";
-                if (day === 2 && month === 6) return "Festa della Repubblica";
-                if (day === 15 && month === 8) return "Ferragosto";
-                if (day === 1 && month === 11) return "Tutti i Santi";
-                if (day === 8 && month === 12) return "Immacolata Concezione";
-                if (day === 25 && month === 12) return "Natale";
-                if (day === 26 && month === 12) return "Santo Stefano";
-                
-                // Pasqua e festività collegate
-                const easterDate = calculateEaster(year);
-                
-                // Pasqua
-                if (date.getTime() === easterDate.getTime()) return "Pasqua";
-                
-                // Lunedì dell'Angelo (Pasquetta) - giorno dopo Pasqua
-                const easterMonday = new Date(easterDate);
-                easterMonday.setDate(easterDate.getDate() + 1);
-                if (date.getTime() === easterMonday.getTime()) return "Lunedì dell'Angelo";
-                
-                return null;
-            }
-
-            function calculateEaster(year) {
-                // Algoritmo di Meeus/Jones/Butcher per calcolare la Pasqua
-                const a = year % 19;
-                const b = Math.floor(year / 100);
-                const c = year % 100;
-                const d = Math.floor(b / 4);
-                const e = b % 4;
-                const f = Math.floor((b + 8) / 25);
-                const g = Math.floor((b - f + 1) / 3);
-                const h = (19 * a + b - d - g + 15) % 30;
-                const i = Math.floor(c / 4);
-                const k = c % 4;
-                const l = (32 + 2 * e + 2 * i - h - k) % 7;
-                const m = Math.floor((a + 11 * h + 22 * l) / 451);
-                const month = Math.floor((h + l - 7 * m + 114) / 31);
-                const day = ((h + l - 7 * m + 114) % 31) + 1;
-                
-                return new Date(year, month - 1, day);
-            }
-
-            function exportToCSV() {
-                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
-                const userName = localStorage.getItem('userName') || '';
-                
-                if (entries.length === 0) {
-                    alert('Nessun dato da esportare');
-                    return;
-                }
-                
-                // Ordina le entries per data (più recenti prima)
-                entries.sort((a, b) => {
-                    const dateObjA = getDateFromItalianFormat(a.date);
-                    const dateObjB = getDateFromItalianFormat(b.date);
-                    return dateObjB - dateObjA; // Ordine decrescente (più recenti prima)
-                });
-                
-                // Crea intestazione CSV
-                let csvContent = 'Data,Inizio,Fine,Pausa,Ore Totali,Trasferta,Notturne,Descrizione\n';
-                
-                // Aggiungi ogni riga al file CSV
-                entries.forEach(entry => {
-                    const row = [
-                        entry.date,
-                        entry.startTime,
-                        entry.endTime,
-                        entry.breakTime,
-                        entry.hours,
-                        entry.transferta || '0',
-                        entry.notturne || '0',
-                        '"' + (entry.description || '').replace(/"/g, '""') + '"' // Escaping delle virgolette per CSV
-                    ];
-                    
-                    csvContent += row.join(',') + '\n';
-                });
-                
-                // Crea un blob e un link per il download
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.setAttribute('href', url);
-                link.setAttribute('download', `ore_pws_${userName || 'export'}.csv`);
-                link.style.display = 'none';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-
-            function exportAllData() {
-                const timeEntries = localStorage.getItem('timeEntries') || '[]';
-                const settings = {
-                    userName: localStorage.getItem('userName') || '',
-                    darkTheme: localStorage.getItem('darkTheme') || 'false'
-                };
-                
-                const exportData = {
-                    timeEntries: JSON.parse(timeEntries),
-                    settings: settings,
-                    version: '1.0'
-                };
-                
-                // Crea un blob e un link per il download
-                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.setAttribute('href', url);
-                link.setAttribute('download', `orepws_backup_${new Date().toISOString().slice(0,10)}.json`);
-                link.style.display = 'none';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-
-            function importAllData() {
-                // Crea un input file invisibile
-                const fileInput = document.createElement('input');
-                fileInput.type = 'file';
-                fileInput.accept = '.json';
-                fileInput.style.display = 'none';
-                document.body.appendChild(fileInput);
-                
-                fileInput.addEventListener('change', function(e) {
-                    const file = e.target.files[0];
-                    if (!file) {
-                        document.body.removeChild(fileInput);
-                        return;
-                    }
-                    
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        try {
-                            const data = JSON.parse(event.target.result);
-                            
-                            // Verifica che il file contenga i dati corretti
-                            if (!data.timeEntries || !data.settings || !data.version) {
-                                alert('Formato file non valido');
-                                document.body.removeChild(fileInput);
-                                return;
-                            }
-                            
-                            if (confirm('Questa operazione sovrascriverà tutti i dati esistenti. Continuare?')) {
-                                // Salva i dati importati
-                                localStorage.setItem('timeEntries', JSON.stringify(data.timeEntries));
-                                localStorage.setItem('userName', data.settings.userName);
-                                localStorage.setItem('darkTheme', data.settings.darkTheme);
-                                
-                                // Ricarica la pagina per applicare le modifiche
-                                alert('Dati importati con successo!');
-                                window.location.reload();
-                            }
-                        } catch (error) {
-                            alert('Errore durante l\'importazione: ' + error.message);
-                        }
-                        document.body.removeChild(fileInput);
-                    };
-                    
-                    reader.readAsText(file);
-                });
-                
-                fileInput.click();
             }
 
             /**
@@ -4567,6 +4897,7 @@
             function exportMonthlyReportToExcel(selectedMonth = 'all', shouldDownload = true) {
                 const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
                 const ferieEntries = JSON.parse(localStorage.getItem('ferieMalattieEntries') || '[]');
+                const vehicles = JSON.parse(localStorage.getItem('vehicles') || '[]');
                 const userName = localStorage.getItem('userName') || 'Utente';
                 
                 if (entries.length === 0 && ferieEntries.length === 0) {
@@ -4717,13 +5048,13 @@
                 });
 
                 // Prepara le intestazioni con colonne aggiuntive per i lavori
-                const baseHeaders = ['Giorno', 'Data', 'Tipo', 'Ora Inizio', 'Pausa', 'Ora Fine', 'Ore Trasferta', 'Ore Notturne', 'Ore Totali'];
+                const baseHeaders = ['Giorno', 'Data', 'Tipo', 'Ora Inizio', 'Pausa', 'Ora Fine', 'Ore Trasferta', 'Ore Notturne', 'Ore Totali', 'Mezzo'];
                 const workplaceHeaders = Array.from({length: maxWorkplaces}, (_, i) => `Lavoro ${i+1}`);
                 const allHeaders = [...baseHeaders, ...workplaceHeaders];
 
                 // Intestazioni colonne
                 headerData.push(allHeaders);
-                
+
                 // Crea un set di date già aggiunte per evitare duplicati
                 const addedDates = new Set();
                 
@@ -4793,6 +5124,11 @@
                         parseFloat(entry.transferta || 0).toFixed(1),
                         parseFloat(entry.notturne || 0).toFixed(1),
                         parseFloat(entry.hours || 0).toFixed(1),
+                        // Aggiungi info sul veicolo
+                        entry.vehicleId ? (() => {
+                            const vehicle = vehicles.find(v => v.id === entry.vehicleId);
+                            return vehicle ? `${vehicle.name} (${vehicle.plate})` : '';
+                        })() : '',
                         ...workplaces
                     ];
                     
@@ -4864,6 +5200,7 @@
                         '', // Trasferta
                         '', // Notturne
                         '', // Ore totali
+                        '', // Mezzo
                         ...rowWorkplaces
                     ];
                     
@@ -4977,7 +5314,8 @@
                     { wch: 10 }, // Ora Fine
                     { wch: 13 }, // Ore Trasferta
                     { wch: 13 }, // Ore Notturne
-                    { wch: 10 }  // Ore Totali
+                    { wch: 10 }, // Ore Totali
+                    { wch: 20 }  // Mezzo
                 ];
 
                 // Aggiungi larghezza per le colonne dei luoghi di lavoro
@@ -4992,6 +5330,12 @@
 
                 // Crea un oggetto stile per il testo centrato
                 const centeredStyle = { alignment: { horizontal: 'center', vertical: 'center', wrapText: true } };
+                
+                // Crea un oggetto stile per i numeri (allineati a sinistra)
+                const numericStyle = { 
+                    alignment: { horizontal: 'left', vertical: 'center', wrapText: true },
+                    numFmt: "0.0" // Formato numerico con 1 decimale
+                };
 
                 // Applica lo stile a tutte le celle nel range usato
                 for (let r = 0; r < numRows; r++) {
@@ -4999,14 +5343,9 @@
                         const cellRef = XLSX.utils.encode_cell({r: r, c: c});
                         stylesheet[cellRef] = { ...centeredStyle };
                         
-                        // Assicurati che tutte le colonne numeriche (pausa, ore trasferta, ore notturne, ore totali) 
-                        // abbiano lo stesso allineamento
-                        if (r > 0 && (c === 4 || c === 6 || c === 7 || c === 8)) {
-                            stylesheet[cellRef] = { 
-                                ...centeredStyle,
-                                alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
-                                numFmt: "0.0" // Formato numerico con 1 decimale
-                            };
+                        // Applica stile numerico alle colonne con valori numerici (dopo la riga di intestazione)
+                        if (r > headerRows && (c === 4 || c === 6 || c === 7 || c === 8)) {
+                            stylesheet[cellRef] = { ...numericStyle };
                         }
                     }
                 }
@@ -5034,11 +5373,11 @@
                     font: { color: { rgb: "FFFF0000" }, bold: true, size: 12 },
                     alignment: { horizontal: 'left', vertical: 'center' }
                 };
-                
+
                 // Stile per la leggenda delle ferie
                 const ferieLegendRef = XLSX.utils.encode_cell({r: 5, c: 0});
                 stylesheet[ferieLegendRef] = {
-                    ...centeredStyle,
+                            ...centeredStyle,
                     font: { color: { rgb: "FF0000FF" }, bold: true, size: 12 }, // Blu
                     alignment: { horizontal: 'left', vertical: 'center' }
                 };
@@ -5046,7 +5385,7 @@
                 // Stile per la leggenda delle malattie
                 const malattiaLegendRef = XLSX.utils.encode_cell({r: 6, c: 0});
                 stylesheet[malattiaLegendRef] = {
-                    ...centeredStyle,
+                        ...centeredStyle,
                     font: { color: { rgb: "FFFF0000" }, bold: true, size: 12 }, // Rosso
                     alignment: { horizontal: 'left', vertical: 'center' }
                 };
@@ -5131,31 +5470,55 @@
             function clearForm() {
                 console.log("Pulizia form");
                 
-                // Resetta tutti i campi del form
-                const form = document.getElementById('timeEntryForm'); // ID corretto
-                if (form) {
-                    form.reset();
+                try {
+                    // Resetta tutti i campi del form
+                    const form = document.getElementById('timeEntryForm'); // ID corretto
                     
-                    // Ripristina la data corrente
-                    const today = new Date();
-                    const dateString = formatDateForInput(today);
-                    const dateInput = document.getElementById('date');
-                    if (dateInput) {
-                        dateInput.value = dateString;
+                    // Salva la data corrente prima di resettare il form
+                    const currentDate = document.getElementById('date') ? document.getElementById('date').value : '';
+                    
+                    if (form) {
+                        form.reset();
+                        
+                        // Mantieni la data selezionata invece di ripristinare la data corrente
+                        const dateInput = document.getElementById('date');
+                        if (dateInput && currentDate) {
+                            dateInput.value = currentDate;
+                            
+                            // Aggiorna l'indicatore della data con la data selezionata
+                            if (typeof updateDateIndicator === 'function') {
+                                updateDateIndicator(currentDate);
+                            }
+                        } else {
+                            // Solo se non c'è una data già selezionata, usa la data corrente
+                            const today = new Date();
+                            const dateString = formatDateForInput(today);
+                            if (dateInput) {
+                                dateInput.value = dateString;
+                            }
+                            
+                            // Aggiorna l'indicatore della data se la funzione è disponibile
+                            if (typeof updateDateIndicator === 'function') {
+                                updateDateIndicator(dateString);
+                            }
+                        }
+                        
+                        // Reset del campo veicolo
+                        const vehicleSelect = document.getElementById('vehicleSelect');
+                        if (vehicleSelect) {
+                            vehicleSelect.value = '';
+                        }
+                    } else {
+                        console.error("Form non trovato con ID 'timeEntryForm'");
                     }
                     
-                    // Aggiorna l'indicatore della data se la funzione è disponibile
-                    if (typeof updateDateIndicator === 'function') {
-                        updateDateIndicator(dateString);
+                    // Nascondi il messaggio di successo/errore
+                    const messageDiv = document.getElementById('messageDiv');
+                    if (messageDiv) {
+                        messageDiv.style.display = 'none';
                     }
-                } else {
-                    console.error("Form non trovato con ID 'timeEntryForm'");
-                }
-                
-                // Nascondi il messaggio di successo/errore
-                const messageDiv = document.getElementById('messageDiv');
-                if (messageDiv) {
-                    messageDiv.style.display = 'none';
+                } catch (error) {
+                    console.error('Errore durante la pulizia del form:', error);
                 }
             }
 
@@ -5163,74 +5526,74 @@
             const shareExcelBtn = document.getElementById('shareExcelBtn');
             if (shareExcelBtn) {
                 shareExcelBtn.addEventListener('click', function() {
-                    const selectedMonth = document.getElementById('exportMonthSelect').value;
-                    const userName = localStorage.getItem('userName') || 'Utente';
+                const selectedMonth = document.getElementById('exportMonthSelect').value;
+                const userName = localStorage.getItem('userName') || 'Utente';
+                
+                try {
+                    // Verifica se siamo in un contesto sicuro (HTTPS)
+                    const isSecureContext = window.isSecureContext;
                     
-                    try {
-                        // Verifica se siamo in un contesto sicuro (HTTPS)
-                        const isSecureContext = window.isSecureContext;
+                    // Genera il file Excel
+                    const result = exportMonthlyReportToExcel(selectedMonth, false);
+                    
+                    if (!result) return; // Se c'è stato un errore, esci
+                    
+                    const { workbook, fileName } = result;
+                    
+                    // Converti il workbook in un blob
+                    const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                    const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                    
+                    // Crea un file da condividere
+                    const file = new File([blob], `${fileName}.xlsx`, { type: blob.type });
+                    
+                    // Verifica se il browser supporta la Web Share API con file sharing
+                    // e se siamo in un contesto sicuro
+                    if (isSecureContext && navigator.share && 
+                        navigator.canShare && navigator.canShare({ files: [file] })) {
                         
-                        // Genera il file Excel
-                        const result = exportMonthlyReportToExcel(selectedMonth, false);
+                        // Mostra messaggio di condivisione in corso
+                        showToast('Apertura menu di condivisione...', 'info');
                         
-                        if (!result) return; // Se c'è stato un errore, esci
-                        
-                        const { workbook, fileName } = result;
-                        
-                        // Converti il workbook in un blob
-                        const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-                        const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                        
-                        // Crea un file da condividere
-                        const file = new File([blob], `${fileName}.xlsx`, { type: blob.type });
-                        
-                        // Verifica se il browser supporta la Web Share API con file sharing
-                        // e se siamo in un contesto sicuro
-                        if (isSecureContext && navigator.share && 
-                            navigator.canShare && navigator.canShare({ files: [file] })) {
+                        // Condividi direttamente usando l'API del dispositivo
+                        navigator.share({
+                            files: [file],
+                            title: 'Riepilogo Ore PWS',
+                            text: `Riepilogo ore di ${userName}`
+                        }).then(() => {
+                            showToast('File condiviso con successo!', 'success');
+                        }).catch(error => {
+                            console.error('Errore durante la condivisione:', error);
                             
-                            // Mostra messaggio di condivisione in corso
-                            showToast('Apertura menu di condivisione...', 'info');
-                            
-                            // Condividi direttamente usando l'API del dispositivo
-                            navigator.share({
-                                files: [file],
-                                title: 'Riepilogo Ore PWS',
-                                text: `Riepilogo ore di ${userName}`
-                            }).then(() => {
-                                showToast('File condiviso con successo!', 'success');
-                            }).catch(error => {
-                                console.error('Errore durante la condivisione:', error);
-                                
-                                if (error.name === 'NotAllowedError') {
-                                    showToast('Permesso di condivisione negato. Il file verrà scaricato.', 'warning');
-                                } else if (error.name === 'AbortError') {
-                                    showToast('Condivisione annullata', 'info');
-                                    return; // Non scaricare se l'utente ha annullato
-                                } else {
-                                    showToast('Impossibile condividere. Il file verrà scaricato.', 'warning');
-                                }
-                                
-                                // Se fallisce, scarica il file come fallback
-                                XLSX.writeFile(workbook, `${fileName}.xlsx`);
-                            });
-                        } else {
-                            // Fallback: scarica il file se l'API di condivisione non è supportata
-                            // o non siamo in un contesto sicuro
-                            if (!isSecureContext) {
-                                showToast('La condivisione richiede una connessione sicura (HTTPS). Il file verrà scaricato.', 'warning');
+                            if (error.name === 'NotAllowedError') {
+                                showToast('Permesso di condivisione negato. Il file verrà scaricato.', 'warning');
+                            } else if (error.name === 'AbortError') {
+                                showToast('Condivisione annullata', 'info');
+                                return; // Non scaricare se l'utente ha annullato
                             } else {
-                                showToast('La condivisione non è supportata su questo dispositivo. Il file verrà scaricato.', 'info');
+                                showToast('Impossibile condividere. Il file verrà scaricato.', 'warning');
                             }
+                            
+                            // Se fallisce, scarica il file come fallback
                             XLSX.writeFile(workbook, `${fileName}.xlsx`);
+                        });
+                    } else {
+                        // Fallback: scarica il file se l'API di condivisione non è supportata
+                        // o non siamo in un contesto sicuro
+                        if (!isSecureContext) {
+                            showToast('La condivisione richiede una connessione sicura (HTTPS). Il file verrà scaricato.', 'warning');
+                        } else {
+                            showToast('La condivisione non è supportata su questo dispositivo. Il file verrà scaricato.', 'info');
                         }
-                    } catch (error) {
-                        console.error('Errore durante la creazione o condivisione del file:', error);
-                        showToast('Si è verificato un errore. Il file verrà scaricato.', 'error');
-                        // Fallback al metodo tradizionale
-                        exportMonthlyReportToExcel(selectedMonth, true);
+                        XLSX.writeFile(workbook, `${fileName}.xlsx`);
                     }
-                });
+                } catch (error) {
+                    console.error('Errore durante la creazione o condivisione del file:', error);
+                    showToast('Si è verificato un errore. Il file verrà scaricato.', 'error');
+                    // Fallback al metodo tradizionale
+                    exportMonthlyReportToExcel(selectedMonth, true);
+                }
+            });
             }
 
             // Aggiungi un gestore di scorciatoie da tastiera per il debug
@@ -5607,6 +5970,13 @@
                 return;
             }
             
+            // Recupera tutti i mezzi
+            const vehicles = JSON.parse(localStorage.getItem('vehicles') || '[]');
+            console.log(`%cTrovati ${vehicles.length} mezzi nel localStorage`, 'color: blue; font-weight: bold;');
+            vehicles.forEach((vehicle, index) => {
+                console.log(`Mezzo #${index}: id=${vehicle.id}, nome=${vehicle.name}, targa=${vehicle.plate}`);
+            });
+            
             // Analizza ogni entry
             entries.forEach((entry, index) => {
                 console.log(`%cEntry #${index}:`, 'color: green; font-weight: bold;');
@@ -5633,6 +6003,18 @@
                 
                 console.log('Data normalizzata:', normalizedDate);
                 
+                // Verifica il mezzo associato
+                if (entry.vehicleId) {
+                    const vehicle = vehicles.find(v => v.id === entry.vehicleId);
+                    if (vehicle) {
+                        console.log('Mezzo:', `${vehicle.name} (${vehicle.plate})`, 'ID:', entry.vehicleId);
+                    } else {
+                        console.log('Mezzo ID:', entry.vehicleId, '- MEZZO NON TROVATO!');
+                    }
+                } else {
+                    console.log('Nessun mezzo associato');
+                }
+                
                 // Verifica che i campi essenziali siano presenti
                 const requiredFields = ['startTime', 'endTime', 'breakTime', 'hours', 'description'];
                 requiredFields.forEach(field => {
@@ -5656,6 +6038,15 @@
                     console.log(`  - Valore attuale: "${element.value}"`);
                 }
             });
+            
+            // Verifica l'elemento select dei mezzi
+            const vehicleSelect = document.getElementById('vehicleSelect');
+            console.log(`Elemento 'vehicleSelect': ${vehicleSelect ? 'trovato' : 'NON TROVATO'}`);
+            if (vehicleSelect) {
+                console.log(`  - Tipo: ${vehicleSelect.tagName}`);
+                console.log(`  - Valore attuale: "${vehicleSelect.value}"`);
+                console.log(`  - Opzioni: ${vehicleSelect.options.length}`);
+            }
             
             console.log('%c==== FINE DEBUG ====', 'background: #000; color: #fff; padding: 5px;');
             return "Debug completato. Controlla la console per i risultati.";
