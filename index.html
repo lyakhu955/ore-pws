@@ -2051,6 +2051,75 @@
             color: #aaa;
             border-left-color: #444;
         }
+
+        /* Modifiche per risolvere i problemi nella versione mobile */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            main {
+                margin-top: 60px;
+                padding: 10px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .stats-container {
+                flex-direction: column;
+            }
+            
+            /* Inverti l'ordine tra label e valore nel riepilogo mensile */
+            .stat-item {
+                display: flex;
+                flex-direction: column-reverse;
+                align-items: center;
+                text-align: center;
+            }
+            
+            /* Assicura che i numeri siano centrati */
+            .stat-value {
+                width: 100%;
+                text-align: center;
+            }
+            
+            .stat-label {
+                width: 100%;
+                text-align: center;
+                margin-bottom: 5px;
+            }
+        }
+
+        /* Fix per i problemi visualizzazione mobile */
+        @media (max-width: 768px) {
+            /* Corregge l'ordine delle etichette e dei valori */
+            .stat-item {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            /* Mette l'etichetta sopra al valore */
+            .stat-label {
+                order: -1;
+                margin-bottom: 5px;
+                width: 100%;
+                text-align: center;
+            }
+            
+            /* Centra i valori */
+            .stat-value {
+                width: 100%;
+                text-align: center;
+            }
+            
+            /* Assicura che tutti i numeri siano allineati orizzontalmente */
+            .monthly-report-stats {
+                justify-content: center;
+                text-align: center;
+            }
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -2360,11 +2429,11 @@
                 </div>
             </div>
 
-            <!-- Sezione Riepilogo Mese -->
+            <!-- Sezione Riepilogo -->
             <div id="monthly-report-section" class="section">
                 <div class="card">
                     <div class="section-header">
-                        <h2>Riepilogo Mese</h2>
+                        <h2>Riepilogo</h2>
                         <div class="section-controls">
                             <div class="month-selector">
                                 <select id="exportMonthSelect"></select>
@@ -2442,7 +2511,7 @@
         </a>
         <a href="#" class="nav-item" data-section="monthly-report-section">
             <i class="fas fa-list-alt"></i>
-            <span>Riepilogo Mese</span>
+            <span>Riepilogo</span>
         </a>
         <a href="#" class="nav-item" data-section="ferie-malattie-section">
             <i class="fas fa-calendar-times"></i>
@@ -2619,11 +2688,6 @@
             const month = date.getMonth() + 1; // getMonth() restituisce 0-11
             const year = date.getFullYear();
             
-            // Verifica se è domenica (0 = domenica, 6 = sabato)
-            if (date.getDay() === 0) {
-                return true;
-            }
-            
             // Festività fisse italiane
             const fixedHolidays = [
                 { day: 1, month: 1 },    // Capodanno
@@ -2698,11 +2762,6 @@
             const month = date.getMonth() + 1; // getMonth() restituisce 0-11
             const year = date.getFullYear();
             
-            // Verifica se è domenica
-            if (date.getDay() === 0) {
-                return 'Domenica';
-            }
-            
             // Dizionario delle festività fisse
             const holidayNames = {
                 '1/1': 'Capodanno',
@@ -2755,6 +2814,11 @@
             easterMonday.setDate(easter.getDate() + 1);
             if (day === easterMonday.getDate() && month === easterMonday.getMonth() + 1) {
                 return 'Pasquetta';
+            }
+            
+            // Controllo se è domenica solo dopo aver verificato le altre festività
+            if (date.getDay() === 0) {
+                return 'Domenica';
             }
             
             return '';
@@ -3008,28 +3072,28 @@
                             <h3>${monthName.charAt(0).toUpperCase() + monthName.slice(1)} ${year}</h3>
                             <div class="monthly-report-stats">
                                 <div class="stat-item">
-                                    <div class="stat-value">${totalHours.toFixed(1)}h</div>
                                     <div class="stat-label">Ore totali</div>
+                                    <div class="stat-value">${totalHours.toFixed(1)}h</div>
                                 </div>
                                 <div class="stat-item">
-                                    <div class="stat-value">${workDays}</div>
                                     <div class="stat-label">Giorni lavorati</div>
+                                    <div class="stat-value">${workDays}</div>
                                 </div>
                                 <div class="stat-item">
-                                    <div class="stat-value">${totalTransferta.toFixed(1)}h</div>
                                     <div class="stat-label">Trasferta</div>
+                                    <div class="stat-value">${totalTransferta.toFixed(1)}h</div>
                                 </div>
                                 <div class="stat-item">
-                                    <div class="stat-value">${totalNotturne.toFixed(1)}h</div>
                                     <div class="stat-label">Notturne</div>
+                                    <div class="stat-value">${totalNotturne.toFixed(1)}h</div>
                                 </div>
                                 <div class="stat-item">
-                                    <div class="stat-value">${ferieDays}</div>
                                     <div class="stat-label">Giorni ferie</div>
+                                    <div class="stat-value">${ferieDays}</div>
                                 </div>
                                 <div class="stat-item">
-                                    <div class="stat-value">${malattiaDays}</div>
                                     <div class="stat-label">Giorni malattia</div>
+                                    <div class="stat-value">${malattiaDays}</div>
                                 </div>
                             </div>
                     `;
@@ -3622,7 +3686,7 @@
                             <div class="vehicle-item">
                                 <div class="vehicle-info">
                                     <div class="vehicle-name">${vehicle.name}</div>
-                                    <div class="vehicle-plate">${vehicle.plate}</div>
+                                    ${vehicle.plate ? `<div class="vehicle-plate">${vehicle.plate}</div>` : ''}
                                 </div>
                                 <button class="delete-vehicle-btn" data-index="${index}">
                                     <i class="fas fa-trash"></i>
@@ -3649,7 +3713,9 @@
                     vehicles.forEach(vehicle => {
                         const option = document.createElement('option');
                         option.value = vehicle.id;
-                        option.textContent = `${vehicle.name} (${vehicle.plate})`;
+                        option.textContent = vehicle.plate 
+                            ? `${vehicle.name} (${vehicle.plate})`
+                            : vehicle.name;
                         vehicleSelect.appendChild(option);
                     });
                 }
@@ -3660,8 +3726,8 @@
                 name = name.trim();
                 plate = plate.trim();
                 
-                if (!name || !plate) {
-                    showToast('Inserisci sia il nome che la targa del mezzo', 'error');
+                if (!name) {
+                    showToast('Inserisci almeno il nome del mezzo', 'error');
                     return false;
                 }
                 
@@ -4223,7 +4289,6 @@
                                     ${isFerie ? `<span class="ferie-icon" title="Ferie">🏖️</span>` : ''}
                                     ${isMalattia ? `<span class="malattia-icon" title="Malattia">💀</span>` : ''}
                                     </div>
-                                ${isHoliday ? `<div class="calendar-holiday-name">${getHolidayName(date)}</div>` : ''}
                             </div>
                         </div>
                     `;
@@ -4628,6 +4693,28 @@
                         updateMonthlyReport();
                     };
                 }, 100);
+            }
+
+            // Funzione per eliminare una entry dalla visualizzazione del calendario
+            function deleteEntry(date, index) {
+                console.log('deleteEntry chiamata con:', date, index);
+                const entries = JSON.parse(localStorage.getItem('timeEntries') || '[]');
+                const dayEntries = entries.filter(e => e.date === date);
+                const entry = dayEntries[index];
+                
+                if (!entry) {
+                    console.error('Entry non trovata per eliminazione');
+                    return;
+                }
+                
+                // Chiama la funzione esistente deleteTimeEntry con i parametri corretti
+                deleteTimeEntry(date, entry.hours, entry.description);
+                
+                // Chiudi il modale dopo l'eliminazione
+                const modal = document.getElementById('dayModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                }
             }
 
             function showMessage(message, type = 'info') {
