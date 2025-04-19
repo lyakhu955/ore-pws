@@ -2676,16 +2676,44 @@
             
             try {
                 // Hide the date input field visually since we're using only the blue indicator
-                dateInput.style.display = 'none';
+                dateInput.style.display = 'none !important';
                 
                 // Also hide the label for the date input
                 const dateLabels = document.querySelectorAll('label');
                 dateLabels.forEach(label => {
                     if (label.textContent.trim() === 'Data:') {
                         console.log("Nascondo etichetta data");
-                        label.style.display = 'none';
+                        label.style.display = 'none !important';
                     }
                 });
+                
+                // Hide any parent containers of the date input that might still be visible
+                // Find parent form-group or similar containers
+                let parent = dateInput.parentElement;
+                if (parent && (parent.classList.contains('form-group') || parent.classList.contains('input-group'))) {
+                    console.log("Nascondo container del campo data");
+                    parent.style.display = 'none !important';
+                }
+                
+                // Add style to head to ensure date input and related elements stay hidden
+                const style = document.createElement('style');
+                style.textContent = `
+                    #date, label[for="date"], .date-container, .date-field, .date-wrapper, .form-group:has(#date) {
+                        display: none !important;
+                        visibility: hidden !important;
+                        height: 0 !important;
+                        width: 0 !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        border: none !important;
+                    }
+                    
+                    #dateIndicator {
+                        cursor: pointer !important;
+                        margin-top: 20px !important;
+                    }
+                `;
+                document.head.appendChild(style);
                 
                 // Destroy any existing instance
                 const oldInstance = dateInput._flatpickr;
