@@ -1044,34 +1044,77 @@
 
         /* QR Code */
         .qr-code-container {
+            margin-top: 1.5rem;
             text-align: center;
-            margin: 1.5rem 0;
-            padding: 1rem;
-            background-color: var(--md-sys-color-surface-variant);
+        }
+
+        /* --- Flatpickr Day Alignment Fix (Revised) --- */
+        .flatpickr-calendar .dayContainer {
+            display: grid !important; /* Force grid layout */
+            grid-template-columns: repeat(7, 1fr) !important; /* Force 7 equal columns */
+            padding: 0 !important; /* Ensure no extra padding */
+            box-sizing: border-box !important;
+            width: 100% !important; /* Try making container full width */
+            /* Remove potentially conflicting properties from previous attempt */
+            /* justify-content: normal !important; */ 
+            /* flex-wrap: nowrap !important; */ 
+            /* min-width: auto !important; */
+            /* max-width: none !important; */
+        }
+
+        /* Ensure days have some spacing and center within grid cells */
+        .flatpickr-calendar .dayContainer .flatpickr-day {
+            margin: 1px !important; 
+            max-width: none !important; /* Let grid control width */
+            justify-self: center !important; /* Center item horizontally */
+            align-self: center !important; /* Center vertically */
+            /* display: block no longer needed */
+            /* text-align: center no longer needed */
+            line-height: 38px !important; /* Make line-height equal to height */
+            height: 38px !important; /* Match original style seen before? */
+            flex-basis: auto !important;
+        }
+        /* Style for the current day */
+        .flatpickr-calendar .dayContainer .flatpickr-day.today {
+            background-color: var(--md-sys-color-primary-container) !important;
+            color: var(--md-sys-color-on-primary-container) !important;
+            border: none !important; /* Remove any borders (like the left one) */
+            border-radius: var(--border-radius-full) !important; /* Make it circular or rounded */
+            font-weight: 500 !important; /* Optional: make font bolder */
+        }
+        /* --- End Flatpickr Fix --- */
+
+        /* --- Calendar Summary Styles (Restored Here) --- */
+        #monthlySummary {
+            margin-top: 0; /* Remove top margin to attach to calendar grid */
+            padding: 0; /* Keep padding 0 */
+            width: 100%;
+            box-sizing: border-box;
+            display: block; /* Override any grid display on the container itself */
+        }
+
+        #monthlySummary .monthly-report-stats.card {
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            background-color: transparent;
+            box-shadow: none;
+            border: none;
+            display: grid; /* Use grid layout */
+            grid-template-columns: 1fr 1fr; /* Create exactly two equal columns */
+            gap: 0.5rem; /* Add spacing between grid items */
+        }
+
+        #monthlySummary .monthly-report-stats.card .monthly-stat-item {
+            padding: 0.75rem 0.5rem;
+            margin: 0;
             border-radius: var(--border-radius-medium);
+            /* Ensure text alignment is centered or as desired */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        .qr-code-container h4 {
-            margin-bottom: 1rem;
-            color: var(--md-sys-color-on-surface-variant);
-            font-weight: 500;
-        }
-        #qrcode, #contacts-qrcode {
-            display: inline-block;
-            padding: 10px;
-            background-color: white; /* Keep white for QR */
-            border-radius: var(--border-radius-small);
-            box-shadow: var(--elevation-1);
-            margin: 0 auto;
-            min-width: 180px;
-            min-height: 180px;
-             line-height: 0; /* Prevent extra space below img */
-        }
-        #qrcode img, #contacts-qrcode img {
-            display: block !important;
-            max-width: 100% !important;
-            height: auto !important;
-            margin: 0 auto !important;
-        }
+        /* --- End Calendar Summary Styles --- */
 
         /* Toast / Message */
          #toast-container {
@@ -1662,9 +1705,7 @@
 
         /* ... rest of css ... */
 
-    </style>
-    <!-- Custom styles for calendar summary layout -->
-    <style>
+        /* --- Calendar Summary Styles (Moved Here) --- */
         #monthlySummary {
             margin-top: 0; /* Remove top margin to attach to calendar grid */
             padding: 0; /* Keep padding 0 */
@@ -1689,16 +1730,12 @@
             padding: 0.75rem 0.5rem;
             margin: 0;
             border-radius: var(--border-radius-medium);
-            width: 100%; /* Make items take full width */
-            box-sizing: border-box; /* Include padding/border in width */
-            margin-bottom: 0.5rem; /* Add vertical spacing */
             /* Ensure text alignment is centered or as desired */
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-
-        /* No need to remove margin-bottom from last-child as grid gap handles spacing */
+        /* --- End Calendar Summary Styles --- */
 
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
