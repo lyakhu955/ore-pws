@@ -1044,34 +1044,277 @@
 
         /* QR Code */
         .qr-code-container {
+            margin-top: 1.5rem;
             text-align: center;
-            margin: 1.5rem 0;
-            padding: 1rem;
-            background-color: var(--md-sys-color-surface-variant);
-            border-radius: var(--border-radius-medium);
         }
-        .qr-code-container h4 {
-            margin-bottom: 1rem;
-            color: var(--md-sys-color-on-surface-variant);
+
+        /* --- Modern Flatpickr Styling (2025 Inspired) --- */
+
+        .flatpickr-calendar {
+            background: var(--md-sys-color-surface-container-high); /* Use a surface color */
+            border-radius: var(--border-radius-large); /* More pronounced rounding */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            padding: 10px; /* Overall padding */
+            width: 320px; /* Slightly wider */
+            color: var(--md-sys-color-on-surface);
+            font-family: 'Roboto', sans-serif;
+        }
+
+        /* Header (Month/Year/Arrows) */
+        .flatpickr-months {
+            background: transparent; /* No separate background for header */
+            padding: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .flatpickr-current-month {
+            color: var(--md-sys-color-on-surface);
+            font-size: 1.1em;
             font-weight: 500;
+            position: relative;
+            flex-grow: 1; /* Allow month name to take space */
+            text-align: center;
         }
-        #qrcode, #contacts-qrcode {
-            display: inline-block;
-            padding: 10px;
-            background-color: white; /* Keep white for QR */
-            border-radius: var(--border-radius-small);
-            box-shadow: var(--elevation-1);
-            margin: 0 auto;
-            min-width: 180px;
-            min-height: 180px;
-             line-height: 0; /* Prevent extra space below img */
+
+        .flatpickr-current-month .flatpickr-monthDropdown-months,
+        .flatpickr-current-month .numInputWrapper {
+            border: none;
+            background: transparent;
+            color: inherit;
+            font-size: inherit;
+            font-weight: inherit;
+            padding: 0 5px;
         }
-        #qrcode img, #contacts-qrcode img {
-            display: block !important;
-            max-width: 100% !important;
-            height: auto !important;
-            margin: 0 auto !important;
+        .flatpickr-current-month .numInputWrapper { /* Style year input */
+            width: 7ch; /* Further increased width for year */
         }
+        .flatpickr-current-month input.cur-year:hover {
+           background: var(--md-sys-color-surface-container-highest);
+        }
+
+        .flatpickr-prev-month,
+        .flatpickr-next-month {
+            color: var(--md-sys-color-on-surface-variant);
+            cursor: pointer;
+            padding: 5px;
+            border-radius: var(--border-radius-full);
+            transition: background-color 0.2s;
+            position: static; /* Override default absolute positioning */
+            transform: none; /* Reset transforms */
+            height: auto;
+            width: auto;
+        }
+        .flatpickr-prev-month:hover,
+        .flatpickr-next-month:hover {
+            background-color: var(--md-sys-color-surface-container-highest);
+            color: var(--md-sys-color-primary);
+        }
+        .flatpickr-prev-month svg,
+        .flatpickr-next-month svg {
+            width: 20px; /* Adjust size */
+            height: 20px;
+            fill: currentColor; /* Use the text color */
+        }
+
+        /* Weekdays (Mo, Tu...) */
+        .flatpickr-weekdays {
+            background: transparent;
+            padding: 5px 0;
+            display: flex;
+            justify-content: space-around;
+        }
+        span.flatpickr-weekday {
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 0.8em;
+            font-weight: 500;
+            text-align: center;
+            flex: 1; /* Distribute space evenly */
+        }
+
+        /* Day Container */
+        .dayContainer {
+            padding: 5px 0 0 0; /* Add some space above days */
+            display: grid; /* Use grid */
+            grid-template-columns: repeat(7, 1fr); /* 7 equal columns */
+            gap: 2px; /* Small gap between days */
+        }
+
+        /* Individual Days */
+        .flatpickr-day {
+            background: transparent;
+            border: none;
+            color: var(--md-sys-color-on-surface);
+            font-size: 0.9em;
+            width: 38px; /* Fixed width */
+            height: 38px; /* Fixed height */
+            line-height: 38px; /* Center text vertically */
+            text-align: center;
+            border-radius: var(--border-radius-full); /* Circular shape */
+            margin: 0; /* Remove default margins */
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            justify-self: center; /* Center horizontally in grid cell */
+            align-self: center; /* Center vertically in grid cell */
+        }
+
+        .flatpickr-day:hover {
+             background-color: var(--md-sys-color-surface-container-highest);
+        }
+
+        .flatpickr-day.disabled,
+        .flatpickr-day.disabled:hover {
+            background: transparent;
+            color: var(--md-sys-color-on-surface-variant);
+            opacity: 0.5;
+            cursor: default;
+        }
+
+        .flatpickr-day.prevMonthDay,
+        .flatpickr-day.nextMonthDay {
+            color: var(--md-sys-color-on-surface-variant);
+            opacity: 0.7;
+        }
+        .flatpickr-day.prevMonthDay:hover,
+        .flatpickr-day.nextMonthDay:hover {
+             background-color: var(--md-sys-color-surface-container-highest);
+        }
+
+        /* Today Style */
+        .flatpickr-day.today {
+            /* Dotted outline style */
+            border: 2px dotted var(--md-sys-color-outline);
+            color: inherit; /* Use default text color */
+            font-weight: normal; /* Reset font weight */
+            background: transparent !important; /* Ensure no background */
+        }
+        .flatpickr-day.today:hover {
+             background-color: var(--md-sys-color-surface-container-highest);
+             color: inherit; /* Keep default color on hover */
+             border-color: var(--md-sys-color-outline); /* Keep border color */
+        }
+
+        /* Selected Day Style */
+        .flatpickr-day.selected {
+            background-color: var(--md-sys-color-surface-variant) !important; /* Gray background */
+            color: var(--md-sys-color-on-surface-variant) !important; /* Text on gray */
+            border: none !important; /* Remove any border */
+            font-weight: 500; /* Restore normal weight */
+        }
+
+        /* Today and Selected Style */
+        .flatpickr-day.today.selected {
+             /* Combine selected background and today border */
+            background-color: var(--md-sys-color-surface-variant) !important;
+            color: var(--md-sys-color-on-surface-variant) !important;
+            border: 2px dotted var(--md-sys-color-outline) !important; /* Add dotted border */
+            font-weight: 500 !important;
+            box-shadow: none !important;
+        }
+
+        /* Dark Theme Overrides */
+        @media (prefers-color-scheme: dark) {
+            .flatpickr-calendar {
+                background: var(--md-sys-color-surface-container-high-dark);
+                border: 1px solid var(--md-sys-color-outline-variant-dark);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                color: var(--md-sys-color-on-surface-dark);
+            }
+            .flatpickr-current-month {
+                 color: var(--md-sys-color-on-surface-dark);
+            }
+             .flatpickr-current-month input.cur-year:hover {
+                 background: var(--md-sys-color-surface-container-highest-dark);
+            }
+            .flatpickr-prev-month,
+            .flatpickr-next-month {
+                color: var(--md-sys-color-on-surface-variant-dark);
+            }
+            .flatpickr-prev-month:hover,
+            .flatpickr-next-month:hover {
+                background-color: var(--md-sys-color-surface-container-highest-dark);
+                color: var(--md-sys-color-primary-dark);
+            }
+            span.flatpickr-weekday {
+                color: var(--md-sys-color-on-surface-variant-dark);
+            }
+            .flatpickr-day {
+                color: var(--md-sys-color-on-surface-dark);
+            }
+            .flatpickr-day:hover {
+                background-color: var(--md-sys-color-surface-container-highest-dark);
+            }
+            .flatpickr-day.disabled,
+            .flatpickr-day.disabled:hover {
+                color: var(--md-sys-color-on-surface-variant-dark);
+            }
+            .flatpickr-day.prevMonthDay,
+            .flatpickr-day.nextMonthDay {
+                color: var(--md-sys-color-on-surface-variant-dark);
+            }
+             .flatpickr-day.prevMonthDay:hover,
+             .flatpickr-day.nextMonthDay:hover {
+                background-color: var(--md-sys-color-surface-container-highest-dark);
+             }
+            .flatpickr-day.today {
+                border: 2px dotted var(--md-sys-color-outline-dark);
+                color: inherit;
+                font-weight: normal;
+                background: transparent !important;
+            }
+             .flatpickr-day.today:hover {
+                  background-color: var(--md-sys-color-surface-container-highest-dark);
+                  color: inherit;
+                  border-color: var(--md-sys-color-outline-dark);
+             }
+            .flatpickr-day.selected {
+                background-color: var(--md-sys-color-surface-variant-dark) !important;
+                color: var(--md-sys-color-on-surface-variant-dark) !important;
+                border: none !important;
+            }
+            .flatpickr-day.today.selected {
+                background-color: var(--md-sys-color-surface-variant-dark) !important;
+                color: var(--md-sys-color-on-surface-variant-dark) !important;
+                border: 2px dotted var(--md-sys-color-outline-dark) !important;
+                font-weight: 500 !important;
+            }
+        }
+
+        /* --- End Modern Flatpickr Styling --- */
+
+        /* --- Calendar Summary Styles (Restored Here) --- */
+        #monthlySummary {
+            margin-top: 0; /* Remove top margin to attach to calendar grid */
+            padding: 0; /* Keep padding 0 */
+            width: 100%;
+            box-sizing: border-box;
+            display: block; /* Override any grid display on the container itself */
+        }
+
+        #monthlySummary .monthly-report-stats.card {
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            background-color: transparent;
+            box-shadow: none;
+            border: none;
+            display: grid; /* Use grid layout */
+            grid-template-columns: 1fr 1fr; /* Create exactly two equal columns */
+            gap: 0.5rem; /* Add spacing between grid items */
+        }
+
+        #monthlySummary .monthly-report-stats.card .monthly-stat-item {
+            padding: 0.75rem 0.5rem;
+            margin: 0;
+            border-radius: var(--border-radius-medium);
+            /* Ensure text alignment is centered or as desired */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        /* --- End Calendar Summary Styles --- */
 
         /* Toast / Message */
          #toast-container {
@@ -1662,9 +1905,7 @@
 
         /* ... rest of css ... */
 
-    </style>
-    <!-- Custom styles for calendar summary layout -->
-    <style>
+        /* --- Calendar Summary Styles (Moved Here) --- */
         #monthlySummary {
             margin-top: 0; /* Remove top margin to attach to calendar grid */
             padding: 0; /* Keep padding 0 */
@@ -1689,16 +1930,12 @@
             padding: 0.75rem 0.5rem;
             margin: 0;
             border-radius: var(--border-radius-medium);
-            width: 100%; /* Make items take full width */
-            box-sizing: border-box; /* Include padding/border in width */
-            margin-bottom: 0.5rem; /* Add vertical spacing */
             /* Ensure text alignment is centered or as desired */
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-
-        /* No need to remove margin-bottom from last-child as grid gap handles spacing */
+        /* --- End Calendar Summary Styles --- */
 
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -2251,6 +2488,12 @@
                     defaultDate: dateInput.value,
                     disableMobile: true, // Use custom mobile handling & style
                     appendTo: document.body, // Append to body to avoid layout issues
+                    // ++ Add dropdowns for month and year ++
+                    dropdowns: {
+                        month: true,
+                        year: true
+                    },
+                    // ++ End dropdowns ++
                     onChange: function(selectedDates, dateStr, instance) {
                         console.log("Datepicker onChange:", dateStr);
 
@@ -4481,9 +4724,9 @@
                          <span class="monthly-stat-value">${monthTotalNotturne.toFixed(1)}h</span>
                          <span class="monthly-stat-label">Ore Notturne</span>
                      </div>
-                      ${monthFerieDays > 0 ? `
+                      ${ferieDays > 0 ? `
                       <div class="monthly-stat-item" style="background-color: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container);">
-                         <span class="monthly-stat-value" style="color: var(--md-sys-color-tertiary);">${monthFerieDays}</span>
+                         <span class="monthly-stat-value" style="color: var(--md-sys-color-tertiary);">${ferieDays}</span>
                          <span class="monthly-stat-label">Giorni Ferie</span>
                      </div>` : ''}
                      ${monthMalattiaDays > 0 ? `
