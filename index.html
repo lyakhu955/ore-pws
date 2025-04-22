@@ -174,6 +174,48 @@
             filter: drop-shadow(0 0 5px var(--md-sys-color-primary));
             animation-play-state: paused;
         }
+        
+        /* Animazione più vivace quando l'utente clicca sul logo */
+        @keyframes bounce-excited {
+            0%, 100% {
+                transform: translateX(0) rotate(0deg) scale(1);
+                animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+            }
+            10% {
+                transform: translateX(20px) rotate(10deg) scale(1.2);
+            }
+            20% {
+                transform: translateX(-20px) rotate(-15deg) scale(1.1);
+            }
+            30% {
+                transform: translateX(15px) rotate(15deg) scale(1.15);
+            }
+            40% {
+                transform: translateX(-15px) rotate(-10deg) scale(1.05);
+            }
+            50% {
+                transform: translateY(-15px) rotate(5deg) scale(1.1);
+            }
+            60% {
+                transform: translateY(10px) rotate(-5deg) scale(1.05);
+            }
+            70% {
+                transform: translateX(20px) translateY(-5px) rotate(10deg) scale(1.1);
+            }
+            80% {
+                transform: translateX(-20px) translateY(5px) rotate(-10deg) scale(1.05);
+            }
+            90% {
+                transform: translateX(10px) translateY(-3px) rotate(5deg) scale(1.02);
+            }
+        }
+        
+        .bouncing-logo-excited {
+            animation: bounce-excited 2s ease-in-out;
+            transform-origin: center;
+            cursor: pointer;
+            filter: drop-shadow(0 0 8px var(--md-sys-color-primary));
+        }
 
         main {
             padding: 1rem;
@@ -6284,6 +6326,33 @@ END:VCARD`;
             const minutes = date.getMinutes().toString().padStart(2, '0');
             return `${hours}:${minutes}`;
          }
+         
+         // Interattività per il logo rimbalzante
+         document.addEventListener('DOMContentLoaded', function() {
+             const logo = document.querySelector('.bouncing-logo');
+             if (logo) {
+                 // Quando l'utente clicca sul logo, aggiungiamo un'animazione più vivace
+                 logo.addEventListener('click', function() {
+                     // Rimuoviamo temporaneamente la classe per resettare l'animazione
+                     this.classList.remove('bouncing-logo');
+                     
+                     // Forziamo un reflow per assicurarci che l'animazione si resetti
+                     void this.offsetWidth;
+                     
+                     // Aggiungiamo una classe per un'animazione più vivace
+                     this.classList.add('bouncing-logo-excited');
+                     
+                     // Dopo l'animazione, torniamo all'animazione normale
+                     setTimeout(() => {
+                         this.classList.remove('bouncing-logo-excited');
+                         this.classList.add('bouncing-logo');
+                     }, 2000); // Durata dell'animazione speciale
+                     
+                     // Mostriamo un messaggio divertente
+                     showToast('Ciao! 👋 Sono il logo PWS!', 'success');
+                 });
+             }
+         });
 
     </script>
 
