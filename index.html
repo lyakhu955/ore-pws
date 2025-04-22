@@ -42,11 +42,6 @@
             --md-sys-color-outline-variant: #BFC9C8;
             --md-sys-color-shadow: #000000;
             --md-sys-color-scrim: #000000;
-            --md-sys-color-inverse-surface: #2E3131;
-            --md-sys-color-inverse-on-surface: #EFF1F0;
-            --md-sys-color-inverse-primary: #81D5D4;
-
-            /* Custom Variables */
             --body-font-family: 'Roboto', sans-serif;
             --base-font-size: 16px;
             --border-radius-small: 8px;
@@ -146,6 +141,38 @@
             max-height: 40px; /* Adjusted logo size */
             width: auto;
             display: block;
+        }
+        
+        /* Animazione logo rimbalzante */
+        @keyframes bounce-horizontal {
+            0%, 100% {
+                transform: translateX(0) rotate(0deg);
+                animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+            }
+            25% {
+                transform: translateX(15px) rotate(5deg);
+                animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+            }
+            50% {
+                transform: translateX(0) rotate(0deg);
+                animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+            }
+            75% {
+                transform: translateX(-15px) rotate(-5deg);
+                animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+            }
+        }
+        
+        .bouncing-logo {
+            animation: bounce-horizontal 2s infinite;
+            transform-origin: center;
+            cursor: pointer;
+            transition: filter 0.3s ease;
+        }
+        
+        .bouncing-logo:hover {
+            filter: drop-shadow(0 0 5px var(--md-sys-color-primary));
+            animation-play-state: paused;
         }
 
         main {
@@ -1046,6 +1073,11 @@
         .qr-code-container {
             margin-top: 1.5rem;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
         /* --- Modern Flatpickr Styling (2025 Inspired) --- */
@@ -1811,7 +1843,7 @@
         /* Remove .monthly-summary from the media query rule if it only applied grid there */
         @media (max-width: 600px) {
             /* ... other rules ... */
-             .stats-container, .monthly-report-stats { grid-template-columns: 1fr 1fr; } /* Keep only relevant selectors */
+             .stats-container, .monthly-report-stats { grid-template-columns: 1fr 1fr; } /* Keep other relevant selectors */
             /* Remove or comment out the old rule applying grid to .monthly-summary here */
              /* .monthly-summary, .stats-container, .monthly-report-stats { grid-template-columns: 1fr 1fr; } */
         }
@@ -1938,7 +1970,8 @@
         /* --- End Calendar Summary Styles --- */
 
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/it.js"></script>
 </head>
@@ -1947,7 +1980,8 @@
         <div class="header-content">
             <div class="logo">
                 <img src="https://i.imgur.com/BnllByD.png"
-                     alt="PWS Logo">
+                     alt="PWS Logo" 
+                     class="bouncing-logo">
             </div>
             <div class="header-actions">
                 <!-- Header actions can go here -->
@@ -3753,6 +3787,7 @@
                  let totalHoursSummary = 0; // Rename for clarity: this is for the summary
                  let totalTransferta = 0;
                  let totalNotturne = 0;
+                 let totalBreakTime = 0; // Added for break time
                  modalEntries.innerHTML = entries.map((entry, index) => {
                      // Reconstruct full date-time strings for Date parsing
                      // dateStr is DD/MM/YYYY, startTime/endTime are HH:MM
@@ -3812,9 +3847,10 @@
                      totalHoursSummary += Number(entry.totalHours) || 0;
                      totalTransferta += Number(entry.transferta) || 0;
                      totalNotturne += Number(entry.notturne) || 0;
+                     totalBreakTime += Number(entry.breakTime) || 0; // Add break time to total
                      return `
                          <div class="modal-entry">
-                             <span>${formatTime(start)} - ${formatTime(end)}</span>
+                             <span>${formatTime(start)}-${Number(entry.breakTime || 0).toFixed(1).replace('.', ',')}-${formatTime(end)}</span>
                              <span title="${escapeHtml(entry.description || '')}">${escapeHtml(entry.description || '-')}</span>
                              <span>${hoursNet.toFixed(2)}h</span> <!-- Display net hours for the entry -->
                              <div>
@@ -4105,8 +4141,6 @@
 
              document.body.appendChild(fileInput);
              fileInput.click();
-             // No need to remove immediately, event listener will handle it
-             // document.body.removeChild(fileInput); // Clean up input element later
          }
 
          function handleImportFile(event) {
@@ -4323,7 +4357,7 @@
                     console.log("Dati rimossi da localStorage.");
                     showToast('Tutti i dati sono stati cancellati. Ricaricamento...', 'success', 4000);
                      // Reload page to clear state completely
-                     setTimeout(() => window.location.reload(), 1500);
+                     setTimeout(() => window.location.reload(), 1500); // Reload page after import
                  } else {
                       console.log("Seconda conferma cancellazione fallita.");
                       showToast("Cancellazione annullata.", "info");
@@ -4507,11 +4541,33 @@
 
          function getVehicleNameById(vehicleId) {
              if (!vehicleId) return '';
+             
+             // Log per debug
+             console.log("Cercando veicolo con ID:", vehicleId);
+             
              const db = getDb();
              // Ensure vehicles exists and is an array
              const vehicles = Array.isArray(db.vehicles) ? db.vehicles : [];
-             const vehicle = vehicles.find(v => v && v.id === vehicleId); // Check v exists
-             return vehicle ? vehicle.name : ''; // Return name or empty string if not found or invalid
+             
+             // Prima cerca per ID esatto
+             let vehicle = vehicles.find(v => v && v.id === vehicleId);
+             
+             // Se non trova, prova a cercare per nome (nel caso l'ID sia in realtà un nome)
+             if (!vehicle) {
+                 vehicle = vehicles.find(v => v && v.name === vehicleId);
+             }
+             
+             // Se ancora non trova, controlla se è un ID predefinito
+             if (!vehicle && vehicleId.startsWith('default_')) {
+                 // Estrai il nome dal formato default_nome
+                 const defaultName = vehicleId.replace('default_', '').replace(/_/g, ' ');
+                 return defaultName.charAt(0).toUpperCase() + defaultName.slice(1);
+             }
+             
+             // Log del risultato
+             console.log("Veicolo trovato:", vehicle);
+             
+             return vehicle ? vehicle.name : vehicleId; // Ritorna il nome o l'ID stesso se non trovato
          }
 
         // --- Monthly Report Functions ---
@@ -4689,7 +4745,7 @@
               console.log(`Trovati ${monthData.length} giorni con dati per il report di ${yearMonth}`);
 
              // --- Create Overall Monthly Stats ---
-             let monthTotalHours = 0, monthTotalTransferta = 0, monthTotalNotturne = 0, monthWorkDays = 0, monthFerieDays = 0, monthMalattiaDays = 0;
+             let monthTotalHours = 0, monthTotalTransferta = 0, monthTotalNotturne = 0, monthTotalBreak = 0, monthWorkDays = 0, monthFerieDays = 0, monthMalattiaDays = 0;
               monthData.forEach(dayData => {
                  if (dayData.holidayInfo) {
                      if (dayData.holidayInfo.type === 'ferie') monthFerieDays++;
@@ -4700,6 +4756,7 @@
                          monthTotalHours += (typeof e.totalHours === 'number' ? e.totalHours : 0);
                          monthTotalTransferta += (typeof e.transferta === 'number' ? e.transferta : 0);
                          monthTotalNotturne += (typeof e.notturne === 'number' ? e.notturne : 0);
+                         monthTotalBreak += (typeof e.breakTime === 'number' ? e.breakTime : 0);
                           if (typeof e.totalHours === 'number' && e.totalHours > 0) dayHasHours = true;
                      });
                       if(dayHasHours) monthWorkDays++;
@@ -4716,6 +4773,7 @@
                          <span class="monthly-stat-value">${monthWorkDays}</span>
                          <span class="monthly-stat-label">Giorni Lavorati</span>
                      </div>
+
                      <div class="monthly-stat-item" style="background-color: var(--md-sys-color-surface);">
                          <span class="monthly-stat-value">${monthTotalTransferta.toFixed(1)}h</span>
                          <span class="monthly-stat-label">Ore Trasferta</span>
@@ -4724,7 +4782,7 @@
                          <span class="monthly-stat-value">${monthTotalNotturne.toFixed(1)}h</span>
                          <span class="monthly-stat-label">Ore Notturne</span>
                      </div>
-                      ${monthFerieDays > 0 ? `
+                     ${monthFerieDays > 0 ? `
                       <div class="monthly-stat-item" style="background-color: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container);">
                          <span class="monthly-stat-value" style="color: var(--md-sys-color-tertiary);">${monthFerieDays}</span>
                          <span class="monthly-stat-label">Giorni Ferie</span>
@@ -4765,30 +4823,54 @@
 
                  } else if (dayData.entries.length > 0) {
                      // --- Work Entries ---
-                     let dayTotalHours = 0, dayTotalTransferta = 0, dayTotalNotturne = 0;
+                     let dayTotalHours = 0, dayTotalTransferta = 0, dayTotalNotturne = 0, dayTotalBreak = 0;
                      let entryDetailsHtml = ''; // Accumulate details for individual entries
+                     // Raccogliamo i mezzi utilizzati nel giorno
+                     const vehiclesUsed = new Set();
+                     
                      dayData.entries.forEach(entry => {
                          dayTotalHours += (typeof entry.totalHours === 'number' ? entry.totalHours : 0);
                          dayTotalTransferta += (typeof entry.transferta === 'number' ? entry.transferta : 0);
                          dayTotalNotturne += (typeof entry.notturne === 'number' ? entry.notturne : 0);
+                         dayTotalBreak += (typeof entry.breakTime === 'number' ? entry.breakTime : 0);
+                         
+                         // Aggiungiamo il mezzo alla lista dei mezzi utilizzati nel giorno
+                         const vehicleName = getVehicleNameById(entry.vehicle);
+                         if (vehicleName) {
+                             vehiclesUsed.add(vehicleName);
+                         }
 
                           // Add individual entry details
-                          const vehicleName = getVehicleNameById(entry.vehicle);
                           const entryTime = `${entry.startTime || '?'} - ${entry.endTime || '?'}`;
                           const entryHours = typeof entry.totalHours === 'number' ? ` (${entry.totalHours.toFixed(1)}h)` : '';
                           const entryDesc = entry.description ? `<p class="monthly-report-description" style="margin-top: 0;">${escapeHtml(entry.description)}</p>` : '';
-                          const entryVehicle = vehicleName ? `<p class="monthly-report-vehicle" style="margin-top: 0;"><span class="material-symbols-outlined" style="font-size: 1em;">directions_car</span> ${escapeHtml(vehicleName)}</p>` : '';
+                          
+                          // Aggiungiamo le informazioni sul mezzo utilizzato in modo più evidente
+                          const entryVehicle = vehicleName ? `<p class="monthly-report-vehicle" style="margin-top: 0.25rem; margin-bottom: 0.25rem; font-weight: 500; color: var(--md-sys-color-primary);"><span class="material-symbols-outlined" style="font-size: 1.1em; vertical-align: text-bottom;">directions_car</span> <strong>Mezzo:</strong> ${escapeHtml(vehicleName)}</p>` : '';
+                          
+                          // Aggiungiamo le informazioni sulla pausa
+                          const breakTime = typeof entry.breakTime === 'number' ? entry.breakTime : 0;
+                          const entryBreak = `<p class="monthly-report-break" style="margin-top: 0.25rem; margin-bottom: 0.25rem;"><span class="material-symbols-outlined" style="font-size: 1em; vertical-align: text-bottom;">timer</span> <strong>Pausa:</strong> ${breakTime.toFixed(1)}h</p>`;
 
                          entryDetailsHtml += `<div style="margin-left: 1rem; margin-top: 0.5rem; padding-left: 0.5rem; border-left: 2px solid var(--md-sys-color-outline-variant); font-size: 0.9em;">
                                                 <span style="color: var(--md-sys-color-on-surface-variant);">${entryTime}${entryHours}</span>
                                                 ${entryDesc}
                                                 ${entryVehicle}
+                                                ${entryBreak}
                                             </div>`;
                      });
 
                       // Summary details for the day
                       contentHtml += `<div class="monthly-report-details">
                                       <span class="monthly-report-detail"><strong>${dayTotalHours.toFixed(1)}h</strong> Totali</span>`;
+                      
+                      // Aggiungiamo i mezzi utilizzati nel riepilogo giornaliero in modo più evidente
+                      if (vehiclesUsed.size > 0) {
+                          const vehiclesList = Array.from(vehiclesUsed).join(', ');
+                          contentHtml += `<span class="monthly-report-detail" style="background-color: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); font-weight: 500; border: 2px solid var(--md-sys-color-primary); padding: 4px 10px;"><span class="material-symbols-outlined" style="font-size: 1.2em; vertical-align: text-bottom;">directions_car</span> ${escapeHtml(vehiclesList)}</span>`;
+                      }
+                      
+                      if (dayTotalBreak > 0) contentHtml += `<span class="monthly-report-detail"><span class="material-symbols-outlined">timer</span> ${dayTotalBreak.toFixed(1)}h Pausa</span>`;
                       if (dayTotalTransferta > 0) contentHtml += `<span class="monthly-report-detail"><span class="material-symbols-outlined">local_shipping</span> ${dayTotalTransferta.toFixed(1)}h Trasf.</span>`;
                       if (dayTotalNotturne > 0) contentHtml += `<span class="monthly-report-detail"><span class="material-symbols-outlined">dark_mode</span> ${dayTotalNotturne.toFixed(1)}h Nott.</span>`;
                       contentHtml += `</div>`;
@@ -4798,161 +4880,646 @@
 
                  itemDiv.innerHTML = contentHtml;
                  listContainer.appendChild(itemDiv); // Add to container
+                 // Add a blank row AFTER processing all entries/holidays for the current day, IF data was added
+                 if (dayData.entries.length > 0 || dayData.holidayInfo) {
+                     listContainer.appendChild(document.createElement('div')); // Blank row
+                 }
              });
              contentElement.appendChild(listContainer); // Append the whole list at once
              console.log("Report mensile visualizzato.");
          }
 
         function exportMonthlyReportToExcel(yearMonth) {
-             console.log(`Inizio esportazione Excel per ${yearMonth}...`);
-             if (!yearMonth) {
+            console.log(`Inizio esportazione Excel per ${yearMonth}...`);
+            if (!yearMonth) {
                 showToast("Seleziona un mese da esportare.", "warning");
                 return;
             }
-             if (typeof XLSX === 'undefined') {
-                 showToast("Libreria per export Excel non caricata.", "error");
-                 console.error("Libreria SheetJS (XLSX) non trovata.");
-                 return;
-             }
-
+            if (typeof ExcelJS === 'undefined') {
+                showToast("Libreria per export Excel non caricata.", "error");
+                console.error("Libreria ExcelJS non trovata.");
+                return;
+            }
 
             const db = getDb();
-             const userName = localStorage.getItem('userName') || 'Utente';
+            const userName = localStorage.getItem('userName') || 'Utente';
             const [year, monthNum] = yearMonth.split('-').map(Number);
             const monthIndex = monthNum - 1;
             const monthName = new Date(year, monthIndex, 1).toLocaleDateString('it-IT', { month: 'long' });
             const filename = `ReportOre_${userName}_${monthName}_${year}.xlsx`;
+            
+            // Definizione delle costanti per le larghezze delle colonne (in pixel)
+            const PIXEL_TO_EXCEL_UNIT = 7; // Approssimazione: 1 unità Excel ≈ 7 pixel
+            const COLUMN_A_WIDTH_PX = 185; // Larghezza esatta richiesta per colonna A
+            const COLUMN_A_WIDTH = COLUMN_A_WIDTH_PX / PIXEL_TO_EXCEL_UNIT; // Conversione in unità Excel
 
-             // --- Prepare data array for SheetJS ---
-             const excelData = [];
-             // Header Row
-             excelData.push([
-                 "Data", "Giorno", "Tipo", "Ora Inizio", "Ora Fine", "Pausa (h)",
-                 "Ore Lavorate", "Ore Trasferta", "Ore Notturne", "Descrizione/Note", "Mezzo"
-             ]);
+            // --- 1. Pre-process data to find max description columns ---
+            let maxDescCols = 1; // Minimum 1 for notes
+            const descriptionDelimiterRegex = /[.,-\/]/; // Regex for delimiters
+            const daysInMonth = new Date(year, monthNum, 0).getDate();
 
-             const daysInMonth = new Date(year, monthNum, 0).getDate();
-              let monthTotalHours = 0, monthTotalTransferta = 0, monthTotalNotturne = 0, monthWorkDays = 0, monthFerieDays = 0, monthMalattiaDays = 0;
-              const numberFormat = '#,##0.0'; // Basic number format for hours
-              const integerFormat = '0'; // Basic integer format for days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, monthIndex, day);
+                if (isNaN(date.getTime())) continue;
+                const dateStr = formatDateForInput(date);
+                const entries = db.entries[dateStr] || [];
+                entries.forEach(entry => {
+                    if (entry.description) {
+                        const parts = entry.description.split(descriptionDelimiterRegex).map(s => s.trim()).filter(s => s);
+                        if (parts.length > maxDescCols) {
+                            maxDescCols = parts.length;
+                        }
+                    }
+                });
+            }
+            console.log("Max colonne descrizione necessarie:", maxDescCols);
 
-             for (let day = 1; day <= daysInMonth; day++) {
-                 const date = new Date(year, monthIndex, day);
-                  if (isNaN(date.getTime())) continue; // Skip invalid dates
-                 const dateStr = formatDateForInput(date);
-                 const dayOfWeek = date.toLocaleDateString('it-IT', { weekday: 'short' });
-                 const entries = db.entries[dateStr] || [];
-                 const holidayInfo = db.holidays[dateStr];
+            // --- 2. Create a new workbook and worksheet with ExcelJS ---
+            const workbook = new ExcelJS.Workbook();
+            workbook.creator = userName;
+            workbook.lastModifiedBy = userName;
+            workbook.created = new Date();
+            workbook.modified = new Date();
+            
+            // Add a worksheet with dark theme
+            const worksheet = workbook.addWorksheet('Report Ore', {
+                properties: { tabColor: { argb: '6A6AFF' } } // Colore tab azzurro
+            });
+            
+            // Imposta un colore di sfondo scuro per tutto il foglio
+            worksheet.properties.outlineLevelCol = 1;
+            worksheet.properties.defaultColWidth = 12;
+            
+            // Imposta il colore di sfondo per tutto il foglio
+            worksheet.pageSetup.paperSize = 9; // A4
+            worksheet.pageSetup.orientation = 'landscape';
+            worksheet.pageSetup.fitToPage = true;
+            
+            // Utilizziamo il tema chiaro originale
+            const lightThemeColor = 'FFFFFF'; // Bianco
 
-                  if (holidayInfo) {
-                      // --- Absence Row ---
-                      const typeText = holidayInfo.type === 'ferie' ? 'Ferie' : 'Malattia';
-                      excelData.push([
-                          dateStr, dayOfWeek, typeText, "", "", "", // Empty time/hours
-                           "", "", "", // Empty work hours
-                          holidayInfo.note || "", "" // Note and empty vehicle
-                      ]);
-                       if (holidayInfo.type === 'ferie') monthFerieDays++;
-                       if (holidayInfo.type === 'malattia') monthMalattiaDays++;
+            // --- 3. Define column widths ---
+            const columns = [
+                { key: 'giorno', width: COLUMN_A_WIDTH }, // Larghezza esatta in unità Excel
+                { key: 'data', width: 12 },
+                { key: 'tipo', width: 10 },
+                { key: 'mezzo', width: 25 }, // Aumentata larghezza per evitare testo troncato
+                { key: 'oraInizio', width: 10 },
+                { key: 'pausa', width: 8 },
+                { key: 'oraFine', width: 10 },
+                { key: 'oreTrasferte', width: 12 },
+                { key: 'oreNotturne', width: 12 },
+                { key: 'oreTotali', width: 12 }
+            ];
 
-                  } else if (entries.length > 0) {
-                       // --- Work Entry Rows ---
-                       let dayHasWork = false;
-                      entries.forEach(entry => {
-                          const vehicleName = getVehicleNameById(entry.vehicle);
-                          // Ensure numeric types for Excel
-                           const breakTimeNum = typeof entry.breakTime === 'number' ? entry.breakTime : 0;
-                           const totalHoursNum = typeof entry.totalHours === 'number' ? entry.totalHours : 0;
-                           const transfertaNum = typeof entry.transferta === 'number' ? entry.transferta : 0;
-                           const notturneNum = typeof entry.notturne === 'number' ? entry.notturne : 0;
+            // Add dynamic description columns
+            for (let i = 1; i <= maxDescCols; i++) {
+                columns.push({ key: `lavoro${i}`, width: 20 });
+            }
 
-                           excelData.push([
-                              dateStr, dayOfWeek, "Lavoro",
-                              entry.startTime || "", entry.endTime || "",
-                              { v: breakTimeNum, t: 'n', z: numberFormat }, // Pause
-                              { v: totalHoursNum, t: 'n', z: numberFormat }, // Total Hours
-                              { v: transfertaNum, t: 'n', z: numberFormat }, // Transferta
-                              { v: notturneNum, t: 'n', z: numberFormat }, // Notturne
-                              entry.description || "", vehicleName
-                           ]);
-                            monthTotalHours += totalHoursNum;
-                            monthTotalTransferta += transfertaNum;
-                            monthTotalNotturne += notturneNum;
-                            if (totalHoursNum > 0) dayHasWork = true;
-                      });
-                       if (dayHasWork) monthWorkDays++;
-                  } else {
-                      // --- Empty Day Row (Optional) ---
-                      // Could add weekends or empty workdays if desired
-                      // excelData.push([dateStr, dayOfWeek, "-", "", "", "", "", "", "", "", ""]);
-                  }
-             }
+            worksheet.columns = columns;
+            
+            // Aggiungiamo manualmente le intestazioni delle colonne
+            const headerTitles = [
+                'Giorno', 'Data', 'Tipo', 'Mezzo', 'Ora Inizio', 'Pausa', 'Ora Fine',
+                'Ore Trasferte', 'Ore Notturne', 'Ore Totali'
+            ];
+            
+            // Aggiungiamo le intestazioni per le colonne di descrizione
+            for (let i = 1; i <= maxDescCols; i++) {
+                headerTitles.push(`Lavoro${i}`);
+            }
+            
+            // Nessuna funzione per lo sfondo, utilizziamo il tema chiaro predefinito
 
-             // --- Add Summary Rows ---
-             excelData.push([]); // Empty separator row
-             excelData.push(["Riepilogo Mensile:", `${monthName} ${year}`]);
-             excelData.push(["", ""]); // Spacer
-             excelData.push(["Descrizione", "Valore"]);
-             excelData.push(["Ore Lavorate Totali:", {v: monthTotalHours, t:'n', z: numberFormat}]);
-             excelData.push(["Giorni Lavorati:", {v: monthWorkDays, t:'n', z: integerFormat}]);
-             excelData.push(["Ore Trasferta Totali:", {v: monthTotalTransferta, t:'n', z: numberFormat}]);
-             excelData.push(["Ore Notturne Totali:", {v: monthTotalNotturne, t:'n', z: numberFormat}]);
-              if (monthFerieDays > 0) excelData.push(["Giorni Ferie:", {v: monthFerieDays, t:'n', z: integerFormat}]);
-              if (monthMalattiaDays > 0) excelData.push(["Giorni Malattia:", {v: monthMalattiaDays, t:'n', z: integerFormat}]);
+            // --- 4. Add title row ---
+            
+            worksheet.mergeCells('A1:' + String.fromCharCode(65 + columns.length - 1) + '1'); // Merge cells for title (A1:K1 or more)
+            const titleRow = worksheet.getRow(1);
+            titleRow.height = 30;
+            titleRow.getCell(1).value = `${userName} - Report Ore Lavorative - ${monthName} ${year}`;
+            titleRow.getCell(1).font = { 
+                name: 'Arial', 
+                size: 16, 
+                bold: true, 
+                color: { argb: '006A6A' } // Colore primario dell'app
+            };
+            titleRow.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+            titleRow.getCell(1).fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'E6F7F7' } // Colore di sfondo chiaro
+            };
 
-             // --- Create worksheet and workbook ---
-              try {
-                 const ws = XLSX.utils.aoa_to_sheet(excelData);
+            // Add empty row
+            worksheet.addRow({});
 
-                 // --- Define Column Widths ---
-                 ws['!cols'] = [
-                     { wch: 12 }, // Data
-                     { wch: 8 },  // Giorno
-                     { wch: 10 }, // Tipo
-                     { wch: 10 }, // Ora Inizio
-                     { wch: 10 }, // Ora Fine
-                     { wch: 10 }, // Pausa (h)
-                     { wch: 12 }, // Ore Lavorate
-                     { wch: 12 }, // Ore Trasferta
-                     { wch: 12 }, // Ore Notturne
-                     { wch: 35 }, // Descrizione/Note
-                     { wch: 20 }  // Mezzo
-                 ];
+            // --- 5. Style the header row ---
+            const headerRow = worksheet.getRow(3);
+            headerRow.height = 25;
+            headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };
+            headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
+            
+            // Apply header titles and style to header cells
+            for (let i = 1; i <= columns.length; i++) {
+                const cell = headerRow.getCell(i);
+                // Imposta il valore dell'intestazione
+                cell.value = headerTitles[i-1];
+                
+                // Applica lo stile
+                cell.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: '006A6A' } // Colore primario dell'app
+                };
+                // Add border to header cells - più marcato
+                cell.border = {
+                    top: { style: 'medium' },
+                    left: { style: 'medium' },
+                    bottom: { style: 'medium' },
+                    right: { style: 'medium' }
+                };
+            }
 
-                 // --- Apply Basic Formatting (Example: Bold Header) ---
-                 // Find the range of the sheet
-                 const range = XLSX.utils.decode_range(ws['!ref']);
-                 for (let C = range.s.c; C <= range.e.c; ++C) {
-                     const cell_address = { c: C, r: 0 }; // Header row (0)
-                     const cell_ref = XLSX.utils.encode_cell(cell_address);
-                     if (ws[cell_ref]) {
-                         if (!ws[cell_ref].s) ws[cell_ref].s = {}; // Ensure style object exists
-                         ws[cell_ref].s.font = { bold: true };
-                     }
-                 }
-                 // Bold summary labels
-                 const summaryStartRow = daysInMonth + 3; // Adjust based on actual data rows + separators
-                  for (let R = summaryStartRow; R < excelData.length; ++R) {
-                       const cell_address = { c: 0, r: R }; // First column (0)
-                       const cell_ref = XLSX.utils.encode_cell(cell_address);
-                       if (ws[cell_ref] && ws[cell_ref].v) { // Check if cell and value exist
-                           if (!ws[cell_ref].s) ws[cell_ref].s = {};
-                           ws[cell_ref].s.font = { bold: true };
-                       }
-                  }
+            // --- 6. Add data rows ---
+            let rowIndex = 4; // Start after header
+            let monthTotalHours = 0, monthTotalTransferta = 0, monthTotalNotturne = 0;
+            let monthWorkDays = 0, monthFerieDays = 0, monthMalattiaDays = 0;
 
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, monthIndex, day);
+                if (isNaN(date.getTime())) continue;
+                
+                const dateStr = formatDateForInput(date);
+                const dayOfWeek = date.toLocaleDateString('it-IT', { weekday: 'long' });
+                const entries = db.entries[dateStr] || [];
+                const holidayInfo = db.holidays[dateStr];
+                
+                let rowsAddedForDay = false;
 
-                 const wb = XLSX.utils.book_new();
-                 XLSX.utils.book_append_sheet(wb, ws, 'Report Ore');
-
-                 // --- Trigger download ---
-                 XLSX.writeFile(wb, filename);
-                 showToast('Report Excel esportato!', 'success');
-                 console.log(`Esportazione Excel completata: ${filename}`);
-              } catch (excelError) {
-                   console.error("Errore durante la creazione del file Excel:", excelError);
-                   showToast(`Errore durante la creazione dell'Excel: ${excelError.message}`, "error");
-              }
+                if (holidayInfo) {
+                    // --- Absence Row ---
+                    const typeText = holidayInfo.type === 'ferie' ? 'Ferie' : 'Malattia';
+                    const rowData = {
+                        giorno: dayOfWeek,
+                        data: dateStr,
+                        tipo: typeText,
+                        mezzo: '',
+                        oraInizio: '',
+                        pausa: null, // Usiamo null invece di stringa vuota
+                        oraFine: '',
+                        oreTrasferte: null, // Usiamo null invece di stringa vuota
+                        oreNotturne: null, // Usiamo null invece di stringa vuota
+                        oreTotali: null // Usiamo null invece di stringa vuota
+                    };
+                    
+                    // Add note to first description column
+                    rowData.lavoro1 = holidayInfo.note || '';
+                    
+                    const row = worksheet.addRow(rowData);
+                    
+                    // Style the row based on type - nuovi colori
+                    const bgColor = holidayInfo.type === 'ferie' ? 'FFEB3B' : 'F44336'; // Giallo per ferie, rosso per malattia
+                    const fontColor = holidayInfo.type === 'ferie' ? '000000' : 'FFFFFF'; // Testo nero su giallo, bianco su rosso
+                    
+                    for (let i = 1; i <= columns.length; i++) {
+                        const cell = row.getCell(i);
+                        cell.fill = {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: { argb: bgColor }
+                        };
+                        cell.border = {
+                            top: { style: 'medium', color: { argb: '666666' } },
+                            left: { style: 'medium', color: { argb: '666666' } },
+                            bottom: { style: 'medium', color: { argb: '666666' } },
+                            right: { style: 'medium', color: { argb: '666666' } }
+                        };
+                        // Imposta il colore del testo
+                        cell.font = {
+                            color: { argb: fontColor },
+                            name: 'Arial',
+                            size: 10
+                        };
+                        // Allineamento centrato per tutte le celle
+                        cell.alignment = { 
+                            horizontal: 'center', 
+                            vertical: 'middle' 
+                        };
+                    }
+                    
+                    // Evidenzia il tipo di assenza
+                    row.getCell(3).font = {
+                        bold: true,
+                        color: { argb: fontColor },
+                        name: 'Arial',
+                        size: 10
+                    };
+                    
+                    if (holidayInfo.type === 'ferie') monthFerieDays++;
+                    if (holidayInfo.type === 'malattia') monthMalattiaDays++;
+                    
+                    rowsAddedForDay = true;
+                    rowIndex++;
+                } else if (entries.length > 0) {
+                    // --- Work Entry Rows ---
+                    let dayHasWork = false;
+                    
+                    entries.forEach(entry => {
+                        const vehicleName = getVehicleNameById(entry.vehicle) || "";
+                        
+                        // Assicuriamoci che i valori numerici siano effettivamente numeri
+                        // Convertiamo esplicitamente in Number per evitare problemi di formattazione
+                        const breakTimeNum = typeof entry.breakTime === 'number' ? Number(entry.breakTime) : 0;
+                        const totalHoursNum = typeof entry.totalHours === 'number' ? Number(entry.totalHours) : 0;
+                        
+                        // Per trasferta e notturne, usiamo null invece di stringa vuota quando non ci sono ore
+                        // Excel tratterà null come cella vuota ma senza errori di formattazione
+                        const transfertaNum = (typeof entry.transferta === 'number' && entry.transferta > 0) ? 
+                            Number(entry.transferta) : null;
+                        const notturneNum = (typeof entry.notturne === 'number' && entry.notturne > 0) ? 
+                            Number(entry.notturne) : null;
+                        
+                        const rowData = {
+                            giorno: dayOfWeek,
+                            data: dateStr,
+                            tipo: 'Lavoro',
+                            mezzo: vehicleName,
+                            oraInizio: entry.startTime || '',
+                            pausa: breakTimeNum, // Manteniamo visibile lo 0 per le pause
+                            oraFine: entry.endTime || '',
+                            oreTrasferte: transfertaNum,
+                            oreNotturne: notturneNum,
+                            oreTotali: totalHoursNum
+                        };
+                        
+                        // Split description and add to LavoroX columns
+                        const descParts = entry.description ? entry.description.split(descriptionDelimiterRegex).map(s => s.trim()).filter(s => s) : [];
+                        for (let i = 1; i <= maxDescCols; i++) {
+                            rowData[`lavoro${i}`] = descParts[i-1] || '';
+                        }
+                        
+                        const row = worksheet.addRow(rowData);
+                        
+                        // Determina se è weekend (sabato o domenica)
+                        const dayNum = date.getDay(); // 0 = domenica, 6 = sabato
+                        const isWeekend = dayNum === 0 || dayNum === 6;
+                        
+                        // Determina se ci sono ore notturne o trasferte
+                        const hasNightHours = notturneNum > 0;
+                        const hasTransferHours = transfertaNum > 0;
+                        
+                        // Scegli il colore di sfondo in base alle condizioni
+                        let bgColor, fontColor = 'FFFFFF'; // Default: testo bianco
+                        
+                        if (isWeekend) {
+                            // Weekend: viola intenso (mantenuto)
+                            bgColor = '673AB7'; // Deep Purple
+                            fontColor = 'FFFFFF'; // Testo bianco
+                        } else if (hasNightHours) {
+                            // Solo ore notturne: grigio scuro
+                            bgColor = '424242'; // Grigio scuro
+                            fontColor = 'FFFFFF'; // Testo bianco
+                        } else if (hasTransferHours) {
+                            // Solo trasferte: grigio più chiaro per maggiore contrasto
+                            bgColor = 'BDBDBD'; // Grigio più chiaro
+                            fontColor = '000000'; // Testo nero per contrasto
+                        } else {
+                            // Normale giorno lavorativo: sfondo bianco senza colore
+                            bgColor = 'FFFFFF'; // Bianco
+                            fontColor = '000000'; // Testo nero
+                        }
+                        
+                        for (let i = 1; i <= columns.length; i++) {
+                            const cell = row.getCell(i);
+                            cell.fill = {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: bgColor }
+                            };
+                            cell.border = {
+                                top: { style: 'medium', color: { argb: '666666' } },
+                                left: { style: 'medium', color: { argb: '666666' } },
+                                bottom: { style: 'medium', color: { argb: '666666' } },
+                                right: { style: 'medium', color: { argb: '666666' } }
+                            };
+                            
+                            // Imposta il colore del testo
+                            cell.font = {
+                                color: { argb: fontColor },
+                                name: 'Arial',
+                                size: 10
+                            };
+                            
+                            // Allineamento centrato per tutte le celle
+                            cell.alignment = { 
+                                horizontal: 'center', 
+                                vertical: 'middle' 
+                            };
+                            
+                            // Format number cells
+                            if (i === 8 || i === 9 || i === 10) { // Trasferte, Notturne, Totali
+                                cell.numFmt = '0.0';
+                            }
+                            // Formato speciale per la pausa (solo 0 senza decimali)
+                            if (i === 6) { // Pausa
+                                cell.numFmt = '0';
+                            }
+                        }
+                        
+                        // Highlight total hours with bold
+                        row.getCell(10).font = { 
+                            bold: true, 
+                            color: { argb: fontColor },
+                            name: 'Arial',
+                            size: 10
+                        };
+                        
+                        // Evidenzia le celle specifiche per ore notturne e trasferte se presenti
+                        if (hasNightHours) {
+                            row.getCell(9).font = { 
+                                bold: true, 
+                                color: { argb: 'FFEB3B' }, // Giallo per ore notturne (più visibile su sfondo scuro)
+                                name: 'Arial',
+                                size: 10
+                            };
+                        }
+                        
+                        if (hasTransferHours) {
+                            const transferHoursCell = row.getCell(8); // Colonna ore trasferta
+                            
+                            // Se lo sfondo è grigio chiaro, usiamo un colore più scuro per il testo
+                            if (bgColor === 'BDBDBD') {
+                                transferHoursCell.font = {
+                                    bold: true,
+                                    color: { argb: '000000' }, // Nero
+                                    name: 'Arial',
+                                    size: 11 // Dimensione leggermente maggiore
+                                };
+                                // Aggiungiamo un bordo per evidenziare ulteriormente
+                                transferHoursCell.border = {
+                                    top: { style: 'medium', color: { argb: '000000' } },
+                                    left: { style: 'medium', color: { argb: '000000' } },
+                                    bottom: { style: 'medium', color: { argb: '000000' } },
+                                    right: { style: 'medium', color: { argb: '000000' } }
+                                };
+                            } else {
+                                transferHoursCell.font = {
+                                    bold: true,
+                                    color: { argb: '8BC34A' }, // Verde lime per trasferte (più visibile su sfondo scuro)
+                                    name: 'Arial',
+                                    size: 10
+                                };
+                            }
+                        }
+                        
+                        // Se è weekend, evidenzia il giorno della settimana
+                        if (isWeekend) {
+                            row.getCell(1).font = { 
+                                bold: true, 
+                                color: { argb: 'FF9800' }, // Arancione per weekend (più visibile su sfondo scuro)
+                                name: 'Arial',
+                                size: 10
+                            };
+                        }
+                        
+                        monthTotalHours += totalHoursNum;
+                        monthTotalTransferta += transfertaNum;
+                        monthTotalNotturne += notturneNum;
+                        if (totalHoursNum > 0) dayHasWork = true;
+                        
+                        rowsAddedForDay = true;
+                        rowIndex++;
+                    });
+                    
+                    // Nessuno sfondo speciale per la prossima riga
+                    
+                    if (dayHasWork) monthWorkDays++;
+                }
+                
+                // Add a blank row after each day with data
+                if (rowsAddedForDay) {
+                    worksheet.addRow({});
+                    rowIndex++;
+                }
+            }
+            
+            // --- 7. Add summary section ---
+            // Assicuriamoci che la colonna A abbia esattamente la larghezza richiesta
+            worksheet.getColumn('A').width = COLUMN_A_WIDTH;
+            
+            // Add a title for the summary
+            const summaryTitleRow = worksheet.addRow({});
+            
+            summaryTitleRow.getCell(1).value = 'Riepilogo Mensile';
+            summaryTitleRow.getCell(2).value = `${monthName} ${year}`;
+            summaryTitleRow.getCell(1).font = { bold: true, size: 14, color: { argb: '006A6A' } }; // Colore primario dell'app
+            summaryTitleRow.getCell(2).font = { bold: true, size: 14 };
+            
+            // Style the summary title
+            summaryTitleRow.getCell(1).fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'E6F7F7' } // Colore di sfondo chiaro
+            };
+            summaryTitleRow.getCell(2).fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'E6F7F7' } // Colore di sfondo chiaro
+            };
+            // Allineamento centrato per il titolo del riepilogo
+            summaryTitleRow.getCell(1).alignment = { 
+                horizontal: 'center', 
+                vertical: 'middle' 
+            };
+            summaryTitleRow.getCell(2).alignment = { 
+                horizontal: 'center', 
+                vertical: 'middle' 
+            };
+            
+            worksheet.addRow({}); // Empty row
+            
+            // Add summary header
+            const summaryHeaderRow = worksheet.addRow({});
+            summaryHeaderRow.getCell(1).value = 'Descrizione';
+            summaryHeaderRow.getCell(2).value = 'Valore';
+            summaryHeaderRow.getCell(1).font = { bold: true, size: 11 };
+            summaryHeaderRow.getCell(2).font = { bold: true, size: 11 };
+            
+            // Imposta altezza della riga di intestazione
+            summaryHeaderRow.height = 22;
+            
+            // Imposta la larghezza della colonna B (Valore)
+            worksheet.getColumn('B').width = 15;
+            summaryHeaderRow.getCell(1).fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'CCE8E7' } // Colore secondario container
+            };
+            summaryHeaderRow.getCell(2).fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'CCE8E7' } // Colore secondario container
+            };
+            // Allineamento centrato per le intestazioni del riepilogo
+            summaryHeaderRow.getCell(1).alignment = { 
+                horizontal: 'center', 
+                vertical: 'middle' 
+            };
+            summaryHeaderRow.getCell(2).alignment = { 
+                horizontal: 'center', 
+                vertical: 'middle' 
+            };
+            
+            // Add summary data
+            const addSummaryRow = (label, value, format = '0.0') => {
+                const row = worksheet.addRow({ giorno: label, data: value });
+                
+                // Imposta un'altezza minima per la riga
+                row.height = 22; // Aumentata per garantire spazio sufficiente
+                
+                // Stile per la cella dell'etichetta - bordi più marcati
+                row.getCell(1).border = { 
+                    top: { style: 'medium' }, 
+                    left: { style: 'medium' }, 
+                    bottom: { style: 'medium' }, 
+                    right: { style: 'medium' } 
+                };
+                row.getCell(1).alignment = { 
+                    horizontal: 'left', 
+                    vertical: 'middle',
+                    indent: 2, // Aumentata indentazione per migliore leggibilità
+                    wrapText: true // Permette al testo di andare a capo se necessario
+                };
+                // Aggiungiamo stile al testo
+                row.getCell(1).font = {
+                    bold: true,
+                    name: 'Arial',
+                    size: 11 // Dimensione aumentata per migliore leggibilità
+                };
+                
+                // Stile per la cella del valore - bordi più marcati
+                row.getCell(2).border = { 
+                    top: { style: 'medium' }, 
+                    left: { style: 'medium' }, 
+                    bottom: { style: 'medium' }, 
+                    right: { style: 'medium' } 
+                };
+                row.getCell(2).alignment = { 
+                    horizontal: 'center', 
+                    vertical: 'middle' 
+                };
+                row.getCell(2).numFmt = format;
+                row.getCell(2).font = { 
+                    bold: true,
+                    name: 'Arial',
+                    size: 11 // Dimensione aumentata per migliore leggibilità
+                };
+                
+                return row;
+            };
+            
+            addSummaryRow('Ore Lavorate:', monthTotalHours);
+            addSummaryRow('Giorni Lavorati:', monthWorkDays, '0');
+            addSummaryRow('Ore Trasferta:', monthTotalTransferta);
+            addSummaryRow('Ore Notturne:', monthTotalNotturne);
+            
+            if (monthFerieDays > 0) {
+                // Aggiungiamo la riga senza colorazione speciale
+                addSummaryRow('Giorni Ferie:', monthFerieDays, '0');
+            }
+            
+            if (monthMalattiaDays > 0) {
+                // Aggiungiamo la riga senza colorazione speciale
+                addSummaryRow('Giorni Malattia:', monthMalattiaDays, '0');
+            }
+            
+            // --- Aggiungi legenda colori ---
+            worksheet.addRow({}); // Riga vuota
+            worksheet.addRow({}); // Riga vuota
+            
+            const legendTitleRow = worksheet.addRow({});
+            legendTitleRow.getCell(1).value = 'LEGENDA';
+            legendTitleRow.getCell(1).font = { bold: true, size: 12 };
+            legendTitleRow.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+            legendTitleRow.getCell(1).fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: '006A6A' } // Colore primario dell'app
+            };
+            legendTitleRow.getCell(1).font.color = { argb: 'FFFFFF' };
+            legendTitleRow.height = 22; // Altezza maggiore per il titolo
+            
+            // Unisci le celle per il titolo della legenda
+            worksheet.mergeCells(`A${legendTitleRow.number}:B${legendTitleRow.number}`);
+            
+            // Manteniamo la larghezza della colonna A come definita in precedenza
+            // e impostiamo una larghezza adeguata per la colonna B nella legenda
+            worksheet.getColumn(2).width = 20; // Colonna della descrizione
+            
+            // Funzione per aggiungere una riga alla legenda
+            const addLegendRow = (description, colorCode) => {
+                const row = worksheet.addRow({});
+                const cell1 = row.getCell(1);
+                const cell2 = row.getCell(2);
+                
+                // Imposta altezza della riga
+                row.height = 20; // Altezza fissa per tutte le righe della legenda
+                
+                // Colora la prima cella con il colore di esempio
+                cell1.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: colorCode }
+                };
+                
+                // Aggiungi la descrizione nella seconda cella
+                cell2.value = description;
+                
+                // Stile per entrambe le celle
+                [cell1, cell2].forEach(cell => {
+                    cell.border = {
+                        top: { style: 'medium' },
+                        left: { style: 'medium' },
+                        bottom: { style: 'medium' },
+                        right: { style: 'medium' }
+                    };
+                    cell.alignment = { vertical: 'middle' };
+                });
+                
+                // Allineamento specifico per la descrizione
+                cell2.alignment.horizontal = 'center'; // Centrato per migliore aspetto
+                cell2.alignment.wrapText = true; // Permette il testo a capo se necessario
+                
+                // Stile del testo
+                cell2.font = {
+                    name: 'Arial',
+                    size: 10,
+                    bold: true // Grassetto per migliore leggibilità
+                };
+                
+                return row;
+            };
+            
+            // Aggiungi le righe della legenda con i colori aggiornati e descrizioni più brevi
+            addLegendRow('Weekend', '673AB7');
+            addLegendRow('Ore notturne', '424242');
+            addLegendRow('Trasferte', 'BDBDBD');
+            addLegendRow('Ferie', 'FFEB3B');
+            addLegendRow('Malattia', 'F44336');
+            
+            // --- 8. Save and download the file ---
+            try {
+                workbook.xlsx.writeBuffer().then(buffer => {
+                    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                    saveAs(blob, filename);
+                    showToast('Report Excel esportato!', 'success');
+                    console.log(`Esportazione Excel completata: ${filename}`);
+                });
+            } catch (excelError) {
+                console.error("Errore durante la creazione del file Excel:", excelError);
+                showToast(`Errore durante la creazione dell'Excel: ${excelError.message}`, "error");
+            }
         }
 
 
@@ -5231,108 +5798,108 @@
 
         }
 
-         function loadFerieMalattieEntries() {
-             const entriesContainer = document.getElementById('ferieMalattieEntries');
-              if (!entriesContainer) {
-                   console.warn("Contenitore lista Ferie/Malattie non trovato.");
-                   return;
-              }
-             console.log("Caricamento lista Ferie/Malattie...");
-             const db = getDb();
-             entriesContainer.innerHTML = ''; // Clear list
+        function loadFerieMalattieEntries() {
+            const entriesContainer = document.getElementById('ferieMalattieEntries');
+            if (!entriesContainer) {
+                console.warn("Contenitore lista Ferie/Malattie non trovato.");
+                return;
+            }
+            console.log("Caricamento lista Ferie/Malattie...");
+            const db = getDb();
+            entriesContainer.innerHTML = ''; // Clear list
 
-             const allHolidayEntries = Object.entries(db.holidays || {})
-                 .map(([dateStr, info]) => {
-                      // Basic validation of the entry structure
-                      if (typeof info !== 'object' || !info.type) {
-                           console.warn(`Voce assenza non valida per ${dateStr}:`, info);
-                           return null; // Skip invalid entries
-                      }
-                      return { dateStr, ...info };
-                 })
-                 .filter(entry => entry !== null) // Remove null entries
-                 .sort((a, b) => parseDate(b.dateStr).getTime() - parseDate(a.dateStr).getTime()); // Sort descending by date
+            const allHolidayEntries = Object.entries(db.holidays || {})
+                .map(([dateStr, info]) => {
+                    // Basic validation of the entry structure
+                    if (typeof info !== 'object' || !info.type) {
+                        console.warn(`Voce assenza non valida per ${dateStr}:`, info);
+                        return null; // Skip invalid entries
+                    }
+                    return { dateStr, ...info };
+                })
+                .filter(entry => entry !== null) // Remove null entries
+                .sort((a, b) => parseDate(b.dateStr).getTime() - parseDate(a.dateStr).getTime()); // Sort descending by date
 
-             if (allHolidayEntries.length === 0) {
-                 entriesContainer.innerHTML = '<p style="text-align: center; color: var(--md-sys-color-on-surface-variant); padding: 1rem;">Nessuna voce di ferie o malattia inserita.</p>';
-                 console.log("Nessuna voce Ferie/Malattia trovata.");
-                 return;
-             }
+            if (allHolidayEntries.length === 0) {
+                entriesContainer.innerHTML = '<p style="text-align: center; color: var(--md-sys-color-on-surface-variant); padding: 1rem;">Nessuna voce di ferie o malattia inserita.</p>';
+                console.log("Nessuna voce Ferie/Malattia trovata.");
+                return;
+            }
 
-             console.log(`Visualizzazione ${allHolidayEntries.length} voci Ferie/Malattie.`);
-             allHolidayEntries.forEach(entry => {
-                 const div = document.createElement('div');
-                 div.className = 'ferie-malattie-entry';
-                 const date = parseDate(entry.dateStr);
-                  if (isNaN(date.getTime())) {
-                       console.warn(`Data non valida ${entry.dateStr} nella lista assenze, skip.`);
-                       return; // Skip if date is invalid
-                  }
-                 const typeText = entry.type === 'ferie' ? 'Ferie' : 'Malattia';
-                  const icon = entry.type === 'ferie' ? 'beach_access' : 'sick';
-
-                 div.innerHTML = `
-                     <div class="ferie-malattie-info">
-                         <div class="ferie-malattie-header">
-                             <span class="ferie-malattie-type">
-                                 <span class="material-symbols-outlined">${icon}</span>
-                                 ${typeText}
-                             </span>
-                             <span class="ferie-malattie-date">${date.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
-                         </div>
-                         ${entry.note ? `<p class="ferie-malattie-note">${escapeHtml(entry.note)}</p>` : ''}
-                     </div>
-                     <div class="ferie-malattie-actions">
-                         <button class="delete-ferie-btn delete-btn" title="Elimina Assenza" onclick="deleteFerieMalattieEntry('${entry.dateStr}')">
-                              <span class="material-symbols-outlined">delete</span>
-                         </button>
-                     </div>
-                 `;
-                 entriesContainer.appendChild(div);
-             });
-         }
-
-         function deleteFerieMalattieEntry(dateStr) {
-               console.log(`Richiesta eliminazione assenza per ${dateStr}`);
-               const db = getDb();
-               const holidayInfo = db.holidays ? db.holidays[dateStr] : null;
-
-                if (!holidayInfo) {
-                    console.warn(`Assenza non trovata per ${dateStr} per l'eliminazione.`);
-                    showToast("Voce di assenza non trovata.", "warning");
-                    loadFerieMalattieEntries(); // Refresh list
-                    return;
+            console.log(`Visualizzazione ${allHolidayEntries.length} voci Ferie/Malattie.`);
+            allHolidayEntries.forEach(entry => {
+                const div = document.createElement('div');
+                div.className = 'ferie-malattie-entry';
+                const date = parseDate(entry.dateStr);
+                if (isNaN(date.getTime())) {
+                    console.warn(`Data non valida ${entry.dateStr} nella lista assenze, skip.`);
+                    return; // Skip if date is invalid
                 }
+                const typeText = entry.type === 'ferie' ? 'Ferie' : 'Malattia';
+                const icon = entry.type === 'ferie' ? 'beach_access' : 'sick';
 
-               const typeText = holidayInfo.type === 'ferie' ? 'Ferie' : 'Malattia';
-              if (confirm(`Sei sicuro di voler eliminare la voce di ${typeText} per il ${dateStr}?`)) {
-                 if (db.holidays && db.holidays[dateStr]) { // Double check it exists before deleting
-                     delete db.holidays[dateStr];
-                     saveDb(db);
-                     showToast(`${typeText} eliminata per ${dateStr}.`, 'success');
-                     console.log(`Assenza eliminata per ${dateStr}.`);
-                     // Reload relevant views
-                     loadFerieMalattieEntries(); // Reload list
-                      if (document.getElementById('calendar-section')?.classList.contains('active') && typeof loadCalendarData === 'function') loadCalendarData();
-                      if (document.getElementById('monthly-report-section')?.classList.contains('active') && typeof displayMonthlyReport === 'function') {
-                          const monthSelect = document.getElementById('exportMonthSelect');
-                          if (monthSelect) displayMonthlyReport(monthSelect.value, document.getElementById('monthlyReportContent'));
-                     }
-                 } else {
-                      // Should not happen due to check above, but handle defensively
-                      console.warn(`Assenza per ${dateStr} scomparsa prima dell'eliminazione effettiva.`);
-                       showToast("Voce di assenza non trovata (potrebbe essere già stata eliminata).", "warning");
-                       loadFerieMalattieEntries();
-                 }
-             } else {
-                  console.log("Eliminazione assenza annullata.");
-             }
-         }
+                div.innerHTML = `
+                    <div class="ferie-malattie-info">
+                        <div class="ferie-malattie-header">
+                            <span class="ferie-malattie-type">
+                                <span class="material-symbols-outlined">${icon}</span>
+                                ${typeText}
+                            </span>
+                            <span class="ferie-malattie-date">${date.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
+                        </div>
+                        ${entry.note ? `<p class="ferie-malattie-note">${escapeHtml(entry.note)}</p>` : ''}
+                    </div>
+                    <div class="ferie-malattie-actions">
+                        <button class="delete-ferie-btn delete-btn" title="Elimina Assenza" onclick="deleteFerieMalattieEntry('${entry.dateStr}')">
+                            <span class="material-symbols-outlined">delete</span>
+                        </button>
+                    </div>
+                `;
+                entriesContainer.appendChild(div);
+            });
+        }
 
-         function loadFerieMalattieTypes() {
+        function deleteFerieMalattieEntry(dateStr) {
+            console.log(`Richiesta eliminazione assenza per ${dateStr}`);
+            const db = getDb();
+            const holidayInfo = db.holidays ? db.holidays[dateStr] : null;
+
+            if (!holidayInfo) {
+                console.warn(`Assenza non trovata per ${dateStr} per l'eliminazione.`);
+                showToast("Voce di assenza non trovata.", "warning");
+                loadFerieMalattieEntries(); // Refresh list
+                return;
+            }
+
+            const typeText = holidayInfo.type === 'ferie' ? 'Ferie' : 'Malattia';
+            if (confirm(`Sei sicuro di voler eliminare la voce di ${typeText} per il ${dateStr}?`)) {
+                if (db.holidays && db.holidays[dateStr]) { // Double check it exists before deleting
+                    delete db.holidays[dateStr];
+                    saveDb(db);
+                    showToast(`${typeText} eliminata per ${dateStr}.`, 'success');
+                    console.log(`Assenza eliminata per ${dateStr}.`);
+                    // Reload relevant views
+                    loadFerieMalattieEntries(); // Reload list
+                    if (document.getElementById('calendar-section')?.classList.contains('active') && typeof loadCalendarData === 'function') loadCalendarData();
+                    if (document.getElementById('monthly-report-section')?.classList.contains('active') && typeof displayMonthlyReport === 'function') {
+                        const monthSelect = document.getElementById('exportMonthSelect');
+                        if (monthSelect) displayMonthlyReport(monthSelect.value, document.getElementById('monthlyReportContent'));
+                    }
+                } else {
+                    // Should not happen due to check above, but handle defensively
+                    console.warn(`Assenza per ${dateStr} scomparsa prima dell'eliminazione effettiva.`);
+                    showToast("Voce di assenza non trovata (potrebbe essere già stata eliminata).", "warning");
+                    loadFerieMalattieEntries();
+                }
+            } else {
+                console.log("Eliminazione assenza annullata.");
+            }
+        }
+
+        function loadFerieMalattieTypes() {
             // Currently types are hardcoded in select. This function is a placeholder.
             console.log("Tipi Ferie/Malattie caricati (staticamente).");
-         }
+        }
 
 
         // --- Utility Functions ---
