@@ -474,41 +474,74 @@
          }
 
         .nav-item.active {
-            color: var(--md-sys-color-on-primary-container);
+            color: var(--md-sys-color-primary);
+            font-weight: 500;
+            transform: translateY(-4px); /* Solleva leggermente l'elemento attivo */
+            transition: transform 0.3s ease, color 0.3s ease, font-weight 0.3s ease;
         }
+        
+        .nav-item {
+            transition: transform 0.3s ease, color 0.3s ease, font-weight 0.3s ease;
+        }
+        
         .nav-item.active .material-symbols-outlined {
-            font-variation-settings: 'FILL' 1; /* Fill active icon */
+            font-variation-settings: 'FILL' 1, 'wght' 600; /* Fill active icon and make it bolder */
+            font-size: 2rem; /* Icona più grande per l'elemento attivo */
+            transition: font-variation-settings 0.3s ease, font-size 0.3s ease;
         }
 
-        /* Indicator for active item */
+        /* Indicatore per l'elemento attivo - sfondo più grande e visibile */
         .nav-item.active::before {
             content: '';
             display: block;
-            width: 40px;
-            height: 24px;
+            width: 100%; /* Occupa tutta la larghezza dell'elemento */
+            height: 32px; /* Più alto per maggiore visibilità */
             background-color: var(--md-sys-color-primary-container);
-            border-radius: var(--border-radius-full);
+            border-radius: var(--border-radius-medium);
             position: absolute;
-            top: 6px; /* Adjust position */
+            top: 2px; /* Posizionato più in alto */
             left: 50%;
             transform: translateX(-50%);
-            opacity: 1;
-            transition: opacity 0.3s ease, background-color 0.3s ease;
+            opacity: 0.9; /* Leggermente trasparente */
+            transition: all 0.3s ease;
             z-index: -1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Ombra leggera */
         }
+        
+        /* Bordo inferiore per l'elemento attivo */
+        .nav-item.active::after {
+            content: '';
+            display: block;
+            width: 60%;
+            height: 3px;
+            background-color: var(--md-sys-color-primary);
+            border-radius: var(--border-radius-full);
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: width 0.3s ease;
+        }
+        
         .nav-item::before { /* Hidden normally */
             content: '';
             display: block;
-             width: 40px;
-            height: 24px;
+            width: 100%;
+            height: 32px;
             background-color: var(--md-sys-color-primary-container);
-            border-radius: var(--border-radius-full);
+            border-radius: var(--border-radius-medium);
             position: absolute;
-            top: 6px;
+            top: 2px;
             left: 50%;
             transform: translateX(-50%);
             opacity: 0;
-             z-index: -1;
+            z-index: -1;
+            transition: all 0.3s ease;
+        }
+        
+        /* Hover effect */
+        .nav-item:hover::before {
+            opacity: 0.3; /* Mostra leggermente lo sfondo in hover */
         }
 
 
@@ -517,18 +550,35 @@
         }
 
 
-        /* Section Visibility */
+        /* Section Visibility with improved transitions */
         .section {
             display: none;
-            animation: fadeIn 0.5s ease;
+            animation: none;
         }
         .section.active {
             display: block;
+            animation: fadeIn 0.5s ease forwards;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-10px); }
+        }
+        
+        /* Aggiungiamo un indicatore di sezione nella parte superiore */
+        .section.active::before {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 4px;
+            background-color: var(--md-sys-color-primary);
+            border-radius: var(--border-radius-full);
+            margin: -0.5rem auto 1rem auto;
         }
 
         /* Time Entries List */
@@ -1777,8 +1827,10 @@
             .bottom-nav { padding: 0.25rem 0; }
             .nav-item { font-size: 0.65rem; min-height: 52px; padding: 0.25rem 0.5rem; }
             .nav-item .material-symbols-outlined { font-size: 1.5rem; }
-            .nav-item.active::before { width: 36px; height: 20px; top: 4px;}
-            .nav-item::before { width: 36px; height: 20px; top: 4px;}
+            .nav-item.active .material-symbols-outlined { font-size: 1.7rem; }
+            .nav-item.active::before { height: 28px; top: 2px; }
+            .nav-item::before { height: 28px; top: 2px; }
+            .nav-item.active::after { height: 2px; }
             .form-row { flex-direction: column; gap: 0; } /* Stack inline groups */
             .form-group-inline { margin-bottom: 1rem; }
 
@@ -1823,7 +1875,11 @@
              .card { padding: 0.75rem; }
              button, .btn { padding: 0.6rem 1.2rem; font-size: 0.8rem; }
              .nav-item { font-size: 0.6rem; }
-              .nav-item .material-symbols-outlined { font-size: 1.4rem; }
+             .nav-item .material-symbols-outlined { font-size: 1.4rem; }
+             .nav-item.active .material-symbols-outlined { font-size: 1.6rem; }
+             .nav-item.active::before { height: 26px; }
+             .nav-item::before { height: 26px; }
+             .nav-item.active { transform: translateY(-3px); }
              .logo img { max-height: 35px; }
              header { padding: 0.5rem 1rem; }
              #dateIndicator div { font-size: 1rem !important; }
@@ -2766,31 +2822,92 @@
             // --- Navigation Logic ---
             const navItems = document.querySelectorAll('.nav-item');
             const sections = document.querySelectorAll('.section');
+            
+            // Variabile per tenere traccia se una transizione è in corso
+            let isNavigating = false;
 
             if (navItems.length > 0 && sections.length > 0) {
                 navItems.forEach(item => {
                     item.addEventListener('click', (e) => {
                         e.preventDefault();
+                        
+                        // Evita clic multipli durante una transizione
+                        if (isNavigating) return;
+                        
                         const targetSectionId = item.getAttribute('data-section');
+                        
+                        // Evita di navigare alla sezione già attiva
+                        if (item.classList.contains('active')) {
+                            console.log(`Già nella sezione: ${targetSectionId}`);
+                            return;
+                        }
+                        
                         console.log(`Navigazione a: ${targetSectionId}`);
+                        
+                        // Imposta lo stato di navigazione
+                        isNavigating = true;
 
                         // Update active nav item
                         navItems.forEach(nav => nav.classList.remove('active'));
                         item.classList.add('active');
 
-                        // Update active section
-                        let sectionFound = false;
+                        // Update active section with improved transition
+                        
+                        // Prima nascondiamo tutte le sezioni con una breve transizione
                         sections.forEach(section => {
-                            if (section.id === targetSectionId) {
-                                section.classList.add('active');
-                                sectionFound = true;
-                            } else {
-                                section.classList.remove('active');
+                            if (section.classList.contains('active') && section.id !== targetSectionId) {
+                                section.style.animation = 'fadeOut 0.2s ease forwards';
+                                setTimeout(() => {
+                                    section.classList.remove('active');
+                                    section.style.animation = '';
+                                }, 200);
                             }
                         });
-                         if (!sectionFound) {
-                             console.error(`Sezione ${targetSectionId} non trovata!`);
-                         }
+                        
+                        // Poi mostriamo la sezione target
+                        setTimeout(() => {
+                            let sectionFound = false;
+                            
+                            sections.forEach(section => {
+                                if (section.id === targetSectionId) {
+                                    section.classList.add('active');
+                                    sectionFound = true;
+                                    
+                                    // Inizializza la sezione in base al tipo
+                                    setTimeout(() => {
+                                        if (targetSectionId === 'home-section') {
+                                            console.log("Inizializzazione home dopo attivazione...");
+                                            loadTimeEntries();
+                                            populateVehicleDropdown();
+                                        } else if (targetSectionId === 'calendar-section') {
+                                            console.log("Inizializzazione calendario dopo attivazione...");
+                                            loadCalendarData();
+                                        } else if (targetSectionId === 'monthly-report-section') {
+                                            console.log("Inizializzazione report mensile dopo attivazione...");
+                                            initMonthlyReport();
+                                        } else if (targetSectionId === 'ferie-malattie-section') {
+                                            console.log("Inizializzazione ferie/malattie dopo attivazione...");
+                                            initFerieMalattieSection();
+                                            loadFerieMalattieEntries();
+                                        } else if (targetSectionId === 'contacts-section') {
+                                            console.log("Inizializzazione contatti dopo attivazione...");
+                                            // Non richiede inizializzazione speciale
+                                        } else if (targetSectionId === 'settings-section') {
+                                            console.log("Inizializzazione impostazioni dopo attivazione...");
+                                            populateVehicleSettingsList(); // Carica la lista dei veicoli nelle impostazioni
+                                        }
+                                    }, 100); // Piccolo ritardo per assicurarsi che la sezione sia completamente attivata
+                                }
+                            });
+                            
+                            // Verifichiamo se la sezione è stata trovata dopo il timeout
+                            if (!sectionFound) {
+                                console.error(`Sezione ${targetSectionId} non trovata!`);
+                            }
+                            
+                            // Resetta lo stato di navigazione
+                            isNavigating = false;
+                        }, 250);
 
                          // Scroll to top of the main content area for clarity
                          const mainElement = document.querySelector('main');
@@ -2798,11 +2915,8 @@
                              mainElement.scrollTo({ top: 0, behavior: 'smooth' });
                          }
 
-                        // Load data specific to the section if needed (and function exists)
-                         if (targetSectionId === 'calendar-section' && typeof loadCalendarData === 'function') loadCalendarData();
-                         if (targetSectionId === 'settings-section' && typeof populateVehicleSettingsList === 'function') populateVehicleSettingsList(); // Populate settings list
-                         if (targetSectionId === 'monthly-report-section' && typeof initMonthlyReport === 'function') initMonthlyReport();
-                         if (targetSectionId === 'ferie-malattie-section' && typeof initFerieMalattieSection === 'function') initFerieMalattieSection();
+                        // Nota: l'inizializzazione delle sezioni viene ora gestita nel timeout sopra
+                        // Qui possiamo aggiungere altre operazioni specifiche se necessario in futuro
 
                     });
                 });
