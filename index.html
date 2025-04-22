@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -216,6 +215,993 @@
             transform-origin: center;
             cursor: pointer;
             filter: drop-shadow(0 0 8px var(--md-sys-color-primary));
+        }
+        
+        /* Stile per il pulsante troll di Jeffrey Chong */
+        .troll-btn {
+            background-color: var(--md-sys-color-tertiary-container);
+            color: var(--md-sys-color-on-tertiary-container);
+            border: none;
+            border-radius: var(--border-radius-full);
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--elevation-1);
+        }
+        
+        .troll-btn:hover {
+            background-color: var(--md-sys-color-tertiary);
+            color: var(--md-sys-color-on-tertiary);
+            transform: scale(1.05);
+            box-shadow: var(--elevation-2);
+        }
+        
+        .troll-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .troll-btn.active {
+            background-color: var(--md-sys-color-error);
+            color: var(--md-sys-color-on-error);
+            animation: pulse 0.5s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+        
+        /* Animazioni per l'effetto troll di Jeffrey Chong */
+        @keyframes translateAnimation1 {
+            0% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(15px) rotate(2deg); }
+            75% { transform: translateX(-15px) rotate(-2deg); }
+            100% { transform: translateX(0) rotate(0deg); }
+        }
+        
+        @keyframes translateAnimation2 {
+            0% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-10px) scale(1.02); }
+            100% { transform: translateY(0) scale(1); }
+        }
+        
+        @keyframes translateAnimation3 {
+            0% { transform: skewX(0deg); }
+            25% { transform: skewX(5deg); }
+            75% { transform: skewX(-5deg); }
+            100% { transform: skewX(0deg); }
+        }
+        
+        @keyframes translateAnimation4 {
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.03) rotate(1deg); }
+            75% { transform: scale(0.97) rotate(-1deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        
+        /* Animazione per far sparire e riapparire il pulsante */
+        @keyframes disappearReappear {
+            0% { transform: scale(1) rotate(0deg); opacity: 1; }
+            25% { transform: scale(1.2) rotate(10deg); opacity: 0.8; }
+            50% { transform: scale(0) rotate(180deg); opacity: 0; }
+            75% { transform: scale(0.8) rotate(-10deg); opacity: 0.8; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        
+        /* Stili per l'esplosione finale */
+        .explosion-particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--md-sys-color-error);
+            pointer-events: none;
+            z-index: 9999;
+        }
+        
+        @keyframes explode {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+        }
+        
+        @keyframes shake-violent {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            10% { transform: translate(-25px, 15px) rotate(-5deg); }
+            20% { transform: translate(20px, -20px) rotate(7deg); }
+            30% { transform: translate(-30px, -10px) rotate(-10deg); }
+            40% { transform: translate(25px, 25px) rotate(12deg); }
+            50% { transform: translate(-20px, -25px) rotate(-15deg); }
+            60% { transform: translate(15px, 10px) rotate(7deg); }
+            70% { transform: translate(-15px, 20px) rotate(-5deg); }
+            80% { transform: translate(10px, -15px) rotate(3deg); }
+            90% { transform: translate(-5px, 5px) rotate(-1deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+        
+        @keyframes glitch {
+            0% { transform: translate(0, 0) skew(0deg, 0deg); filter: hue-rotate(0deg); }
+            10% { transform: translate(-10px, 5px) skew(10deg, 5deg); filter: hue-rotate(90deg); }
+            20% { transform: translate(10px, -5px) skew(-8deg, -3deg); filter: hue-rotate(180deg); }
+            30% { transform: translate(-5px, -10px) skew(0deg, 8deg); filter: hue-rotate(270deg); }
+            40% { transform: translate(5px, 10px) skew(-5deg, -8deg); filter: hue-rotate(360deg); }
+            50% { transform: translate(0, 0) skew(0deg, 0deg); filter: hue-rotate(0deg); }
+            60% { transform: translate(10px, 5px) skew(-10deg, 5deg); filter: hue-rotate(90deg); }
+            70% { transform: translate(-10px, -5px) skew(8deg, -3deg); filter: hue-rotate(180deg); }
+            80% { transform: translate(5px, -10px) skew(0deg, -8deg); filter: hue-rotate(270deg); }
+            90% { transform: translate(-5px, 10px) skew(5deg, 8deg); filter: hue-rotate(360deg); }
+            100% { transform: translate(0, 0) skew(0deg, 0deg); filter: hue-rotate(0deg); }
+        }
+        
+        @keyframes flash {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(3); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(5); opacity: 0; }
+        }
+        
+        /* Stile per l'overlay finale con il troll face */
+        .troll-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            z-index: 999999;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            color: #fff;
+            text-align: center;
+            font-family: monospace;
+        }
+        
+        .troll-overlay.visible {
+            display: flex;
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .troll-overlay .ascii-troll {
+            display: block;
+            visibility: visible;
+            opacity: 1;
+            font-size: 7px;
+            line-height: 6px;
+            color: #00ff00 !important;
+            margin-bottom: 20px;
+            text-shadow: 0 0 5px #00ff00 !important;
+            white-space: pre !important;
+        }
+        
+        .troll-overlay .troll-title {
+            display: block;
+            visibility: visible;
+            opacity: 1;
+            font-size: 36px !important;
+            font-weight: bold !important;
+            color: #ff0000 !important;
+            text-shadow: 0 0 10px #ff0000 !important;
+            animation: blink 0.5s infinite !important;
+            content: "JEFF HAI ROTTO TUTTO!!!!!";
+        }
+        
+        body.troll-active {
+            overflow: hidden;
+        }
+        
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        main {
+            padding: 1rem;
+            margin-top: 70px; /* Adjusted for header height */
+        }
+
+        /* Card */
+        .card {
+            background-color: var(--md-sys-color-surface-variant); /* Slightly different bg */
+            color: var(--md-sys-color-on-surface-variant);
+            border-radius: var(--border-radius-large);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--elevation-1);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card h2, .card h3 {
+            color: var(--md-sys-color-primary);
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="email"],
+        input[type="tel"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: var(--border-radius-small);
+            font-size: 1rem;
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            appearance: none; /* For select */
+            -webkit-appearance: none;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--md-sys-color-primary);
+            box-shadow: 0 0 0 2px var(--md-sys-color-primary-container);
+        }
+
+        select {
+             /* Add arrow for select */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 -960 960 960' width='24'%3E%3Cpath d='M480-345 240-585l56-56 184 184 184-184 56 56-240 240Z' fill='%23${(getComputedStyle(document.documentElement).getPropertyValue('--md-sys-color-on-surface').trim() || '#191C1C').substring(1)}'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.5em;
+            padding-right: 3rem; /* Space for arrow */
+        }
+        .dark-theme select {
+             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 -960 960 960' width='24'%3E%3Cpath d='M480-345 240-585l56-56 184 184 184-184 56 56-240 240Z' fill='%23${(getComputedStyle(document.documentElement).getPropertyValue('--md-sys-color-on-surface').trim() || '#E0E3E2').substring(1)}'/%3E%3C/svg%3E");
+        }
+
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group-inline {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        /* Buttons */
+        button, .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius-full); /* Pill shape */
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+            box-shadow: var(--elevation-1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        button:hover, .btn:hover {
+            box-shadow: var(--elevation-2);
+        }
+
+        button:active, .btn:active {
+            transform: scale(0.98);
+            box-shadow: none;
+        }
+
+        /* Filled Button (Primary Action) */
+        button[type="submit"], #submitBtn, #saveUserName, #addVehicle, #exportData, #importData, #saveFerieMalattie, .export-btn, .edit-all-btn, #addEntryBtn {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+        button[type="submit"]:hover, #submitBtn:hover, #saveUserName:hover, #addVehicle:hover, #exportData:hover, #importData:hover, #saveFerieMalattie:hover, .export-btn:hover, .edit-all-btn:hover, #addEntryBtn:hover {
+             /* Slightly darker/lighter on hover - generate this if needed */
+            filter: brightness(90%);
+        }
+        .dark-theme button[type="submit"]:hover, .dark-theme #submitBtn:hover, .dark-theme #saveUserName:hover, .dark-theme #addVehicle:hover, .dark-theme #exportData:hover, .dark-theme #importData:hover, .dark-theme #saveFerieMalattie:hover, .dark-theme .export-btn:hover, .dark-theme .edit-all-btn:hover, .dark-theme #addEntryBtn:hover {
+            filter: brightness(110%);
+        }
+
+        /* Error/Destructive Button */
+        #clearData, .delete-btn, .delete-ferie-btn, .delete-vehicle-btn {
+            background-color: var(--md-sys-color-error);
+            color: var(--md-sys-color-on-error);
+        }
+         #clearData:hover, .delete-btn:hover, .delete-ferie-btn:hover, .delete-vehicle-btn:hover {
+            filter: brightness(90%);
+        }
+        .dark-theme #clearData:hover, .dark-theme .delete-btn:hover, .dark-theme .delete-ferie-btn:hover, .dark-theme .delete-vehicle-btn:hover {
+            filter: brightness(110%);
+        }
+
+
+        /* Text Button (e.g., Cancel) */
+        .form-buttons button:last-child, .close-modal {
+             background-color: transparent;
+             color: var(--md-sys-color-primary);
+             box-shadow: none;
+        }
+         .form-buttons button:last-child:hover, .close-modal:hover {
+            background-color: var(--md-sys-color-primary-container);
+         }
+        .close-modal { /* Specific style for modal close */
+             font-size: 1.75rem;
+             padding: 0.5rem;
+             border-radius: 50%;
+             line-height: 1;
+             color: var(--md-sys-color-on-surface-variant);
+             font-weight: normal;
+             border: none; /* Ensure no border */
+        }
+        .close-modal:hover {
+            color: var(--md-sys-color-on-primary-container);
+        }
+
+
+        /* Small Action Buttons (Edit/Delete in lists) */
+        .edit-btn, .delete-btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            min-width: 36px;
+            min-height: 36px;
+            box-shadow: none;
+            border-radius: var(--border-radius-small);
+            text-transform: none;
+            letter-spacing: normal;
+            border: 1px solid transparent; /* Base border */
+        }
+        .edit-btn { /* Make edit look like an Outlined Button */
+            background-color: transparent;
+            color: var(--md-sys-color-primary);
+            border-color: var(--md-sys-color-outline);
+        }
+        .edit-btn:hover {
+             background-color: var(--md-sys-color-primary-container);
+             border-color: var(--md-sys-color-primary-container);
+        }
+        .delete-btn {
+            background-color: var(--md-sys-color-error-container);
+            color: var(--md-sys-color-on-error-container);
+        }
+        .delete-btn:hover {
+            filter: brightness(95%);
+            background-color: var(--md-sys-color-error-container); /* Keep bg */
+        }
+         .dark-theme .delete-btn:hover {
+            filter: brightness(110%);
+         }
+
+        /* Material Symbols */
+        .material-symbols-outlined {
+          font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24;
+          vertical-align: middle; /* Align icons better with text */
+          font-size: 1.25em; /* Slightly larger default size */
+          line-height: 1; /* Prevent extra space */
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--md-sys-color-surface-variant); /* Navigation Rail style */
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+            padding: 0.5rem 0;
+            display: flex;
+            justify-content: space-around;
+            align-items: stretch; /* Stretch items vertically */
+            z-index: 1000;
+            border-top: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; /* Center content vertically */
+            text-decoration: none;
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 0.75rem; /* Smaller text */
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--border-radius-medium);
+            transition: all 0.3s ease;
+            flex: 1; /* Distribute space */
+            text-align: center;
+            min-height: 56px; /* Standard height */
+            position: relative; /* For indicator positioning */
+             overflow: hidden; /* Hide overflow */
+        }
+
+        .nav-item .material-symbols-outlined {
+            font-size: 1.75rem; /* Larger icon */
+            margin-bottom: 2px;
+            transition: font-variation-settings 0.3s ease;
+        }
+         .nav-item span { /* Label */
+             display: block;
+             line-height: 1.2;
+             white-space: nowrap; /* Prevent label wrapping */
+         }
+
+        .nav-item.active {
+            color: var(--md-sys-color-primary);
+            font-weight: 500;
+            transform: translateY(-4px); /* Solleva leggermente l'elemento attivo */
+            transition: transform 0.3s ease, color 0.3s ease, font-weight 0.3s ease;
+        }
+        
+        .nav-item {
+            transition: transform 0.3s ease, color 0.3s ease, font-weight 0.3s ease;
+        }
+        
+        .nav-item.active .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 600; /* Fill active icon and make it bolder */
+            font-size: 2rem; /* Icona più grande per l'elemento attivo */
+            transition: font-variation-settings 0.3s ease, font-size 0.3s ease;
+        }
+
+        /* Indicatore per l'elemento attivo - sfondo più grande e visibile */
+        .nav-item.active::before {
+            content: '';
+            display: block;
+            width: 100%; /* Occupa tutta la larghezza dell'elemento */
+            height: 32px; /* Più alto per maggiore visibilità */
+            background-color: var(--md-sys-color-primary-container);
+            border-radius: var(--border-radius-medium);
+            position: absolute;
+            top: 2px; /* Posizionato più in alto */
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0.9; /* Leggermente trasparente */
+            transition: all 0.3s ease;
+            z-index: -1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Ombra leggera */
+        }
+        
+        /* Bordo inferiore per l'elemento attivo */
+        .nav-item.active::after {
+            content: '';
+            display: block;
+            width: 60%;
+            height: 3px;
+            background-color: var(--md-sys-color-primary);
+            border-radius: var(--border-radius-full);
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-item::before { /* Hidden normally */
+            content: '';
+            display: block;
+            width: 100%;
+            height: 32px;
+            background-color: var(--md-sys-color-primary-container);
+            border-radius: var(--border-radius-medium);
+            position: absolute;
+            top: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            z-index: -1;
+            transition: all 0.3s ease;
+        }
+        
+        /* Hover effect */
+        .nav-item:hover::before {
+            opacity: 0.3; /* Mostra leggermente lo sfondo in hover */
+        }
+
+
+        .nav-item:hover {
+            color: var(--md-sys-color-on-surface);
+        }
+
+
+        /* Section Visibility with improved transitions */
+        .section {
+            display: none;
+            animation: none;
+        }
+        .section.active {
+            display: block;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-10px); }
+        }
+        
+        /* Aggiungiamo un indicatore di sezione nella parte superiore */
+        .section.active::before {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 4px;
+            background-color: var(--md-sys-color-primary);
+            border-radius: var(--border-radius-full);
+            margin: -0.5rem auto 1rem auto;
+        }
+
+        /* Time Entries List */
+        #timeEntries .time-entry {
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            padding: 1rem 0;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        #timeEntries .time-entry:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        .time-entry-info {
+            flex-grow: 1;
+        }
+        .time-entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.25rem;
+        }
+        .time-entry-date {
+            font-weight: 500;
+            color: var(--md-sys-color-primary);
+        }
+        .time-entry-hours {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--md-sys-color-secondary);
+        }
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ore PWS Group (Modern)</title>
+    <!-- Google Fonts: Roboto and Material Symbols Outlined -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <!-- Include Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        /* Material Design 3 Inspired Theme - Android 2025 */
+
+        :root {
+            /* Light Theme Palette (Material You - Teal/Blue Base) */
+            --md-sys-color-primary: #006A6A;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #9DF2F1;
+            --md-sys-color-on-primary-container: #002020;
+            --md-sys-color-secondary: #4A6363;
+            --md-sys-color-on-secondary: #FFFFFF;
+            --md-sys-color-secondary-container: #CCE8E7;
+            --md-sys-color-on-secondary-container: #051F1F;
+            --md-sys-color-tertiary: #4B607C;
+            --md-sys-color-on-tertiary: #FFFFFF;
+            --md-sys-color-tertiary-container: #D3E4FF;
+            --md-sys-color-on-tertiary-container: #041C35;
+            --md-sys-color-error: #BA1A1A;
+            --md-sys-color-on-error: #FFFFFF;
+            --md-sys-color-error-container: #FFDAD6;
+            --md-sys-color-on-error-container: #410002;
+            --md-sys-color-background: #FAFDFC;
+            --md-sys-color-on-background: #191C1C;
+            --md-sys-color-surface: #FAFDFC;
+            --md-sys-color-on-surface: #191C1C;
+            --md-sys-color-surface-variant: #DAE5E4;
+            --md-sys-color-on-surface-variant: #3F4948;
+            --md-sys-color-outline: #6F7979;
+            --md-sys-color-outline-variant: #BFC9C8;
+            --md-sys-color-shadow: #000000;
+            --md-sys-color-scrim: #000000;
+            --body-font-family: 'Roboto', sans-serif;
+            --base-font-size: 16px;
+            --border-radius-small: 8px;
+            --border-radius-medium: 12px;
+            --border-radius-large: 16px;
+            --border-radius-full: 999px;
+            --elevation-1: 0px 1px 2px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+            --elevation-2: 0px 1px 2px rgba(0, 0, 0, 0.3), 0px 2px 6px 2px rgba(0, 0, 0, 0.15);
+            --elevation-3: 0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px rgba(0, 0, 0, 0.3);
+            --elevation-4: 0px 6px 10px 4px rgba(0, 0, 0, 0.15), 0px 2px 3px rgba(0, 0, 0, 0.3);
+            --elevation-5: 0px 8px 12px 6px rgba(0, 0, 0, 0.15), 0px 4px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Dark Theme Palette */
+        .dark-theme {
+            --md-sys-color-primary: #81D5D4;
+            --md-sys-color-on-primary: #003737;
+            --md-sys-color-primary-container: #00504F;
+            --md-sys-color-on-primary-container: #9DF2F1;
+            --md-sys-color-secondary: #B0CCCB;
+            --md-sys-color-on-secondary: #1C3534;
+            --md-sys-color-secondary-container: #334B4B;
+            --md-sys-color-on-secondary-container: #CCE8E7;
+            --md-sys-color-tertiary: #B3C8E8;
+            --md-sys-color-on-tertiary: #1D314B;
+            --md-sys-color-tertiary-container: #344863;
+            --md-sys-color-on-tertiary-container: #D3E4FF;
+            --md-sys-color-error: #FFB4AB;
+            --md-sys-color-on-error: #690005;
+            --md-sys-color-error-container: #93000A;
+            --md-sys-color-on-error-container: #FFDAD6;
+            --md-sys-color-background: #191C1C;
+            --md-sys-color-on-background: #E0E3E2;
+            --md-sys-color-surface: #191C1C;
+            --md-sys-color-on-surface: #E0E3E2;
+            --md-sys-color-surface-variant: #3F4948;
+            --md-sys-color-on-surface-variant: #BFC9C8;
+            --md-sys-color-outline: #899392;
+            --md-sys-color-outline-variant: #3F4948;
+            /* Shadow and Scrim remain black */
+            --md-sys-color-inverse-surface: #E0E3E2;
+            --md-sys-color-inverse-on-surface: #191C1C;
+            --md-sys-color-inverse-primary: #006A6A;
+        }
+
+        /* Global Styles */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: var(--base-font-size);
+        }
+
+        body {
+            font-family: var(--body-font-family);
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            padding-bottom: 80px; /* Space for bottom nav */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            box-shadow: var(--elevation-1);
+            padding: 0.75rem 1rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo img {
+            max-height: 40px; /* Adjusted logo size */
+            width: auto;
+            display: block;
+        }
+        
+        /* Animazione logo rimbalzante */
+        @keyframes bounce-horizontal {
+            0%, 100% {
+                transform: translateX(0) rotate(0deg);
+                animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+            }
+            25% {
+                transform: translateX(15px) rotate(5deg);
+                animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+            }
+            50% {
+                transform: translateX(0) rotate(0deg);
+                animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+            }
+            75% {
+                transform: translateX(-15px) rotate(-5deg);
+                animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+            }
+        }
+        
+        .bouncing-logo {
+            animation: bounce-horizontal 2s infinite;
+            transform-origin: center;
+            cursor: pointer;
+            transition: filter 0.3s ease;
+        }
+        
+        .bouncing-logo:hover {
+            filter: drop-shadow(0 0 5px var(--md-sys-color-primary));
+            animation-play-state: paused;
+        }
+        
+        /* Animazione più vivace quando l'utente clicca sul logo */
+        @keyframes bounce-excited {
+            0%, 100% {
+                transform: translateX(0) rotate(0deg) scale(1);
+                animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+            }
+            10% {
+                transform: translateX(20px) rotate(10deg) scale(1.2);
+            }
+            20% {
+                transform: translateX(-20px) rotate(-15deg) scale(1.1);
+            }
+            30% {
+                transform: translateX(15px) rotate(15deg) scale(1.15);
+            }
+            40% {
+                transform: translateX(-15px) rotate(-10deg) scale(1.05);
+            }
+            50% {
+                transform: translateY(-15px) rotate(5deg) scale(1.1);
+            }
+            60% {
+                transform: translateY(10px) rotate(-5deg) scale(1.05);
+            }
+            70% {
+                transform: translateX(20px) translateY(-5px) rotate(10deg) scale(1.1);
+            }
+            80% {
+                transform: translateX(-20px) translateY(5px) rotate(-10deg) scale(1.05);
+            }
+            90% {
+                transform: translateX(10px) translateY(-3px) rotate(5deg) scale(1.02);
+            }
+        }
+        
+        .bouncing-logo-excited {
+            animation: bounce-excited 2s ease-in-out;
+            transform-origin: center;
+            cursor: pointer;
+            filter: drop-shadow(0 0 8px var(--md-sys-color-primary));
+        }
+        
+        /* Stile per il pulsante troll di Jeffrey Chong */
+        .troll-btn {
+            background-color: var(--md-sys-color-tertiary-container);
+            color: var(--md-sys-color-on-tertiary-container);
+            border: none;
+            border-radius: var(--border-radius-full);
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--elevation-1);
+        }
+        
+        .troll-btn:hover {
+            background-color: var(--md-sys-color-tertiary);
+            color: var(--md-sys-color-on-tertiary);
+            transform: scale(1.05);
+            box-shadow: var(--elevation-2);
+        }
+        
+        .troll-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .troll-btn.active {
+            background-color: var(--md-sys-color-error);
+            color: var(--md-sys-color-on-error);
+            animation: pulse 0.5s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+        
+        /* Animazioni per l'effetto troll di Jeffrey Chong */
+        @keyframes translateAnimation1 {
+            0% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(15px) rotate(2deg); }
+            75% { transform: translateX(-15px) rotate(-2deg); }
+            100% { transform: translateX(0) rotate(0deg); }
+        }
+        
+        @keyframes translateAnimation2 {
+            0% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-10px) scale(1.02); }
+            100% { transform: translateY(0) scale(1); }
+        }
+        
+        @keyframes translateAnimation3 {
+            0% { transform: skewX(0deg); }
+            25% { transform: skewX(5deg); }
+            75% { transform: skewX(-5deg); }
+            100% { transform: skewX(0deg); }
+        }
+        
+        @keyframes translateAnimation4 {
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.03) rotate(1deg); }
+            75% { transform: scale(0.97) rotate(-1deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        
+        /* Animazione per far sparire e riapparire il pulsante */
+        @keyframes disappearReappear {
+            0% { transform: scale(1) rotate(0deg); opacity: 1; }
+            25% { transform: scale(1.2) rotate(10deg); opacity: 0.8; }
+            50% { transform: scale(0) rotate(180deg); opacity: 0; }
+            75% { transform: scale(0.8) rotate(-10deg); opacity: 0.8; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        
+        /* Stili per l'esplosione finale */
+        .explosion-particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--md-sys-color-error);
+            pointer-events: none;
+            z-index: 9999;
+        }
+        
+        @keyframes explode {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+        }
+        
+        @keyframes shake-violent {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            10% { transform: translate(-25px, 15px) rotate(-5deg); }
+            20% { transform: translate(20px, -20px) rotate(7deg); }
+            30% { transform: translate(-30px, -10px) rotate(-10deg); }
+            40% { transform: translate(25px, 25px) rotate(12deg); }
+            50% { transform: translate(-20px, -25px) rotate(-15deg); }
+            60% { transform: translate(15px, 10px) rotate(7deg); }
+            70% { transform: translate(-15px, 20px) rotate(-5deg); }
+            80% { transform: translate(10px, -15px) rotate(3deg); }
+            90% { transform: translate(-5px, 5px) rotate(-1deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+        
+        @keyframes glitch {
+            0% { transform: translate(0, 0) skew(0deg, 0deg); filter: hue-rotate(0deg); }
+            10% { transform: translate(-10px, 5px) skew(10deg, 5deg); filter: hue-rotate(90deg); }
+            20% { transform: translate(10px, -5px) skew(-8deg, -3deg); filter: hue-rotate(180deg); }
+            30% { transform: translate(-5px, -10px) skew(0deg, 8deg); filter: hue-rotate(270deg); }
+            40% { transform: translate(5px, 10px) skew(-5deg, -8deg); filter: hue-rotate(360deg); }
+            50% { transform: translate(0, 0) skew(0deg, 0deg); filter: hue-rotate(0deg); }
+            60% { transform: translate(10px, 5px) skew(-10deg, 5deg); filter: hue-rotate(90deg); }
+            70% { transform: translate(-10px, -5px) skew(8deg, -3deg); filter: hue-rotate(180deg); }
+            80% { transform: translate(5px, -10px) skew(0deg, -8deg); filter: hue-rotate(270deg); }
+            90% { transform: translate(-5px, 10px) skew(5deg, 8deg); filter: hue-rotate(360deg); }
+            100% { transform: translate(0, 0) skew(0deg, 0deg); filter: hue-rotate(0deg); }
+        }
+        
+        @keyframes flash {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(3); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(5); opacity: 0; }
+        }
+        
+        /* Stile per l'overlay finale con il troll face */
+        .troll-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            z-index: 999999;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            color: #fff;
+            text-align: center;
+            font-family: monospace;
+        }
+        
+        .troll-overlay.visible {
+            display: flex;
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .troll-overlay .ascii-troll {
+            display: block;
+            visibility: visible;
+            opacity: 1;
+            font-size: 7px;
+            line-height: 6px;
+            color: #00ff00 !important;
+            margin-bottom: 20px;
+            text-shadow: 0 0 5px #00ff00 !important;
+            white-space: pre !important;
+        }
+        
+        .troll-overlay .troll-title {
+            display: block;
+            visibility: visible;
+            opacity: 1;
+            font-size: 36px !important;
+            font-weight: bold !important;
+            color: #ff0000 !important;
+            text-shadow: 0 0 10px #ff0000 !important;
+            animation: blink 0.5s infinite !important;
+            content: "JEFF HAI ROTTO TUTTO!!!!!";
+        }
+        
+        body.troll-active {
+            overflow: hidden;
+        }
+        
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
         }
 
         main {
@@ -1998,7 +2984,7 @@
              /* .stats-container, .monthly-report-stats { grid-template-columns: 1fr 1fr; } */
         }
 
-        /* ... existing css ... */
+        /* ... rest of css ... */
 
         #calendar-section .card {
             padding: 1rem; /* Maintain padding for the overall card */
@@ -2083,7 +3069,10 @@
                      class="bouncing-logo">
             </div>
             <div class="header-actions">
-                <!-- Header actions can go here -->
+                <button id="jeffreyChongBtn" class="troll-btn">
+                    <span class="material-symbols-outlined">translate</span>
+                    Jeffrey Chong
+                </button>
             </div>
         </div>
     </header>
@@ -6169,12 +7158,12 @@
             } else if (d === 28 && e === 6 && (11 * M + 11) % 30 < 19) {
                 easterDay = 18; easterMonth = 4; // April 18
             } else {
-                 const dayOffset = d + e;
-                 if (dayOffset < 10) {
-                     easterDay = dayOffset + 22; easterMonth = 3; // March
-                 } else {
-                     easterDay = dayOffset - 9; easterMonth = 4; // April
-                 }
+                const dayOffset = d + e;
+                if (dayOffset < 10) {
+                    easterDay = dayOffset + 22; easterMonth = 3; // March
+                } else {
+                    easterDay = dayOffset - 9; easterMonth = 4; // April
+                }
             }
 
             // Check Easter Sunday
@@ -6444,6 +7433,24 @@ END:VCARD`;
          
          // Interattività per il logo rimbalzante
          document.addEventListener('DOMContentLoaded', function() {
+             // Rimuovi l'overlay del troll se presente (per evitare che blocchi i click)
+             const trollOverlay = document.getElementById('trollOverlay');
+             if (trollOverlay) {
+                 trollOverlay.classList.remove('visible');
+                 console.log("Overlay troll resettato all'avvio per evitare blocchi");
+             }
+             
+             // Rimuovi eventuali contenitori di esplosione rimasti
+             const explosionContainer = document.getElementById('explosion-container');
+             if (explosionContainer) {
+                 explosionContainer.remove();
+                 console.log("Contenitore esplosione rimosso all'avvio");
+             }
+             
+             // Rimuovi eventuali animazioni dal body
+             document.body.style.animation = 'none';
+             console.log("Animazioni body resettate all'avvio");
+             
              const logo = document.querySelector('.bouncing-logo');
              if (logo) {
                  // Quando l'utente clicca sul logo, aggiungiamo un'animazione più vivace
@@ -6467,9 +7474,667 @@ END:VCARD`;
                      showToast('Ciao! 👋 Sono il logo PWS!', 'success');
                  });
              }
+             
+             // Funzionalità pulsante troll Jeffrey Chong
+             const jeffreyBtn = document.getElementById('jeffreyChongBtn');
+             if (jeffreyBtn) {
+                 // Variabili per gestire l'effetto troll
+                 let trollActive = false;
+                 let trollInterval;
+                 let trollCounter = 0;
+                 
+                 // Array di lingue asiatiche da alternare
+                 const asianLanguages = [
+                     { code: 'vi', name: 'Vietnamita' },
+                     { code: 'zh-CN', name: 'Cinese' },
+                     { code: 'ko', name: 'Coreano' },
+                     { code: 'ja', name: 'Giapponese' },
+                     { code: 'th', name: 'Tailandese' },
+                     { code: 'fil', name: 'Filippino' }
+                 ];
+                 
+                 // Funzione per tradurre tutti i testi nella pagina con animazioni
+                 function translatePageToLanguage(langCode) {
+                     // Salviamo i testi originali se è la prima traduzione
+                     if (!window.originalTexts) {
+                         window.originalTexts = {};
+                         document.querySelectorAll('h1, h2, h3, h4, h5, p, span, button, a, label, option').forEach((el, index) => {
+                             if (el.textContent.trim() && !el.classList.contains('material-symbols-outlined')) {
+                                 window.originalTexts[index] = el.textContent;
+                             }
+                         });
+                     }
+                     
+                     // Aggiungiamo un'animazione a tutta la pagina
+                     const animations = [
+                         'translateAnimation1', 
+                         'translateAnimation2', 
+                         'translateAnimation3', 
+                         'translateAnimation4'
+                     ];
+                     
+                     // Seleziona un'animazione casuale
+                     const randomAnimation = animations[Math.floor(Math.random() * animations.length)];
+                     document.body.classList.add(randomAnimation);
+                     
+                     // Rimuovi l'animazione dopo un breve periodo
+                     setTimeout(() => {
+                         document.body.classList.remove(randomAnimation);
+                     }, 700);
+                     
+                     // Simuliamo una traduzione cambiando i caratteri in base alla lingua
+                     document.querySelectorAll('h1, h2, h3, h4, h5, p, span, button, a, label, option').forEach((el, index) => {
+                         if (el.textContent.trim() && !el.classList.contains('material-symbols-outlined')) {
+                             const originalText = window.originalTexts[index];
+                             if (originalText) {
+                                 // Aggiungiamo un'animazione al testo
+                                 el.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+                                 el.style.opacity = '0';
+                                 el.style.transform = 'scale(0.8) translateY(-5px)';
+                                 
+                                 setTimeout(() => {
+                                     switch(langCode) {
+                                         case 'vi': // Vietnamita
+                                             el.textContent = originalText.replace(/[a-z]/gi, c => 
+                                                 'ăâđêôơưàáảãạèéẻẽẹìíỉĩịòóỏõọùúủũụỳýỷỹỵ'[Math.floor(Math.random() * 29)] + c);
+                                             break;
+                                         case 'zh-CN': // Cinese
+                                             el.textContent = originalText.replace(/[a-z]/gi, c => 
+                                                 '的一是不了人我在有他这为之大来以个中上们到说国和地也子时道出而要于就下得可你年生自会那后能对着事其里所去行过家十用发天如然作方成者多日都三小军二无同么经法当起与好看学进种将还分此心前面又定见只主没公从问使工教如何都开己也很情最立新通少机打水己长同样意把体重别正机物应只将起明等自其与间手看用等最力把通等'[Math.floor(Math.random() * 50)]);
+                                             break;
+                                         case 'ko': // Coreano
+                                             el.textContent = originalText.replace(/[a-z]/gi, c => 
+                                                 '가나다라마바사아자차카타파하거너더러머버서어저처커터퍼허기니디리미비시이지치키티피히'[Math.floor(Math.random() * 40)]);
+                                             break;
+                                         case 'ja': // Giapponese
+                                             el.textContent = originalText.replace(/[a-z]/gi, c => 
+                                                 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん'[Math.floor(Math.random() * 46)]);
+                                             break;
+                                         case 'th': // Tailandese
+                                             el.textContent = originalText.replace(/[a-z]/gi, c => 
+                                                 'กขคฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ'[Math.floor(Math.random() * 44)]);
+                                             break;
+                                         case 'fil': // Filippino
+                                             el.textContent = originalText.replace(/[a-z]/gi, c => 
+                                                 c + 'ng' + ['a', 'o', 'u', 'e', 'i'][Math.floor(Math.random() * 5)]);
+                                             break;
+                                     }
+                                     
+                                     // Ripristina l'elemento con il nuovo testo
+                                     el.style.opacity = '1';
+                                     el.style.transform = 'scale(1) translateY(0)';
+                                 }, 150);
+                             }
+                         }
+                     });
+                 }
+                 
+                 // Funzione per ripristinare i testi originali con animazione
+                 function restoreOriginalTexts() {
+                     if (window.originalTexts) {
+                         console.log("Ripristino testi originali...");
+                         
+                         // Aggiungiamo un'animazione finale a tutta la pagina
+                         document.body.classList.add('translateAnimation2');
+                         
+                         // Rimuovi l'animazione dopo un breve periodo
+                         setTimeout(() => {
+                             document.body.classList.remove('translateAnimation2');
+                         }, 700);
+                         
+                         // Ripristina tutti i testi in due fasi per una migliore animazione
+                         const elements = document.querySelectorAll('h1, h2, h3, h4, h5, p, span, button, a, label, option');
+                         
+                         // Fase 1: Fade out di tutti gli elementi
+                         elements.forEach(el => {
+                             if (el.textContent.trim() && !el.classList.contains('material-symbols-outlined')) {
+                                 el.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+                                 el.style.opacity = '0';
+                                 el.style.transform = 'scale(0.8) translateY(-5px)';
+                             }
+                         });
+                         
+                         // Fase 2: Ripristina i testi originali e fade in
+                         setTimeout(() => {
+                             elements.forEach((el, index) => {
+                                 if (window.originalTexts[index]) {
+                                     el.textContent = window.originalTexts[index];
+                                     
+                                     // Ripristina l'elemento con il testo originale
+                                     el.style.opacity = '1';
+                                     el.style.transform = 'scale(1) translateY(0)';
+                                 }
+                             });
+                             
+                             console.log("Testi originali ripristinati con successo");
+                         }, 300);
+                     } else {
+                         console.warn("Nessun testo originale da ripristinare");
+                     }
+                 }
+                 
+                 // Funzione per far sparire e riapparire il pulsante
+                 function animateButton(button) {
+                     // Rimuovi l'animazione precedente (se presente)
+                     button.style.animation = 'none';
+                     
+                     // Forza un reflow per assicurarsi che l'animazione si resetti
+                     void button.offsetWidth;
+                     
+                     // Applica la nuova animazione
+                     button.style.animation = 'disappearReappear 1s ease forwards';
+                 }
+                 
+                 // Funzione per creare l'effetto di esplosione finale
+                 function createExplosion() {
+                     console.log("Creazione esplosione super distruttiva...");
+                     
+                     // Colori per le particelle dell'esplosione
+                     const colors = [
+                         '#FF5252', // Rosso
+                         '#FFEB3B', // Giallo
+                         '#FF9800', // Arancione
+                         '#E91E63', // Rosa
+                         '#2196F3', // Blu
+                         '#4CAF50', // Verde
+                         '#9C27B0'  // Viola
+                     ];
+                     
+                     // Numero di particelle
+                     const particleCount = 300; // Aumentato il numero di particelle
+                     
+                     // Crea un contenitore per le particelle
+                     const container = document.createElement('div');
+                     container.style.position = 'fixed';
+                     container.style.top = '0';
+                     container.style.left = '0';
+                     container.style.width = '100%';
+                     container.style.height = '100%';
+                     container.style.pointerEvents = 'none'; // Assicuriamoci che non blocchi i click
+                     container.style.zIndex = '9999';
+                     container.id = 'explosion-container'; // Aggiungiamo un ID per poterlo rimuovere facilmente
+                     document.body.appendChild(container);
+                     
+                     // Crea effetti di esplosione in diversi punti della pagina
+                     const explosionPoints = [
+                         { x: '50%', y: '50%' },  // Centro
+                         { x: '25%', y: '25%' },  // In alto a sinistra
+                         { x: '75%', y: '25%' },  // In alto a destra
+                         { x: '25%', y: '75%' },  // In basso a sinistra
+                         { x: '75%', y: '75%' },  // In basso a destra
+                         { x: '10%', y: '50%' },  // Sinistra centro
+                         { x: '90%', y: '50%' },  // Destra centro
+                         { x: '50%', y: '10%' },  // Alto centro
+                         { x: '50%', y: '90%' }   // Basso centro
+                     ];
+                     
+                     // Crea esplosioni multiple
+                     explosionPoints.forEach((point, index) => {
+                         setTimeout(() => {
+                             // Effetto flash
+                             const flash = document.createElement('div');
+                             flash.style.position = 'fixed';
+                             flash.style.top = point.y;
+                             flash.style.left = point.x;
+                             flash.style.transform = 'translate(-50%, -50%)';
+                             flash.style.width = '80px'; // Flash più grande
+                             flash.style.height = '80px';
+                             flash.style.borderRadius = '50%';
+                             flash.style.backgroundColor = 'white';
+                             flash.style.boxShadow = '0 0 100px 50px white'; // Bagliore più intenso
+                             flash.style.opacity = '0';
+                             flash.style.animation = 'flash 0.6s ease-out forwards';
+                             container.appendChild(flash);
+                             
+                             // Crea particelle per questa esplosione
+                             for (let i = 0; i < particleCount / explosionPoints.length; i++) {
+                                 createParticle(point.x, point.y, colors, container);
+                             }
+                             
+                             // Rimuovi il flash dopo l'animazione
+                             setTimeout(() => {
+                                 flash.remove();
+                             }, 600);
+                         }, index * 150); // Ritardo ridotto tra le esplosioni
+                     });
+                     
+                     // Esplodi gli elementi dell'interfaccia
+                     explodeUIElements();
+                     
+                     // Aggiungi un effetto di glitch a tutti gli elementi
+                     const allElements = document.querySelectorAll('div, p, h1, h2, h3, h4, h5, span, button, a, input, select');
+                     allElements.forEach(el => {
+                         if (Math.random() > 0.5) { // Più elementi con effetto glitch
+                             el.style.animation = 'glitch 0.5s infinite';
+                         }
+                     });
+                     
+                     // Rimuovi il contenitore dopo l'animazione
+                     setTimeout(() => {
+                         container.remove();
+                         
+                         // Dispatch the explosion-animation-end event
+                         document.dispatchEvent(new CustomEvent('explosion-animation-end'));
+                     }, 4000); // Durata aumentata
+                 }
+                 
+                 // Funzione per far esplodere gli elementi dell'interfaccia
+                 function explodeUIElements() {
+                     // Seleziona elementi importanti dell'interfaccia
+                     const uiElements = document.querySelectorAll('.card, .btn, .form-control, .nav-item, .tab-content, .modal, .switch, input, select, button, .chart-container');
+                     
+                     uiElements.forEach(el => {
+                         // Probabilità casuale di esplodere
+                         if (Math.random() > 0.3) {
+                             // Crea un clone dell'elemento per l'animazione
+                             const rect = el.getBoundingClientRect();
+                             
+                             // Crea frammenti dell'elemento
+                             const fragmentCount = Math.floor(Math.random() * 5) + 3; // 3-7 frammenti
+                             
+                             for (let i = 0; i < fragmentCount; i++) {
+                                 const fragment = document.createElement('div');
+                                 
+                                 // Stile del frammento basato sull'elemento originale
+                                 fragment.style.position = 'fixed';
+                                 fragment.style.top = rect.top + 'px';
+                                 fragment.style.left = rect.left + 'px';
+                                 fragment.style.width = (rect.width / fragmentCount) + 'px';
+                                 fragment.style.height = (rect.height / 2) + 'px';
+                                 fragment.style.backgroundColor = getComputedStyle(el).backgroundColor || 'var(--md-sys-color-surface)';
+                                 fragment.style.border = getComputedStyle(el).border || '1px solid var(--md-sys-color-outline)';
+                                 fragment.style.borderRadius = getComputedStyle(el).borderRadius || 'var(--border-radius-small)';
+                                 fragment.style.zIndex = '9998';
+                                 fragment.style.pointerEvents = 'none';
+                                 
+                                 // Animazione di esplosione
+                                 const angle = Math.random() * Math.PI * 2;
+                                 const distance = Math.random() * 500 + 100;
+                                 const tx = Math.cos(angle) * distance;
+                                 const ty = Math.sin(angle) * distance;
+                                 const rotation = Math.random() * 720 - 360; // -360 a 360 gradi
+                                 
+                                 fragment.style.transition = 'all 1.5s cubic-bezier(0.2, 0.9, 0.3, 1.1)';
+                                 
+                                 // Aggiungi il frammento al contenitore
+                                 document.getElementById('explosion-container').appendChild(fragment);
+                                 
+                                 // Forza un reflow
+                                 void fragment.offsetWidth;
+                                 
+                                 // Anima il frammento
+                                 fragment.style.transform = `translate(${tx}px, ${ty}px) rotate(${rotation}deg)`;
+                                 fragment.style.opacity = '0';
+                                 
+                                 // Rimuovi il frammento dopo l'animazione
+                                 setTimeout(() => {
+                                     fragment.remove();
+                                 }, 1500);
+                             }
+                             
+                             // Nascondi l'elemento originale
+                             el.style.visibility = 'hidden';
+                         }
+                     });
+                 }
+                 
+                 // Funzione per creare una singola particella dell'esplosione
+                 function createParticle(x, y, colors, container) {
+                     const particle = document.createElement('div');
+                     particle.className = 'explosion-particle';
+                     
+                     // Posizione iniziale
+                     particle.style.left = x;
+                     particle.style.top = y;
+                     particle.style.transform = 'translate(-50%, -50%)';
+                     
+                     // Proprietà casuali
+                     const size = Math.random() * 15 + 5;
+                     const color = colors[Math.floor(Math.random() * colors.length)];
+                     
+                     // Direzione casuale
+                     const angle = Math.random() * Math.PI * 2;
+                     const distance = Math.random() * 200 + 50;
+                     const tx = Math.cos(angle) * distance;
+                     const ty = Math.sin(angle) * distance;
+                     
+                     // Applica stile
+                     particle.style.width = `${size}px`;
+                     particle.style.height = `${size}px`;
+                     particle.style.backgroundColor = color;
+                     particle.style.boxShadow = `0 0 ${size/2}px ${color}`;
+                     
+                     // Imposta le variabili CSS per l'animazione
+                     particle.style.setProperty('--tx', `${tx}px`);
+                     particle.style.setProperty('--ty', `${ty}px`);
+                     
+                     // Applica l'animazione
+                     particle.style.animation = `explode ${Math.random() * 1 + 0.5}s ease-out forwards`;
+                     
+                     // Aggiungi al contenitore
+                     container.appendChild(particle);
+                     
+                     // Rimuovi dopo l'animazione
+                     setTimeout(() => {
+                         particle.remove();
+                     }, 1500);
+                 }
+                 
+                 // Funzione che mostra il troll face dopo l'esplosione
+                 function showTrollFace() {
+                     // Prendi l'elemento dell'overlay del troll
+                     const trollOverlay = document.querySelector('.troll-overlay');
+                     
+                     // Aggiungi la classe visible all'overlay
+                     trollOverlay.classList.add('visible');
+                     
+                     // Aggiungi la classe troll-active al body
+                     document.body.classList.add('troll-active');
+                     
+                     // Assicurati che l'overlay sia completamente visibile
+                     trollOverlay.style.display = 'flex';
+                     trollOverlay.style.visibility = 'visible';
+                     trollOverlay.style.opacity = '1';
+                     trollOverlay.style.zIndex = '999999';
+                     
+                     // Assicurati che l'ASCII art e il titolo siano visibili
+                     const asciiTroll = trollOverlay.querySelector('.ascii-troll');
+                     if (asciiTroll) {
+                         asciiTroll.style.display = 'block';
+                         asciiTroll.style.visibility = 'visible';
+                         asciiTroll.style.opacity = '1';
+                     }
+                     
+                     const trollTitle = trollOverlay.querySelector('.troll-title');
+                     if (trollTitle) {
+                         trollTitle.style.display = 'block';
+                         trollTitle.style.visibility = 'visible';
+                         trollTitle.style.opacity = '1';
+                         trollTitle.textContent = "JEFF HAI ROTTO TUTTO!!!!!";
+                     }
+                     
+                     console.log('Troll face displayed successfully!');
+                 }
+                 
+                 // Aggiungi un event listener alla fine dell'animazione di esplosione
+                 document.addEventListener('explosion-animation-end', function() {
+                     // Attendi un breve momento prima di mostrare il troll face
+                     setTimeout(showTrollFace, 500);
+                 });
+                 
+                 // Evento click sul pulsante Jeffrey Chong
+                 jeffreyBtn.addEventListener('click', function() {
+                     // Ottieni l'elemento audio e riproducilo
+                     const trollAudio = document.getElementById('trollAudio');
+                     trollAudio.play();
+                     
+                     if (trollActive) {
+                         // Ferma l'effetto troll
+                         clearInterval(trollInterval);
+                         trollActive = false;
+                         this.classList.remove('active');
+                         
+                         // Anima il pulsante
+                         animateButton(this);
+                         
+                         // Ripristina i testi originali
+                         restoreOriginalTexts();
+                         
+                         console.log("Effetto troll interrotto manualmente, preparazione esplosione finale...");
+                         
+                         // Aggiungiamo un'animazione di scuotimento violento a tutta la pagina
+                         setTimeout(() => {
+                             document.body.style.animation = 'shake-violent 0.8s ease-in-out';
+                             
+                             // Creiamo l'effetto di esplosione con particelle
+                             setTimeout(() => {
+                                 // Creiamo l'esplosione
+                                 createExplosion();
+                                 
+                                 // Mostriamo l'overlay del troll face dopo l'esplosione
+                                 setTimeout(() => {
+                                     // Fermiamo tutte le animazioni in corso
+                                     document.querySelectorAll('*').forEach(element => {
+                                         element.style.animationPlayState = 'paused';
+                                         element.style.transition = 'none';
+                                     });
+                                     
+                                     // Nascondiamo tutti gli elementi tranne l'overlay
+                                     document.querySelectorAll('body > *:not(#trollOverlay)').forEach(element => {
+                                         if (element.id !== 'trollOverlay') {
+                                             element.style.display = 'none';
+                                         }
+                                     });
+                                     
+                                     // Mostriamo l'overlay del troll face
+                                     const trollOverlay = document.getElementById('trollOverlay');
+                                     if (trollOverlay) {
+                                         // Assicuriamoci che l'overlay sia visibile
+                                         trollOverlay.style.display = 'flex';
+                                         trollOverlay.style.opacity = '1';
+                                         trollOverlay.style.visibility = 'visible';
+                                         trollOverlay.style.zIndex = '999999';
+                                         
+                                         // Aggiungiamo la classe visible
+                                         trollOverlay.classList.add('visible');
+                                         
+                                         // Aggiungiamo la classe troll-active al body
+                                         document.body.classList.add('troll-active');
+                                         
+                                         // Assicuriamoci che l'ASCII art e il titolo siano visibili
+                                         const asciiTroll = trollOverlay.querySelector('.ascii-troll');
+                                         const trollTitle = trollOverlay.querySelector('.troll-title');
+                                         
+                                         if (asciiTroll) {
+                                             asciiTroll.style.display = 'block';
+                                             asciiTroll.style.visibility = 'visible';
+                                             asciiTroll.style.opacity = '1';
+                                         }
+                                         
+                                         if (trollTitle) {
+                                             trollTitle.style.display = 'block';
+                                             trollTitle.style.visibility = 'visible';
+                                             trollTitle.style.opacity = '1';
+                                             trollTitle.textContent = "JEFF HAI ROTTO TUTTO!!!!!";
+                                         }
+                                         
+                                         console.log("Troll face mostrato con successo!");
+                                     }
+                                     
+                                     // Ricarica la pagina dopo aver mostrato il troll face
+                                     setTimeout(() => {
+                                         console.log("Ricaricamento pagina...");
+                                         window.location.reload();
+                                     }, 15000); // Aumentato a 15 secondi per dare più tempo di leggere
+                                 }, 2000); // Aumentato a 2 secondi per dare tempo all'esplosione di completarsi
+                             }, 1000);
+                         }, 800);
+                     } else {
+                         // Attiva l'effetto troll
+                         trollActive = true;
+                         trollCounter = 0;
+                         this.classList.add('active');
+                         
+                         // Anima il pulsante
+                         animateButton(this);
+                         
+                         // Cambia lingua ogni 0.8 secondi
+                         trollInterval = setInterval(function() {
+                             // Seleziona una lingua in sequenza
+                             const currentLang = asianLanguages[trollCounter % asianLanguages.length];
+                             translatePageToLanguage(currentLang.code);
+                             
+                             // Anima il pulsante ad ogni cambio di lingua
+                             if (trollCounter > 0 && trollCounter < 6) {
+                                 animateButton(jeffreyBtn);
+                             }
+                             
+                             trollCounter++;
+                             
+                             // Ferma automaticamente dopo 5 secondi (circa 6-7 cambi di lingua)
+                             if (trollCounter >= 6) {
+                                 clearInterval(trollInterval);
+                                 setTimeout(() => {
+                                    // Assicuriamoci che il testo venga ripristinato in ogni caso
+                                    trollActive = false;
+                                    jeffreyBtn.classList.remove('active');
+                                    
+                                    // Anima il pulsante un'ultima volta
+                                    animateButton(jeffreyBtn);
+                                    
+                                    // Ripristina i testi originali con un'animazione finale
+                                    restoreOriginalTexts();
+                                    
+                                    console.log("Effetto troll terminato, preparazione esplosione finale...");
+                                    
+                                    // Aggiungiamo un'animazione di scuotimento violento a tutta la pagina
+                                    setTimeout(() => {
+                                        document.body.style.animation = 'shake-violent 0.8s ease-in-out';
+                                        
+                                        // Creiamo l'effetto di esplosione con particelle
+                                        setTimeout(() => {
+                                            // Creiamo l'esplosione
+                                            createExplosion();
+                                            
+                                            // Mostriamo l'overlay del troll face dopo l'esplosione
+                                            setTimeout(() => {
+                                                // Fermiamo tutte le animazioni in corso
+                                                document.querySelectorAll('*').forEach(element => {
+                                                    element.style.animationPlayState = 'paused';
+                                                    element.style.transition = 'none';
+                                                });
+                                                
+                                                // Nascondiamo tutti gli elementi tranne l'overlay
+                                                document.querySelectorAll('body > *:not(#trollOverlay)').forEach(element => {
+                                                    if (element.id !== 'trollOverlay') {
+                                                        element.style.display = 'none';
+                                                    }
+                                                });
+                                                
+                                                // Mostriamo l'overlay del troll face
+                                                const trollOverlay = document.getElementById('trollOverlay');
+                                                if (trollOverlay) {
+                                                    // Assicuriamoci che l'overlay sia visibile
+                                                    trollOverlay.style.display = 'flex';
+                                                    trollOverlay.style.opacity = '1';
+                                                    trollOverlay.style.visibility = 'visible';
+                                                    trollOverlay.style.zIndex = '999999';
+                                                    
+                                                    // Aggiungiamo la classe visible
+                                                    trollOverlay.classList.add('visible');
+                                                    
+                                                    // Aggiungiamo la classe troll-active al body
+                                                    document.body.classList.add('troll-active');
+                                                    
+                                                    // Assicuriamoci che l'ASCII art e il titolo siano visibili
+                                                    const asciiTroll = trollOverlay.querySelector('.ascii-troll');
+                                                    const trollTitle = trollOverlay.querySelector('.troll-title');
+                                                    
+                                                    if (asciiTroll) {
+                                                        asciiTroll.style.display = 'block';
+                                                        asciiTroll.style.visibility = 'visible';
+                                                        asciiTroll.style.opacity = '1';
+                                                    }
+                                                    
+                                                    if (trollTitle) {
+                                                        trollTitle.style.display = 'block';
+                                                        trollTitle.style.visibility = 'visible';
+                                                        trollTitle.style.opacity = '1';
+                                                        trollTitle.textContent = "JEFF HAI ROTTO TUTTO!!!!!";
+                                                    }
+                                                    
+                                                    console.log("Troll face mostrato con successo!");
+                                                }
+                                                
+                                                // Ricarica la pagina dopo aver mostrato il troll face
+                                                setTimeout(() => {
+                                                    console.log("Ricaricamento pagina...");
+                                                    window.location.reload();
+                                                }, 15000); // Aumentato a 15 secondi per dare più tempo di leggere
+                                            }, 1000);
+                                        }, 800);
+                                    }, 500);
+                                }, 800);
+                             }
+                         }, 800);
+                     }
+                 });
+             }
          });
 
     </script>
+
+    <!-- Overlay per il troll finale -->
+    <div id="trollOverlay" class="troll-overlay">
+        <pre class="ascii-troll">
+            ⣿⣿⣿⣿⣿⣿⢿⣿⣿⣿⣿⣿⣿⡿⣿⣿⣿⣿⣿⣿⣿⢿⣿⣿⣿⣿⣿⢿⣿⢿⠿⠟⠛⠏⠿⠛⠻⠛⠻⠻⠟⠟⠛⠟⠙⠙⠛⠻⠛⠏⠙⠙⢿⣿⣿⣿⣿⣿⡿⣿⣿⣿⣿⣿⣿⣿⢿⣿⣿⣿⣿⣿⣿⡿⣿⣿⣿⣿⣿⣿⣿⢿⣿⣿⣿⣿⣿⣿⡿⣿
+            ⣿⣿⣿⣿⣿⣾⣿⣿⣿⣿⣿⣿⣷⣿⣿⣿⣿⣿⣿⣿⣾⣿⣿⡿⡟⡛⠫⠈⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠁⠀⠉⠘⢳⢻⡿⣿⣿⣿⣿⣿⣾⣿⣿⣿⣿⣿⣿⣷⣿⣿⣿⣿⣿⣿⣿⣾⣿⣿⣿⣿⣿⣿⣷⣿⣿⣿⣿⣿
+            ⣽⣿⣻⣿⣿⣿⣿⣯⣿⣟⣿⣿⣿⣿⣿⣽⣿⣻⡿⢟⠏⠪⠂⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠃⠁⠀⢻⢛⢿⢿⣿⣯⣿⣟⣿⣿⣿⣿⣿⣽⣿⣻⣿⣿⣿⣿⣯⣿⣟⣿⣿⣿⣿⣿⣿⣿⣿⣿
+            ⣯⣿⣿⣽⣿⣿⣿⣿⣽⣿⣽⣿⡿⣿⣿⣯⣿⠻⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠈⠛⣿⣽⣿⣽⣿⡿⣿⣿⣯⣿⣯⣿⣿⢿⣿⣿⣽⣿⣽⣿⡿⣿⣿⣿⣿⣿⣿⣿⣿
+            ⣿⣿⣿⣿⢿⣾⣷⣿⣿⣿⣿⣿⣻⠟⠷⠙⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠋⣾⣿⣿⣻⣿⣷⣿⣿⣿⣿⣟⣿⣿⣾⣿⣿⣿⣿⣻⣿⣷⣿⣿⣿⣿⣿⣿
+            ⣿⣿⣿⣿⣿⣿⣾⣿⣿⣿⣿⢷⡉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡳⢟⢿⣟⣷⣿⣿⣿⣿⣿⣟⣿⣾⣿⣿⣿⣿⣿⣻⣷⣿⣿⣿⣿⣿⣿⣿⣿
+            ⣷⡿⣷⣿⣿⣿⣿⣿⠾⣍⠛⠓⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣘⣿⣿⣿⣿⡾⣿⣾⣿⣿⣿⣿⣾⣿⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+            ⣯⣿⣿⣿⣻⡿⣯⠻⡑⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⣿⣿⣷⣿⣿⣿⢿⣿⣿⢿⣷⣿⣾⣿⣿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+            ⣿⣿⣿⣿⣿⣝⡂⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⣾⣿⣿⣿⣿⡿⣿⣾⣿⣿⣿⣿⣿⣾⣿⢿⣿⣿⣿⣿⣿⣿⣿⣿
+            ⣿⡿⣿⡿⠕⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠐⠺⣿⣿⣿⣿⣿⣿⣷⣿⣿⣿⣿⣿⣷⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+            ⣷⣭⡉⠊⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡀⡀⣀⢀⠀⡀⣀⣀⣀⢀⡠⣰⡢⣕⢦⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠲⣿⣷⣿⣿⣿⣿⣿⢷⣿⣷⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+            ⣿⣳⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡠⣔⢖⡖⣮⣳⣵⡫⣞⣼⣮⣾⣮⣾⣾⣷⣿⣮⣯⣷⣯⣦⢠⣪⢜⡄⠠⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⣷⣿⣿⣻⣿⣻⣿⣿⣾⣿⢿⡿⣟⣿⣿⣿⣿⣿
+            ⣿⣿⣋⡁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡀⣔⣗⣽⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣿⣿⣯⣿⣟⣿⣿⣿⣿⣿⢿⣿⣿⣿⣿⣿⣿⣿
+            ⣿⣟⡫⠀⠀⠀⠀⠀⠀⠀⠀⣀⡤⡦⣐⣖⢮⡺⡲⣕⣞⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⣿⣿⣿⣿⣿⢿⣿⣻⣿⣿⣿⣾⣿⣿⣿⣿⣿
+            ⣿⣽⡗⣀⡄⠀⠀⠀⠀⢀⢮⡺⣪⢯⡺⣪⡳⣝⣽⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣗⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢹⣿⣿⣿⡿⣟⣿⣟⣿⣿⣿⣿⣿⣿⣿⣿
+            ⣿⣿⣟⢥⢀⠀⠀⠀⠀⢮⡳⣝⢮⡳⣝⣞⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡎⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡸⣿⣟⣿⣿⣿⣿⣿⣿⢿⣻⣿⣿⣿⣿⣿
+            ⣿⣿⣿⣿⢏⠎⠀⠀⢠⡻⣪⢗⡽⣺⣿⡿⠿⡻⣛⣫⣫⣽⣽⡿⠟⠟⠛⡛⣛⣛⣟⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣆⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣟⣯⣿⣿⣿⣿⣿⢿⣿⣯⣿⣿⣿⣿
+            ⣿⣽⣿⣽⡏⡀⠀⠀⣜⢮⡳⣝⢾⢫⣣⡵⡿⠿⣛⣝⣭⣬⠶⠮⠏⢟⢟⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣀⡀⠀⢮⣿⣿⣿⣿⣟⣯⣿⣿⣿⣿⣿⣿⣿⣿
+            ⣾⡿⣷⣿⡯⡀⠀⢠⡺⣕⢯⡺⣕⣟⣝⢖⠽⡹⣙⣍⣦⣶⣾⠾⡿⡿⡿⢿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣲⣿⠟⠟⠫⢗⣦⡙⣿⣿⣿⣟⣿⣯⣿⣿⣿⣿⣿⣿
+            ⣿⣿⣿⣿⣷⠗⠀⣰⡫⣞⢵⡫⣞⢮⠾⡻⣿⣿⣟⡝⣿⡿⠉⠀⠀⠀⠀⠀⠀⠉⠉⠉⠋⠻⠛⠛⠟⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⢢⣺⡿⢋⣀⣀⣀⡀⠀⠈⢿⡜⣿⣻⣿⣿⣿⣿⣯⣿⣯⣿⣿⣿
+            ⣿⣿⣿⣿⣟⣯⡂⢮⡺⣕⢯⣾⠳⠙⠻⠻⣿⡿⣸⢡⣿⡊⠀⣀⣀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠙⠻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣢⡷⣵⠟⢰⣣⣿⣿⣿⣝⡗⣦⠨⣿⡸⣿⣿⣿⣿⣷⣿⣿⣾⣿⣿⣿
+            ⣯⣿⣯⣿⣿⣿⠂⣗⢽⣺⠟⠁⠀⠀⠀⠀⢹⢸⣿⢰⣿⣷⡰⣕⢧⡳⣝⣖⢴⣠⡠⣀⢀⢀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⡛⡿⣿⡿⣻⣿⣿⣿⣿⣿⣿⣿⣇⠀⠀⠀⠀⠀⠀⣠⣳⣿⣿⣿⢫⣜⡶⣶⣾⣿⣿⣿⣮⠸⡕⢽⡎⣿⣿⣽⣟⣿⣿⣿⣿⣿⣿⣿
+            ⣯⣷⣿⣿⢿⣷⣧⢳⠝⠀⠀⠀⠀⠀⠀⣠⢯⢪⢟⣮⣿⣿⣿⡪⣗⢽⡺⣜⢧⡳⣝⢮⢯⡺⣝⢽⢕⡗⣖⢖⡤⣤⢠⢤⠬⢪⢿⢫⣺⣿⣿⣿⣿⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⡰⣷⣿⣿⣿⣷⣿⡏⡙⢷⣿⣿⣿⡻⣿⣧⢹⢸⠅⣿⣯⣿⣟⣿⣿⣿⣿⣿
+            ⣿⣿⣿⣿⡿⣟⣿⠈⠀⠀⠀⠀⢠⢔⣗⣜⢵⣣⡫⣾⣿⣿⣿⣝⢮⡳⣝⢮⡳⣝⢮⠳⠳⢝⠮⢏⣗⢽⡪⣗⢽⡪⢋⣡⣔⡯⣖⣗⡿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣔⡀⠀⠠⣿⣿⣿⣿⣿⣿⢻⣷⡘⣖⢖⡧⣳⢝⣝⢿⡢⢺⢸⣿⣿⣿⣿⣿⢿⣾⣟
+            ⣿⣿⣿⢿⣿⡿⠁⠀⠀⠀⡠⣪⢏⣓⢕⡓⡳⢵⢝⣞⣿⣿⣿⡯⡓⡽⣪⢗⡽⣪⢖⠏⠋⠁⠉⡀⢀⠁⡉⡊⣃⣒⢝⣬⣦⢮⠲⣚⣋⣫⣛⣻⣿⣿⣿⣿⣿⣿⣿⣿⣎⣆⣾⣿⣿⣿⣿⣿⣿⠚⣿⣺⡢⣝⣮⣗⡽⡪⣽⣇⢺⢸⣿⣿⣿⣿⣿⣿⣿⣽
+            ⡿⣷⣿⣿⣿⡃⠀⠀⢀⢴⡫⣞⣝⢮⡳⣝⢖⡬⣑⠕⣝⢿⣿⣿⡕⣝⢮⡳⣝⢎⡢⡰⣔⢗⡽⣪⢗⢯⢳⢹⣘⢬⣷⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⡐⠽⣿⣿⣿⣿⣯⡫⣿⠃⣽⣸⣿⡿⣾⣷⣿⣿⣿⣿
+            ⣿⣿⣷⣿⣿⡆⠀⢀⡮⣳⢝⢮⠪⠓⠙⠪⡳⣝⢮⣳⢌⢯⣿⣿⣿⢼⣿⣿⣎⡳⢝⣝⢮⡳⣝⠮⡫⣱⣾⣾⣶⣷⣴⣴⣴⣶⣷⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢈⢟⡿⡿⢟⣏⣷⠟⣨⣿⢺⣿⣿⣿⣯⣿⣿⡿⣿
+            ⣿⣿⣿⣿⣯⣿⡄⡷⣝⠮⠣⢁⡠⣄⢦⡰⡤⡬⡵⣕⡇⣷⣿⣿⣿⣿⣾⣛⠿⣿⣕⣦⣥⣕⣬⢮⡫⣿⣻⣿⣿⣿⣿⣿⣿⣿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢨⣳⢩⣾⣿⣿⣱⣽⣿⣿⣸⣿⣿⣿⣿⣿⢷⣿⣿
+            ⣿⣟⣿⣿⣽⣿⣦⢹⡪⢋⢮⡳⣝⢮⡳⣝⠮⢏⡞⠞⣘⣾⣿⣿⣿⣿⣿⣿⣿⣮⣽⣿⣽⣹⠹⢕⢟⣾⣾⣿⣿⣿⣿⣿⣿⣿⣿⣾⣽⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢿⡗⢀⣥⣿⣿⣿⣿⣿⣿⡿⣡⣿⣿⢿⡿⣟⣿⣿⣿⣾
+            ⣯⣿⡿⣾⣿⣿⣿⣷⠸⣊⢄⢝⣘⠡⡑⣒⡩⡥⣪⡾⣸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⡿⣷⣦⣫⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣽⢿⣿⣿⣿⣿⣿⣿⣿⡟⣱⣿⣿⣿⣿⢿⣿⣿⣿⣿⣿
+            ⣿⣷⣿⣿⣿⢿⣿⡯⡸⣨⠮⣕⣶⣿⢿⣫⣮⣾⣟⡕⣽⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⣿⣝⣯⣫⠪⢫⢟⣟⢿⣿⣿⣿⣿⣿⣿⣿⣻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣗⣿⣿⣿⣿⣿⣿⣿⠟⢰⣿⣿⡿⣿⣿⣿⣿⣟⣿⣿⣻
+            ⣿⣿⣿⣿⡿⣿⣻⡯⣸⡪⡯⣺⣾⣿⣿⣿⣿⣿⡟⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣴⣭⣝⢻⣿⣿⣶⣅⡓⠽⣝⣿⣯⡿⣿⣿⣿⣷⣝⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣟⠸⠿⠿⠻⠋⠁⠀⣿⣿⣾⣿⣿⣿⣿⣿⣿⣯⣿⣟
+            ⡿⣿⣟⣿⣿⣿⣿⡇⣗⣝⢞⣿⣿⣿⣟⢟⣟⢵⢣⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⡣⢿⣿⣿⣿⣷⣕⢌⠪⡻⣿⣷⣯⡿⣿⣿⣷⡙⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⠀⡤⣲⢝⡅⠀⣸⣿⣿⣾⣿⣾⣿⣟⣿⣿⣾⣿⣿
+            ⡿⣟⣿⣿⣿⣿⣿⡇⣗⢵⣻⣿⣿⣟⡮⣳⢕⢯⣺⣿⣿⣿⣿⣿⢿⢿⢿⢿⠿⣟⢟⠯⡳⣱⣿⣿⣿⣿⣿⣿⣗⡧⡌⠚⢿⣿⣿⣷⣟⣿⣷⡈⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣗⢸⢝⢮⡳⡅⠀⣿⣻⣿⣿⣿⣿⣷⡿⣟⣿⣿⣿⣿
+            ⣿⣿⣿⣿⣾⣿⣻⡅⣞⢵⡳⣿⣿⠯⡹⡮⡇⢯⢮⡻⡿⡯⣳⢕⡏⠅⠁⠀⢀⢠⣠⣶⣽⣾⣿⣿⣿⣿⣿⣿⣿⣿⢮⣣⢈⢻⢮⢻⣿⣿⣿⣇⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡪⡯⡳⡽⡀⢸⣿⣿⣿⣻⣯⣿⣿⣿⣿⣿⣟⣯⣿
+            ⣿⣿⣿⣿⡿⣾⣿⣧⠸⡵⣝⢖⡽⣸⠝⡮⣫⢮⣐⢒⣨⣉⢎⡓⡓⣡⢦⣳⣽⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢿⢕⡗⣗⠌⣞⢎⢿⣿⣿⣯⢘⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣯⣿⣿⣿⣿⣿⣫⢺⢝⣝⣞⢀⣿⣿⣿⣟⣿⣻⣿⣿⣿⣿⣿⣻⣿⣻
+            ⡿⣯⣿⢿⣿⣿⣿⣿⣆⢫⢞⡵⣫⠎⣜⢽⡪⣗⢵⡫⣞⣜⢗⣝⣮⣳⣷⡿⠿⣛⣛⢝⢭⢭⢭⢭⢭⢭⢩⢓⠕⠯⡳⡝⠮⣳⡱⡧⢹⣿⣿⡿⢀⣿⡳⣿⣿⣿⣿⣿⣿⣿⣿⣫⣾⣿⣿⣿⡿⣪⢮⡣⢯⡺⣜⢐⣿⣿⣻⣿⣿⣿⣿⣯⣿⣯⣿⣿⣿⣿
+            ⣿⣿⣻⣿⣿⣿⣿⣿⣿⣆⢯⡺⣕⠇⣪⡳⣝⢮⡳⣝⢮⢚⢕⣑⣍⢍⡵⣕⢯⡳⡳⢝⢓⡍⣪⡬⣒⣮⢒⡲⡕⣓⡍⢝⠢⡑⢝⣞⠸⣿⣿⡟⣸⣿⢸⣿⣿⣿⣿⣿⣿⢟⣾⣾⣿⣿⣿⡿⣹⡪⣗⢇⡳⣝⢮⢰⣿⣟⣿⣿⣿⣿⣿⣽⣾⣿⣿⣿⣿⣿
+            ⣿⣿⣿⣿⣯⣿⣷⣿⣿⣿⣦⢫⢞⡥⠐⣯⡺⣕⢯⢎⠖⠝⢕⠳⣑⡫⣚⢬⢱⣬⡪⣶⣷⣸⣿⣷⢾⣿⡷⢿⣷⢮⠺⠘⢐⡲⡘⣞⢨⣿⣿⡇⣾⡏⣾⣿⣿⣿⣿⡿⣳⣽⣿⣿⣿⣿⢟⣝⢮⡺⡮⣳⢸⢕⣗⢸⣿⣿⣿⣯⣿⣽⣿⣿⣿⣿⣷⡿⣿⣾
+            ⣿⣿⣿⣿⣯⣷⣿⡿⣿⣿⣿⣇⢏⢞⡆⠱⣝⢮⡳⡊⠀⠀⠑⡭⣵⣼⣿⣗⣽⣿⣷⣿⡿⠛⠟⠋⠈⠉⠀⠀⠀⠀⠀⢀⣮⣾⣞⢮⢐⣿⣿⢡⣿⢇⢿⣹⣿⣿⣿⢽⣾⣿⡿⣟⢯⡳⣝⢮⡳⣝⢮⡳⢨⡳⡵⢸⣿⣿⣿⣯⣿⣯⣿⣿⣿⣿⣟⣿⣿⣷
+            ⣯⣿⣷⣿⣿⣿⣿⣿⣿⣻⣾⣿⣎⢣⡊⢧⡘⢵⣫⢠⣀⡀⠀⢻⣿⡿⢿⠿⠻⠛⠙⠈⠀⠀⢀⢀⢠⡰⢔⢦⢲⢄⢦⡳⣽⣿⣷⡫⢰⣿⠏⣰⣿⢱⢝⣾⣿⣿⣷⣿⡿⣏⢯⢮⡳⣝⢮⡳⣝⢮⡳⡽⡸⣝⢞⢘⣯⣿⣾⣿⣿⣿⣿⣻⣾⣟⣿⣿⣿⣿
+            ⣯⣷⣿⣯⣿⣿⣿⣿⣽⣿⣯⣿⣿⣦⠳⡐⡝⣆⠳⣝⢮⢮⡀⠀⠁⠀⠀⠀⠀⠀⢔⢎⣏⣯⢮⣮⣶⣾⡟⣟⢽⢜⡵⣽⣿⣿⣿⠇⣸⣿⠁⣾⡏⣜⢗⣿⣿⣿⣿⢯⡫⣞⣝⢞⢮⡳⣝⢮⡳⣝⢮⢏⣺⡪⣯⡊⣿⣿⣽⣿⣿⣿⣿⣿⣯⣿⣿⣿⣿⢿
+            ⣿⣿⣿⣿⣟⣷⣿⣻⣿⣿⣿⣿⣯⣿⣷⠹⣜⢜⢵⢌⢳⡳⡹⡤⣀⠀⠀⡀⡴⠿⡟⡿⡻⢿⣙⢽⡸⡲⣕⢗⣝⣵⣿⣿⣿⣿⡿⢁⣿⡯⢸⣿⢃⡗⣿⣿⣿⢿⢕⣗⢽⡪⡮⣫⡳⣝⢮⡳⣝⢮⠯⡱⡵⣽⣷⡣⢸⣿⣿⣟⣷⣿⣻⣿⣿⣿⣿⣾⢿⣿
+            ⢿⣿⣿⢿⣿⣿⣽⣿⣿⣿⡿⣿⣾⣿⣽⣷⡜⢵⡹⣹⣢⠹⡵⡙⡮⡯⡯⣺⣪⡳⡳⣝⢮⡳⣕⢗⢝⣭⣾⣿⣿⣿⣿⣿⣿⣿⢃⣾⣿⢃⣿⡯⣸⣺⣿⡿⣫⡳⣝⢮⡳⣝⣝⢞⢮⡳⣝⢮⡳⡽⣕⢯⣺⣯⣿⣞⠨⣿⣿⣿⣿⣽⣿⣿⢿⣿⣿⣾⣿⣿
+            ⣿⢿⣾⣿⣿⣿⣿⣿⣷⡿⣿⣿⣿⣿⣿⣿⢿⣮⡺⡜⣾⣧⡹⣝⢼⣘⢝⡪⣚⢎⣏⣎⣧⣵⢶⢿⠿⠿⡿⡿⣿⣿⣿⣿⣿⢇⣿⣿⡏⣼⣿⢡⣳⣿⢯⡫⣞⢮⡳⡳⣝⢮⡺⣝⢵⡫⡞⡕⣯⡺⡮⣳⢵⣿⣿⣟⡆⢻⣽⣿⣿⣿⣿⣻⣿⢿⣾⣿⣿⣿
+            ⣿⣿⣿⣟⣿⡿⣿⣿⣾⣿⣿⡿⣿⡿⣿⣿⣿⣿⣿⣮⠪⢿⣧⠳⣝⢮⡳⣝⣚⡙⠑⢃⢃⢁⡅⣥⣪⣯⣾⣿⣿⣿⣿⡿⣣⣿⣿⣿⠠⣿⢇⣗⡿⣕⣗⢽⡪⣗⢽⢝⢮⡳⣝⢮⡳⠝⣔⢯⣺⣾⣿⢮⣫⣿⣿⣿⡦⢹⣿⣿⢿⣿⢿⣿⣿⣿⣿⡿⣿⡿
+            ⣿⣿⣿⣿⣟⣿⣿⣽⣿⣿⣿⣿⡿⣿⣻⣿⣿⣿⣿⣻⣿⡌⣿⣇⢳⡳⣝⣾⣾⣿⣿⣷⣯⣷⣿⣿⣿⣿⣿⣿⣿⣿⢟⣼⣿⣿⡿⠅⣺⢏⡞⣮⡺⣪⢮⡳⣝⢮⡳⣝⢗⡽⣪⢗⢱⢝⡮⣳⣿⣿⣿⣗⢗⣿⣯⣿⣿⡀⣿⡿⣟⣿⣿⣿⣿⣿⣷⣿⡿⣿
+            ⣿⣻⣿⣻⣿⣿⣷⣿⣿⢿⡿⣿⣿⣿⣿⡿⣟⣿⡿⣿⣿⣿⡔⡯⡢⢯⢾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⢿⢝⠎⡸⡮⡳⣝⢮⡺⣕⢷⢝⡮⣳⢝⡮⣳⢝⠪⣔⢯⡳⣽⣿⢿⣟⣿⣯⡳⣿⣿⡿⣟⡇⢺⣿⣿⣿⣿⣻⣿⣻⣿⣾⣿⣿
+            ⣿⣻⣽⣿⣿⣿⣿⣿⣻⣿⡿⣿⣿⣿⣿⣿⢿⣟⣿⣿⣿⣿⣿⡘⣎⣗⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⣻⣿⢿⡫⣗⢽⢑⣕⢯⡫⡯⡺⣕⢯⡺⣕⢯⡺⣕⢯⡺⢕⡱⣝⢮⡳⣽⣿⣿⡿⣿⣻⣿⣯⣺⣿⣿⣿⣿⠘⣿⣿⣿⣿⣟⣯⣿⣿⣿⣿⣿
+            ⣿⣿⣿⣿⣻⣿⣻⣿⣿⣿⣿⣿⢿⣟⣿⣿⣿⣿⣿⡿⣟⣿⣿⣇⢪⣻⣯⣿⣿⣿⡿⣿⣻⣿⣿⡿⡟⣗⢽⢕⣗⢽⡪⡗⡕⣣⢗⡽⣪⢏⡯⣺⢕⡯⣺⢕⡯⣺⠕⣕⢵⢝⣮⣷⢿⣿⢿⣻⣿⣿⣿⣿⣻⡼⣿⣿⣾⣿⣇⢪⠻⢿⣿⣿⣿⣿⣟⣿⣟⣿
+            ⣿⣿⣿⣿⣟⣯⣿⣿⣿⣿⣿⡿⣿⢿⣻⣿⣿⣿⣿⡿⣿⣿⣽⣿⡌⡮⡯⣻⢿⢿⡿⡿⡿⡻⣕⢯⡫⣞⢵⡫⡮⣳⠝⣍⢜⢮⡳⣝⢮⡳⣝⢮⡳⣝⢮⡳⡝⣌⡞⣮⣷⣿⣿⣿⢿⣻⣿⣿⣿⣿⣿⣿⣻⣯⣿⣿⣿⣿⣿⡨⣿⣮⡹⢿⣿⣿⣿⣻⣟⣯
+            ⣿⢿⣽⣿⣿⣿⣿⣿⣾⢿⣷⣿⣿⣿⣿⣿⣻⣽⣿⣿⣿⣿⣿⣻⣷⣍⢞⢵⣫⡳⣝⢵⡫⡯⡺⣕⢯⡺⣕⠯⢋⢬⠎⡪⣜⢞⢮⡳⣝⢮⡳⣝⢮⡳⢝⣔⣞⣾⣾⣿⣿⣯⣿⢿⣿⣿⣿⣿⣻⣟⣿⣿⣿⣿⣿⣿⣽⣿⣻⣇⢺⣿⣿⣦⡙⢿⣿⣿⣿⣿
+            ⡿⣿⣿⣽⣿⣿⣿⣿⣾⣿⣟⣿⣿⣿⣿⣿⣟⣿⣽⣿⣿⣿⣿⣻⣟⣿⡷⢢⡊⢌⢇⡫⣚⣙⣙⢜⢥⢭⡲⣪⡫⣔⣗⣝⢮⣫⡳⣝⢮⡳⣝⢮⡳⣳⡷⣿⣿⣿⣿⣿⣿⣾⢿⣿⣿⣿⣿⣿⣟⣿⣯⣿⣿⣿⣿⣷⣿⣻⣿⣿⢆⢿⣿⡿⣿⣦⡻⣿⣿⣿
+            ⣿⣿⣿⣿⣯⣿⣯⣿⣿⣿⣿⣿⣻⣿⣻⣿⣿⣿⣿⣟⣿⣽⣿⣿⣿⣿⢃⣗⢽⢌⢖⢮⣊⡳⡹⣝⢵⡫⣞⢵⡫⣞⢼⣪⡳⡵⣝⢮⡳⣝⢮⣳⣿⣿⣿⣿⣿⣽⣿⣻⣿⣿⣿⣿⣟⣿⣻⣽⣿⣿⣿⣿⣻⣽⣿⣿⣿⣿⣿⣻⣗⢕⢹⣿⣿⣿⣿⣿⣽⡿
+            ⣿⣿⣿⣿⣽⣾⣿⣻⣿⣿⣿⣟⣯⣿⣿⣿⣿⣿⣿⣟⣿⣯⣿⣿⡿⢡⡺⡼⣕⢯⢆⢫⢞⢮⡫⣞⢵⡫⣞⢵⡫⣞⢵⡳⣝⢞⢮⡳⣝⣮⣿⣿⣿⣿⣿⣿⣿⣽⣟⣿⣿⣿⣿⣿⣻⣿⣻⣿⣿⣿⣿⣿⣻⣿⣷⣿⣿⣿⣿⣟⣯⡳⡭⣿⣿⣿⣿⣾⣿⣻
+            ⣿⣯⣿⣻⣿⣿⣿⣿⣟⣷⣿⣿⣿⣿⣿⣾⣿⣾⢿⣿⣿⣿⣿⡯⢡⡳⣝⢞⢮⡳⣝⢦⠹⣕⢯⡺⣕⢯⡺⣕⢯⡺⣕⢯⢮⣫⡳⣝⢞⡿⣿⣿⣿⣾⣿⣽⣿⣿⣿⣿⣿⡾⣿⣽⣿⣿⣿⣿⣯⣿⣯⣿⣿⣿⣿⣽⣷⣿⣻⣿⣿⡽⢸⣿⣻⣯⣿⣿⣿⣿
+            ⣷⣿⣟⣿⣿⣿⣿⣿⣻⣯⣷⣿⣿⣿⣿⣿⣾⣿⣿⣿⣿⣿⠟⡰⣝⢮⡳⡽⣕⢯⡺⣝⢵⡈⣗⢽⡪⣗⢽⡪⣗⢽⡪⣗⢗⡵⣽⣾⣷⣿⣾⣿⣿⣾⣿⣽⣿⣿⣿⣿⣷⣿⣿⣿⣿⣿⣿⣿⣯⣷⣿⣿⣿⣿⣿⣿⣽⣿⣻⣿⣿⡏⣾⣿⣻⣿⣿⣿⣿⣿
+            ⣿⣿⣿⣿⣯⣿⣾⣿⣿⣿⣿⣿⣯⣿⣷⣿⣿⣿⡿⠾⠻⢉⢼⣹⡪⣗⢽⡺⣪⢗⡽⣪⢗⡽⡬⡳⣝⢮⡳⣝⢮⡳⣝⣮⣷⣿⣿⣿⣿⣷⢿⣻⣽⣿⣿⣿⡿⣷⡿⣷⣿⣿⣿⣿⣾⣿⣽⣾⣿⣿⣿⣿⣽⣾⡿⣿⣿⣿⣿⣿⣽⡧⣿⣿⣿⣿⣷⣿⣷⡿
+            ⣿⣿⣿⢿⣯⣿⣷⣿⣿⣿⣿⣿⣽⣾⣟⣫⣭⣲⣲⣵⣟⣼⣵⣷⢿⣾⣷⣿⣾⣿⣾⣿⣿⣿⣿⣞⣮⣷⣿⣾⣷⣿⣿⣾⣿⢿⣿⣿⣿⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣿⣯⣿⣿⣿⣿⣿⣽⣿⣿⣿⣿⣿⣿⣷⣿⣿⣿⣿⣿⣿⣿⣾⣷⣿
+        </pre>
+        <p class="troll-title">JEFF HAI ROTTO TUTTO!!!!!</p>
+    </div>
+    
+    <!-- Audio element for troll sound -->
+    <audio id="trollAudio" loop>
+        <source src="https://github.com/lyakhu955/ore-pws/raw/main/A%20Filipino%20Rap%20Battle%20%20Any%20Translators%20(mp3cut.net).mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
 
 </body>
 </html>
