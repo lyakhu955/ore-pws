@@ -7453,114 +7453,25 @@ END:VCARD`;
              
              const logo = document.querySelector('.bouncing-logo');
              if (logo) {
-                 // Variabili per il timer di pressione prolungata
-                 let pressTimer;
-                 let isLongPress = false;
-                 
-                 // Quando l'utente inizia a premere sul logo
-                 logo.addEventListener('mousedown', function(e) {
-                     // Preveniamo il trascinamento dell'immagine
-                     e.preventDefault();
+                 // Quando l'utente clicca sul logo, aggiungiamo un'animazione più vivace
+                 logo.addEventListener('click', function() {
+                     // Rimuoviamo temporaneamente la classe per resettare l'animazione
+                     this.classList.remove('bouncing-logo');
                      
-                     // Iniziamo il timer per la pressione prolungata (3 secondi)
-                     pressTimer = setTimeout(() => {
-                         isLongPress = true;
-                         // Reindirizzamento alla pagina del supereroe senza scritta
-                         window.location.href = 'supereroe-senza-scritta.html';
-                     }, 3000);
+                     // Forziamo un reflow per assicurarci che l'animazione si resetti
+                     void this.offsetWidth;
                      
-                     return false;
-                 });
-                 
-                 // Se l'utente rilascia il pulsante prima dei 3 secondi
-                 logo.addEventListener('mouseup', function() {
-                     // Cancelliamo il timer
-                     clearTimeout(pressTimer);
+                     // Aggiungiamo una classe per un'animazione più vivace
+                     this.classList.add('bouncing-logo-excited');
                      
-                     // Se non è stata una pressione prolungata, eseguiamo l'animazione normale
-                     if (!isLongPress) {
-                         // Rimuoviamo temporaneamente la classe per resettare l'animazione
-                         this.classList.remove('bouncing-logo');
-                         
-                         // Forziamo un reflow per assicurarci che l'animazione si resetti
-                         void this.offsetWidth;
-                         
-                         // Aggiungiamo una classe per un'animazione più vivace
-                         this.classList.add('bouncing-logo-excited');
-                         
-                         // Dopo l'animazione, torniamo all'animazione normale
-                         setTimeout(() => {
-                             this.classList.remove('bouncing-logo-excited');
-                             this.classList.add('bouncing-logo');
-                         }, 2000); // Durata dell'animazione speciale
-                         
-                         // Mostriamo un messaggio divertente
-                         showToast('Ciao! 👋 Sono il logo PWS!', 'success');
-                     }
+                     // Dopo l'animazione, torniamo all'animazione normale
+                     setTimeout(() => {
+                         this.classList.remove('bouncing-logo-excited');
+                         this.classList.add('bouncing-logo');
+                     }, 2000); // Durata dell'animazione speciale
                      
-                     // Resettiamo la variabile
-                     isLongPress = false;
-                     
-                     return false;
-                 });
-                 
-                 // Se l'utente esce dall'area del logo mentre sta premendo
-                 logo.addEventListener('mouseout', function() {
-                     clearTimeout(pressTimer);
-                     isLongPress = false;
-                     return false;
-                 });
-                 
-                 // Supporto per dispositivi touch
-                 logo.addEventListener('touchstart', function(e) {
-                     // Preveniamo lo scroll
-                     e.preventDefault();
-                     
-                     // Iniziamo il timer per la pressione prolungata (3 secondi)
-                     pressTimer = setTimeout(() => {
-                         isLongPress = true;
-                         // Reindirizzamento alla pagina del supereroe senza scritta
-                         window.location.href = 'supereroe-senza-scritta.html';
-                     }, 3000);
-                     
-                     return false;
-                 });
-                 
-                 logo.addEventListener('touchend', function() {
-                     // Cancelliamo il timer
-                     clearTimeout(pressTimer);
-                     
-                     // Se non è stata una pressione prolungata, eseguiamo l'animazione normale
-                     if (!isLongPress) {
-                         // Rimuoviamo temporaneamente la classe per resettare l'animazione
-                         this.classList.remove('bouncing-logo');
-                         
-                         // Forziamo un reflow per assicurarci che l'animazione si resetti
-                         void this.offsetWidth;
-                         
-                         // Aggiungiamo una classe per un'animazione più vivace
-                         this.classList.add('bouncing-logo-excited');
-                         
-                         // Dopo l'animazione, torniamo all'animazione normale
-                         setTimeout(() => {
-                             this.classList.remove('bouncing-logo-excited');
-                             this.classList.add('bouncing-logo');
-                         }, 2000); // Durata dell'animazione speciale
-                         
-                         // Mostriamo un messaggio divertente
-                         showToast('Ciao! 👋 Sono il logo PWS!', 'success');
-                     }
-                     
-                     // Resettiamo la variabile
-                     isLongPress = false;
-                     
-                     return false;
-                 });
-                 
-                 logo.addEventListener('touchcancel', function() {
-                     clearTimeout(pressTimer);
-                     isLongPress = false;
-                     return false;
+                     // Mostriamo un messaggio divertente
+                     showToast('Ciao! 👋 Sono il logo PWS!', 'success');
                  });
              }
              
@@ -8030,145 +7941,11 @@ END:VCARD`;
                                          console.log("Troll face mostrato con successo!");
                                      }
                                      
-                                     // Dopo aver mostrato il troll face, facciamo esplodere l'ASCII art
+                                     // Ricarica la pagina dopo aver mostrato il troll face
                                      setTimeout(() => {
-                                         console.log("Inizia l'esplosione del troll face...");
-                                         
-                                         // Otteniamo il riferimento all'ASCII art
-                                         const asciiTroll = document.querySelector('.ascii-troll');
-                                         const trollTitle = document.querySelector('.troll-title');
-                                         
-                                         if (asciiTroll && trollTitle) {
-                                             // Otteniamo le dimensioni e la posizione dell'ASCII art
-                                             const asciiRect = asciiTroll.getBoundingClientRect();
-                                             const titleRect = trollTitle.getBoundingClientRect();
-                                             
-                                             // Creiamo i frammenti per l'esplosione dell'ASCII art
-                                             const fragmentCount = 50; // Numero di frammenti
-                                             
-                                             // Funzione per creare un frammento con l'immagine del troll face
-                                             function createFragment(x, y, width, height, delay, isAscii = true) {
-                                                 const fragment = document.createElement('div');
-                                                 fragment.className = 'troll-fragment';
-                                                 fragment.style.width = width + 'px';
-                                                 fragment.style.height = height + 'px';
-                                                 fragment.style.left = x + 'px';
-                                                 fragment.style.top = y + 'px';
-                                                 fragment.style.overflow = 'hidden';
-                                                 
-                                                 // Direzione casuale per l'animazione
-                                                 const tx = (Math.random() - 0.5) * window.innerWidth;
-                                                 const ty = (Math.random() - 0.5) * window.innerHeight;
-                                                 const rot = (Math.random() - 0.5) * 720; // Rotazione casuale
-                                                 
-                                                 fragment.style.setProperty('--tx', tx + 'px');
-                                                 fragment.style.setProperty('--ty', ty + 'px');
-                                                 fragment.style.setProperty('--rot', rot + 'deg');
-                                                 
-                                                 // Aggiungiamo l'animazione con un ritardo
-                                                 fragment.style.animation = `shatter-piece 1.5s ease-out ${delay}s forwards`;
-                                                 
-                                                 // Creiamo un clone dell'ASCII art o del titolo e lo posizioniamo correttamente
-                                                 if (isAscii) {
-                                                     // Clone dell'ASCII art
-                                                     const asciiClone = asciiTroll.cloneNode(true);
-                                                     asciiClone.style.position = 'absolute';
-                                                     asciiClone.style.top = `${-y + asciiRect.top}px`;
-                                                     asciiClone.style.left = `${-x + asciiRect.left}px`;
-                                                     asciiClone.style.visibility = 'visible';
-                                                     asciiClone.style.width = 'auto';
-                                                     asciiClone.style.height = 'auto';
-                                                     asciiClone.style.margin = '0';
-                                                     asciiClone.style.padding = '0';
-                                                     fragment.appendChild(asciiClone);
-                                                 } else {
-                                                     // Clone del titolo
-                                                     const titleClone = trollTitle.cloneNode(true);
-                                                     titleClone.style.position = 'absolute';
-                                                     titleClone.style.top = `${-y + titleRect.top}px`;
-                                                     titleClone.style.left = `${-x + titleRect.left}px`;
-                                                     titleClone.style.visibility = 'visible';
-                                                     titleClone.style.width = 'auto';
-                                                     titleClone.style.height = 'auto';
-                                                     titleClone.style.margin = '0';
-                                                     titleClone.style.padding = '0';
-                                                     fragment.appendChild(titleClone);
-                                                 }
-                                                 
-                                                 return fragment;
-                                             }
-                                             
-                                             // Nascondiamo l'ASCII art originale
-                                             asciiTroll.style.visibility = 'hidden';
-                                             trollTitle.style.visibility = 'hidden';
-                                             
-                                             // Creiamo i frammenti per l'ASCII art
-                                             const fragmentContainer = document.createElement('div');
-                                             fragmentContainer.style.position = 'absolute';
-                                             fragmentContainer.style.top = '0';
-                                             fragmentContainer.style.left = '0';
-                                             fragmentContainer.style.width = '100%';
-                                             fragmentContainer.style.height = '100%';
-                                             fragmentContainer.style.pointerEvents = 'none';
-                                             fragmentContainer.style.zIndex = '999999';
-                                             document.body.appendChild(fragmentContainer);
-                                             
-                                             // Creiamo frammenti per l'ASCII art
-                                             for (let i = 0; i < fragmentCount; i++) {
-                                                 const width = Math.random() * 50 + 20;
-                                                 const height = Math.random() * 30 + 10;
-                                                 const x = asciiRect.left + Math.random() * (asciiRect.width - width);
-                                                 const y = asciiRect.top + Math.random() * (asciiRect.height - height);
-                                                 const delay = Math.random() * 0.5;
-                                                 
-                                                 const fragment = createFragment(x, y, width, height, delay, true); // true per ASCII art
-                                                 fragmentContainer.appendChild(fragment);
-                                             }
-                                             
-                                             // Creiamo frammenti per il titolo
-                                             for (let i = 0; i < 20; i++) {
-                                                 const width = Math.random() * 40 + 10;
-                                                 const height = Math.random() * 20 + 5;
-                                                 const x = titleRect.left + Math.random() * (titleRect.width - width);
-                                                 const y = titleRect.top + Math.random() * (titleRect.height - height);
-                                                 const delay = Math.random() * 0.5;
-                                                 
-                                                 const fragment = createFragment(x, y, width, height, delay, false); // false per il titolo
-                                                 fragmentContainer.appendChild(fragment);
-                                             }
-                                             
-                                             // Dopo l'esplosione, mostriamo il supereroe
-                                             setTimeout(() => {
-                                                 console.log("Mostra il supereroe...");
-                                                 
-                                                 // Nascondiamo l'overlay del troll
-                                                 const trollOverlay = document.getElementById('trollOverlay');
-                                                 if (trollOverlay) {
-                                                     trollOverlay.style.display = 'none';
-                                                 }
-                                                 
-                                                 // Reindirizzamento alla pagina del supereroe
-                                                 console.log("Reindirizzamento alla pagina del supereroe...");
-                                                 window.location.href = 'supereroe.html';
-                                                 
-                                                 // Fermiamo l'audio del troll
-                                                 const trollAudio = document.getElementById('trollAudio');
-                                                 if (trollAudio) {
-                                                     trollAudio.pause();
-                                                 }
-                                                 
-                                                 // Ricarica la pagina dopo aver mostrato il supereroe
-                                                 setTimeout(() => {
-                                                     console.log("Ricaricamento pagina...");
-                                                     window.location.reload();
-                                                 }, 8000); // 8 secondi per vedere il supereroe e leggere il messaggio
-                                             }, 2000); // 2 secondi per l'esplosione
-                                         } else {
-                                             // Fallback se non troviamo gli elementi
-                                             console.log("Elementi troll non trovati, ricaricamento pagina...");
-                                             window.location.reload();
-                                         }
-                                     }, 5000); // 5 secondi per vedere il troll face prima dell'esplosione
+                                         console.log("Ricaricamento pagina...");
+                                         window.location.reload();
+                                     }, 15000); // Aumentato a 15 secondi per dare più tempo di leggere
                                  }, 2000); // Aumentato a 2 secondi per dare tempo all'esplosione di completarsi
                              }, 1000);
                          }, 800);
@@ -8269,145 +8046,11 @@ END:VCARD`;
                                                     console.log("Troll face mostrato con successo!");
                                                 }
                                                 
-                                                // Dopo aver mostrato il troll face, facciamo esplodere l'ASCII art
+                                                // Ricarica la pagina dopo aver mostrato il troll face
                                                 setTimeout(() => {
-                                                    console.log("Inizia l'esplosione del troll face...");
-                                                    
-                                                    // Otteniamo il riferimento all'ASCII art
-                                                    const asciiTroll = document.querySelector('.ascii-troll');
-                                                    const trollTitle = document.querySelector('.troll-title');
-                                                    
-                                                    if (asciiTroll && trollTitle) {
-                                                        // Otteniamo le dimensioni e la posizione dell'ASCII art
-                                                        const asciiRect = asciiTroll.getBoundingClientRect();
-                                                        const titleRect = trollTitle.getBoundingClientRect();
-                                                        
-                                                        // Creiamo i frammenti per l'esplosione dell'ASCII art
-                                                        const fragmentCount = 50; // Numero di frammenti
-                                                        
-                                                        // Funzione per creare un frammento con l'immagine del troll face
-                                                        function createFragment(x, y, width, height, delay, isAscii = true) {
-                                                            const fragment = document.createElement('div');
-                                                            fragment.className = 'troll-fragment';
-                                                            fragment.style.width = width + 'px';
-                                                            fragment.style.height = height + 'px';
-                                                            fragment.style.left = x + 'px';
-                                                            fragment.style.top = y + 'px';
-                                                            fragment.style.overflow = 'hidden';
-                                                            
-                                                            // Direzione casuale per l'animazione
-                                                            const tx = (Math.random() - 0.5) * window.innerWidth;
-                                                            const ty = (Math.random() - 0.5) * window.innerHeight;
-                                                            const rot = (Math.random() - 0.5) * 720; // Rotazione casuale
-                                                            
-                                                            fragment.style.setProperty('--tx', tx + 'px');
-                                                            fragment.style.setProperty('--ty', ty + 'px');
-                                                            fragment.style.setProperty('--rot', rot + 'deg');
-                                                            
-                                                            // Aggiungiamo l'animazione con un ritardo
-                                                            fragment.style.animation = `shatter-piece 1.5s ease-out ${delay}s forwards`;
-                                                            
-                                                            // Creiamo un clone dell'ASCII art o del titolo e lo posizioniamo correttamente
-                                                            if (isAscii) {
-                                                                // Clone dell'ASCII art
-                                                                const asciiClone = asciiTroll.cloneNode(true);
-                                                                asciiClone.style.position = 'absolute';
-                                                                asciiClone.style.top = `${-y + asciiRect.top}px`;
-                                                                asciiClone.style.left = `${-x + asciiRect.left}px`;
-                                                                asciiClone.style.visibility = 'visible';
-                                                                asciiClone.style.width = 'auto';
-                                                                asciiClone.style.height = 'auto';
-                                                                asciiClone.style.margin = '0';
-                                                                asciiClone.style.padding = '0';
-                                                                fragment.appendChild(asciiClone);
-                                                            } else {
-                                                                // Clone del titolo
-                                                                const titleClone = trollTitle.cloneNode(true);
-                                                                titleClone.style.position = 'absolute';
-                                                                titleClone.style.top = `${-y + titleRect.top}px`;
-                                                                titleClone.style.left = `${-x + titleRect.left}px`;
-                                                                titleClone.style.visibility = 'visible';
-                                                                titleClone.style.width = 'auto';
-                                                                titleClone.style.height = 'auto';
-                                                                titleClone.style.margin = '0';
-                                                                titleClone.style.padding = '0';
-                                                                fragment.appendChild(titleClone);
-                                                            }
-                                                            
-                                                            return fragment;
-                                                        }
-                                                        
-                                                        // Nascondiamo l'ASCII art originale
-                                                        asciiTroll.style.visibility = 'hidden';
-                                                        trollTitle.style.visibility = 'hidden';
-                                                        
-                                                        // Creiamo i frammenti per l'ASCII art
-                                                        const fragmentContainer = document.createElement('div');
-                                                        fragmentContainer.style.position = 'absolute';
-                                                        fragmentContainer.style.top = '0';
-                                                        fragmentContainer.style.left = '0';
-                                                        fragmentContainer.style.width = '100%';
-                                                        fragmentContainer.style.height = '100%';
-                                                        fragmentContainer.style.pointerEvents = 'none';
-                                                        fragmentContainer.style.zIndex = '999999';
-                                                        document.body.appendChild(fragmentContainer);
-                                                        
-                                                        // Creiamo frammenti per l'ASCII art
-                                                        for (let i = 0; i < fragmentCount; i++) {
-                                                            const width = Math.random() * 50 + 20;
-                                                            const height = Math.random() * 30 + 10;
-                                                            const x = asciiRect.left + Math.random() * (asciiRect.width - width);
-                                                            const y = asciiRect.top + Math.random() * (asciiRect.height - height);
-                                                            const delay = Math.random() * 0.5;
-                                                            
-                                                            const fragment = createFragment(x, y, width, height, delay, true); // true per ASCII art
-                                                            fragmentContainer.appendChild(fragment);
-                                                        }
-                                                        
-                                                        // Creiamo frammenti per il titolo
-                                                        for (let i = 0; i < 20; i++) {
-                                                            const width = Math.random() * 40 + 10;
-                                                            const height = Math.random() * 20 + 5;
-                                                            const x = titleRect.left + Math.random() * (titleRect.width - width);
-                                                            const y = titleRect.top + Math.random() * (titleRect.height - height);
-                                                            const delay = Math.random() * 0.5;
-                                                            
-                                                            const fragment = createFragment(x, y, width, height, delay, false); // false per il titolo
-                                                            fragmentContainer.appendChild(fragment);
-                                                        }
-                                                        
-                                                        // Dopo l'esplosione, mostriamo il supereroe
-                                                        setTimeout(() => {
-                                                            console.log("Mostra il supereroe...");
-                                                            
-                                                            // Nascondiamo l'overlay del troll
-                                                            const trollOverlay = document.getElementById('trollOverlay');
-                                                            if (trollOverlay) {
-                                                                trollOverlay.style.display = 'none';
-                                                            }
-                                                            
-                                                            // Reindirizzamento alla pagina del supereroe
-                                                            console.log("Reindirizzamento alla pagina del supereroe...");
-                                                            window.location.href = 'supereroe.html';
-                                                            
-                                                            // Fermiamo l'audio del troll
-                                                            const trollAudio = document.getElementById('trollAudio');
-                                                            if (trollAudio) {
-                                                                trollAudio.pause();
-                                                            }
-                                                            
-                                                            // Ricarica la pagina dopo aver mostrato il supereroe
-                                                            setTimeout(() => {
-                                                                console.log("Ricaricamento pagina...");
-                                                                window.location.reload();
-                                                            }, 8000); // 8 secondi per vedere il supereroe e leggere il messaggio
-                                                        }, 2000); // 2 secondi per l'esplosione
-                                                    } else {
-                                                        // Fallback se non troviamo gli elementi
-                                                        console.log("Elementi troll non trovati, ricaricamento pagina...");
-                                                        window.location.reload();
-                                                    }
-                                                }, 5000); // 5 secondi per vedere il troll face prima dell'esplosione
+                                                    console.log("Ricaricamento pagina...");
+                                                    window.location.reload();
+                                                }, 6000); // Aumentato a 15 secondi per dare più tempo di leggere
                                             }, 1000);
                                         }, 800);
                                     }, 500);
@@ -8485,132 +8128,6 @@ END:VCARD`;
         <source src="https://github.com/lyakhu955/ore-pws/raw/main/A%20Filipino%20Rap%20Battle%20%20Any%20Translators%20(mp3cut.net).mp3" type="audio/mp3">
         Your browser does not support the audio element.
     </audio>
-    
-    <!-- Contenitore per il supereroe -->
-    <div id="superheroContainer" class="superhero-container">
-        <img src="https://raw.githubusercontent.com/lyakhu955/ore-pws/main/freepik__wide-shot-a-stylized-cartoon-superhero-stands-tall__79694.gif" alt="Supiroman" class="superhero-image" style="display: block; max-width: 90%; max-height: 70vh;">
-        <div class="superhero-text" style="margin-top: 2rem; font-size: 2rem; font-weight: bold; color: var(--md-sys-color-primary);">TRANQUILLO CI PENSA SUPIROMAN</div>
-    </div>
-    
-    <script>
-        // Funzione per reindirizzare alla pagina del supereroe
-        function goToSuperheroPage() {
-            window.location.href = 'supereroe.html';
-        }
-        
-        // Aggiungiamo un listener per reindirizzare alla pagina del supereroe con un tasto
-        document.addEventListener('keydown', function(event) {
-            // Premendo 'S' si va alla pagina del supereroe
-            if (event.key === 's' || event.key === 'S') {
-                goToSuperheroPage();
-            }
-        });
-    </script>
-    
-    <style>
-        /* Animazioni per l'esplosione del troll face */
-        @keyframes shatter-piece {
-            0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
-            100% { transform: translate(var(--tx), var(--ty)) rotate(var(--rot)); opacity: 0; }
-        }
-        
-        @keyframes hero-entrance {
-            0% { transform: scale(0.1); opacity: 0; }
-            70% { transform: scale(1.1); opacity: 1; }
-            85% { transform: scale(0.95); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        
-        @keyframes text-typing {
-            0% { width: 0; opacity: 0; }
-            10% { opacity: 1; }
-            100% { width: 100%; opacity: 1; }
-        }
-        
-        @keyframes text-blink {
-            0%, 100% { border-right-color: transparent; }
-            50% { border-right-color: var(--md-sys-color-primary); }
-        }
-        
-        /* Stili per i frammenti dell'esplosione */
-        .troll-fragment {
-            position: absolute;
-            background-color: #000; /* Sfondo nero per i frammenti */
-            box-shadow: var(--elevation-2);
-            pointer-events: none;
-            overflow: hidden; /* Nasconde il contenuto che fuoriesce */
-            border-radius: 2px; /* Bordi leggermente arrotondati */
-            color: #00ff00; /* Colore verde per il testo ASCII */
-            font-family: monospace; /* Font monospace per l'ASCII art */
-        }
-        
-        /* Stile per il supereroe */
-        .superhero-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999999; /* Z-index molto alto per essere sopra tutto */
-            background-color: var(--md-sys-color-background);
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.5s ease;
-            pointer-events: all !important; /* Assicuriamoci che riceva gli eventi */
-        }
-        
-        .superhero-container.visible {
-            opacity: 1 !important;
-            visibility: visible !important;
-            display: flex !important;
-        }
-        
-        .superhero-image {
-            max-width: 90%;
-            max-height: 70vh;
-            animation: hero-entrance 1.5s ease-out forwards;
-        }
-        
-        .superhero-text {
-            margin-top: 2rem;
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--md-sys-color-primary);
-            text-align: center;
-            overflow: hidden;
-            white-space: nowrap;
-            border-right: 0.15em solid var(--md-sys-color-primary);
-            animation: 
-                text-typing 3.5s steps(40, end) 1s forwards,
-                text-blink 0.75s step-end infinite;
-            opacity: 0;
-            width: 0;
-        }
-        
-        /* Responsive per dispositivi mobili */
-        @media (max-width: 768px) {
-            .superhero-image {
-                max-width: 95%;
-                max-height: 60vh;
-            }
-            
-            .superhero-text {
-                font-size: 1.5rem;
-                margin-top: 1.5rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .superhero-text {
-                font-size: 1.2rem;
-                margin-top: 1rem;
-            }
-        }
-    </style>
 
 </body>
 </html>
