@@ -839,8 +839,8 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 100vw; /* Usa viewport width */
+            height: 100vh; /* Usa viewport height */
             background-color: rgba(0, 0, 0, 0.85);
             display: flex;
             justify-content: center;
@@ -851,15 +851,22 @@
             transition: opacity 0.3s ease, visibility 0.3s ease;
             /* Assicuriamoci che l'overlay non interferisca con i toast */
             pointer-events: auto;
+            /* Assicuriamoci che l'overlay copra l'intera viewport */
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
         .superhero-overlay.visible {
             opacity: 1;
-            visibility: visible;
+            visibility: visible !important;
+            display: flex !important;
         }
         
         .superhero-container {
-            position: relative;
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             display: flex;
@@ -871,8 +878,10 @@
         .superhero-gif {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: cover; /* Riempie l'intero contenitore */
             object-position: center;
+            display: block;
+            margin: 0;
             border-radius: 0;
             box-shadow: none;
         }
@@ -3552,12 +3561,13 @@
                 <img src="https://raw.githubusercontent.com/lyakhu955/ore-pws/main/freepik__wide-shot-a-stylized-cartoon-superhero-stands-tall__79694.gif" 
                      alt="Supereroe PWS" 
                      class="superhero-gif"
-                     loading="lazy"
-                     decoding="async">
+                     loading="eager"
+                     decoding="sync"
+                     style="max-width: 90%; max-height: 90%; display: block; margin: auto;">
             </picture>
         </div>
-        <button class="close-btn" id="closeSuperhero" title="Chiudi">
-            <span class="material-symbols-outlined">close</span>
+        <button class="close-btn" id="closeSuperhero" title="Chiudi" style="position: absolute; top: 20px; right: 20px; z-index: 10001; background-color: rgba(0, 0, 0, 0.5); color: white; border: none; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);">
+            <span class="material-symbols-outlined" style="font-size: 36px;">close</span>
         </button>
         
         <!-- Audio per lo scherzo del pulsante che scappa - Ottimizzato per iOS -->
@@ -7568,7 +7578,7 @@ END:VCARD`;
                  logo.addEventListener('mousedown', function(e) {
                      pressTimer = setTimeout(() => {
                          isLongPress = true;
-                         showSuperheroOverlay();
+                         showSuperheroOverlayDirect(); // Utilizziamo la nuova funzione
                          showToast('Hai sbloccato il supereroe PWS! 🦸‍♂️', 'success');
                      }, 3000); // 3 secondi di pressione
                  });
@@ -7584,13 +7594,11 @@ END:VCARD`;
                      // Avvia il timer per la pressione prolungata
                      pressTimer = setTimeout(() => {
                          isLongPress = true;
-                         showSuperheroOverlay();
+                         showSuperheroOverlayDirect(); // Utilizziamo la nuova funzione
                          showToast('Hai sbloccato il supereroe PWS! 🦸‍♂️', 'success');
                          
-                         // Vibrazione per feedback tattile (se supportato)
-                         if (navigator.vibrate) {
-                             navigator.vibrate([100, 50, 200]);
-                         }
+                         // Disabilitiamo la vibrazione per evitare errori di intervento del browser
+                         console.log("Supereroe attivato senza vibrazione");
                      }, 3000); // 3 secondi di pressione
                  });
                  
@@ -7743,33 +7751,109 @@ END:VCARD`;
                  
                  // Funzione per mostrare l'overlay del supereroe
                  function showSuperheroOverlay() {
+                     console.log("Attivazione overlay supereroe");
                      const overlay = document.getElementById('superheroOverlay');
-                     if (overlay) {
-                         // Precarica la GIF
+                     if (!overlay) {
+                         console.error("Overlay del supereroe non trovato!");
+                         return;
+                     }
+                     
+                     // Mostra un messaggio di caricamento
+                     showToast('Caricamento supereroe in corso...', 'info');
+                     
+                     // Crea un nuovo oggetto Image per precaricare la GIF
+                     const preloadImg = new Image();
+                     const gifUrl = "https://raw.githubusercontent.com/lyakhu955/ore-pws/main/freepik__wide-shot-a-stylized-cartoon-superhero-stands-tall__79694.gif";
+                     
+                     // Aggiungi un timestamp per evitare la cache
+                     preloadImg.src = gifUrl + "?t=" + new Date().getTime();
+                     
+                     // Quando l'immagine è caricata, aggiorna l'overlay
+                     preloadImg.onload = function() {
+                         console.log("GIF precaricata con successo");
+                         
+                         // Trova l'elemento immagine nell'overlay
                          const superheroGif = overlay.querySelector('.superhero-gif');
                          if (superheroGif) {
-                             // Assicurati che la GIF sia caricata prima di mostrarla
-                             superheroGif.onload = function() {
-                                 // Mostra l'overlay con un leggero ritardo per una transizione più fluida
-                                 setTimeout(() => {
-                                     overlay.classList.add('visible');
-                                 }, 100);
-                             };
-                             
-                             // Se l'immagine è già nel cache, forza l'evento onload
-                             if (superheroGif.complete) {
-                                 overlay.classList.add('visible');
-                             } else {
-                                 // Mostra un messaggio di caricamento
-                                 showToast('Caricamento supereroe in corso...', 'info');
-                             }
-                         } else {
-                             overlay.classList.add('visible');
+                             // Aggiorna l'src dell'immagine con quella precaricata
+                             superheroGif.src = preloadImg.src;
+                         }
+                         
+                      // Forza la visibilità dell'overlay
+                            overlay.style.opacity = "1";
+                         overlay.style.visibility = "visible";
+                         overlay.style.display = "flex";
+                         overlay.classList.add('visible');
+                         
+                         // Blocca lo scroll della pagina quando l'overlay è visibile
+                         document.body.style.overflow = 'hidden';
+                     };
+                     
+                     // In caso di errore nel caricamento della GIF
+                     preloadImg.onerror = function() {
+                         console.error("Errore nel caricamento della GIF");
+                         
+                         // Mostra comunque l'overlay
+                         overlay.style.opacity = "1";
+                         overlay.style.visibility = "visible";
+                         overlay.style.display = "flex";
+                         overlay.classList.add('visible');
+                         
+                         // Mostra un messaggio di errore nell'overlay
+                         const container = overlay.querySelector('.superhero-container');
+                         if (container) {
+                             container.innerHTML = '<div style="color: white; font-size: 24px; text-align: center; padding: 20px;">Impossibile caricare il supereroe.<br>Riprova più tardi!</div>';
                          }
                          
                          // Blocca lo scroll della pagina quando l'overlay è visibile
                          document.body.style.overflow = 'hidden';
+                     };
+                 }
+                 
+                 // Nuova funzione per mostrare l'overlay del supereroe direttamente
+                 function showSuperheroOverlayDirect() {
+                     console.log("Attivazione diretta overlay supereroe");
+                     
+                     // Mostra un messaggio di caricamento
+                     showToast('Caricamento supereroe in corso...', 'info');
+                     
+                     // Ottieni l'overlay
+                     const overlay = document.getElementById('superheroOverlay');
+                     if (!overlay) {
+                         console.error("Overlay del supereroe non trovato!");
+                         showToast('Errore: overlay non trovato!', 'error');
+                         return;
                      }
+                     
+                     // Mostra immediatamente l'overlay
+                     overlay.style.opacity = "1";
+                     overlay.style.visibility = "visible";
+                     overlay.style.display = "flex";
+                     overlay.classList.add('visible');
+                     
+                     // Blocca lo scroll della pagina
+                     document.body.style.overflow = 'hidden';
+                     
+                     // Trova il contenitore dell'immagine
+                     const container = overlay.querySelector('.superhero-container');
+                     if (!container) {
+                         console.error("Contenitore del supereroe non trovato!");
+                         return;
+                     }
+                     
+                     // Sostituisci il contenuto con una GIF a schermo intero ottimizzata per tutti i dispositivi
+                     container.innerHTML = `
+                         <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: black;">
+                             <img src="https://raw.githubusercontent.com/lyakhu955/ore-pws/main/freepik__wide-shot-a-stylized-cartoon-superhero-stands-tall__79694.gif?t=${new Date().getTime()}" 
+                                  alt="Supereroe PWS" 
+                                  style="min-width: 100%; min-height: 100%; width: auto; height: auto; object-fit: cover; object-position: center; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                         </div>
+                     `;
+                     
+                     // Mostra un messaggio di successo
+                     setTimeout(() => {
+                         showToast('Supereroe PWS sbloccato! 🦸‍♂️', 'success');
+                     }, 500);
                  }
                  
                  // Gestione del pulsante di chiusura con scherzo
@@ -8037,13 +8121,19 @@ END:VCARD`;
                              setTimeout(() => {
                                  const overlay = document.getElementById('superheroOverlay');
                                  if (overlay) {
+                                     // Forza la chiusura dell'overlay
                                      overlay.classList.remove('visible');
+                                     overlay.style.opacity = "0";
+                                     overlay.style.visibility = "hidden";
+                                     overlay.style.display = "none";
                                      
                                      // Ripristina lo scroll della pagina
                                      document.body.style.overflow = '';
                                      
                                      // Mostra il messaggio RIP
                                      showRIPMessage();
+                                     
+                                     console.log("Overlay chiuso con successo dopo il quinto click");
                                      
                                      // Tentativo aggiuntivo di riproduzione dell'audio funebre (compatibile con iOS)
                                      setTimeout(() => {
@@ -8271,9 +8361,14 @@ END:VCARD`;
                          superheroOverlay.addEventListener('click', function(e) {
                              // Chiudi solo se il click è sull'overlay e non sull'immagine o sul pulsante
                              if (e.target === this && clickCount >= 4) {
+                                 // Forza la chiusura dell'overlay
                                  this.classList.remove('visible');
+                                 this.style.opacity = "0";
+                                 this.style.visibility = "hidden";
+                                 this.style.display = "none";
                                  document.body.style.overflow = '';
                                  showRIPMessage();
+                                 console.log("Overlay chiuso con successo dopo click sull'overlay");
                              } else if (e.target === this) {
                                  showToast("Devi prima cliccare sul pulsante X!", 'info');
                              }
