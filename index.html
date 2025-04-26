@@ -217,191 +217,7 @@
             filter: drop-shadow(0 0 8px var(--md-sys-color-primary));
         }
         
-        /* Stile per il pulsante troll di Jeffrey Chong */
-        .troll-btn {
-            background-color: var(--md-sys-color-tertiary-container);
-            color: var(--md-sys-color-on-tertiary-container);
-            border: none;
-            border-radius: var(--border-radius-full);
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: var(--elevation-1);
-        }
-        
-        .troll-btn:hover {
-            background-color: var(--md-sys-color-tertiary);
-            color: var(--md-sys-color-on-tertiary);
-            transform: scale(1.05);
-            box-shadow: var(--elevation-2);
-        }
-        
-        .troll-btn:active {
-            transform: scale(0.98);
-        }
-        
-        .troll-btn.active {
-            background-color: var(--md-sys-color-error);
-            color: var(--md-sys-color-on-error);
-            animation: pulse 0.5s infinite alternate;
-        }
-        
-        @keyframes pulse {
-            from { transform: scale(1); }
-            to { transform: scale(1.05); }
-        }
-        
-        /* Animazioni per l'effetto troll di Jeffrey Chong */
-        @keyframes translateAnimation1 {
-            0% { transform: translateX(0) rotate(0deg); }
-            25% { transform: translateX(15px) rotate(2deg); }
-            75% { transform: translateX(-15px) rotate(-2deg); }
-            100% { transform: translateX(0) rotate(0deg); }
-        }
-        
-        @keyframes translateAnimation2 {
-            0% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-10px) scale(1.02); }
-            100% { transform: translateY(0) scale(1); }
-        }
-        
-        @keyframes translateAnimation3 {
-            0% { transform: skewX(0deg); }
-            25% { transform: skewX(5deg); }
-            75% { transform: skewX(-5deg); }
-            100% { transform: skewX(0deg); }
-        }
-        
-        @keyframes translateAnimation4 {
-            0% { transform: scale(1) rotate(0deg); }
-            25% { transform: scale(1.03) rotate(1deg); }
-            75% { transform: scale(0.97) rotate(-1deg); }
-            100% { transform: scale(1) rotate(0deg); }
-        }
-        
-        /* Animazione per far sparire e riapparire il pulsante */
-        @keyframes disappearReappear {
-            0% { transform: scale(1) rotate(0deg); opacity: 1; }
-            25% { transform: scale(1.2) rotate(10deg); opacity: 0.8; }
-            50% { transform: scale(0) rotate(180deg); opacity: 0; }
-            75% { transform: scale(0.8) rotate(-10deg); opacity: 0.8; }
-            100% { transform: scale(1) rotate(0deg); opacity: 1; }
-        }
-        
-        /* Stili per l'esplosione finale */
-        .explosion-particle {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background-color: var(--md-sys-color-error);
-            pointer-events: none;
-            z-index: 9999;
-        }
-        
-        @keyframes explode {
-            0% { transform: translate(0, 0) scale(1); opacity: 1; }
-            100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
-        }
-        
-        @keyframes shake-violent {
-            0% { transform: translate(0, 0) rotate(0deg); }
-            10% { transform: translate(-25px, 15px) rotate(-5deg); }
-            20% { transform: translate(20px, -20px) rotate(7deg); }
-            30% { transform: translate(-30px, -10px) rotate(-10deg); }
-            40% { transform: translate(25px, 25px) rotate(12deg); }
-            50% { transform: translate(-20px, -25px) rotate(-15deg); }
-            60% { transform: translate(15px, 10px) rotate(7deg); }
-            70% { transform: translate(-15px, 20px) rotate(-5deg); }
-            80% { transform: translate(10px, -15px) rotate(3deg); }
-            90% { transform: translate(-5px, 5px) rotate(-1deg); }
-            100% { transform: translate(0, 0) rotate(0deg); }
-        }
-        
-        @keyframes glitch {
-            0% { transform: translate(0, 0) skew(0deg, 0deg); filter: hue-rotate(0deg); }
-            10% { transform: translate(-10px, 5px) skew(10deg, 5deg); filter: hue-rotate(90deg); }
-            20% { transform: translate(10px, -5px) skew(-8deg, -3deg); filter: hue-rotate(180deg); }
-            30% { transform: translate(-5px, -10px) skew(0deg, 8deg); filter: hue-rotate(270deg); }
-            40% { transform: translate(5px, 10px) skew(-5deg, -8deg); filter: hue-rotate(360deg); }
-            50% { transform: translate(0, 0) skew(0deg, 0deg); filter: hue-rotate(0deg); }
-            60% { transform: translate(10px, 5px) skew(-10deg, 5deg); filter: hue-rotate(90deg); }
-            70% { transform: translate(-10px, -5px) skew(8deg, -3deg); filter: hue-rotate(180deg); }
-            80% { transform: translate(5px, -10px) skew(0deg, -8deg); filter: hue-rotate(270deg); }
-            90% { transform: translate(-5px, 10px) skew(5deg, 8deg); filter: hue-rotate(360deg); }
-            100% { transform: translate(0, 0) skew(0deg, 0deg); filter: hue-rotate(0deg); }
-        }
-        
-        @keyframes flash {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-            50% { transform: translate(-50%, -50%) scale(3); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(5); opacity: 0; }
-        }
-        
-        /* Stile per l'overlay finale con il troll face */
-        .troll-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000;
-            z-index: 999999;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            visibility: hidden;
-            color: #fff;
-            text-align: center;
-            font-family: monospace;
-        }
-        
-        .troll-overlay.visible {
-            display: flex;
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .troll-overlay .ascii-troll {
-            display: block;
-            visibility: visible;
-            opacity: 1;
-            font-size: 7px;
-            line-height: 6px;
-            color: #00ff00 !important;
-            margin-bottom: 20px;
-            text-shadow: 0 0 5px #00ff00 !important;
-            white-space: pre !important;
-        }
-        
-        .troll-overlay .troll-title {
-            display: block;
-            visibility: visible;
-            opacity: 1;
-            font-size: 36px !important;
-            font-weight: bold !important;
-            color: #ff0000 !important;
-            text-shadow: 0 0 10px #ff0000 !important;
-            animation: blink 0.5s infinite !important;
-            content: "JEFF HAI ROTTO TUTTO!!!!!";
-        }
-        
-        body.troll-active {
-            overflow: hidden;
-        }
-        
-        @keyframes blink {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
+        /* Removed troll button styles */
 
         main {
             padding: 1rem;
@@ -1018,191 +834,234 @@
             filter: drop-shadow(0 0 8px var(--md-sys-color-primary));
         }
         
-        /* Stile per il pulsante troll di Jeffrey Chong */
-        .troll-btn {
-            background-color: var(--md-sys-color-tertiary-container);
-            color: var(--md-sys-color-on-tertiary-container);
-            border: none;
-            border-radius: var(--border-radius-full);
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: var(--elevation-1);
-        }
-        
-        .troll-btn:hover {
-            background-color: var(--md-sys-color-tertiary);
-            color: var(--md-sys-color-on-tertiary);
-            transform: scale(1.05);
-            box-shadow: var(--elevation-2);
-        }
-        
-        .troll-btn:active {
-            transform: scale(0.98);
-        }
-        
-        .troll-btn.active {
-            background-color: var(--md-sys-color-error);
-            color: var(--md-sys-color-on-error);
-            animation: pulse 0.5s infinite alternate;
-        }
-        
-        @keyframes pulse {
-            from { transform: scale(1); }
-            to { transform: scale(1.05); }
-        }
-        
-        /* Animazioni per l'effetto troll di Jeffrey Chong */
-        @keyframes translateAnimation1 {
-            0% { transform: translateX(0) rotate(0deg); }
-            25% { transform: translateX(15px) rotate(2deg); }
-            75% { transform: translateX(-15px) rotate(-2deg); }
-            100% { transform: translateX(0) rotate(0deg); }
-        }
-        
-        @keyframes translateAnimation2 {
-            0% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-10px) scale(1.02); }
-            100% { transform: translateY(0) scale(1); }
-        }
-        
-        @keyframes translateAnimation3 {
-            0% { transform: skewX(0deg); }
-            25% { transform: skewX(5deg); }
-            75% { transform: skewX(-5deg); }
-            100% { transform: skewX(0deg); }
-        }
-        
-        @keyframes translateAnimation4 {
-            0% { transform: scale(1) rotate(0deg); }
-            25% { transform: scale(1.03) rotate(1deg); }
-            75% { transform: scale(0.97) rotate(-1deg); }
-            100% { transform: scale(1) rotate(0deg); }
-        }
-        
-        /* Animazione per far sparire e riapparire il pulsante */
-        @keyframes disappearReappear {
-            0% { transform: scale(1) rotate(0deg); opacity: 1; }
-            25% { transform: scale(1.2) rotate(10deg); opacity: 0.8; }
-            50% { transform: scale(0) rotate(180deg); opacity: 0; }
-            75% { transform: scale(0.8) rotate(-10deg); opacity: 0.8; }
-            100% { transform: scale(1) rotate(0deg); opacity: 1; }
-        }
-        
-        /* Stili per l'esplosione finale */
-        .explosion-particle {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background-color: var(--md-sys-color-error);
-            pointer-events: none;
-            z-index: 9999;
-        }
-        
-        @keyframes explode {
-            0% { transform: translate(0, 0) scale(1); opacity: 1; }
-            100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
-        }
-        
-        @keyframes shake-violent {
-            0% { transform: translate(0, 0) rotate(0deg); }
-            10% { transform: translate(-25px, 15px) rotate(-5deg); }
-            20% { transform: translate(20px, -20px) rotate(7deg); }
-            30% { transform: translate(-30px, -10px) rotate(-10deg); }
-            40% { transform: translate(25px, 25px) rotate(12deg); }
-            50% { transform: translate(-20px, -25px) rotate(-15deg); }
-            60% { transform: translate(15px, 10px) rotate(7deg); }
-            70% { transform: translate(-15px, 20px) rotate(-5deg); }
-            80% { transform: translate(10px, -15px) rotate(3deg); }
-            90% { transform: translate(-5px, 5px) rotate(-1deg); }
-            100% { transform: translate(0, 0) rotate(0deg); }
-        }
-        
-        @keyframes glitch {
-            0% { transform: translate(0, 0) skew(0deg, 0deg); filter: hue-rotate(0deg); }
-            10% { transform: translate(-10px, 5px) skew(10deg, 5deg); filter: hue-rotate(90deg); }
-            20% { transform: translate(10px, -5px) skew(-8deg, -3deg); filter: hue-rotate(180deg); }
-            30% { transform: translate(-5px, -10px) skew(0deg, 8deg); filter: hue-rotate(270deg); }
-            40% { transform: translate(5px, 10px) skew(-5deg, -8deg); filter: hue-rotate(360deg); }
-            50% { transform: translate(0, 0) skew(0deg, 0deg); filter: hue-rotate(0deg); }
-            60% { transform: translate(10px, 5px) skew(-10deg, 5deg); filter: hue-rotate(90deg); }
-            70% { transform: translate(-10px, -5px) skew(8deg, -3deg); filter: hue-rotate(180deg); }
-            80% { transform: translate(5px, -10px) skew(0deg, -8deg); filter: hue-rotate(270deg); }
-            90% { transform: translate(-5px, 10px) skew(5deg, 8deg); filter: hue-rotate(360deg); }
-            100% { transform: translate(0, 0) skew(0deg, 0deg); filter: hue-rotate(0deg); }
-        }
-        
-        @keyframes flash {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-            50% { transform: translate(-50%, -50%) scale(3); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(5); opacity: 0; }
-        }
-        
-        /* Stile per l'overlay finale con il troll face */
-        .troll-overlay {
+        /* Stili per l'overlay della GIF del supereroe */
+        .superhero-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #000;
-            z-index: 999999;
-            display: none;
-            flex-direction: column;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: flex;
             justify-content: center;
             align-items: center;
+            z-index: 9999;
             opacity: 0;
             visibility: hidden;
-            color: #fff;
-            text-align: center;
-            font-family: monospace;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            /* Assicuriamoci che l'overlay non interferisca con i toast */
+            pointer-events: auto;
         }
         
-        .troll-overlay.visible {
+        .superhero-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .superhero-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
             display: flex;
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .troll-overlay .ascii-troll {
-            display: block;
-            visibility: visible;
-            opacity: 1;
-            font-size: 7px;
-            line-height: 6px;
-            color: #00ff00 !important;
-            margin-bottom: 20px;
-            text-shadow: 0 0 5px #00ff00 !important;
-            white-space: pre !important;
-        }
-        
-        .troll-overlay .troll-title {
-            display: block;
-            visibility: visible;
-            opacity: 1;
-            font-size: 36px !important;
-            font-weight: bold !important;
-            color: #ff0000 !important;
-            text-shadow: 0 0 10px #ff0000 !important;
-            animation: blink 0.5s infinite !important;
-            content: "JEFF HAI ROTTO TUTTO!!!!!";
-        }
-        
-        body.troll-active {
+            justify-content: center;
+            align-items: center;
             overflow: hidden;
         }
         
-        @keyframes blink {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+        .superhero-gif {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            border-radius: 0;
+            box-shadow: none;
         }
+        
+        /* Stile specifico per desktop */
+        @media (min-width: 1024px) {
+            .superhero-container {
+                width: 90%;
+                max-width: 1200px;
+                height: auto;
+                max-height: 90vh;
+            }
+            
+            .superhero-gif {
+                object-fit: contain;
+                border-radius: var(--border-radius-large);
+                box-shadow: var(--elevation-5);
+            }
+        }
+        
+        .close-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: var(--md-sys-color-error);
+            color: var(--md-sys-color-on-error);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: var(--elevation-5);
+            z-index: 10000;
+            transition: all 0.3s ease;
+            animation: pulse-animation 1.5s infinite;
+            font-size: 1.5rem;
+        }
+        
+        .close-btn .material-symbols-outlined {
+            font-size: 30px;
+            font-weight: bold;
+        }
+        
+        .close-btn:hover, .close-btn:active {
+            background-color: #d32f2f;
+            transform: scale(1.1);
+            animation-play-state: paused;
+        }
+        
+        /* Stile per il messaggio RIP */
+        .rip-message {
+            position: fixed;
+            top: 0;
+            left: 50%; /* Posizionato al centro */
+            transform: translateX(-50%) translateY(-100%); /* Inizialmente fuori dallo schermo */
+            background-color: #000000;
+            color: #ffffff;
+            padding: 10px 15px;
+            border-radius: 0 0 var(--border-radius-medium) var(--border-radius-medium);
+            box-shadow: var(--elevation-3);
+            z-index: 1001; /* Sopra l'header ma sotto il pulsante di chiusura */
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.5s ease;
+            font-weight: bold;
+            min-width: 200px;
+            text-align: center;
+        }
+        
+        .rip-message.visible {
+            transform: translateX(-50%) translateY(0); /* Scende dall'alto */
+        }
+        
+        .rip-message::before {
+            content: "☠️";
+            font-size: 1.2rem;
+        }
+        
+        .rip-message::after {
+            content: "☠️";
+            font-size: 1.2rem;
+        }
+        
+        /* Animazione principale per il pulsante che scappa - stile cartoon */
+        @keyframes escape-animation {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); filter: brightness(1); }
+            10% { transform: translate(-40px, -30px) scale(1.3) rotate(-15deg); filter: brightness(1.2); }
+            20% { transform: translate(35px, 45px) scale(0.7) rotate(20deg); filter: brightness(0.9); }
+            30% { transform: translate(50px, 60px) scale(1.4) rotate(-25deg); filter: brightness(1.3); }
+            40% { transform: translate(-45px, -55px) scale(0.6) rotate(30deg); filter: brightness(0.8); }
+            50% { transform: translate(60px, 20px) scale(1.2) rotate(-35deg); filter: brightness(1.4); }
+            60% { transform: translate(-55px, 50px) scale(0.8) rotate(40deg); filter: brightness(0.7); }
+            70% { transform: translate(40px, -40px) scale(1.5) rotate(-45deg); filter: brightness(1.5); }
+            80% { transform: translate(-60px, -25px) scale(0.7) rotate(50deg); filter: brightness(0.9); }
+            90% { transform: translate(50px, 55px) scale(1.3) rotate(-55deg); filter: brightness(1.3); }
+            100% { transform: translate(0, 0) scale(1) rotate(0deg); filter: brightness(1); }
+        }
+        
+        /* Animazione per l'effetto di squash e stretch */
+        @keyframes squash-stretch {
+            0%, 100% { transform: scale(1, 1); }
+            25% { transform: scale(1.3, 0.7); }
+            50% { transform: scale(0.7, 1.3); }
+            75% { transform: scale(1.1, 0.9); }
+        }
+        
+        /* Animazione per l'effetto di vibrazione */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px) rotate(-2deg); }
+            20%, 40%, 60%, 80% { transform: translateX(5px) rotate(2deg); }
+        }
+        
+        /* Classe per il pulsante che scappa */
+        .escaping {
+            animation: escape-animation 0.4s infinite;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
+            transition: all 0.1s ease;
+            z-index: 10000;
+            position: fixed !important;
+        }
+        
+        /* Effetto hover sul pulsante che scappa */
+        .escaping:hover {
+            animation-duration: 0.2s !important;
+            filter: hue-rotate(180deg) brightness(1.5);
+        }
+        
+        /* Animazione di morte per il pulsante */
+        @keyframes button-death {
+            0% { transform: scale(1) rotate(0deg); opacity: 1; filter: brightness(1); box-shadow: 0 0 20px red; }
+            10% { transform: scale(1.5) rotate(10deg); opacity: 0.9; filter: brightness(1.5) hue-rotate(30deg); box-shadow: 0 0 30px orange; }
+            20% { transform: scale(0.8) rotate(-15deg); opacity: 0.8; filter: brightness(0.8) hue-rotate(60deg); box-shadow: 0 0 40px yellow; }
+            30% { transform: scale(1.3) rotate(20deg); opacity: 0.7; filter: brightness(1.3) hue-rotate(90deg); box-shadow: 0 0 50px green; }
+            40% { transform: scale(0.7) rotate(-25deg); opacity: 0.6; filter: brightness(0.7) hue-rotate(120deg); box-shadow: 0 0 60px blue; }
+            50% { transform: scale(1.2) rotate(30deg); opacity: 0.5; filter: brightness(1.2) hue-rotate(150deg); box-shadow: 0 0 70px indigo; }
+            60% { transform: scale(0.6) rotate(-35deg); opacity: 0.4; filter: brightness(0.6) hue-rotate(180deg); box-shadow: 0 0 80px violet; }
+            70% { transform: scale(1.1) rotate(40deg); opacity: 0.3; filter: brightness(1.1) hue-rotate(210deg); box-shadow: 0 0 90px red; }
+            80% { transform: scale(0.5) rotate(-45deg); opacity: 0.2; filter: brightness(0.5) hue-rotate(240deg); box-shadow: 0 0 100px orange; }
+            90% { transform: scale(0.3) rotate(50deg); opacity: 0.1; filter: brightness(0.3) hue-rotate(270deg); box-shadow: 0 0 110px yellow; }
+            100% { transform: scale(0) rotate(360deg); opacity: 0; filter: brightness(0) hue-rotate(360deg); box-shadow: 0 0 120px white; }
+        }
+        
+        .dying-button {
+            animation: button-death 2s forwards !important;
+            position: fixed !important;
+            z-index: 10000 !important;
+            pointer-events: none !important;
+            /* Assicurati che non ci siano altre animazioni in esecuzione */
+            transform-origin: center !important;
+            will-change: transform, opacity, filter, box-shadow !important;
+        }
+        
+        @keyframes pulse-animation {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.7);
+            }
+            70% {
+                transform: scale(1.1);
+                box-shadow: 0 0 0 10px rgba(255, 82, 82, 0);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 82, 82, 0);
+            }
+        }
+        
+        /* Stili per dispositivi mobili */
+        @media (max-width: 768px) {
+            .close-btn {
+                top: 15px;
+                right: 15px;
+                width: 45px;
+                height: 45px;
+            }
+            
+            .close-btn .material-symbols-outlined {
+                font-size: 24px;
+            }
+        }
+        /* Removed troll-related JavaScript functionality */
+        /* Removed troll-related event listeners and functions */
 
         main {
             padding: 1rem;
@@ -2433,13 +2292,14 @@
              bottom: 90px; /* Above bottom nav */
              left: 50%;
              transform: translateX(-50%);
-             z-index: 1100;
+             z-index: 10000; /* Aumentato per essere sopra l'overlay del supereroe */
              display: flex;
              flex-direction: column;
              align-items: center;
              gap: 0.5rem;
              width: fit-content; /* Only as wide as needed */
              max-width: 90%;
+             pointer-events: none; /* Permette di cliccare attraverso il container */
          }
         .message, .toast {
             padding: 0.875rem 1.5rem;
@@ -2452,6 +2312,8 @@
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bounce effect */
             box-shadow: var(--elevation-3);
             font-size: 0.9rem;
+            border: 2px solid var(--md-sys-color-primary); /* Bordo per maggiore visibilità */
+            pointer-events: auto; /* Permette interazione con il toast */
              width: 100%;
              text-align: center;
         }
@@ -3053,6 +2915,130 @@
             align-items: center;
         }
         /* --- End Calendar Summary Styles --- */
+        
+        /* --- Gratta e Vinci Styles --- */
+        .scratch-card-btn {
+            background-color: #FF6B00; /* Arancione brillante */
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            animation: pulse-slow 3s infinite;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            box-shadow: 0 0 10px rgba(255, 107, 0, 0.5);
+            margin-right: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .scratch-card-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px #FF6B00;
+            background-color: #FF8C00;
+        }
+        
+        @keyframes pulse-slow {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        #scratchCardOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        
+        #scratchCardOverlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .scratch-card-container {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            background-color: var(--md-sys-color-surface);
+            border-radius: var(--border-radius-medium);
+            box-shadow: var(--elevation-3);
+            overflow: hidden;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        
+        #scratchCardOverlay.visible .scratch-card-container {
+            transform: scale(1);
+        }
+        
+        .scratch-card-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+            color: var(--md-sys-color-on-surface);
+            font-size: 1.2rem;
+            font-weight: bold;
+            z-index: 1;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><text x="50%" y="50%" font-family="Arial" font-size="6" fill="%23cccccc" text-anchor="middle" dominant-baseline="middle">PWS</text></svg>');
+            background-repeat: repeat;
+        }
+        
+        .scratch-card-content p {
+            background-color: var(--md-sys-color-surface);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .scratch-card-content span {
+            color: var(--md-sys-color-primary);
+            font-size: 1.5rem;
+            margin-top: 10px;
+            background-color: var(--md-sys-color-surface);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        #scratchCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="%23ffffff" stroke="%23000000" stroke-width="1" opacity="0.7"/><circle cx="16" cy="16" r="4" fill="%23000000" opacity="0.5"/></svg>') 16 16, auto;
+            border-radius: var(--border-radius-medium);
+            transition: opacity 0.5s ease;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .scratch-card-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 3;
+        }
 
     </style>
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
@@ -3069,9 +3055,10 @@
                      class="bouncing-logo">
             </div>
             <div class="header-actions">
-                <button id="jeffreyChongBtn" class="troll-btn">
-                    <span class="material-symbols-outlined">translate</span>
-                    Jeffrey Chong
+                <!-- Pulsante Gratta e Vinci -->
+                <button id="scratchCardBtn" class="btn scratch-card-btn">
+                    <span class="material-symbols-outlined">redeem</span>
+                    Gratta e Vinci
                 </button>
             </div>
         </div>
@@ -3538,7 +3525,51 @@
 
     <!-- Toast Notification Placeholder -->
     <div id="toast-container"></div>
+    
+    <!-- Gratta e Vinci Overlay -->
+    <div id="scratchCardOverlay">
+        <button class="scratch-card-close" id="closeScratchCard">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+        <div class="scratch-card-container">
+            <div class="scratch-card-content">
+                <p>Bravo hai vinto una lavatrice!!!</p>
+                <span>Ora torna a lavorare PIRLA!</span>
+            </div>
+            <!-- Canvas per il grattamento realistico -->
+            <canvas id="scratchCanvas"></canvas>
+        </div>
+    </div>
 
+    <!-- Overlay per la GIF del supereroe -->
+    <div id="superheroOverlay" class="superhero-overlay">
+        <div class="superhero-container">
+            <img src="https://raw.githubusercontent.com/lyakhu955/ore-pws/main/freepik__wide-shot-a-stylized-cartoon-superhero-stands-tall__79694.gif" 
+                 alt="Supereroe PWS" 
+                 class="superhero-gif"
+                 loading="lazy">
+        </div>
+        <button class="close-btn" id="closeSuperhero" title="Chiudi">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+        <!-- Audio per lo scherzo del pulsante che scappa -->
+        <!-- Utilizziamo i file dalla repository GitHub -->
+        <audio id="screamAudio1" preload="auto">
+            <source src="https://raw.githubusercontent.com/lyakhu955/ore-pws/main/audio/help.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="screamAudio2" preload="auto">
+            <source src="https://raw.githubusercontent.com/lyakhu955/ore-pws/main/audio/r2d2.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="screamAudio3" preload="auto">
+            <source src="https://raw.githubusercontent.com/lyakhu955/ore-pws/main/audio/cry.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="screamAudio4" preload="auto">
+            <source src="https://raw.githubusercontent.com/lyakhu955/ore-pws/main/audio/germano.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="funeralAudio" preload="auto">
+            <source src="https://raw.githubusercontent.com/lyakhu955/ore-pws/main/audio/funeral.mp3" type="audio/mpeg">
+        </audio>
+    </div>
 
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -3706,29 +3737,46 @@
                  return; // Exit if container doesn't exist
              }
 
+            // Assicuriamoci che il container sia visibile e sopra tutto
+            container.style.zIndex = "10000";
+            
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             toast.textContent = message;
-
+            
+            // Aggiungiamo stile inline per assicurarci che sia visibile
+            toast.style.backgroundColor = type === 'warning' ? '#FFA726' : 
+                                         type === 'error' ? '#EF5350' : 
+                                         type === 'success' ? '#66BB6A' : '#42A5F5';
+            toast.style.color = '#FFFFFF';
+            toast.style.fontWeight = 'bold';
+            toast.style.fontSize = '1rem';
+            toast.style.border = '2px solid #FFFFFF';
+            toast.style.zIndex = "10001"; // Assicuriamoci che sia sopra tutto
+            
             container.appendChild(toast);
+
+            console.log("Toast creato:", message); // Log per debug
 
             // Trigger transition for appearance
             requestAnimationFrame(() => {
                  // We need a double requestAnimationFrame to ensure the transition works on add
                 requestAnimationFrame(() => {
                      toast.classList.add('show');
+                     console.log("Toast mostrato:", message); // Log per debug
                  });
             });
-
 
             // Remove toast after duration
             setTimeout(() => {
                 toast.classList.remove('show');
+                console.log("Toast nascosto:", message); // Log per debug
                 // Remove from DOM after transition ends
                 toast.addEventListener('transitionend', () => {
                     // Check if the element still has a parent before removing
                     if (toast.parentNode) {
                         toast.parentNode.removeChild(toast);
+                        console.log("Toast rimosso:", message); // Log per debug
                     }
                 }, { once: true }); // Use {once: true} for cleaner event handling
             }, duration);
@@ -7453,8 +7501,18 @@ END:VCARD`;
              
              const logo = document.querySelector('.bouncing-logo');
              if (logo) {
+                 // Variabili per gestire la pressione prolungata
+                 let pressTimer;
+                 let isLongPress = false;
+                 
                  // Quando l'utente clicca sul logo, aggiungiamo un'animazione più vivace
-                 logo.addEventListener('click', function() {
+                 logo.addEventListener('click', function(e) {
+                     // Se è una pressione prolungata, non eseguiamo l'animazione normale
+                     if (isLongPress) {
+                         isLongPress = false;
+                         return;
+                     }
+                     
                      // Rimuoviamo temporaneamente la classe per resettare l'animazione
                      this.classList.remove('bouncing-logo');
                      
@@ -7473,661 +7531,995 @@ END:VCARD`;
                      // Mostriamo un messaggio divertente
                      showToast('Ciao! 👋 Sono il logo PWS!', 'success');
                  });
+                 
+                 // Gestione della pressione prolungata (3 secondi)
+                 logo.addEventListener('mousedown', function(e) {
+                     pressTimer = setTimeout(() => {
+                         isLongPress = true;
+                         showSuperheroOverlay();
+                         showToast('Hai sbloccato il supereroe PWS! 🦸‍♂️', 'success');
+                     }, 3000); // 3 secondi di pressione
+                 });
+                 
+                 // Supporto per dispositivi touch
+                 logo.addEventListener('touchstart', function(e) {
+                     // Previeni lo scroll durante la pressione prolungata
+                     e.preventDefault();
+                     
+                     // Mostra un feedback visivo durante la pressione
+                     this.style.filter = 'brightness(1.2) drop-shadow(0 0 10px var(--md-sys-color-primary))';
+                     
+                     // Avvia il timer per la pressione prolungata
+                     pressTimer = setTimeout(() => {
+                         isLongPress = true;
+                         showSuperheroOverlay();
+                         showToast('Hai sbloccato il supereroe PWS! 🦸‍♂️', 'success');
+                         
+                         // Vibrazione per feedback tattile (se supportato)
+                         if (navigator.vibrate) {
+                             navigator.vibrate([100, 50, 200]);
+                         }
+                     }, 3000); // 3 secondi di pressione
+                 });
+                 
+                 // Cancella il timer se l'utente rilascia prima dei 3 secondi
+                 logo.addEventListener('mouseup', function() {
+                     clearTimeout(pressTimer);
+                     this.style.filter = '';
+                 });
+                 
+                 logo.addEventListener('mouseleave', function() {
+                     clearTimeout(pressTimer);
+                     this.style.filter = '';
+                 });
+                 
+                 logo.addEventListener('touchend', function() {
+                     clearTimeout(pressTimer);
+                     this.style.filter = '';
+                 });
+                 
+                 logo.addEventListener('touchcancel', function() {
+                     clearTimeout(pressTimer);
+                     this.style.filter = '';
+                 });
+                 
+                 // Funzione per inizializzare il Gratta e Vinci
+                 function initScratchCard() {
+                     console.log("Inizializzazione Gratta e Vinci...");
+                     const scratchCardBtn = document.getElementById('scratchCardBtn');
+                     const scratchCardOverlay = document.getElementById('scratchCardOverlay');
+                     const scratchCardCover = document.getElementById('scratchCardCover');
+                     const closeScratchCard = document.getElementById('closeScratchCard');
+                     
+                     console.log("Elementi trovati:", {
+                         scratchCardBtn: !!scratchCardBtn,
+                         scratchCardOverlay: !!scratchCardOverlay,
+                         scratchCardCover: !!scratchCardCover,
+                         closeScratchCard: !!closeScratchCard
+                     });
+                     
+                     if (!scratchCardBtn || !scratchCardOverlay || !scratchCardCover || !closeScratchCard) {
+                         console.error("Elementi del Gratta e Vinci non trovati");
+                         return;
+                     }
+                     
+                     // Apri il Gratta e Vinci quando si clicca sul pulsante
+                     scratchCardBtn.onclick = function() {
+                         console.log("Pulsante Gratta e Vinci cliccato");
+                         scratchCardOverlay.classList.add('visible');
+                         document.body.style.overflow = 'hidden'; // Blocca lo scroll
+                     };
+                     
+                     // Chiudi il Gratta e Vinci quando si clicca sul pulsante di chiusura
+                     closeScratchCard.onclick = function() {
+                         console.log("Pulsante di chiusura Gratta e Vinci cliccato");
+                         scratchCardOverlay.classList.remove('visible');
+                         document.body.style.overflow = ''; // Ripristina lo scroll
+                     };
+                     
+                     // Gestisci il grattamento
+                     let isScratching = false;
+                     let scratchedPercentage = 0;
+                     const totalArea = scratchCardCover.offsetWidth * scratchCardCover.offsetHeight;
+                     const scratchedPixels = new Set();
+                     
+                     // Funzione per calcolare la percentuale grattata
+                     function calculateScratchedPercentage(x, y, radius) {
+                         const pixelRadius = radius * 5; // Aumenta l'area grattata
+                         
+                         for (let i = -pixelRadius; i <= pixelRadius; i++) {
+                             for (let j = -pixelRadius; j <= pixelRadius; j++) {
+                                 if (i*i + j*j <= pixelRadius*pixelRadius) {
+                                     const pixelX = Math.floor(x + i);
+                                     const pixelY = Math.floor(y + j);
+                                     const pixelKey = `${pixelX},${pixelY}`;
+                                     
+                                     if (!scratchedPixels.has(pixelKey)) {
+                                         scratchedPixels.add(pixelKey);
+                                     }
+                                 }
+                             }
+                         }
+                         
+                         return (scratchedPixels.size / totalArea) * 100;
+                     }
+                     
+                     // Funzione per grattare
+                     function scratch(e) {
+                         if (!isScratching) return;
+                         
+                         const rect = scratchCardCover.getBoundingClientRect();
+                         let x, y;
+                         
+                         // Supporto per touch e mouse
+                         if (e.type.includes('touch')) {
+                             const touch = e.touches[0] || e.changedTouches[0];
+                             x = touch.clientX - rect.left;
+                             y = touch.clientY - rect.top;
+                         } else {
+                             x = e.clientX - rect.left;
+                             y = e.clientY - rect.top;
+                         }
+                         
+                         // Crea un effetto di trasparenza dove si gratta
+                         const radius = 20;
+                         scratchCardCover.style.background = `radial-gradient(circle at ${x}px ${y}px, transparent ${radius}px, rgba(255, 215, 0, 0.9) ${radius + 1}px)`;
+                         
+                         // Aggiorna la percentuale grattata
+                         scratchedPercentage = calculateScratchedPercentage(x, y, radius);
+                         
+                         // Se è stato grattato abbastanza, rivela il contenuto
+                         if (scratchedPercentage > 30) {
+                             scratchCardCover.style.opacity = '0';
+                             setTimeout(() => {
+                                 scratchCardCover.style.display = 'none';
+                             }, 500);
+                             
+                             // Rimuovi gli event listener
+                             scratchCardCover.removeEventListener('mousedown', startScratching);
+                             scratchCardCover.removeEventListener('mousemove', scratch);
+                             scratchCardCover.removeEventListener('mouseup', stopScratching);
+                             scratchCardCover.removeEventListener('mouseleave', stopScratching);
+                             scratchCardCover.removeEventListener('touchstart', startScratching);
+                             scratchCardCover.removeEventListener('touchmove', scratch);
+                             scratchCardCover.removeEventListener('touchend', stopScratching);
+                         }
+                     }
+                     
+                     // Funzione per iniziare a grattare
+                     function startScratching(e) {
+                         isScratching = true;
+                         scratch(e);
+                     }
+                     
+                     // Funzione per smettere di grattare
+                     function stopScratching() {
+                         isScratching = false;
+                     }
+                     
+                     // Aggiungi gli event listener per il grattamento
+                     scratchCardCover.addEventListener('mousedown', startScratching);
+                     scratchCardCover.addEventListener('mousemove', scratch);
+                     scratchCardCover.addEventListener('mouseup', stopScratching);
+                     scratchCardCover.addEventListener('mouseleave', stopScratching);
+                     
+                     // Supporto per dispositivi touch
+                     scratchCardCover.addEventListener('touchstart', startScratching);
+                     scratchCardCover.addEventListener('touchmove', scratch);
+                     scratchCardCover.addEventListener('touchend', stopScratching);
+                 }
+                 
+                 // Funzione per mostrare l'overlay del supereroe
+                 function showSuperheroOverlay() {
+                     const overlay = document.getElementById('superheroOverlay');
+                     if (overlay) {
+                         // Precarica la GIF
+                         const superheroGif = overlay.querySelector('.superhero-gif');
+                         if (superheroGif) {
+                             // Assicurati che la GIF sia caricata prima di mostrarla
+                             superheroGif.onload = function() {
+                                 // Mostra l'overlay con un leggero ritardo per una transizione più fluida
+                                 setTimeout(() => {
+                                     overlay.classList.add('visible');
+                                 }, 100);
+                             };
+                             
+                             // Se l'immagine è già nel cache, forza l'evento onload
+                             if (superheroGif.complete) {
+                                 overlay.classList.add('visible');
+                             } else {
+                                 // Mostra un messaggio di caricamento
+                                 showToast('Caricamento supereroe in corso...', 'info');
+                             }
+                         } else {
+                             overlay.classList.add('visible');
+                         }
+                         
+                         // Blocca lo scroll della pagina quando l'overlay è visibile
+                         document.body.style.overflow = 'hidden';
+                     }
+                 }
+                 
+                 // Gestione del pulsante di chiusura con scherzo
+                 const closeBtn = document.getElementById('closeSuperhero');
+                 if (closeBtn) {
+                     // Contatore per tenere traccia dei tentativi di click
+                     let clickCount = 0;
+                     let isEscaping = false;
+                     let isAudioPlaying = false; // Flag per tracciare se un audio è in riproduzione
+                     
+                     // Funzione per fermare tutti gli audio
+                     function stopAllAudio() {
+                         audioElements.forEach(audioEl => {
+                             if (audioEl) {
+                                 audioEl.pause();
+                                 audioEl.currentTime = 0;
+                             }
+                         });
+                     }
+                     
+                     // Array di messaggi da mostrare
+                     const messages = [
+                         "Perchè mi vuoi schiacciare???",
+                         "Hey guarda che fa male!!!",
+                         "Ti prego ho una famiglia!!!",
+                         "Va bene facciamola finita sono stanco di correre"
+                     ];
+                     
+                     // Array di elementi audio
+                     const audioElements = [
+                         document.getElementById('screamAudio1'),
+                         document.getElementById('screamAudio2'),
+                         document.getElementById('screamAudio3'),
+                         document.getElementById('screamAudio4')
+                     ];
+                     
+                     // Funzione per far scappare il pulsante in una posizione casuale con effetti cartoon
+                     function escapeTo(button) {
+                         // Ottieni le dimensioni della finestra
+                         const windowWidth = window.innerWidth;
+                         const windowHeight = window.innerHeight;
+                         
+                         // Calcola una posizione casuale all'interno della finestra
+                         // Lascia un margine più piccolo per movimenti più ampi
+                         const margin = 50;
+                         const randomX = Math.max(margin, Math.min(windowWidth - margin, Math.random() * windowWidth));
+                         const randomY = Math.max(margin, Math.min(windowHeight - margin, Math.random() * windowHeight));
+                         
+                         // Aggiungi effetti casuali di stile cartoon
+                         const effects = [
+                             'escape-animation 0.4s infinite',
+                             'escape-animation 0.3s infinite, squash-stretch 0.5s infinite',
+                             'escape-animation 0.2s infinite, shake 0.3s infinite',
+                             'escape-animation 0.4s infinite linear'
+                         ];
+                         
+                         // Scegli un effetto casuale
+                         const randomEffect = effects[Math.floor(Math.random() * effects.length)];
+                         button.style.animation = randomEffect;
+                         
+                         // Colori casuali per l'ombra
+                         const colors = ['rgba(255,0,0,0.7)', 'rgba(0,255,0,0.7)', 'rgba(0,0,255,0.7)', 'rgba(255,255,0,0.7)'];
+                         const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                         button.style.boxShadow = `0 0 15px ${randomColor}`;
+                         
+                         // Applica la nuova posizione con un leggero ritardo per effetto cartoon
+                         setTimeout(() => {
+                             button.style.top = randomY + 'px';
+                             button.style.left = randomX + 'px';
+                             button.style.right = 'auto'; // Rimuovi right per evitare conflitti
+                         }, 50);
+                     }
+                     
+                     // Funzione per mostrare il messaggio RIP
+                     function showRIPMessage() {
+                         // Crea l'elemento per il messaggio RIP
+                         const ripMessage = document.createElement('div');
+                         ripMessage.className = 'rip-message';
+                         
+                         // Ottieni la data attuale
+                         const today = new Date();
+                         const day = today.getDate();
+                         const month = today.getMonth() + 1; // I mesi partono da 0
+                         const year = today.getFullYear();
+                         
+                         // Formatta la data come DD/MM/YYYY
+                         const formattedDate = `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}`;
+                         
+                         // Imposta il contenuto del messaggio
+                         ripMessage.innerHTML = `RIP Mr.X ${formattedDate}`;
+                         
+                         // Aggiungi il messaggio all'header per integrarlo nella barra in alto
+                         const header = document.querySelector('header');
+                         if (header) {
+                             header.appendChild(ripMessage);
+                         } else {
+                             // Fallback al body se l'header non esiste
+                             document.body.appendChild(ripMessage);
+                         }
+                         
+                         // Riproduci l'audio funebre immediatamente quando appare il messaggio RIP
+                         console.log("Tentativo di riproduzione dell'audio funebre");
+                         
+                         // Crea un nuovo elemento audio per evitare conflitti
+                         const funeralAudio = new Audio("https://raw.githubusercontent.com/lyakhu955/ore-pws/main/audio/funeral.mp3");
+                         funeralAudio.volume = 1.0; // Volume massimo
+                         
+                         // Aggiungi un listener per quando l'audio è pronto
+                         funeralAudio.addEventListener('canplaythrough', function() {
+                             console.log("Audio funebre pronto per la riproduzione");
+                             // Riproduci l'audio con un piccolo ritardo per assicurarsi che sia pronto
+                             setTimeout(() => {
+                                 const playPromise = funeralAudio.play();
+                                 if (playPromise !== undefined) {
+                                     playPromise
+                                         .then(() => {
+                                             console.log("Audio funebre riprodotto con successo");
+                                         })
+                                         .catch(error => {
+                                             console.error("Errore nella riproduzione dell'audio funebre:", error);
+                                             // Tentativo di riproduzione alternativo
+                                             document.addEventListener('click', function playOnInteraction() {
+                                                 funeralAudio.play();
+                                                 document.removeEventListener('click', playOnInteraction);
+                                             }, { once: true });
+                                      });
+                                    }
+                             }, 100);
+                         });
+                         
+                         // Forza il caricamento dell'audio
+                         funeralAudio.load();
+                         
+                         // Rendi visibile il messaggio
+                         setTimeout(() => {
+                             ripMessage.classList.add('visible');
+                         }, 100);
+                         
+                         // Rimuovi il messaggio dopo 5 secondi
+                         setTimeout(() => {
+                             ripMessage.classList.remove('visible');
+                             setTimeout(() => {
+                                 const parent = ripMessage.parentNode;
+                                 if (parent && parent.contains(ripMessage)) {
+                                     parent.removeChild(ripMessage);
+                                 }
+                             }, 500);
+                         }, 5000);
+                     }
+                     
+                     // Funzione per gestire il click sul pulsante
+                     closeBtn.addEventListener('click', function(e) {
+                         // Se il pulsante sta già scappando o un audio è in riproduzione, ignora il click
+                         if (isEscaping || isAudioPlaying) return;
+                         
+                         // Ferma tutti gli audio prima di iniziare
+                         stopAllAudio();
+                         
+                         // Se è il quinto click, esegui l'animazione di morte prima di chiudere
+                         if (clickCount >= 4) {
+                             // Crea un clone del pulsante per l'animazione di morte
+                             // Questo evita conflitti con altre classi e stili
+                             const buttonRect = this.getBoundingClientRect();
+                             const deathButton = document.createElement('div');
+                             
+                             // Copia lo stile e il contenuto del pulsante originale
+                             deathButton.innerHTML = this.innerHTML;
+                             deathButton.style.position = 'fixed';
+                             deathButton.style.top = buttonRect.top + 'px';
+                             deathButton.style.left = buttonRect.left + 'px';
+                             deathButton.style.width = buttonRect.width + 'px';
+                             deathButton.style.height = buttonRect.height + 'px';
+                             deathButton.style.backgroundColor = window.getComputedStyle(this).backgroundColor;
+                             deathButton.style.color = window.getComputedStyle(this).color;
+                             deathButton.style.borderRadius = window.getComputedStyle(this).borderRadius;
+                             deathButton.style.display = 'flex';
+                             deathButton.style.alignItems = 'center';
+                             deathButton.style.justifyContent = 'center';
+                             deathButton.style.zIndex = '10001';
+                             
+                             // Aggiungi la classe per l'animazione di morte
+                             deathButton.classList.add('dying-button');
+                             
+                             // Aggiungi il pulsante al body
+                             document.body.appendChild(deathButton);
+                             
+                             // Nascondi il pulsante originale
+                             this.style.opacity = '0';
+                             
+                             console.log("Animazione di morte applicata al pulsante clone");
+                             
+                             // Aggiungi effetti visivi extra (flash dello schermo)
+                             const flashEffect = document.createElement('div');
+                             flashEffect.style.position = 'fixed';
+                             flashEffect.style.top = '0';
+                             flashEffect.style.left = '0';
+                             flashEffect.style.width = '100%';
+                             flashEffect.style.height = '100%';
+                             flashEffect.style.backgroundColor = 'white';
+                             flashEffect.style.opacity = '0.8';
+                             flashEffect.style.zIndex = '9998';
+                             flashEffect.style.pointerEvents = 'none';
+                             document.body.appendChild(flashEffect);
+                             
+                             // Rimuovi il flash dopo un breve periodo
+                             setTimeout(() => {
+                                 if (flashEffect.parentNode) {
+                                     flashEffect.parentNode.removeChild(flashEffect);
+                                 }
+                             }, 100);
+                             
+                             // Attendi che l'animazione di morte finisca prima di chiudere
+                             setTimeout(() => {
+                                 const overlay = document.getElementById('superheroOverlay');
+                                 if (overlay) {
+                                     overlay.classList.remove('visible');
+                                     
+                                     // Ripristina lo scroll della pagina
+                                     document.body.style.overflow = '';
+                                     
+                                     // Mostra il messaggio RIP
+                                     showRIPMessage();
+                                     
+                                     // Tentativo aggiuntivo di riproduzione dell'audio funebre
+                                     setTimeout(() => {
+                                         console.log("Tentativo aggiuntivo di riproduzione dell'audio funebre");
+                                         const backupAudio = new Audio("https://raw.githubusercontent.com/lyakhu955/ore-pws/main/audio/funeral.mp3");
+                                         backupAudio.volume = 1.0;
+                                         backupAudio.play().catch(e => console.error("Backup audio playback failed:", e));
+                                     }, 500);
+                                 }
+                             }, 2000); // Durata dell'animazione di morte
+                             
+                             return;
+                         }
+                         
+                         // Previeni la propagazione dell'evento
+                         e.preventDefault();
+                         e.stopPropagation();
+                         
+                         // Riproduci l'audio corrispondente
+                         const audio = audioElements[clickCount];
+                         if (audio) {
+                             // Mostra il messaggio toast con priorità alta
+                             const currentMessage = messages[clickCount];
+                             console.log("Mostrando messaggio:", currentMessage);
+                             
+                             // Forziamo la visualizzazione del toast con stile inline
+                             const container = document.getElementById('toast-container');
+                             if (container) {
+                                 // Assicuriamoci che il container sia visibile
+                                 container.style.zIndex = "10000";
+                             }
+                             
+                             // Mostra il toast con durata più lunga
+                             showToast(currentMessage, 'warning', 5000);
+                             
+                             // Aggiungi la classe per l'animazione
+                             this.classList.add('escaping');
+                             isEscaping = true;
+                             
+                             // Durata fissa per ogni audio (in millisecondi)
+                             // Aumentiamo significativamente le durate per assicurarci che gli audio vengano riprodotti completamente
+                             // Il terzo audio è più lungo e ha bisogno di più tempo
+                             const audioDurations = [3000, 3500, 6000, 5000];
+                             const currentDuration = audioDurations[clickCount];
+                             
+                             // Funzione per riprodurre l'audio
+                             const playAudio = () => {
+                                 // Ferma tutti gli altri audio prima di riprodurre quello nuovo
+                                 audioElements.forEach(audioEl => {
+                                     if (audioEl && audioEl !== audio) {
+                                         audioEl.pause();
+                                         audioEl.currentTime = 0;
+                                     }
+                                 });
+                                 
+                                 // Imposta il volume e riproduci l'audio
+                                 audio.volume = 1.0;
+                                 audio.currentTime = 0;
+                                 
+                                 // Avvia l'audio
+                                 const playPromise = audio.play();
+                                 
+                                 // Gestisci eventuali errori di riproduzione
+                                 if (playPromise !== undefined) {
+                                     playPromise.catch(error => {
+                                         console.error("Audio playback failed:", error);
+                                     });
+                                 }
+                             };
+                             
+                             // Verifica se l'audio è pronto per essere riprodotto
+                             if (audio.readyState >= 2) { // HAVE_CURRENT_DATA o superiore
+                                 playAudio();
+                             } else {
+                                 // Se l'audio non è ancora caricato, aggiungiamo un listener
+                                 audio.addEventListener('canplaythrough', function playWhenReady() {
+                                     playAudio();
+                                     // Rimuovi il listener dopo l'uso
+                                     audio.removeEventListener('canplaythrough', playWhenReady);
+                                 });
+                                 
+                                 // Forza il caricamento
+                                 audio.load();
+                             }
+                             
+                             // Fai scappare il pulsante per un tempo fisso ma con velocità maggiore
+                             const escapeInterval = setInterval(() => {
+                                 escapeTo(this);
+                             }, 300); // Cambia posizione ogni 300ms per un movimento più frenetico
+                             
+                             // Imposta un flag per indicare che l'audio è in riproduzione
+                             isAudioPlaying = true;
+                             
+                             // Ferma l'animazione dopo un tempo fisso invece di aspettare l'evento onended
+                             setTimeout(() => {
+                                 // Ferma completamente tutte le animazioni
+                                 clearInterval(escapeInterval);
+                                 this.classList.remove('escaping');
+                                 
+                                 // Rimuovi tutti gli stili inline che potrebbero causare movimenti
+                                 this.style.animation = 'none';
+                                 this.style.transform = 'none';
+                                 this.style.transition = 'none';
+                                 
+                                 // Riposiziona il pulsante in una posizione fissa
+                                 const buttonRect = this.getBoundingClientRect();
+                                 this.style.position = 'fixed';
+                                 this.style.top = buttonRect.top + 'px';
+                                 this.style.left = buttonRect.left + 'px';
+                                 this.style.right = 'auto';
+                                 this.style.boxShadow = 'none';
+                                 
+                                 // Resetta i flag
+                                 isEscaping = false;
+                                 isAudioPlaying = false;
+                                 clickCount++;
+                                 
+                                 // Non ripristinare lo stile originale, mantieni la posizione attuale
+                                 
+                                 // Non mostrare messaggi aggiuntivi quando il pulsante smette di scappare
+                             }, currentDuration);
+                         } else {
+                             // Fallback se l'audio non è disponibile
+                             const currentMessage = messages[clickCount];
+                             console.log("Mostrando messaggio (fallback):", currentMessage);
+                             
+                             // Forziamo la visualizzazione del toast con stile inline
+                             const container = document.getElementById('toast-container');
+                             if (container) {
+                                 // Assicuriamoci che il container sia visibile
+                                 container.style.zIndex = "10000";
+                             }
+                             
+                             // Mostra il toast con durata più lunga
+                             showToast(currentMessage, 'warning', 5000);
+                             
+                             // Simula un breve movimento del pulsante
+                             this.classList.add('escaping');
+                             isEscaping = true;
+                             
+                             // Imposta un flag per indicare che l'audio è in riproduzione
+                             isAudioPlaying = true;
+                             
+                             setTimeout(() => {
+                                 // Ferma completamente tutte le animazioni
+                                 this.classList.remove('escaping');
+                                 
+                                 // Rimuovi tutti gli stili inline che potrebbero causare movimenti
+                                 this.style.animation = 'none';
+                                 this.style.transform = 'none';
+                                 this.style.transition = 'none';
+                                 
+                                 // Riposiziona il pulsante in una posizione fissa
+                                 const buttonRect = this.getBoundingClientRect();
+                                 this.style.position = 'fixed';
+                                 this.style.top = buttonRect.top + 'px';
+                                 this.style.left = buttonRect.left + 'px';
+                                 this.style.right = 'auto';
+                                 this.style.boxShadow = 'none';
+                                 
+                                 // Resetta i flag
+                                 isEscaping = false;
+                                 isAudioPlaying = false;
+                                 clickCount++;
+                                 
+                                 // Non ripristinare lo stile originale, mantieni la posizione attuale
+                             }, 2000);
+                         }
+                     });
+                     
+                     // Chiudi anche quando si clicca fuori dall'immagine (ma dentro l'overlay)
+                     const superheroOverlay = document.getElementById('superheroOverlay');
+                     if (superheroOverlay) {
+                         superheroOverlay.addEventListener('click', function(e) {
+                             // Chiudi solo se il click è sull'overlay e non sull'immagine o sul pulsante
+                             if (e.target === this && clickCount >= 4) {
+                                 this.classList.remove('visible');
+                                 document.body.style.overflow = '';
+                                 showRIPMessage();
+                             } else if (e.target === this) {
+                                 showToast("Devi prima cliccare sul pulsante X!", 'info');
+                             }
+                         });
+                     }
+                 }
              }
              
-             // Funzionalità pulsante troll Jeffrey Chong
-             const jeffreyBtn = document.getElementById('jeffreyChongBtn');
-             if (jeffreyBtn) {
-                 // Variabili per gestire l'effetto troll
-                 let trollActive = false;
-                 let trollInterval;
-                 let trollCounter = 0;
-                 
-                 // Array di lingue asiatiche da alternare
-                 const asianLanguages = [
-                     { code: 'vi', name: 'Vietnamita' },
-                     { code: 'zh-CN', name: 'Cinese' },
-                     { code: 'ko', name: 'Coreano' },
-                     { code: 'ja', name: 'Giapponese' },
-                     { code: 'th', name: 'Tailandese' },
-                     { code: 'fil', name: 'Filippino' }
-                 ];
-                 
-                 // Funzione per tradurre tutti i testi nella pagina con animazioni
-                 function translatePageToLanguage(langCode) {
-                     // Salviamo i testi originali se è la prima traduzione
-                     if (!window.originalTexts) {
-                         window.originalTexts = {};
-                         document.querySelectorAll('h1, h2, h3, h4, h5, p, span, button, a, label, option').forEach((el, index) => {
-                             if (el.textContent.trim() && !el.classList.contains('material-symbols-outlined')) {
-                                 window.originalTexts[index] = el.textContent;
-                             }
-                         });
-                     }
-                     
-                     // Aggiungiamo un'animazione a tutta la pagina
-                     const animations = [
-                         'translateAnimation1', 
-                         'translateAnimation2', 
-                         'translateAnimation3', 
-                         'translateAnimation4'
-                     ];
-                     
-                     // Seleziona un'animazione casuale
-                     const randomAnimation = animations[Math.floor(Math.random() * animations.length)];
-                     document.body.classList.add(randomAnimation);
-                     
-                     // Rimuovi l'animazione dopo un breve periodo
+             // Inizializzazione del tema scuro
+             const darkThemeToggle = document.getElementById('darkTheme');
+             if(darkThemeToggle) {
+                 const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                 const savedTheme = localStorage.getItem('theme');
+
+                 if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                     document.body.classList.add('dark-theme');
+                     darkThemeToggle.checked = true;
+                     console.log("Tema scuro applicato (salvato o preferito).");
+                 } else {
+                     document.body.classList.remove('dark-theme');
+                     darkThemeToggle.checked = false;
+                     console.log("Tema chiaro applicato.");
+                }
+
+                  darkThemeToggle.addEventListener('change', () => {
+                     document.body.classList.toggle('dark-theme');
+                     const currentTheme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
+                     localStorage.setItem('theme', currentTheme);
+                     console.log(`Tema cambiato a: ${currentTheme}`);
+                     // Re-initialize things that might depend on theme (like select arrows)
                      setTimeout(() => {
-                         document.body.classList.remove(randomAnimation);
-                     }, 700);
-                     
-                     // Simuliamo una traduzione cambiando i caratteri in base alla lingua
-                     document.querySelectorAll('h1, h2, h3, h4, h5, p, span, button, a, label, option').forEach((el, index) => {
-                         if (el.textContent.trim() && !el.classList.contains('material-symbols-outlined')) {
-                             const originalText = window.originalTexts[index];
-                             if (originalText) {
-                                 // Aggiungiamo un'animazione al testo
-                                 el.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-                                 el.style.opacity = '0';
-                                 el.style.transform = 'scale(0.8) translateY(-5px)';
-                                 
-                                 setTimeout(() => {
-                                     switch(langCode) {
-                                         case 'vi': // Vietnamita
-                                             el.textContent = originalText.replace(/[a-z]/gi, c => 
-                                                 'ăâđêôơưàáảãạèéẻẽẹìíỉĩịòóỏõọùúủũụỳýỷỹỵ'[Math.floor(Math.random() * 29)] + c);
-                                             break;
-                                         case 'zh-CN': // Cinese
-                                             el.textContent = originalText.replace(/[a-z]/gi, c => 
-                                                 '的一是不了人我在有他这为之大来以个中上们到说国和地也子时道出而要于就下得可你年生自会那后能对着事其里所去行过家十用发天如然作方成者多日都三小军二无同么经法当起与好看学进种将还分此心前面又定见只主没公从问使工教如何都开己也很情最立新通少机打水己长同样意把体重别正机物应只将起明等自其与间手看用等最力把通等'[Math.floor(Math.random() * 50)]);
-                                             break;
-                                         case 'ko': // Coreano
-                                             el.textContent = originalText.replace(/[a-z]/gi, c => 
-                                                 '가나다라마바사아자차카타파하거너더러머버서어저처커터퍼허기니디리미비시이지치키티피히'[Math.floor(Math.random() * 40)]);
-                                             break;
-                                         case 'ja': // Giapponese
-                                             el.textContent = originalText.replace(/[a-z]/gi, c => 
-                                                 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん'[Math.floor(Math.random() * 46)]);
-                                             break;
-                                         case 'th': // Tailandese
-                                             el.textContent = originalText.replace(/[a-z]/gi, c => 
-                                                 'กขคฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ'[Math.floor(Math.random() * 44)]);
-                                             break;
-                                         case 'fil': // Filippino
-                                             el.textContent = originalText.replace(/[a-z]/gi, c => 
-                                                 c + 'ng' + ['a', 'o', 'u', 'e', 'i'][Math.floor(Math.random() * 5)]);
-                                             break;
-                                     }
-                                     
-                                     // Ripristina l'elemento con il nuovo testo
-                                     el.style.opacity = '1';
-                                     el.style.transform = 'scale(1) translateY(0)';
-                                 }, 150);
-                             }
-                         }
-                     });
-                 }
-                 
-                 // Funzione per ripristinare i testi originali con animazione
-                 function restoreOriginalTexts() {
-                     if (window.originalTexts) {
-                         console.log("Ripristino testi originali...");
-                         
-                         // Aggiungiamo un'animazione finale a tutta la pagina
-                         document.body.classList.add('translateAnimation2');
-                         
-                         // Rimuovi l'animazione dopo un breve periodo
-                         setTimeout(() => {
-                             document.body.classList.remove('translateAnimation2');
-                         }, 700);
-                         
-                         // Ripristina tutti i testi in due fasi per una migliore animazione
-                         const elements = document.querySelectorAll('h1, h2, h3, h4, h5, p, span, button, a, label, option');
-                         
-                         // Fase 1: Fade out di tutti gli elementi
-                         elements.forEach(el => {
-                             if (el.textContent.trim() && !el.classList.contains('material-symbols-outlined')) {
-                                 el.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-                                 el.style.opacity = '0';
-                                 el.style.transform = 'scale(0.8) translateY(-5px)';
-                             }
-                         });
-                         
-                         // Fase 2: Ripristina i testi originali e fade in
-                         setTimeout(() => {
-                             elements.forEach((el, index) => {
-                                 if (window.originalTexts[index]) {
-                                     el.textContent = window.originalTexts[index];
-                                     
-                                     // Ripristina l'elemento con il testo originale
-                                     el.style.opacity = '1';
-                                     el.style.transform = 'scale(1) translateY(0)';
-                                 }
-                             });
-                             
-                             console.log("Testi originali ripristinati con successo");
-                         }, 300);
-                     } else {
-                         console.warn("Nessun testo originale da ripristinare");
-                     }
-                 }
-                 
-                 // Funzione per far sparire e riapparire il pulsante
-                 function animateButton(button) {
-                     // Rimuovi l'animazione precedente (se presente)
-                     button.style.animation = 'none';
-                     
-                     // Forza un reflow per assicurarsi che l'animazione si resetti
-                     void button.offsetWidth;
-                     
-                     // Applica la nuova animazione
-                     button.style.animation = 'disappearReappear 1s ease forwards';
-                 }
-                 
-                 // Funzione per creare l'effetto di esplosione finale
-                 function createExplosion() {
-                     console.log("Creazione esplosione super distruttiva...");
-                     
-                     // Colori per le particelle dell'esplosione
-                     const colors = [
-                         '#FF5252', // Rosso
-                         '#FFEB3B', // Giallo
-                         '#FF9800', // Arancione
-                         '#E91E63', // Rosa
-                         '#2196F3', // Blu
-                         '#4CAF50', // Verde
-                         '#9C27B0'  // Viola
-                     ];
-                     
-                     // Numero di particelle
-                     const particleCount = 300; // Aumentato il numero di particelle
-                     
-                     // Crea un contenitore per le particelle
-                     const container = document.createElement('div');
-                     container.style.position = 'fixed';
-                     container.style.top = '0';
-                     container.style.left = '0';
-                     container.style.width = '100%';
-                     container.style.height = '100%';
-                     container.style.pointerEvents = 'none'; // Assicuriamoci che non blocchi i click
-                     container.style.zIndex = '9999';
-                     container.id = 'explosion-container'; // Aggiungiamo un ID per poterlo rimuovere facilmente
-                     document.body.appendChild(container);
-                     
-                     // Crea effetti di esplosione in diversi punti della pagina
-                     const explosionPoints = [
-                         { x: '50%', y: '50%' },  // Centro
-                         { x: '25%', y: '25%' },  // In alto a sinistra
-                         { x: '75%', y: '25%' },  // In alto a destra
-                         { x: '25%', y: '75%' },  // In basso a sinistra
-                         { x: '75%', y: '75%' },  // In basso a destra
-                         { x: '10%', y: '50%' },  // Sinistra centro
-                         { x: '90%', y: '50%' },  // Destra centro
-                         { x: '50%', y: '10%' },  // Alto centro
-                         { x: '50%', y: '90%' }   // Basso centro
-                     ];
-                     
-                     // Crea esplosioni multiple
-                     explosionPoints.forEach((point, index) => {
-                         setTimeout(() => {
-                             // Effetto flash
-                             const flash = document.createElement('div');
-                             flash.style.position = 'fixed';
-                             flash.style.top = point.y;
-                             flash.style.left = point.x;
-                             flash.style.transform = 'translate(-50%, -50%)';
-                             flash.style.width = '80px'; // Flash più grande
-                             flash.style.height = '80px';
-                             flash.style.borderRadius = '50%';
-                             flash.style.backgroundColor = 'white';
-                             flash.style.boxShadow = '0 0 100px 50px white'; // Bagliore più intenso
-                             flash.style.opacity = '0';
-                             flash.style.animation = 'flash 0.6s ease-out forwards';
-                             container.appendChild(flash);
-                             
-                             // Crea particelle per questa esplosione
-                             for (let i = 0; i < particleCount / explosionPoints.length; i++) {
-                                 createParticle(point.x, point.y, colors, container);
-                             }
-                             
-                             // Rimuovi il flash dopo l'animazione
-                             setTimeout(() => {
-                                 flash.remove();
-                             }, 600);
-                         }, index * 150); // Ritardo ridotto tra le esplosioni
-                     });
-                     
-                     // Esplodi gli elementi dell'interfaccia
-                     explodeUIElements();
-                     
-                     // Aggiungi un effetto di glitch a tutti gli elementi
-                     const allElements = document.querySelectorAll('div, p, h1, h2, h3, h4, h5, span, button, a, input, select');
-                     allElements.forEach(el => {
-                         if (Math.random() > 0.5) { // Più elementi con effetto glitch
-                             el.style.animation = 'glitch 0.5s infinite';
-                         }
-                     });
-                     
-                     // Rimuovi il contenitore dopo l'animazione
-                     setTimeout(() => {
-                         container.remove();
-                         
-                         // Dispatch the explosion-animation-end event
-                         document.dispatchEvent(new CustomEvent('explosion-animation-end'));
-                     }, 4000); // Durata aumentata
-                 }
-                 
-                 // Funzione per far esplodere gli elementi dell'interfaccia
-                 function explodeUIElements() {
-                     // Seleziona elementi importanti dell'interfaccia
-                     const uiElements = document.querySelectorAll('.card, .btn, .form-control, .nav-item, .tab-content, .modal, .switch, input, select, button, .chart-container');
-                     
-                     uiElements.forEach(el => {
-                         // Probabilità casuale di esplodere
-                         if (Math.random() > 0.3) {
-                             // Crea un clone dell'elemento per l'animazione
-                             const rect = el.getBoundingClientRect();
-                             
-                             // Crea frammenti dell'elemento
-                             const fragmentCount = Math.floor(Math.random() * 5) + 3; // 3-7 frammenti
-                             
-                             for (let i = 0; i < fragmentCount; i++) {
-                                 const fragment = document.createElement('div');
-                                 
-                                 // Stile del frammento basato sull'elemento originale
-                                 fragment.style.position = 'fixed';
-                                 fragment.style.top = rect.top + 'px';
-                                 fragment.style.left = rect.left + 'px';
-                                 fragment.style.width = (rect.width / fragmentCount) + 'px';
-                                 fragment.style.height = (rect.height / 2) + 'px';
-                                 fragment.style.backgroundColor = getComputedStyle(el).backgroundColor || 'var(--md-sys-color-surface)';
-                                 fragment.style.border = getComputedStyle(el).border || '1px solid var(--md-sys-color-outline)';
-                                 fragment.style.borderRadius = getComputedStyle(el).borderRadius || 'var(--border-radius-small)';
-                                 fragment.style.zIndex = '9998';
-                                 fragment.style.pointerEvents = 'none';
-                                 
-                                 // Animazione di esplosione
-                                 const angle = Math.random() * Math.PI * 2;
-                                 const distance = Math.random() * 500 + 100;
-                                 const tx = Math.cos(angle) * distance;
-                                 const ty = Math.sin(angle) * distance;
-                                 const rotation = Math.random() * 720 - 360; // -360 a 360 gradi
-                                 
-                                 fragment.style.transition = 'all 1.5s cubic-bezier(0.2, 0.9, 0.3, 1.1)';
-                                 
-                                 // Aggiungi il frammento al contenitore
-                                 document.getElementById('explosion-container').appendChild(fragment);
-                                 
-                                 // Forza un reflow
-                                 void fragment.offsetWidth;
-                                 
-                                 // Anima il frammento
-                                 fragment.style.transform = `translate(${tx}px, ${ty}px) rotate(${rotation}deg)`;
-                                 fragment.style.opacity = '0';
-                                 
-                                 // Rimuovi il frammento dopo l'animazione
-                                 setTimeout(() => {
-                                     fragment.remove();
-                                 }, 1500);
-                             }
-                             
-                             // Nascondi l'elemento originale
-                             el.style.visibility = 'hidden';
-                         }
-                     });
-                 }
-                 
-                 // Funzione per creare una singola particella dell'esplosione
-                 function createParticle(x, y, colors, container) {
-                     const particle = document.createElement('div');
-                     particle.className = 'explosion-particle';
-                     
-                     // Posizione iniziale
-                     particle.style.left = x;
-                     particle.style.top = y;
-                     particle.style.transform = 'translate(-50%, -50%)';
-                     
-                     // Proprietà casuali
-                     const size = Math.random() * 15 + 5;
-                     const color = colors[Math.floor(Math.random() * colors.length)];
-                     
-                     // Direzione casuale
-                     const angle = Math.random() * Math.PI * 2;
-                     const distance = Math.random() * 200 + 50;
-                     const tx = Math.cos(angle) * distance;
-                     const ty = Math.sin(angle) * distance;
-                     
-                     // Applica stile
-                     particle.style.width = `${size}px`;
-                     particle.style.height = `${size}px`;
-                     particle.style.backgroundColor = color;
-                     particle.style.boxShadow = `0 0 ${size/2}px ${color}`;
-                     
-                     // Imposta le variabili CSS per l'animazione
-                     particle.style.setProperty('--tx', `${tx}px`);
-                     particle.style.setProperty('--ty', `${ty}px`);
-                     
-                     // Applica l'animazione
-                     particle.style.animation = `explode ${Math.random() * 1 + 0.5}s ease-out forwards`;
-                     
-                     // Aggiungi al contenitore
-                     container.appendChild(particle);
-                     
-                     // Rimuovi dopo l'animazione
-                     setTimeout(() => {
-                         particle.remove();
-                     }, 1500);
-                 }
-                 
-                 // Funzione che mostra il troll face dopo l'esplosione
-                 function showTrollFace() {
-                     // Prendi l'elemento dell'overlay del troll
-                     const trollOverlay = document.querySelector('.troll-overlay');
-                     
-                     // Aggiungi la classe visible all'overlay
-                     trollOverlay.classList.add('visible');
-                     
-                     // Aggiungi la classe troll-active al body
-                     document.body.classList.add('troll-active');
-                     
-                     // Assicurati che l'overlay sia completamente visibile
-                     trollOverlay.style.display = 'flex';
-                     trollOverlay.style.visibility = 'visible';
-                     trollOverlay.style.opacity = '1';
-                     trollOverlay.style.zIndex = '999999';
-                     
-                     // Assicurati che l'ASCII art e il titolo siano visibili
-                     const asciiTroll = trollOverlay.querySelector('.ascii-troll');
-                     if (asciiTroll) {
-                         asciiTroll.style.display = 'block';
-                         asciiTroll.style.visibility = 'visible';
-                         asciiTroll.style.opacity = '1';
-                     }
-                     
-                     const trollTitle = trollOverlay.querySelector('.troll-title');
-                     if (trollTitle) {
-                         trollTitle.style.display = 'block';
-                         trollTitle.style.visibility = 'visible';
-                         trollTitle.style.opacity = '1';
-                         trollTitle.textContent = "JEFF HAI ROTTO TUTTO!!!!!";
-                     }
-                     
-                     console.log('Troll face displayed successfully!');
-                 }
-                 
-                 // Aggiungi un event listener alla fine dell'animazione di esplosione
-                 document.addEventListener('explosion-animation-end', function() {
-                     // Attendi un breve momento prima di mostrare il troll face
-                     setTimeout(showTrollFace, 500);
-                 });
-                 
-                 // Evento click sul pulsante Jeffrey Chong
-                 jeffreyBtn.addEventListener('click', function() {
-                     // Ottieni l'elemento audio e riproducilo
-                     const trollAudio = document.getElementById('trollAudio');
-                     trollAudio.play();
-                     
-                     if (trollActive) {
-                         // Ferma l'effetto troll
-                         clearInterval(trollInterval);
-                         trollActive = false;
-                         this.classList.remove('active');
-                         
-                         // Anima il pulsante
-                         animateButton(this);
-                         
-                         // Ripristina i testi originali
-                         restoreOriginalTexts();
-                         
-                         console.log("Effetto troll interrotto manualmente, preparazione esplosione finale...");
-                         
-                         // Aggiungiamo un'animazione di scuotimento violento a tutta la pagina
-                         setTimeout(() => {
-                             document.body.style.animation = 'shake-violent 0.8s ease-in-out';
-                             
-                             // Creiamo l'effetto di esplosione con particelle
-                             setTimeout(() => {
-                                 // Creiamo l'esplosione
-                                 createExplosion();
-                                 
-                                 // Mostriamo l'overlay del troll face dopo l'esplosione
-                                 setTimeout(() => {
-                                     // Fermiamo tutte le animazioni in corso
-                                     document.querySelectorAll('*').forEach(element => {
-                                         element.style.animationPlayState = 'paused';
-                                         element.style.transition = 'none';
-                                     });
-                                     
-                                     // Nascondiamo tutti gli elementi tranne l'overlay
-                                     document.querySelectorAll('body > *:not(#trollOverlay)').forEach(element => {
-                                         if (element.id !== 'trollOverlay') {
-                                             element.style.display = 'none';
-                                         }
-                                     });
-                                     
-                                     // Mostriamo l'overlay del troll face
-                                     const trollOverlay = document.getElementById('trollOverlay');
-                                     if (trollOverlay) {
-                                         // Assicuriamoci che l'overlay sia visibile
-                                         trollOverlay.style.display = 'flex';
-                                         trollOverlay.style.opacity = '1';
-                                         trollOverlay.style.visibility = 'visible';
-                                         trollOverlay.style.zIndex = '999999';
-                                         
-                                         // Aggiungiamo la classe visible
-                                         trollOverlay.classList.add('visible');
-                                         
-                                         // Aggiungiamo la classe troll-active al body
-                                         document.body.classList.add('troll-active');
-                                         
-                                         // Assicuriamoci che l'ASCII art e il titolo siano visibili
-                                         const asciiTroll = trollOverlay.querySelector('.ascii-troll');
-                                         const trollTitle = trollOverlay.querySelector('.troll-title');
-                                         
-                                         if (asciiTroll) {
-                                             asciiTroll.style.display = 'block';
-                                             asciiTroll.style.visibility = 'visible';
-                                             asciiTroll.style.opacity = '1';
-                                         }
-                                         
-                                         if (trollTitle) {
-                                             trollTitle.style.display = 'block';
-                                             trollTitle.style.visibility = 'visible';
-                                             trollTitle.style.opacity = '1';
-                                             trollTitle.textContent = "JEFF HAI ROTTO TUTTO!!!!!";
-                                         }
-                                         
-                                         console.log("Troll face mostrato con successo!");
-                                     }
-                                     
-                                     // Ricarica la pagina dopo aver mostrato il troll face
-                                     setTimeout(() => {
-                                         console.log("Ricaricamento pagina...");
-                                         window.location.reload();
-                                     }, 15000); // Aumentato a 15 secondi per dare più tempo di leggere
-                                 }, 2000); // Aumentato a 2 secondi per dare tempo all'esplosione di completarsi
-                             }, 1000);
-                         }, 800);
-                     } else {
-                         // Attiva l'effetto troll
-                         trollActive = true;
-                         trollCounter = 0;
-                         this.classList.add('active');
-                         
-                         // Anima il pulsante
-                         animateButton(this);
-                         
-                         // Cambia lingua ogni 0.8 secondi
-                         trollInterval = setInterval(function() {
-                             // Seleziona una lingua in sequenza
-                             const currentLang = asianLanguages[trollCounter % asianLanguages.length];
-                             translatePageToLanguage(currentLang.code);
-                             
-                             // Anima il pulsante ad ogni cambio di lingua
-                             if (trollCounter > 0 && trollCounter < 6) {
-                                 animateButton(jeffreyBtn);
-                             }
-                             
-                             trollCounter++;
-                             
-                             // Ferma automaticamente dopo 5 secondi (circa 6-7 cambi di lingua)
-                             if (trollCounter >= 6) {
-                                 clearInterval(trollInterval);
-                                 setTimeout(() => {
-                                    // Assicuriamoci che il testo venga ripristinato in ogni caso
-                                    trollActive = false;
-                                    jeffreyBtn.classList.remove('active');
-                                    
-                                    // Anima il pulsante un'ultima volta
-                                    animateButton(jeffreyBtn);
-                                    
-                                    // Ripristina i testi originali con un'animazione finale
-                                    restoreOriginalTexts();
-                                    
-                                    console.log("Effetto troll terminato, preparazione esplosione finale...");
-                                    
-                                    // Aggiungiamo un'animazione di scuotimento violento a tutta la pagina
-                                    setTimeout(() => {
-                                        document.body.style.animation = 'shake-violent 0.8s ease-in-out';
-                                        
-                                        // Creiamo l'effetto di esplosione con particelle
-                                        setTimeout(() => {
-                                            // Creiamo l'esplosione
-                                            createExplosion();
-                                            
-                                            // Mostriamo l'overlay del troll face dopo l'esplosione
-                                            setTimeout(() => {
-                                                // Fermiamo tutte le animazioni in corso
-                                                document.querySelectorAll('*').forEach(element => {
-                                                    element.style.animationPlayState = 'paused';
-                                                    element.style.transition = 'none';
-                                                });
-                                                
-                                                // Nascondiamo tutti gli elementi tranne l'overlay
-                                                document.querySelectorAll('body > *:not(#trollOverlay)').forEach(element => {
-                                                    if (element.id !== 'trollOverlay') {
-                                                        element.style.display = 'none';
-                                                    }
-                                                });
-                                                
-                                                // Mostriamo l'overlay del troll face
-                                                const trollOverlay = document.getElementById('trollOverlay');
-                                                if (trollOverlay) {
-                                                    // Assicuriamoci che l'overlay sia visibile
-                                                    trollOverlay.style.display = 'flex';
-                                                    trollOverlay.style.opacity = '1';
-                                                    trollOverlay.style.visibility = 'visible';
-                                                    trollOverlay.style.zIndex = '999999';
-                                                    
-                                                    // Aggiungiamo la classe visible
-                                                    trollOverlay.classList.add('visible');
-                                                    
-                                                    // Aggiungiamo la classe troll-active al body
-                                                    document.body.classList.add('troll-active');
-                                                    
-                                                    // Assicuriamoci che l'ASCII art e il titolo siano visibili
-                                                    const asciiTroll = trollOverlay.querySelector('.ascii-troll');
-                                                    const trollTitle = trollOverlay.querySelector('.troll-title');
-                                                    
-                                                    if (asciiTroll) {
-                                                        asciiTroll.style.display = 'block';
-                                                        asciiTroll.style.visibility = 'visible';
-                                                        asciiTroll.style.opacity = '1';
-                                                    }
-                                                    
-                                                    if (trollTitle) {
-                                                        trollTitle.style.display = 'block';
-                                                        trollTitle.style.visibility = 'visible';
-                                                        trollTitle.style.opacity = '1';
-                                                        trollTitle.textContent = "JEFF HAI ROTTO TUTTO!!!!!";
-                                                    }
-                                                    
-                                                    console.log("Troll face mostrato con successo!");
-                                                }
-                                                
-                                                // Ricarica la pagina dopo aver mostrato il troll face
-                                                setTimeout(() => {
-                                                    console.log("Ricaricamento pagina...");
-                                                    window.location.reload();
-                                                }, 6000); // Aumentato a 15 secondi per dare più tempo di leggere
-                                            }, 1000);
-                                        }, 800);
-                                    }, 500);
-                                }, 800);
-                             }
-                         }, 800);
-                     }
+                         console.log("Forzando aggiornamento stile select");
+                         const selects = document.querySelectorAll('select');
+                         selects.forEach(s => { s.style.display = 'none'; s.offsetHeight; s.style.display = ''; });
+                     }, 50);
                  });
              }
+
+
+
+
+             // Inizializza il Gratta e Vinci
+             setTimeout(() => {
+                 console.log("Inizializzazione ritardata del Gratta e Vinci...");
+                 
+                 // Inizializzazione del Gratta e Vinci realistico
+                 const scratchCardBtn = document.getElementById('scratchCardBtn');
+                 const scratchCardOverlay = document.getElementById('scratchCardOverlay');
+                 const canvas = document.getElementById('scratchCanvas');
+                 const closeScratchCard = document.getElementById('closeScratchCard');
+                 
+                 console.log("Elementi trovati:", {
+                     scratchCardBtn: !!scratchCardBtn,
+                     scratchCardOverlay: !!scratchCardOverlay,
+                     canvas: !!canvas,
+                     closeScratchCard: !!closeScratchCard
+                 });
+                 
+                 if (scratchCardBtn && scratchCardOverlay && canvas) {
+                     // Apri il Gratta e Vinci quando si clicca sul pulsante
+                     scratchCardBtn.onclick = function() {
+                         console.log("Pulsante Gratta e Vinci cliccato");
+                         scratchCardOverlay.classList.add('visible');
+                         document.body.style.overflow = 'hidden'; // Blocca lo scroll
+                         
+                         // Assicurati che il canvas sia visibile
+                         canvas.style.opacity = '1';
+                         canvas.style.display = 'block';
+                         
+                         // Inizializza il canvas per il grattamento
+                         initScratchCanvas();
+                     };
+                     
+                     // Chiudi il Gratta e Vinci quando si clicca sul pulsante di chiusura
+                     if (closeScratchCard) {
+                         closeScratchCard.onclick = function() {
+                             console.log("Pulsante di chiusura Gratta e Vinci cliccato");
+                             scratchCardOverlay.classList.remove('visible');
+                             document.body.style.overflow = ''; // Ripristina lo scroll
+                             
+                             // Reset del canvas per la prossima apertura
+                             // Rimuoviamo il canvas esistente
+                             if (canvas) {
+                                 // Ripristina la visualizzazione del canvas
+                                 canvas.style.opacity = '1';
+                                 canvas.style.display = 'block';
+                             }
+                         };
+                     }
+                     
+                     // Funzione per inizializzare il canvas per il grattamento
+                     function initScratchCanvas() {
+                         console.log("Inizializzazione canvas per grattamento");
+                         
+                         // Crea un effetto sonoro per il grattamento
+                         let scratchSound = null;
+                         try {
+                             // Crea un oscillatore per simulare il suono del grattamento
+                             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                             
+                             // Funzione per creare un suono di grattamento
+                             function createScratchSound() {
+                                 // Crea un oscillatore con rumore bianco
+                                 const noise = audioContext.createBufferSource();
+                                 const bufferSize = audioContext.sampleRate * 0.5; // mezzo secondo di rumore
+                                 const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+                                 const data = buffer.getChannelData(0);
+                                 
+                                 // Riempi il buffer con rumore bianco
+                                 for (let i = 0; i < bufferSize; i++) {
+                                     data[i] = Math.random() * 2 - 1;
+                                 }
+                                 
+                                 noise.buffer = buffer;
+                                 
+                                 // Crea un filtro per modellare il suono
+                                 const filter = audioContext.createBiquadFilter();
+                                 filter.type = 'bandpass';
+                                 filter.frequency.value = 2000;
+                                 filter.Q.value = 1;
+                                 
+                                 // Crea un gain node per controllare il volume
+                                 const gainNode = audioContext.createGain();
+                                 gainNode.gain.value = 0.03; // Volume molto basso
+                                 
+                                 // Collega i nodi
+                                 noise.connect(filter);
+                                 filter.connect(gainNode);
+                                 gainNode.connect(audioContext.destination);
+                                 
+                                 return {
+                                     play: function() {
+                                         noise.start();
+                                     },
+                                     stop: function() {
+                                         try {
+                                             noise.stop();
+                                         } catch (e) {
+                                             console.log("Errore nel fermare il suono:", e);
+                                         }
+                                     }
+                                 };
+                             }
+                             
+                             scratchSound = createScratchSound();
+                         } catch (e) {
+                             console.log("Audio non supportato:", e);
+                         }
+                         
+                         // Rimuovi eventuali event listener precedenti
+                         canvas.removeEventListener('mousedown', startDrawing);
+                         canvas.removeEventListener('mousemove', scratch);
+                         canvas.removeEventListener('mouseup', stopDrawing);
+                         canvas.removeEventListener('mouseleave', stopDrawing);
+                         canvas.removeEventListener('touchstart', startDrawing);
+                         canvas.removeEventListener('touchmove', scratch);
+                         canvas.removeEventListener('touchend', stopDrawing);
+                         
+                         // Ottieni il contenitore del gratta e vinci
+                         const container = canvas.parentElement;
+                         
+                         // Imposta le dimensioni del canvas
+                         canvas.width = container.offsetWidth;
+                         canvas.height = container.offsetHeight;
+                         
+                         // Ottieni il contesto 2D del canvas
+                         const ctx = canvas.getContext('2d');
+                         
+                         // Crea un gradiente dorato per il gratta e vinci
+                         const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                         gradient.addColorStop(0, '#DFBD69'); // Oro chiaro
+                         gradient.addColorStop(1, '#926F34'); // Oro scuro
+                         
+                         // Riempi il canvas con il gradiente
+                         ctx.fillStyle = gradient;
+                         ctx.fillRect(0, 0, canvas.width, canvas.height);
+                         
+                         // Aggiungi una texture per rendere più realistico il grattamento
+                         // Crea un pattern di piccoli punti casuali
+                         for (let i = 0; i < canvas.width; i += 4) {
+                             for (let j = 0; j < canvas.height; j += 4) {
+                                 if (Math.random() > 0.5) {
+                                     ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                                     ctx.fillRect(i, j, 2, 2);
+                                 }
+                             }
+                         }
+                         
+                         // Aggiungi testo "GRATTA QUI"
+                         ctx.font = 'bold 24px Arial';
+                         ctx.fillStyle = '#333';
+                         ctx.textAlign = 'center';
+                         ctx.textBaseline = 'middle';
+                         ctx.fillText('GRATTA QUI', canvas.width / 2, canvas.height / 2);
+                         
+                         // Aggiungi il logo PWS
+                         ctx.font = 'bold 14px Arial';
+                         ctx.fillStyle = '#333';
+                         ctx.fillText('PWS', canvas.width / 2, 30);
+                         
+                         // Aggiungi decorazioni
+                         for (let i = 0; i < 20; i++) {
+                             const x = Math.random() * canvas.width;
+                             const y = Math.random() * canvas.height;
+                             const size = Math.random() * 5 + 2;
+                             
+                             ctx.beginPath();
+                             ctx.arc(x, y, size, 0, Math.PI * 2);
+                             ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                             ctx.fill();
+                         }
+                         
+                         // Variabili per il grattamento
+                         let isDrawing = false;
+                         let scratchedPercentage = 0;
+                         let scratchedPixels = 0;
+                         const totalPixels = canvas.width * canvas.height;
+                         
+                         // Variabili per tracciare la posizione precedente
+                         let lastX = 0;
+                         let lastY = 0;
+                         
+                         // Funzione per grattare
+                         function scratch(e) {
+                             if (!isDrawing) return;
+                             
+                             // Previeni il comportamento predefinito (come lo scroll)
+                             e.preventDefault();
+                             
+                             // Ottieni la posizione del mouse/touch relativa al canvas
+                             const rect = canvas.getBoundingClientRect();
+                             let x, y;
+                             
+                             if (e.type.includes('touch')) {
+                                 const touch = e.touches[0] || e.changedTouches[0];
+                                 x = touch.clientX - rect.left;
+                                 y = touch.clientY - rect.top;
+                             } else {
+                                 x = e.clientX - rect.left;
+                                 y = e.clientY - rect.top;
+                             }
+                             
+                             // Se abbiamo una posizione precedente, disegniamo una linea tra i punti
+                             // per evitare "buchi" nel grattamento quando si muove velocemente
+                             if (lastX && lastY && (Math.abs(x - lastX) > 5 || Math.abs(y - lastY) > 5)) {
+                                 // Calcola quanti punti intermedi disegnare in base alla distanza
+                                 const distance = Math.sqrt(Math.pow(x - lastX, 2) + Math.pow(y - lastY, 2));
+                                 const steps = Math.ceil(distance / 5); // Un punto ogni 5 pixel
+                                 
+                                 for (let i = 1; i < steps; i++) {
+                                     const stepX = lastX + (x - lastX) * (i / steps);
+                                     const stepY = lastY + (y - lastY) * (i / steps);
+                                     
+                                     // Disegna un cerchio in questa posizione intermedia
+                                     ctx.beginPath();
+                                     ctx.arc(stepX, stepY, 12, 0, Math.PI * 2, false);
+                                     ctx.fill();
+                                     
+                                     // Aggiorna la percentuale grattata
+                                     scratchedPixels += Math.PI * 12 * 12 * 0.3;
+                                 }
+                             }
+                             
+                             // Aggiorna l'ultima posizione
+                             lastX = x;
+                             lastY = y;
+                             
+                             // Imposta l'operazione di composizione per "cancellare" il canvas
+                             ctx.globalCompositeOperation = 'destination-out';
+                             
+                             // Disegna un cerchio di dimensione media per simulare il grattamento
+                             // Abbastanza grande da essere visibile ma non troppo per mantenere la sfida
+                             const radius = 12;
+                             ctx.beginPath();
+                             ctx.arc(x, y, radius, 0, Math.PI * 2, false);
+                             ctx.fill();
+                             
+                             // Aggiorna la percentuale grattata (approssimazione)
+                             // Usiamo un valore molto piccolo per rendere il grattamento più lungo
+                             scratchedPixels += Math.PI * radius * radius * 0.3;
+                             scratchedPercentage = (scratchedPixels / totalPixels) * 100;
+                             
+                             // Limita la percentuale massima al 100%
+                             scratchedPercentage = Math.min(scratchedPercentage, 100);
+                             
+                             console.log("Percentuale grattata:", scratchedPercentage.toFixed(2) + "%");
+                             
+                             // Mostra la percentuale sul canvas
+                             // Salva lo stato corrente del contesto
+                             ctx.save();
+                             // Ripristina l'operazione di composizione normale
+                             ctx.globalCompositeOperation = 'source-over';
+                             // Disegna un rettangolo semi-trasparente in basso a destra
+                             ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                             ctx.fillRect(canvas.width - 60, canvas.height - 30, 60, 30);
+                             // Disegna la percentuale
+                             ctx.fillStyle = 'white';
+                             ctx.font = '12px Arial';
+                             ctx.textAlign = 'center';
+                             ctx.fillText(Math.floor(scratchedPercentage) + '%', canvas.width - 30, canvas.height - 15);
+                             // Ripristina lo stato precedente
+                             ctx.restore();
+                             
+                             // Se è stato grattato abbastanza (95%), rivela completamente il contenuto
+                             if (scratchedPercentage > 95) {
+                                 console.log("Grattamento completato!");
+                                 // Rimuovi il canvas con una transizione
+                                 canvas.style.opacity = '0';
+                                 setTimeout(() => {
+                                     canvas.style.display = 'none';
+                                 }, 500);
+                                 
+                                 // Rimuovi gli event listener
+                                 canvas.removeEventListener('mousedown', startDrawing);
+                                 canvas.removeEventListener('mousemove', scratch);
+                                 canvas.removeEventListener('mouseup', stopDrawing);
+                                 canvas.removeEventListener('mouseleave', stopDrawing);
+                                 canvas.removeEventListener('touchstart', startDrawing);
+                                 canvas.removeEventListener('touchmove', scratch);
+                                 canvas.removeEventListener('touchend', stopDrawing);
+                             }
+                         }
+                         
+                         // Funzioni per gestire l'inizio e la fine del grattamento
+                         function startDrawing(e) {
+                             isDrawing = true;
+                             // Resetta le coordinate precedenti quando si inizia un nuovo tratto
+                             // per evitare di collegare tratti separati
+                             lastX = 0;
+                             lastY = 0;
+                             
+                             // Avvia il suono di grattamento
+                             if (scratchSound) {
+                                 try {
+                                     scratchSound.play();
+                                 } catch (e) {
+                                     console.log("Errore nell'avvio del suono:", e);
+                                 }
+                             }
+                             
+                             scratch(e);
+                         }
+                         
+                         function stopDrawing() {
+                             isDrawing = false;
+                             // Resetta le coordinate precedenti quando si finisce un tratto
+                             lastX = 0;
+                             lastY = 0;
+                             
+                             // Ferma il suono di grattamento
+                             if (scratchSound) {
+                                 try {
+                                     scratchSound.stop();
+                                     // Ricrea il suono per il prossimo grattamento
+                                     scratchSound = createScratchSound();
+                                 } catch (e) {
+                                     console.log("Errore nel fermare il suono:", e);
+                                 }
+                             }
+                         }
+                         
+                         // Aggiungi gli event listener per il grattamento
+                         canvas.addEventListener('mousedown', startDrawing);
+                         canvas.addEventListener('mousemove', scratch);
+                         canvas.addEventListener('mouseup', stopDrawing);
+                         canvas.addEventListener('mouseleave', stopDrawing);
+                         
+                         // Supporto per dispositivi touch
+                         canvas.addEventListener('touchstart', startDrawing);
+                         canvas.addEventListener('touchmove', scratch);
+                         canvas.addEventListener('touchend', stopDrawing);
+                     }
+                 }
+             }, 1000);
+             
+             // Fine inizializzazione
          });
 
     </script>
 
-    <!-- Overlay per il troll finale -->
-    <div id="trollOverlay" class="troll-overlay">
-        <pre class="ascii-troll">
-⣿⣿⣿⣞⣷⣻⣞⣿⣿⣷⣻⣞⣷⣻⣿⣿⣞⣷⣻⣞⣿⣿⣿⣞⠳⡟⠞⠹⠈⠃⠹⠘⠃⠙⠓⠛⠚⠑⠋⠈⠁⠋⠓⠙⠀⠉⠚⡿⢻⡷⣻⣞⣷⣻⣿⣿⣞⣷⣻⣞⣿⣿⣿⣞⣷⣻⣞⣿⣿⣷⣻⣞⣷⣻⣿⣿⣞⣷⣻⣞⣻
-⣻⣟⡿⣞⣷⣻⣞⣿⣻⢷⣻⣞⣷⣻⢿⡽⣞⣷⣻⠞⠿⠃⠉⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⢺⠙⠟⣿⣞⣷⣻⣞⣿⣻⣟⣾⣳⣟⣾⣻⣟⣷⣻⣞⣷⣻⣟⡿⣞⣷⣻⢾⣻⣻⣻⣻
-⣳⢯⡿⣽⣿⣿⣟⡾⣽⢯⣿⣿⣿⡽⣯⢿⠙⠊⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠉⠚⢹⣿⣞⣷⣻⣞⣿⣿⣷⣻⣞⣷⣻⣿⣿⣳⢯⡿⣽⣷⣿⣿⣻⣻⣻⣻⣻⣻
-⣽⣯⣿⣳⢯⡿⣽⣿⣽⣟⡾⣽⢯⠿⠝⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠛⢞⣷⢯⡿⣽⣳⣿⣾⡷⣯⢿⡽⣯⣿⣽⣳⢯⡿⣽⣻⣻⣻⣻⣻⣻
-⢿⡿⣿⡽⣯⣟⡷⣿⢿⣯⡛⠁⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⡿⢯⣟⡷⣯⢿⡿⣿⡽⣯⢿⡽⣿⢿⡽⣯⣟⣷⣻⣻⣻⣻⣻⣻⣻
-⢯⣟⣷⣻⣷⣿⡿⣽⡛⠺⠅⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⣾⣿⣯⢿⣽⣳⢿⣿⣿⡽⣯⢿⡽⣷⣿⣾⣻⣻⣻⣻⣻⣻⣻
-⣻⣞⣷⢯⣟⢯⠛⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⣿⢯⣟⣾⣽⣻⣟⡿⣽⣯⣿⣽⣻⣟⡿⣻⣻⣻⣻⣻⣻⣻⣻
-⣿⣿⣿⣻⣎⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣯⣿⣿⣷⣻⢾⣽⣻⣿⣿⣞⡷⣯⣟⣻⣻⣻⣻⣻⣻⣻⣻
-⣷⢻⡞⠇⠈⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠚⢷⣻⢾⣽⣿⣾⣳⣟⡾⣽⣿⣷⣯⣻⣻⣻⣻⣻⣻⣻⣻
-⣞⡦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⢀⡀⡀⢀⣀⢠⡀⡀⢤⡐⡆⢦⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⣯⣟⣾⣿⣿⣳⢯⣟⡷⣿⣿⣿⣻⣻⣻⣻⣻⣻⣻⣻
-⣿⢶⠄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡠⣔⢦⣝⣮⢶⣻⣼⣳⣞⣷⣻⡽⣯⣟⣿⣳⣞⡿⣦⣴⣲⢦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣟⣾⣳⢯⣿⣿⣿⣽⣳⣟⡾⣻⣻⣻⣻⣻⣻
-⣻⠷⠒⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⢀⡀⣀⢀⣤⣞⡷⣯⣿⣾⣽⣻⣷⣿⣿⣾⣷⣯⣿⣿⣿⣷⣟⣾⣿⣽⣾⡽⣯⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣿⢾⣽⣻⣞⣿⣻⣞⡷⣯⢿⣻⣻⣻⣻⣻
-⣽⣳⠁⠀⠀⠀⠀⠀⠀⢀⡴⡙⢦⢛⡴⢋⡶⣽⣻⣾⣽⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣽⣿⣿⣿⣿⣿⡿⣿⣽⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣿⣿⣿⣞⣷⣻⣞⣿⣿⣿⣻⣻⣻⣻⣻
-⣾⣷⢓⡁⠀⠀⠀⠀⢠⠳⣬⡙⡎⢧⣞⣯⣟⡷⣯⢿⣽⣻⣟⣿⣻⢿⡿⣿⣿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣳⣏⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢿⣽⣻⢾⣷⣿⢾⡽⣯⣟⣻⣻⣻⣻⣻
-⡿⣿⢿⣳⡀⠀⠀⠀⣌⠳⢦⣙⣾⡻⠞⡹⢚⣙⣩⣏⠿⠳⠛⠚⠙⣋⢟⡳⣯⣟⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⢯⣟⣦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⢾⣽⣻⢿⡿⣯⣟⡷⣯⣻⣻⣻⣻⣻
-⢿⡽⣯⢷⡁⠀⠀⠰⣌⡛⢦⢛⣠⠶⠻⣙⣋⣬⠤⠶⠚⢓⣙⣛⡿⣽⢯⣿⣷⣻⢾⣽⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣾⣽⣻⢦⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣀⠀⠀⣿⣿⣾⡽⣯⣟⡷⣿⣿⣷⣻⣻⣻⣻
-⣯⣿⣽⣻⢀⠀⠀⡜⢦⡙⢦⣋⠖⣎⣱⣉⡬⣤⢶⣞⠏⠛⠙⠋⠛⠽⢯⢿⣳⢯⣟⡿⣯⣟⣿⣻⢿⣿⡿⣿⣿⣿⣿⣿⣿⣿⣿⡾⣽⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⡴⠛⠉⠉⠉⠳⣄⠻⣿⣽⣳⣯⣟⣿⣻⣟⣻⣻⣻
-⣿⣿⣿⡽⣏⠀⢠⡙⢦⡙⢦⡋⣭⣭⢷⣯⢳⢉⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠈⠁⠉⠚⠓⠯⢟⡾⣽⢯⣿⣿⣿⣿⣿⣿⣿⣿⣷⣻⠄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣼⠋⡠⣴⣤⣄⡀⠀⠘⣇⢻⣾⣿⣿⣞⣷⣻⣞⣻⣻⣻⣻
-⣷⣻⢾⡽⣿⠆⢰⡙⢦⡟⠃⠀⠀⠀⢹⢣⡼⢰⣯⡀⠠⢤⡄⡄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠻⢽⣻⡷⣯⢿⣽⣿⣿⣿⡽⣧⠀⠀⠀⠀⠀⠀⠀⣀⣴⣻⡵⢃⣈⣱⣛⡾⣷⣍⠙⡄⢻⡈⣷⣻⢾⡽⣾⣷⣯⣻⣻⣻⣻
-⢾⡽⣯⣟⣯⣅⠢⡝⠊⠀⠀⠀⠀⠀⢠⠘⡷⣸⢷⣳⡜⢣⡜⣱⡙⣖⠲⡔⡤⢤⡠⢄⣀⣀⢀⠀⠀⠀⠀⢀⠰⢯⠛⣼⣻⣞⣿⣿⣿⣻⡽⡄⠀⠀⠀⠀⠀⣴⣟⣾⣳⣴⡛⠶⣽⣯⣟⡷⣟⡦⢘⠸⡁⣿⡽⣯⣟⣿⣿⣿⣻⣻⣻
-⣿⣿⣿⣞⣷⣻⠂⠁⠀⠀⠀⠀⣀⢄⢫⢆⠱⣯⣟⣷⣏⠵⣪⠕⡼⢌⡳⢍⠞⠥⡙⢎⡖⡭⢎⡽⠹⠌⢃⣠⢚⡤⣞⣷⣻⣞⡿⣿⣿⣷⣻⡽⡄⠀⠀⠀⣼⣳⣟⣾⣳⢯⣗⠠⢤⡩⢎⡵⣘⢻⡄⢸⢠⣿⣿⣿⣞⣷⣻⣞⣻⣻
-⣻⣟⡿⣞⡷⠃⠀⠀⠀⠀⣤⢚⡘⠊⠞⡬⣓⠽⣞⡿⣾⠑⢣⡝⢬⡓⣌⠶⠘⠀⠁⠀⠀⠉⠘⠈⣁⢊⣉⡤⠥⠒⡘⣃⣛⣺⡽⣯⣿⣿⣳⣿⣽⣇⣄⣰⣯⢿⣿⢷⣻⠆⢿⡒⢦⣙⣜⡦⡓⢼⡇⢸⢸⣟⣿⣻⣞⣷⣻⢾⣻⣻
-⣳⢯⡿⣽⡏⠀⠀⠀⢠⢞⡰⢣⢞⡩⢖⡠⣁⠋⡜⣿⡽⣇⠢⣝⢢⡝⣀⢠⢄⡲⣌⢧⡹⢌⢋⡑⡩⠶⠯⣟⢿⣻⣽⣻⡽⣷⣿⣿⣿⣿⣿⣟⣾⡽⣞⣷⣿⣿⣿⣿⢿⣷⡀⠹⣯⢿⣽⣻⡜⣹⠃⣼⢸⣟⣾⣳⢯⣟⣿⣿⣻
-⣽⣯⣿⣳⢧⠀⠀⣌⢳⢊⠑⠉⠀⠉⠬⠱⢎⡵⠘⣼⣻⡽⣎⢿⡷⣬⣁⠋⠞⠴⠣⠚⣠⣞⡾⣽⣳⢶⡶⣶⣶⣻⣞⣷⣻⣿⣿⣿⣿⣿⣿⣿⣯⣿⣽⣿⣿⣿⣿⣿⣟⡾⣽⠀⡞⠻⢚⣣⡵⢋⣰⣿⢸⣿⣾⣽⢯⡿⣽⣻⣻
-⡿⣿⢿⣽⣻⡆⠸⣌⡃⣀⠤⢤⡰⣄⡒⣖⢢⠞⡑⣾⢯⣿⣽⣻⣌⡓⠿⣼⠶⡶⢶⡙⢦⡹⣽⢯⣟⣯⣿⣳⢯⣳⢯⡿⣽⣻⢿⣿⣿⣿⣿⣿⣿⣻⣿⣿⣿⣿⣿⣟⡿⣽⡻⠀⠏⣸⢯⡷⣧⣟⡷⡏⣼⣻⢿⡿⣯⣟⡷⣯⣻
-⢿⣽⣻⣞⣷⣿⣤⢃⡠⠙⠜⠣⠖⢡⡉⠄⡋⡠⢼⣯⢿⣿⣾⡷⣯⣟⡷⣞⡿⣶⣥⣈⠑⢿⣽⣻⢾⣻⣾⣯⣿⣽⣳⣝⣳⢯⣟⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣯⢿⡧⣗⣤⣞⣯⣿⣿⣳⢯⠛⣴⣿⡽⣯⣟⡷⣿⣿⣷⣻
-⣻⣞⣷⢯⣟⣿⣳⠠⠔⡰⢒⣤⢦⡴⢂⣭⠾⡡⣟⣾⣻⣿⣯⣿⣿⣽⣻⣽⡻⠷⣎⠹⢻⠶⣽⢯⡿⣽⣻⣟⡷⣯⢷⣻⣽⣻⣞⡷⣿⣿⣿⣷⣿⣿⣿⣿⣿⣿⣿⣿⣿⣳⣹⢷⣯⢿⡿⣿⣽⠋⣼⣻⢿⣽⣳⣯⣟⣿⣻⢿⣻
-⣿⣿⣿⣻⣞⡷⣧⢐⡫⣔⣫⣞⣷⣻⣟⣾⡳⢱⣯⣿⣿⣿⣿⣿⣿⣞⣧⣌⡛⢳⣞⡶⣄⡙⠰⣋⢿⣳⢟⡾⣽⣻⣎⠳⣯⢷⣯⣿⣽⣿⣿⣿⣿⣽⣿⣿⣿⣿⣾⣿⣾⣳⡟⢸⢯⠿⠽⠛⠀⢰⣯⣟⡿⣾⣿⣿⣞⡷⣯⣟⣻
-⣷⣻⣞⡷⣯⣿⡇⢬⡓⣼⢷⣻⣞⢳⡛⣎⢥⣟⣾⣿⣿⣿⣿⣿⣻⣾⢷⣯⣟⡆⣹⢿⣽⢷⣦⢈⠂⠻⣟⡾⣵⢻⣞⡷⡌⢻⡾⣟⣾⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣯⢷⡏⠀⢀⢤⡒⠀⠀⣾⣳⣯⣿⣳⣟⡾⣽⣿⣷⣯⣻
-⣞⡷⣯⣟⣿⣿⡇⢚⡼⣸⢯⣷⡩⢖⡍⠶⣸⣟⣾⣳⡟⡾⢳⠯⠷⠏⠟⠺⠍⣒⣼⣻⣞⡿⣞⣧⡓⣄⠈⠿⣽⢻⣼⡻⣽⡀⢻⡽⣞⣯⢿⣿⣿⣿⣿⣿⣟⣾⣳⢯⣟⡿⣇⢠⣋⢦⡙⠀⢰⣯⢿⣿⣿⣳⢯⣟⡷⣿⣿⣿⣻
-⣿⣿⣿⣞⣷⣻⠆⢩⢖⡩⢿⡝⢡⣋⠦⠙⡴⠙⠞⣥⢚⠥⠁⠀⠀⢀⡠⣔⡾⣽⢾⡽⣟⡿⣽⢾⡽⣆⠧⡀⢙⠎⢷⣻⢷⣧⠈⣿⡽⣾⢿⣿⣿⣿⣿⣿⣻⢾⣽⣻⣞⡿⣽⢢⠞⡴⡃⠀⣾⣯⣟⣾⣳⢿⣿⣿⣽⣳⣟⡾⣻
-⣻⣟⡿⣞⡷⣯⢷⠈⡎⡵⢪⡔⠣⣘⢎⠧⣄⠴⣠⠤⣉⢌⡔⢦⣹⢾⡽⣯⡿⡽⢯⠿⣽⢻⡽⢯⡛⡬⣓⠵⡀⢏⡘⣯⣟⣾⠀⣿⠽⣯⣿⣿⣿⣿⣯⢿⡽⣫⣞⣿⡾⡽⢣⠍⡞⢥⠃⢸⣟⣷⣻⢾⣽⣻⣟⡿⣞⡷⣯⢿⣻
-⣳⢯⡿⣽⣿⣿⣯⢧⡘⡱⢣⠞⢀⠳⡎⡵⢪⡕⡣⡝⠜⠮⡞⠯⢛⡩⢍⡔⣲⠰⠆⠲⢐⢂⡰⢀⡉⠲⢡⠘⠱⣪⠄⣻⢾⡽⢀⣿⢸⣷⣻⣟⡿⣾⡽⢏⣵⣻⣾⣳⡟⣱⢋⡆⣙⠮⡁⢸⣟⡾⣽⣿⣿⣳⢯⡿⣽⣿⣿⣿⣻
-⣽⣯⣿⣳⢯⡿⣽⣯⣷⡈⠗⣎⠀⠯⣜⡱⢣⠎⣡⠲⣍⠖⡴⠩⠇⠙⣨⠐⣤⠒⣼⣇⣸⢧⣰⣧⡄⣳⠠⠈⡄⠱⡂⢼⣯⡟⢰⡏⢸⣷⣻⢿⣽⡳⣹⣞⣷⣻⢾⡳⢹⡔⡫⡔⢨⡓⡅⢻⣾⡽⣯⢿⡽⣯⣿⣽⣳⢯⡿⣽⣻
-⢿⡿⣿⡽⣯⣟⡷⣿⢿⣧⠙⡴⢂⠱⣌⢳⢣⠐⠀⠀⠔⢲⡐⣧⡍⣻⢷⣸⢯⡟⠷⠏⠙⠋⠀⠉⠁⠀⠀⢠⣷⡐⡃⢸⣷⡃⣼⡃⣽⢺⣯⣟⡞⣱⣟⣾⡳⢏⠯⡜⣣⢜⡱⣍⠰⣩⠆⣹⢿⡿⣽⢯⡿⣽⢿⡿⣽⢯⣟⣷⣻
-⢿⣽⣳⣟⣷⣿⡿⣽⣻⣞⣧⠐⡉⢄⡈⢎⣃⠀⠀⠀⠘⣷⣻⢷⡻⠝⠏⠉⠁⠀⠀⠀⠀⢀⡀⣀⢀⠀⣤⢻⡷⣏⠅⣸⠷⠁⣾⠁⣎⡿⣾⣽⣺⢷⡛⡴⡙⢮⡱⣙⠦⣋⠶⢬⠰⣱⠂⣹⢯⡿⣽⣿⣿⡽⣯⢿⡽⣿⣾⣷⣻⣻
-⣻⣞⣷⢯⣟⣿⣻⣷⣻⡾⣽⢧⡘⣀⠱⡄⠩⢞⡱⠄⠀⠈⠁⠀⠀⠀⠀⢠⢒⣔⣢⣴⢼⡶⢚⡓⢦⣋⢶⣯⢿⡽⠀⣿⡃⢸⡇⡘⢦⣟⡷⣯⢟⣣⡙⣖⡹⢆⡳⢥⢛⡴⢋⡖⡸⣅⠧⢸⣯⡿⣽⣻⢿⣽⣯⣿⣽⣻⣟⡿⣻
-⣿⣿⣿⣻⣞⡷⣯⣿⣿⡿⣽⢯⣷⡈⢦⠘⣥⠈⢞⣩⢢⢀⠀⠀⠀⠔⠞⠯⠛⣞⣠⢋⡴⢌⠧⣙⣶⢯⣟⡾⣯⠗⢨⡷⢁⣾⠁⡞⣽⢾⡽⢣⠞⣤⠳⡸⢜⡣⢞⡡⢏⡲⡍⣰⠱⣞⣯⠀⢿⣟⡷⣯⣟⣾⣿⣿⣞⡷⣯⣟⣻
-⣷⣻⣞⡷⣯⣿⣷⣻⢾⡽⣯⣿⣾⡽⣆⠳⡀⢯⡄⢒⠦⡉⢮⡱⣍⢮⠹⡜⢳⡘⢆⣋⡴⣮⢿⡽⣞⡿⣞⡿⣏⢠⣟⡇⣸⠧⡘⣽⢯⡛⡴⣋⡜⢦⡹⣱⢋⡜⣣⡙⢦⡓⡼⣡⢏⣿⣾⡁⢸⣯⢿⡷⣿⣞⣷⣻⢾⣽⣷⣯
-⣞⡷⣯⣟⣿⣿⡷⣯⢿⣽⣻⣿⣿⡽⣯⢷⣍⠆⣻⢦⠙⣜⢢⡔⢬⠬⡵⡜⣖⠺⠍⠏⠙⣩⣏⡿⣽⣻⣽⡻⣠⣟⡾⢀⡿⢡⢽⡏⢧⡙⠶⣑⠞⣆⠳⣥⢋⠶⡡⢉⢦⣙⣦⠳⣸⣿⡷⣧⠀⣿⣻⣿⣿⣞⡷⣯⣟⣿⣿⣿
-⣿⣿⣿⣞⡷⣯⣟⣿⣿⣷⣻⣞⣷⣻⣿⣿⣽⣳⡌⢻⣆⠩⢖⡜⢦⣦⣤⣄⣤⣠⣔⣮⡽⣾⡽⣟⣷⣻⠎⣴⣻⢾⠁⣼⠃⣎⠳⣜⡱⢎⢳⡩⠞⣌⠳⣌⠏⢆⡡⢏⣲⣽⣿⣣⠳⣯⣟⣷⡀⢻⣷⣻⢾⣽⣿⣿⣞⣷⣻⣞
-⣻⣟⡿⣾⣽⣳⢯⣟⣿⣳⣟⣾⣳⣟⣿⣻⣞⣷⣻⡄⢻⡀⠯⣼⣻⢾⣷⣿⣾⣷⢿⣾⣽⣷⡿⣿⣾⣱⣞⡷⢏⠃⣠⠇⡞⣌⠳⡜⡼⣩⢖⡩⡝⡬⣓⠜⢠⢎⡵⣣⣟⣿⣻⢧⡙⣷⢯⣟⡧⢘⡷⣯⣟⣾⣻⣟⣾⣳⣟⡾
-⣻⢾⣽⣳⣿⣿⣟⣾⣳⣟⣾⣿⣿⣞⣷⣻⣞⣿⣿⣿⡄⢣⡜⣳⢯⣿⡿⣟⣿⣻⢿⡽⣯⢿⡽⣳⢯⠷⣫⠜⡃⣰⠣⡝⡼⢌⡳⢍⠶⣑⠮⣑⠮⡱⢈⠴⣋⠶⣼⣿⣞⡷⣯⢿⡜⣽⣟⡾⣽⡀⢿⣿⣿⣞⣷⣻⣞⣿⣿⣿
-⣽⣿⣾⣳⢯⡿⣽⣾⣷⣟⡾⣽⣻⢾⣷⣿⢾⡽⣯⣟⡷⢀⡻⣜⡿⣾⣽⠻⣞⡽⣯⠿⣝⠫⡴⣩⢎⠳⡅⢫⠰⡥⣛⡜⡜⣣⠞⣩⠞⣌⢳⡩⠒⣡⢎⢳⣜⡾⣽⣻⣾⣽⣯⣟⣷⡸⣯⣿⣷⣇⢈⠻⡽⣾⣷⣿⢾⡽⣯⣟
-⡿⣿⢿⡽⣯⣟⡷⣿⢿⣯⣟⡷⣯⢿⡿⣿⢯⣟⡷⣯⢿⡆⠱⣍⠻⢷⡻⠿⡽⢛⣍⠳⣌⢳⡱⢣⢎⠳⢈⠔⣣⠳⡱⢎⡵⢣⡙⢦⡹⠜⢂⢥⣚⡵⣾⢿⡾⣽⣳⢯⡿⣿⢿⣞⡷⣝⡷⣿⢿⣿⡀⢷⣬⡙⢿⡿⣯⣟⡷⣯
-⢿⡽⣯⣟⣷⣿⡿⣽⣻⢾⣽⣿⣿⢯⡿⣽⣻⣾⣿⣿⢯⣟⣦⡉⠝⢦⡙⢧⡙⢧⡜⢳⣌⠳⠜⢃⡨⠔⡡⡜⢦⡹⣱⠫⣔⢣⡙⠦⡑⣬⣻⣾⣿⡽⣯⢿⡽⣷⣿⣿⡽⣯⣟⡾⣿⣿⡿⣽⣻⣞⣧⠘⣷⣻⣤⡙⢷⣿⣿⣷
-⣯⣟⣷⢯⣟⣿⣻⣷⣯⣟⣾⣻⣟⣯⣟⣷⢯⣟⣿⣻⣟⣾⣳⠟⢠⠄⣈⠤⠩⢤⡌⢥⡰⢲⡌⢧⡰⢎⡕⢮⡱⢎⡥⠳⣌⠧⣙⣮⣽⣳⣟⣿⣻⣽⣯⣿⣽⣻⣟⡿⣽⣳⣯⣟⣿⣻⣟⣷⣻⡾⣽⣂⠹⣷⣯⣟⣦⡹⣟⡿
-⣿⣿⣿⣻⣞⡷⣯⣿⣟⡿⣞⣷⣻⢾⣿⣿⣻⣞⡷⣯⣿⣿⠏⡰⣍⠞⡄⢹⢒⢦⡘⢧⡱⢣⠞⡱⢎⠳⡜⣆⠳⣍⢲⡙⢦⣻⡽⣿⣿⣷⣻⣞⣷⣻⣿⣿⣞⡷⣯⣟⣿⣿⣿⣞⣷⣻⣞⣿⣿⣟⡷⣇⢆⡸⣿⢿⡾⣽⢯⣟
-⣳⣟⣾⣳⣯⣿⣷⣻⢾⣽⣻⣾⣽⣻⣞⣷⣻⣾⣽⣷⢯⠏⡰⣱⠪⡝⣜⢢⠉⢦⡙⢦⣙⢣⡝⣱⢋⡵⢓⡬⣓⠬⣓⢼⣯⣷⣟⣷⣻⣞⣷⣿⣾⣳⣟⡾⣽⣿⣷⣿⣞⣷⣻⣞⣷⣿⣞⣷⣻⢾⣽⣿⠤⢓⣯⢿⡽⣯⣿⣾
-⣳⣟⣾⣳⣿⣿⡷⣯⣟⡾⣽⣿⣿⣳⣟⣾⣳⣿⣿⣿⠋⣰⢱⠣⡝⡼⢌⡳⢆⡈⠝⣦⡙⢦⡙⢦⢫⡔⡫⢴⡩⢞⣥⣞⣼⣻⣟⣾⣳⣟⣾⣿⣿⣳⢯⣟⡷⣿⣿⣿⣞⣷⣻⣞⣿⣿⣟⡾⣽⣻⢾⣿⡎⣼⢯⡿⣽⡿⣿⣿
-⣿⣿⣿⣳⣟⡾⣽⣿⣿⣟⣷⣻⢾⣽⣟⣿⡳⠟⠞⢁⡜⢦⠫⡵⣙⢬⡓⣜⢣⠳⣌⠲⣍⠖⡭⢎⡵⢪⡕⣣⣽⣿⣿⣞⣷⣻⣞⣿⣟⡿⣞⡷⣯⢿⣿⣿⣽⣳⣟⡾⣿⣟⣿⣞⣷⣻⣞⣿⣿⣯⣟⡾⣅⣿⣿⣿⣳⣟⡷⣯
-⣟⣿⣻⢷⣯⣟⣷⣻⣟⡿⣾⣽⣛⣎⣩⡴⣴⣎⡶⣬⢾⣼⣳⢷⣞⡶⣽⣞⣯⣟⣶⣇⣎⡿⣞⡷⣞⣷⣻⢷⣻⣟⡿⣞⣷⣻⣞⣿⣻⢿⣽⣻⣽⣻⣟⡿⣞⡷⣯⣟⣿⣻⣟⣾⣳⣟⣾⣻⣟⡷⣯⢿⣼⣻⣟⣷⣻⢾⣽⣳
-        </pre>
-        <p class="troll-title">JEFF HAI ROTTO TUTTO!!!!!</p>
-    </div>
-    
-    <!-- Audio element for troll sound -->
-    <audio id="trollAudio" loop>
-        <source src="https://github.com/lyakhu955/ore-pws/raw/main/A%20Filipino%20Rap%20Battle%20%20Any%20Translators%20(mp3cut.net).mp3" type="audio/mp3">
-        Your browser does not support the audio element.
-    </audio>
+   
 
 </body>
 </html>
