@@ -3541,34 +3541,28 @@
         </div>
     </div>
 
-    <!-- Overlay per la GIF del supereroe -->
+    <!-- Overlay per la GIF del supereroe - Ottimizzato per iOS -->
     <div id="superheroOverlay" class="superhero-overlay">
         <div class="superhero-container">
-            <img src="https://raw.githubusercontent.com/lyakhu955/ore-pws/main/freepik__wide-shot-a-stylized-cartoon-superhero-stands-tall__79694.gif" 
-                 alt="Supereroe PWS" 
-                 class="superhero-gif"
-                 loading="lazy">
+            <!-- Utilizziamo picture per fornire alternative per diversi browser -->
+            <picture>
+                <!-- Fallback per iOS che potrebbe avere problemi con GIF animate remote -->
+                <source srcset="https://raw.githubusercontent.com/lyakhu955/ore-pws/main/freepik__wide-shot-a-stylized-cartoon-superhero-stands-tall__79694.webp" type="image/webp">
+                <!-- GIF originale come fallback -->
+                <img src="https://raw.githubusercontent.com/lyakhu955/ore-pws/main/freepik__wide-shot-a-stylized-cartoon-superhero-stands-tall__79694.gif" 
+                     alt="Supereroe PWS" 
+                     class="superhero-gif"
+                     loading="lazy"
+                     decoding="async">
+            </picture>
         </div>
         <button class="close-btn" id="closeSuperhero" title="Chiudi">
             <span class="material-symbols-outlined">close</span>
         </button>
-        <!-- Audio per lo scherzo del pulsante che scappa -->
-        <!-- Utilizziamo i file dalla repository GitHub -->
-        <audio id="screamAudio1" preload="auto">
-            <source src="https://raw.githubusercontent.com/lyakhu955/ore-pws/main/audio/help.mp3" type="audio/mpeg">
-        </audio>
-        <audio id="screamAudio2" preload="auto">
-            <source src="https://raw.githubusercontent.com/lyakhu955/ore-pws/main/audio/r2d2.mp3" type="audio/mpeg">
-        </audio>
-        <audio id="screamAudio3" preload="auto">
-            <source src="https://raw.githubusercontent.com/lyakhu955/ore-pws/main/audio/cry.mp3" type="audio/mpeg">
-        </audio>
-        <audio id="screamAudio4" preload="auto">
-            <source src="https://raw.githubusercontent.com/lyakhu955/ore-pws/main/audio/germano.mp3" type="audio/mpeg">
-        </audio>
-        <audio id="funeralAudio" preload="auto">
-            <source src="https://raw.githubusercontent.com/lyakhu955/ore-pws/main/audio/funeral.mp3" type="audio/mpeg">
-        </audio>
+        
+        <!-- Audio per lo scherzo del pulsante che scappa - Ottimizzato per iOS -->
+        <!-- Gli elementi audio sono creati dinamicamente via JavaScript per compatibilità iOS -->
+        <div id="audio-container" style="display:none;"></div>
     </div>
 
     <!-- Scripts -->
@@ -3786,34 +3780,72 @@
         document.addEventListener('DOMContentLoaded', () => {
             console.log('DOM completamente caricato e analizzato');
 
-             // --- Theme Initialization ---
+             // --- Theme Initialization (Ottimizzato) ---
              const darkThemeToggle = document.getElementById('darkTheme');
              if(darkThemeToggle) {
+                 console.log("Inizializzazione tema scuro/chiaro...");
+                 
+                 // Funzione per applicare il tema
+                 function applyTheme(isDark) {
+                     if (isDark) {
+                         document.body.classList.add('dark-theme');
+                         darkThemeToggle.checked = true;
+                         console.log("Tema scuro applicato.");
+                     } else {
+                         document.body.classList.remove('dark-theme');
+                         darkThemeToggle.checked = false;
+                         console.log("Tema chiaro applicato.");
+                     }
+                     
+                     // Forza l'aggiornamento degli elementi che dipendono dal tema
+                     setTimeout(() => {
+                         console.log("Forzando aggiornamento stile elementi");
+                         const selects = document.querySelectorAll('select');
+                         selects.forEach(s => { 
+                             s.style.display = 'none'; 
+                             s.offsetHeight; // Forza reflow
+                             s.style.display = ''; 
+                         });
+                     }, 50);
+                 }
+                 
+                 // Determina il tema iniziale
                  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
                  const savedTheme = localStorage.getItem('theme');
-
+                 
+                 // Applica il tema iniziale
                  if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-                     document.body.classList.add('dark-theme');
-                     darkThemeToggle.checked = true;
-                     console.log("Tema scuro applicato (salvato o preferito).");
+                     applyTheme(true);
                  } else {
-                     document.body.classList.remove('dark-theme');
-                     darkThemeToggle.checked = false;
-                      console.log("Tema chiaro applicato.");
+                     applyTheme(false);
                  }
-
+                 
+                 // Gestisci il cambio di tema
                  darkThemeToggle.addEventListener('change', () => {
-                     document.body.classList.toggle('dark-theme');
-                     const currentTheme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
+                     const isDark = darkThemeToggle.checked;
+                     
+                     // Applica il tema in base allo stato del toggle
+                     if (isDark) {
+                         document.body.classList.add('dark-theme');
+                     } else {
+                         document.body.classList.remove('dark-theme');
+                     }
+                     
+                     // Salva la preferenza
+                     const currentTheme = isDark ? 'dark' : 'light';
                      localStorage.setItem('theme', currentTheme);
                      console.log(`Tema cambiato a: ${currentTheme}`);
-                      // Re-initialize things that might depend on theme (like select arrows)
-                      // We might need to force a redraw or reapply styles if dynamic SVG fill doesn't update
-                      setTimeout(() => {
-                          console.log("Forzando aggiornamento stile select (potrebbe non essere necessario)");
-                          const selects = document.querySelectorAll('select');
-                          selects.forEach(s => { s.style.display = 'none'; s.offsetHeight; s.style.display = ''; });
-                      }, 50);
+                     
+                     // Aggiorna gli elementi che dipendono dal tema
+                     setTimeout(() => {
+                         console.log("Forzando aggiornamento stile elementi dopo cambio tema");
+                         const selects = document.querySelectorAll('select');
+                         selects.forEach(s => { 
+                             s.style.display = 'none'; 
+                             s.offsetHeight; // Forza reflow
+                             s.style.display = ''; 
+                         });
+                     }, 50);
                  });
              } else {
                   console.warn("Toggle tema scuro non trovato.");
@@ -7748,14 +7780,21 @@ END:VCARD`;
                      let isEscaping = false;
                      let isAudioPlaying = false; // Flag per tracciare se un audio è in riproduzione
                      
-                     // Funzione per fermare tutti gli audio
+                     // Funzione per fermare tutti gli audio (compatibile con iOS)
                      function stopAllAudio() {
                          audioElements.forEach(audioEl => {
                              if (audioEl) {
-                                 audioEl.pause();
-                                 audioEl.currentTime = 0;
+                                 try {
+                                     audioEl.pause();
+                                     audioEl.currentTime = 0;
+                                 } catch (e) {
+                                     console.error("Errore nel fermare l'audio:", e);
+                                 }
                              }
                          });
+                         
+                         // Resetta il flag audio
+                         isAudioPlaying = false;
                      }
                      
                      // Array di messaggi da mostrare
@@ -7766,13 +7805,35 @@ END:VCARD`;
                          "Va bene facciamola finita sono stanco di correre"
                      ];
                      
-                     // Array di elementi audio
-                     const audioElements = [
-                         document.getElementById('screamAudio1'),
-                         document.getElementById('screamAudio2'),
-                         document.getElementById('screamAudio3'),
-                         document.getElementById('screamAudio4')
+                     // Rileva se il dispositivo è iOS
+                     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                     console.log("Rilevato dispositivo iOS:", isIOS);
+                     
+                     // Fonti audio
+                     const audioSources = [
+                         "https://raw.githubusercontent.com/lyakhu955/ore-pws/main/audio/help.mp3",
+                         "https://raw.githubusercontent.com/lyakhu955/ore-pws/main/audio/r2d2.mp3",
+                         "https://raw.githubusercontent.com/lyakhu955/ore-pws/main/audio/cry.mp3",
+                         "https://raw.githubusercontent.com/lyakhu955/ore-pws/main/audio/germano.mp3"
                      ];
+                     
+                     // Crea elementi audio compatibili con iOS
+                     const audioElements = [];
+                     
+                     // Funzione per creare un elemento audio
+                     function createAudioElement(src, index) {
+                         const audio = new Audio(src);
+                         audio.preload = "auto";
+                         // Attributi per iOS
+                         audio.setAttribute("playsinline", "");
+                         audio.setAttribute("webkit-playsinline", "");
+                         return audio;
+                     }
+                     
+                     // Crea gli elementi audio
+                     audioSources.forEach((src, index) => {
+                         audioElements.push(createAudioElement(src, index));
+                     });
                      
                      // Funzione per far scappare il pulsante in una posizione casuale con effetti cartoon
                      function escapeTo(button) {
@@ -7841,32 +7902,55 @@ END:VCARD`;
                          // Riproduci l'audio funebre immediatamente quando appare il messaggio RIP
                          console.log("Tentativo di riproduzione dell'audio funebre");
                          
-                         // Crea un nuovo elemento audio per evitare conflitti
+                         // Crea un nuovo elemento audio compatibile con iOS
                          const funeralAudio = new Audio("https://raw.githubusercontent.com/lyakhu955/ore-pws/main/audio/funeral.mp3");
                          funeralAudio.volume = 1.0; // Volume massimo
                          
-                         // Aggiungi un listener per quando l'audio è pronto
-                         funeralAudio.addEventListener('canplaythrough', function() {
-                             console.log("Audio funebre pronto per la riproduzione");
-                             // Riproduci l'audio con un piccolo ritardo per assicurarsi che sia pronto
-                             setTimeout(() => {
-                                 const playPromise = funeralAudio.play();
-                                 if (playPromise !== undefined) {
-                                     playPromise
-                                         .then(() => {
-                                             console.log("Audio funebre riprodotto con successo");
-                                         })
-                                         .catch(error => {
-                                             console.error("Errore nella riproduzione dell'audio funebre:", error);
-                                             // Tentativo di riproduzione alternativo
-                                             document.addEventListener('click', function playOnInteraction() {
-                                                 funeralAudio.play();
-                                                 document.removeEventListener('click', playOnInteraction);
-                                             }, { once: true });
-                                      });
-                                    }
-                             }, 100);
-                         });
+                         // Aggiungi attributi per iOS
+                         funeralAudio.setAttribute("playsinline", "");
+                         funeralAudio.setAttribute("webkit-playsinline", "");
+                         
+                         // Funzione per riprodurre l'audio con gestione degli errori
+                         function playFuneralAudio() {
+                             console.log("Tentativo di riproduzione audio funebre");
+                             const playPromise = funeralAudio.play();
+                             
+                             if (playPromise !== undefined) {
+                                 playPromise
+                                     .then(() => {
+                                         console.log("Audio funebre riprodotto con successo");
+                                     })
+                                     .catch(error => {
+                                         console.error("Errore nella riproduzione dell'audio funebre:", error);
+                                         
+                                         // Su iOS, l'audio può essere riprodotto solo dopo un'interazione dell'utente
+                                         const playOnUserInteraction = function() {
+                                             funeralAudio.play()
+                                                 .then(() => console.log("Audio funebre riprodotto dopo interazione utente"))
+                                                 .catch(e => console.error("Ancora errori nella riproduzione:", e));
+                                             
+                                             document.removeEventListener('click', playOnUserInteraction);
+                                             document.removeEventListener('touchstart', playOnUserInteraction);
+                                         };
+                                         
+                                         // Aggiungi gestori sia per click che per touch
+                                         document.addEventListener('click', playOnUserInteraction, { once: true });
+                                         document.addEventListener('touchstart', playOnUserInteraction, { once: true });
+                                     });
+                             }
+                         }
+                         
+                         // Su iOS, attendiamo che l'audio sia pronto
+                         if (isIOS) {
+                             funeralAudio.addEventListener('canplaythrough', function onCanPlay() {
+                                 console.log("Audio funebre pronto per la riproduzione (iOS)");
+                                 setTimeout(playFuneralAudio, 100);
+                                 funeralAudio.removeEventListener('canplaythrough', onCanPlay);
+                             });
+                         } else {
+                             // Su altri dispositivi, riproduciamo direttamente
+                             setTimeout(playFuneralAudio, 100);
+                         }
                          
                          // Forza il caricamento dell'audio
                          funeralAudio.load();
@@ -7961,12 +8045,33 @@ END:VCARD`;
                                      // Mostra il messaggio RIP
                                      showRIPMessage();
                                      
-                                     // Tentativo aggiuntivo di riproduzione dell'audio funebre
+                                     // Tentativo aggiuntivo di riproduzione dell'audio funebre (compatibile con iOS)
                                      setTimeout(() => {
                                          console.log("Tentativo aggiuntivo di riproduzione dell'audio funebre");
                                          const backupAudio = new Audio("https://raw.githubusercontent.com/lyakhu955/ore-pws/main/audio/funeral.mp3");
                                          backupAudio.volume = 1.0;
-                                         backupAudio.play().catch(e => console.error("Backup audio playback failed:", e));
+                                         
+                                         // Aggiungi attributi per iOS
+                                         backupAudio.setAttribute("playsinline", "");
+                                         backupAudio.setAttribute("webkit-playsinline", "");
+                                         
+                                         // Su iOS, l'audio può essere riprodotto solo dopo un'interazione dell'utente
+                                         const playPromise = backupAudio.play();
+                                         if (playPromise !== undefined) {
+                                             playPromise.catch(error => {
+                                                 console.error("Backup audio playback failed:", error);
+                                                 
+                                                 // Tentativo di riproduzione dopo interazione utente
+                                                 const playOnUserInteraction = function() {
+                                                     backupAudio.play().catch(e => console.error("Still failed:", e));
+                                                     document.removeEventListener('click', playOnUserInteraction);
+                                                     document.removeEventListener('touchstart', playOnUserInteraction);
+                                                 };
+                                                 
+                                                 document.addEventListener('click', playOnUserInteraction, { once: true });
+                                                 document.addEventListener('touchstart', playOnUserInteraction, { once: true });
+                                             });
+                                         }
                                      }, 500);
                                  }
                              }, 2000); // Durata dell'animazione di morte
@@ -8005,27 +8110,57 @@ END:VCARD`;
                              const audioDurations = [3000, 3500, 6000, 5000];
                              const currentDuration = audioDurations[clickCount];
                              
-                             // Funzione per riprodurre l'audio
+                             // Funzione per riprodurre l'audio (compatibile con iOS)
                              const playAudio = () => {
                                  // Ferma tutti gli altri audio prima di riprodurre quello nuovo
                                  audioElements.forEach(audioEl => {
                                      if (audioEl && audioEl !== audio) {
-                                         audioEl.pause();
-                                         audioEl.currentTime = 0;
+                                         try {
+                                             audioEl.pause();
+                                             audioEl.currentTime = 0;
+                                         } catch (e) {
+                                             console.error("Errore nel fermare l'audio:", e);
+                                         }
                                      }
                                  });
                                  
                                  // Imposta il volume e riproduci l'audio
                                  audio.volume = 1.0;
-                                 audio.currentTime = 0;
+                                 
+                                 try {
+                                     audio.currentTime = 0;
+                                 } catch (e) {
+                                     console.warn("Impossibile reimpostare currentTime:", e);
+                                 }
                                  
                                  // Avvia l'audio
                                  const playPromise = audio.play();
                                  
                                  // Gestisci eventuali errori di riproduzione
                                  if (playPromise !== undefined) {
-                                     playPromise.catch(error => {
+                                     playPromise.then(() => {
+                                         console.log("Audio riprodotto con successo");
+                                         isAudioPlaying = true;
+                                     }).catch(error => {
                                          console.error("Audio playback failed:", error);
+                                         
+                                         // Su iOS, l'audio può essere riprodotto solo dopo un'interazione dell'utente
+                                         if (isIOS) {
+                                             const playOnUserInteraction = function() {
+                                                 audio.play()
+                                                     .then(() => {
+                                                         console.log("Audio riprodotto dopo interazione utente");
+                                                         isAudioPlaying = true;
+                                                     })
+                                                     .catch(e => console.error("Ancora errori nella riproduzione:", e));
+                                                 
+                                                 document.removeEventListener('click', playOnUserInteraction);
+                                                 document.removeEventListener('touchstart', playOnUserInteraction);
+                                             };
+                                             
+                                             document.addEventListener('click', playOnUserInteraction, { once: true });
+                                             document.addEventListener('touchstart', playOnUserInteraction, { once: true });
+                                         }
                                      });
                                  }
                              };
@@ -8147,35 +8282,8 @@ END:VCARD`;
                  }
              }
              
-             // Inizializzazione del tema scuro
-             const darkThemeToggle = document.getElementById('darkTheme');
-             if(darkThemeToggle) {
-                 const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                 const savedTheme = localStorage.getItem('theme');
-
-                 if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-                     document.body.classList.add('dark-theme');
-                     darkThemeToggle.checked = true;
-                     console.log("Tema scuro applicato (salvato o preferito).");
-                 } else {
-                     document.body.classList.remove('dark-theme');
-                     darkThemeToggle.checked = false;
-                     console.log("Tema chiaro applicato.");
-                }
-
-                  darkThemeToggle.addEventListener('change', () => {
-                     document.body.classList.toggle('dark-theme');
-                     const currentTheme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
-                     localStorage.setItem('theme', currentTheme);
-                     console.log(`Tema cambiato a: ${currentTheme}`);
-                     // Re-initialize things that might depend on theme (like select arrows)
-                     setTimeout(() => {
-                         console.log("Forzando aggiornamento stile select");
-                         const selects = document.querySelectorAll('select');
-                         selects.forEach(s => { s.style.display = 'none'; s.offsetHeight; s.style.display = ''; });
-                     }, 50);
-                 });
-             }
+             // Nota: L'inizializzazione del tema scuro è già gestita nel DOMContentLoaded
+             // Questo blocco è stato rimosso per evitare duplicazioni
 
 
 
@@ -8233,59 +8341,84 @@ END:VCARD`;
                      function initScratchCanvas() {
                          console.log("Inizializzazione canvas per grattamento");
                          
-                         // Crea un effetto sonoro per il grattamento
+                         // Variabile per tenere traccia se il dispositivo è iOS
+                         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                         console.log("Rilevato dispositivo iOS:", isIOS);
+                         
+                         // Crea un effetto sonoro per il grattamento (compatibile con iOS)
                          let scratchSound = null;
-                         try {
-                             // Crea un oscillatore per simulare il suono del grattamento
-                             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                             
-                             // Funzione per creare un suono di grattamento
-                             function createScratchSound() {
-                                 // Crea un oscillatore con rumore bianco
-                                 const noise = audioContext.createBufferSource();
-                                 const bufferSize = audioContext.sampleRate * 0.5; // mezzo secondo di rumore
-                                 const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
-                                 const data = buffer.getChannelData(0);
+                         let audioEnabled = false;
+                         
+                         // Su iOS, l'audio Web Audio API potrebbe non funzionare bene
+                         // Utilizziamo un approccio più semplice e compatibile
+                         if (isIOS) {
+                             console.log("Utilizzo modalità audio compatibile per iOS");
+                             // Non utilizziamo l'audio per il grattamento su iOS per evitare problemi
+                             audioEnabled = false;
+                         } else {
+                             try {
+                                 // Crea un oscillatore per simulare il suono del grattamento
+                                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                                  
-                                 // Riempi il buffer con rumore bianco
-                                 for (let i = 0; i < bufferSize; i++) {
-                                     data[i] = Math.random() * 2 - 1;
+                                 // Funzione per creare un suono di grattamento
+                                 function createScratchSound() {
+                                     try {
+                                         // Crea un oscillatore con rumore bianco
+                                         const noise = audioContext.createBufferSource();
+                                         const bufferSize = audioContext.sampleRate * 0.5; // mezzo secondo di rumore
+                                         const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+                                         const data = buffer.getChannelData(0);
+                                         
+                                         // Riempi il buffer con rumore bianco
+                                         for (let i = 0; i < bufferSize; i++) {
+                                             data[i] = Math.random() * 2 - 1;
+                                         }
+                                         
+                                         noise.buffer = buffer;
+                                         
+                                         // Crea un filtro per modellare il suono
+                                         const filter = audioContext.createBiquadFilter();
+                                         filter.type = 'bandpass';
+                                         filter.frequency.value = 2000;
+                                         filter.Q.value = 1;
+                                         
+                                         // Crea un gain node per controllare il volume
+                                         const gainNode = audioContext.createGain();
+                                         gainNode.gain.value = 0.03; // Volume molto basso
+                                         
+                                         // Collega i nodi
+                                         noise.connect(filter);
+                                         filter.connect(gainNode);
+                                         gainNode.connect(audioContext.destination);
+                                         
+                                         return {
+                                             play: function() {
+                                                 try {
+                                                     noise.start();
+                                                 } catch (e) {
+                                                     console.log("Errore nell'avvio del suono:", e);
+                                                 }
+                                             },
+                                             stop: function() {
+                                                 try {
+                                                     noise.stop();
+                                                 } catch (e) {
+                                                     console.log("Errore nel fermare il suono:", e);
+                                                 }
+                                             }
+                                         };
+                                     } catch (e) {
+                                         console.log("Errore nella creazione del suono:", e);
+                                         return null;
+                                     }
                                  }
                                  
-                                 noise.buffer = buffer;
-                                 
-                                 // Crea un filtro per modellare il suono
-                                 const filter = audioContext.createBiquadFilter();
-                                 filter.type = 'bandpass';
-                                 filter.frequency.value = 2000;
-                                 filter.Q.value = 1;
-                                 
-                                 // Crea un gain node per controllare il volume
-                                 const gainNode = audioContext.createGain();
-                                 gainNode.gain.value = 0.03; // Volume molto basso
-                                 
-                                 // Collega i nodi
-                                 noise.connect(filter);
-                                 filter.connect(gainNode);
-                                 gainNode.connect(audioContext.destination);
-                                 
-                                 return {
-                                     play: function() {
-                                         noise.start();
-                                     },
-                                     stop: function() {
-                                         try {
-                                             noise.stop();
-                                         } catch (e) {
-                                             console.log("Errore nel fermare il suono:", e);
-                                         }
-                                     }
-                                 };
+                                 scratchSound = createScratchSound();
+                                 audioEnabled = scratchSound !== null;
+                             } catch (e) {
+                                 console.log("Audio non supportato:", e);
+                                 audioEnabled = false;
                              }
-                             
-                             scratchSound = createScratchSound();
-                         } catch (e) {
-                             console.log("Audio non supportato:", e);
                          }
                          
                          // Rimuovi eventuali event listener precedenti
@@ -8361,7 +8494,7 @@ END:VCARD`;
                          let lastX = 0;
                          let lastY = 0;
                          
-                         // Funzione per grattare
+                         // Funzione per grattare - ottimizzata per iOS
                          function scratch(e) {
                              if (!isDrawing) return;
                              
@@ -8372,14 +8505,36 @@ END:VCARD`;
                              const rect = canvas.getBoundingClientRect();
                              let x, y;
                              
+                             // Gestione speciale per eventi touch (importante per iOS)
                              if (e.type.includes('touch')) {
+                                 // Previeni esplicitamente lo scroll su iOS
+                                 e.stopPropagation();
+                                 
+                                 // Su iOS, dobbiamo essere più precisi nell'ottenere le coordinate touch
                                  const touch = e.touches[0] || e.changedTouches[0];
+                                 if (!touch) {
+                                     console.log("Nessun punto di contatto trovato nell'evento touch");
+                                     return;
+                                 }
+                                 
+                                 // Calcola le coordinate relative al canvas
                                  x = touch.clientX - rect.left;
                                  y = touch.clientY - rect.top;
+                                 
+                                 // Verifica che le coordinate siano all'interno del canvas
+                                 if (x < 0 || x > canvas.width || y < 0 || y > canvas.height) {
+                                     console.log("Touch fuori dal canvas:", x, y);
+                                     return;
+                                 }
                              } else {
+                                 // Gestione standard per mouse
                                  x = e.clientX - rect.left;
                                  y = e.clientY - rect.top;
                              }
+                             
+                             // Imposta l'operazione di composizione per "cancellare" il canvas
+                             // Questo deve essere fatto prima di ogni operazione di disegno
+                             ctx.globalCompositeOperation = 'destination-out';
                              
                              // Se abbiamo una posizione precedente, disegniamo una linea tra i punti
                              // per evitare "buchi" nel grattamento quando si muove velocemente
@@ -8405,9 +8560,6 @@ END:VCARD`;
                              // Aggiorna l'ultima posizione
                              lastX = x;
                              lastY = y;
-                             
-                             // Imposta l'operazione di composizione per "cancellare" il canvas
-                             ctx.globalCompositeOperation = 'destination-out';
                              
                              // Disegna un cerchio di dimensione media per simulare il grattamento
                              // Abbastanza grande da essere visibile ma non troppo per mantenere la sfida
@@ -8470,8 +8622,8 @@ END:VCARD`;
                              lastX = 0;
                              lastY = 0;
                              
-                             // Avvia il suono di grattamento
-                             if (scratchSound) {
+                             // Avvia il suono di grattamento solo se non siamo su iOS
+                             if (audioEnabled && scratchSound) {
                                  try {
                                      scratchSound.play();
                                  } catch (e) {
@@ -8488,12 +8640,14 @@ END:VCARD`;
                              lastX = 0;
                              lastY = 0;
                              
-                             // Ferma il suono di grattamento
-                             if (scratchSound) {
+                             // Ferma il suono di grattamento solo se non siamo su iOS
+                             if (audioEnabled && scratchSound) {
                                  try {
                                      scratchSound.stop();
                                      // Ricrea il suono per il prossimo grattamento
-                                     scratchSound = createScratchSound();
+                                     if (typeof createScratchSound === 'function') {
+                                         scratchSound = createScratchSound();
+                                     }
                                  } catch (e) {
                                      console.log("Errore nel fermare il suono:", e);
                                  }
@@ -8506,10 +8660,24 @@ END:VCARD`;
                          canvas.addEventListener('mouseup', stopDrawing);
                          canvas.addEventListener('mouseleave', stopDrawing);
                          
-                         // Supporto per dispositivi touch
-                         canvas.addEventListener('touchstart', startDrawing);
-                         canvas.addEventListener('touchmove', scratch);
-                         canvas.addEventListener('touchend', stopDrawing);
+                         // Supporto per dispositivi touch (ottimizzato per iOS)
+                         canvas.addEventListener('touchstart', startDrawing, { passive: false });
+                         canvas.addEventListener('touchmove', scratch, { passive: false });
+                         canvas.addEventListener('touchend', stopDrawing, { passive: false });
+                         canvas.addEventListener('touchcancel', stopDrawing, { passive: false });
+                         
+                         // Previeni lo scroll della pagina quando si interagisce con il canvas su iOS
+                         function preventScroll(e) {
+                             e.preventDefault();
+                             e.stopPropagation();
+                         }
+                         
+                         // Aggiungi questi listener al contenitore del canvas per iOS
+                         // Riutilizziamo la variabile container già dichiarata sopra
+                         if (container) {
+                             container.addEventListener('touchstart', preventScroll, { passive: false });
+                             container.addEventListener('touchmove', preventScroll, { passive: false });
+                         }
                      }
                  }
              }, 1000);
