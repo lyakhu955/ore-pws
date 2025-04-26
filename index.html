@@ -7578,8 +7578,7 @@ END:VCARD`;
                  logo.addEventListener('mousedown', function(e) {
                      pressTimer = setTimeout(() => {
                          isLongPress = true;
-                         showSuperheroOverlayDirect(); // Utilizziamo la nuova funzione
-                         showToast('Hai sbloccato il supereroe PWS! 🦸‍♂️', 'success');
+                         showSuperheroOverlayDirect(); // Utilizziamo la nuova funzione senza notifiche
                      }, 3000); // 3 secondi di pressione
                  });
                  
@@ -7594,8 +7593,7 @@ END:VCARD`;
                      // Avvia il timer per la pressione prolungata
                      pressTimer = setTimeout(() => {
                          isLongPress = true;
-                         showSuperheroOverlayDirect(); // Utilizziamo la nuova funzione
-                         showToast('Hai sbloccato il supereroe PWS! 🦸‍♂️', 'success');
+                         showSuperheroOverlayDirect(); // Utilizziamo la nuova funzione senza notifiche
                          
                          // Disabilitiamo la vibrazione per evitare errori di intervento del browser
                          console.log("Supereroe attivato senza vibrazione");
@@ -7758,8 +7756,8 @@ END:VCARD`;
                          return;
                      }
                      
-                     // Mostra un messaggio di caricamento
-                     showToast('Caricamento supereroe in corso...', 'info');
+                     // Non mostriamo più messaggi di caricamento
+                     console.log('Caricamento supereroe in corso senza notifiche');
                      
                      // Crea un nuovo oggetto Image per precaricare la GIF
                      const preloadImg = new Image();
@@ -7814,14 +7812,10 @@ END:VCARD`;
                  function showSuperheroOverlayDirect() {
                      console.log("Attivazione diretta overlay supereroe");
                      
-                     // Mostra un messaggio di caricamento
-                     showToast('Caricamento supereroe in corso...', 'info');
-                     
-                     // Ottieni l'overlay
+                     // Ottieni l'overlay (senza mostrare notifiche di caricamento)
                      const overlay = document.getElementById('superheroOverlay');
                      if (!overlay) {
                          console.error("Overlay del supereroe non trovato!");
-                         showToast('Errore: overlay non trovato!', 'error');
                          return;
                      }
                      
@@ -7850,9 +7844,9 @@ END:VCARD`;
                          </div>
                      `;
                      
-                     // Mostra un messaggio di successo
+                     // Non mostriamo più messaggi di successo
                      setTimeout(() => {
-                         showToast('Supereroe PWS sbloccato! 🦸‍♂️', 'success');
+                         console.log('Supereroe PWS sbloccato senza notifiche');
                      }, 500);
                  }
                  
