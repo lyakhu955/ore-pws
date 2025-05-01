@@ -6457,9 +6457,9 @@
                             if (i === 8 || i === 9 || i === 10) { // Trasferte, Notturne, Totali
                                 cell.numFmt = '0.0';
                             }
-                            // Formato speciale per la pausa (solo 0 senza decimali)
+                            // Formato speciale per la pausa (con decimali solo se necessario)
                             if (i === 6) { // Pausa
-                                cell.numFmt = '0';
+                                cell.numFmt = '0.#'; // Mostra decimali solo se diversi da zero
                             }
                         }
                         
@@ -7058,7 +7058,7 @@
 
             if (allHolidayEntries.length === 0) {
                 entriesContainer.innerHTML = '<p style="text-align: center; color: var(--md-sys-color-on-surface-variant); padding: 1rem;">Nessuna voce di ferie o malattia inserita.</p>';
-                console.log("Nessuna voce Ferie/Malattia trovata.");
+                console.log("Nessuna voce Ferie/Malattie trovata.");
                 return;
             }
 
@@ -7598,7 +7598,7 @@ END:VCARD`;
                          // Disabilitiamo la vibrazione per evitare errori di intervento del browser
                          console.log("Supereroe attivato senza vibrazione");
                      }, 3000); // 3 secondi di pressione
-                 });
+                 }, { passive: false }); // Aggiungiamo passive: false per evitare warning
                  
                  // Cancella il timer se l'utente rilascia prima dei 3 secondi
                  logo.addEventListener('mouseup', function() {
