@@ -11577,10 +11577,10 @@ END:VCARD`;
                         isUsingWhisper = true;
                         
                         // Aggiorna il tooltip per indicare che stiamo usando Whisper AI
-                        tooltip.innerHTML = 'Sto ascoltando con Whisper AI... <br><small>(Riconoscimento vocale avanzato)</small>';
+                        tooltip.innerHTML = 'Sto ascoltando... <br><small>(Parla ora - solo 3 secondi)</small>';
                         
-                        // Avvia la registrazione e trascrizione con Whisper
-                        const transcript = await window.WhisperAI.transcribe(7000); // 7 secondi di registrazione
+                        // Avvia la registrazione e trascrizione con Whisper (tempo ridotto)
+                        const transcript = await window.WhisperAI.transcribe(3000); // 3 secondi di registrazione
                         
                         if (transcript) {
                             // Aggiorna il tooltip con il testo riconosciuto
