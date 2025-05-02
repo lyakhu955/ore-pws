@@ -2523,16 +2523,6 @@
             border: 1px solid #dadce0;
         }
         
-        .cloud-login-btn.microsoft-btn {
-            background-color: #2f2f2f;
-            color: #ffffff;
-        }
-        
-        .cloud-login-btn.apple-btn {
-            background-color: #000000;
-            color: #ffffff;
-        }
-        
         .cloud-logout-btn {
             margin-top: 1rem;
             background-color: var(--md-sys-color-error-container);
@@ -3663,34 +3653,6 @@
                                             </div>
                                             <div class="provider-status">
                                                 <span class="status-indicator" id="googleStatus"></span>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Microsoft OneDrive -->
-                                        <div class="provider-option" data-provider="microsoft">
-                                            <div class="provider-logo">
-                                                <img src="https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg" alt="Microsoft OneDrive">
-                                            </div>
-                                            <div class="provider-info">
-                                                <h4>Microsoft OneDrive</h4>
-                                                <p>Backup su OneDrive utilizzando il tuo account Microsoft</p>
-                                            </div>
-                                            <div class="provider-status">
-                                                <span class="status-indicator" id="microsoftStatus"></span>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Apple iCloud -->
-                                        <div class="provider-option" data-provider="apple">
-                                            <div class="provider-logo">
-                                                <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple iCloud">
-                                            </div>
-                                            <div class="provider-info">
-                                                <h4>Apple iCloud</h4>
-                                                <p>Backup su iCloud utilizzando il tuo ID Apple</p>
-                                            </div>
-                                            <div class="provider-status">
-                                                <span class="status-indicator" id="appleStatus"></span>
                                             </div>
                                         </div>
                                     </div>
@@ -10693,9 +10655,7 @@ END:VCARD`;
         class CloudBackupManager {
             constructor() {
                 this.providers = {
-                    google: new GoogleDriveProvider(),
-                    microsoft: new OneDriveProvider(),
-                    apple: new AppleCloudProvider()
+                    google: new GoogleDriveProvider()
                 };
                 
                 this.currentProvider = null;
