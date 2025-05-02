@@ -10286,6 +10286,9 @@ END:VCARD`;
                             // Salva il token aggiornato in localStorage
                             localStorage.setItem('googleAuthToken', JSON.stringify(tokenResponse));
                             
+                            // Imposta lo stato di login
+                            this.isLoggedIn = true;
+                            
                             // Chiama anche il callback originale
                             if (originalCallback) {
                                 originalCallback(tokenResponse);
@@ -10298,9 +10301,9 @@ END:VCARD`;
                         }
                     };
                     
-                    // Richiedi un nuovo token
+                    // Richiedi un nuovo token senza mostrare il popup di consenso
                     try {
-                        window.googleAuthClient.requestAccessToken();
+                        window.googleAuthClient.requestAccessToken({prompt: ''});
                     } catch (error) {
                         console.error('Errore durante la richiesta del token:', error);
                         // Ripristina il callback originale in caso di errore
@@ -10316,8 +10319,12 @@ END:VCARD`;
                     
                     // Verifica se l'utente è autenticato
                     if (!this.isLoggedIn) {
-                        // Se non è autenticato e showLoginPrompt è true, tenta di autenticare
-                        if (showLoginPrompt) {
+                        // Prima di tutto, proviamo a verificare lo stato di autenticazione
+                        // Potrebbe essere che l'utente sia autenticato ma lo stato non sia stato aggiornato
+                        await this.checkAuthStatus();
+                        
+                        // Se ancora non è autenticato e showLoginPrompt è true, tenta di autenticare
+                        if (!this.isLoggedIn && showLoginPrompt) {
                             console.log('Utente non autenticato, tentativo di login automatico...');
                             await this.login();
                             
@@ -10325,7 +10332,7 @@ END:VCARD`;
                             if (!this.isLoggedIn) {
                                 throw new Error("Login fallito. Impossibile eseguire il backup.");
                             }
-                        } else {
+                        } else if (!this.isLoggedIn) {
                             throw new Error("Utente non autenticato");
                         }
                     }
