@@ -2618,6 +2618,12 @@
             color: white;
         }
         .export-btn.excel-btn:hover { background-color: #165231; }
+        
+        .export-btn.pdf-btn {
+            background-color: #D93025; /* PDF Red */
+            color: white;
+        }
+        .export-btn.pdf-btn:hover { background-color: #B3261E; }
 
         .monthly-report-content { max-height: 60vh; overflow-y: auto; }
         .monthly-report-item {
@@ -3461,6 +3467,10 @@
     <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/it.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
     <header>
@@ -3869,6 +3879,9 @@
                             <button id="exportMonthlyExcel" class="export-btn excel-btn">
                                 <span class="material-symbols-outlined">download_for_offline</span> Esporta Excel
                             </button>
+                            <button id="exportMonthlyPdf" class="export-btn pdf-btn">
+                                <span class="material-symbols-outlined">picture_as_pdf</span> Converti PDF
+                            </button>
                         </div>
                     </div>
                     <!-- Sezione per i file Excel esportati (collassabile) -->
@@ -3960,13 +3973,11 @@
             <span class="material-symbols-outlined">calendar_month</span>
             <span>Calendario</span>
         </a>
-        <a href="#" class="nav-item" data-section="monthly-report-section" style="margin-right: 30px;">
+        <a href="#" class="nav-item" data-section="monthly-report-section">
              <span class="material-symbols-outlined">summarize</span>
             <span>Riepilogo</span>
         </a>
-        <!-- Spazio per il pulsante vocale -->
-        <div id="voice-button-placeholder"></div>
-        <a href="#" class="nav-item" data-section="ferie-malattie-section" style="margin-left: 30px;">
+        <a href="#" class="nav-item" data-section="ferie-malattie-section">
             <span class="material-symbols-outlined">hotel_class</span> <!-- or event_busy / medical_services -->
             <span>Assenze</span>
         </a>
@@ -6346,9 +6357,15 @@
              // Remove previous listeners before adding new ones to prevent duplicates
              monthSelect.replaceWith(monthSelect.cloneNode(true)); // Clone to remove listeners
              exportExcelBtn.replaceWith(exportExcelBtn.cloneNode(true));
+             const exportPdfBtn = document.getElementById('exportMonthlyPdf');
+             if (exportPdfBtn) {
+                 exportPdfBtn.replaceWith(exportPdfBtn.cloneNode(true));
+             }
+             
              // Re-acquire elements after cloning
              const newMonthSelect = document.getElementById('exportMonthSelect');
              const newExportExcelBtn = document.getElementById('exportMonthlyExcel');
+             const newExportPdfBtn = document.getElementById('exportMonthlyPdf');
              const newReportContent = document.getElementById('monthlyReportContent'); // Content div doesn't need cloning
 
 
@@ -6360,6 +6377,11 @@
              newExportExcelBtn.addEventListener('click', () => {
                  console.log(`Richiesta esportazione Excel per: ${newMonthSelect.value}`);
                  exportMonthlyReportToExcel(newMonthSelect.value);
+             });
+             
+             newExportPdfBtn.addEventListener('click', () => {
+                 console.log(`Richiesta esportazione PDF per: ${newMonthSelect.value}`);
+                 exportMonthlyReportToPdf(newMonthSelect.value);
              });
 
              // Display report for the initially selected (current) month
@@ -7608,6 +7630,118 @@
             } catch (excelError) {
                 console.error("Errore durante la creazione del file Excel:", excelError);
                 showToast(`Errore durante la creazione dell'Excel: ${excelError.message}`, "error");
+            }
+        }
+        
+        function exportMonthlyReportToPdf(yearMonth) {
+            console.log(`Inizio conversione in PDF per ${yearMonth}...`);
+            if (!yearMonth) {
+                showToast("Seleziona un mese da convertire.", "warning");
+                return;
+            }
+            
+            try {
+                // Prima esportiamo il file Excel normalmente
+                exportMonthlyReportToExcel(yearMonth);
+                
+                // Poi mostriamo un messaggio all'utente con istruzioni per la conversione in PDF
+                const userName = localStorage.getItem('userName') || 'Utente';
+                const [year, monthNum] = yearMonth.split('-').map(Number);
+                const monthIndex = monthNum - 1;
+                const monthName = new Date(year, monthIndex, 1).toLocaleDateString('it-IT', { month: 'long' });
+                const excelFilename = `ReportOre_${userName}_${monthName}_${year}.xlsx`;
+                
+                // Creiamo una finestra di dialogo personalizzata
+                const dialogOverlay = document.createElement('div');
+                dialogOverlay.style.position = 'fixed';
+                dialogOverlay.style.top = '0';
+                dialogOverlay.style.left = '0';
+                dialogOverlay.style.width = '100%';
+                dialogOverlay.style.height = '100%';
+                dialogOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                dialogOverlay.style.zIndex = '9999';
+                dialogOverlay.style.display = 'flex';
+                dialogOverlay.style.justifyContent = 'center';
+                dialogOverlay.style.alignItems = 'center';
+                
+                const dialogBox = document.createElement('div');
+                dialogBox.style.backgroundColor = 'var(--md-sys-color-surface)';
+                dialogBox.style.color = 'var(--md-sys-color-on-surface)';
+                dialogBox.style.padding = '20px';
+                dialogBox.style.borderRadius = 'var(--border-radius-large)';
+                dialogBox.style.boxShadow = 'var(--elevation-3)';
+                dialogBox.style.maxWidth = '500px';
+                dialogBox.style.width = '90%';
+                
+                const dialogTitle = document.createElement('h2');
+                dialogTitle.textContent = 'Conversione in PDF';
+                dialogTitle.style.color = 'var(--md-sys-color-primary)';
+                dialogTitle.style.marginBottom = '15px';
+                
+                const dialogContent = document.createElement('div');
+                dialogContent.innerHTML = `
+                    <p>Il file Excel <strong>${excelFilename}</strong> è stato scaricato.</p>
+                    <p>Per convertirlo in PDF, visita il sito <strong>ilovepdf.com</strong> cliccando sul pulsante qui sotto.</p>
+                    <p>Sul sito potrai:</p>
+                    <ol>
+                        <li>Caricare il file Excel appena scaricato</li>
+                        <li>Cliccare su "Converti in PDF"</li>
+                        <li>Scaricare il file PDF generato</li>
+                    </ol>
+                `;
+                
+                // Creiamo il pulsante per andare al sito
+                const goToSiteButton = document.createElement('button');
+                goToSiteButton.textContent = 'Vai al sito ilovepdf.com';
+                goToSiteButton.style.backgroundColor = '#e74c3c'; // Rosso come il logo di ilovepdf
+                goToSiteButton.style.color = 'white';
+                goToSiteButton.style.padding = '12px 20px';
+                goToSiteButton.style.border = 'none';
+                goToSiteButton.style.borderRadius = 'var(--border-radius-full)';
+                goToSiteButton.style.cursor = 'pointer';
+                goToSiteButton.style.marginTop = '15px';
+                goToSiteButton.style.marginBottom = '15px';
+                goToSiteButton.style.fontWeight = 'bold';
+                goToSiteButton.style.display = 'block';
+                goToSiteButton.style.marginLeft = 'auto';
+                goToSiteButton.style.marginRight = 'auto';
+                goToSiteButton.style.boxShadow = 'var(--elevation-1)';
+                
+                goToSiteButton.addEventListener('click', () => {
+                    window.open('https://www.ilovepdf.com/it/excel_a_pdf', '_blank');
+                });
+                
+                // Creiamo il pulsante per chiudere il popup
+                const closeButton = document.createElement('button');
+                closeButton.textContent = 'Chiudi';
+                closeButton.style.backgroundColor = 'var(--md-sys-color-primary)';
+                closeButton.style.color = 'var(--md-sys-color-on-primary)';
+                closeButton.style.padding = '10px 20px';
+                closeButton.style.border = 'none';
+                closeButton.style.borderRadius = 'var(--border-radius-full)';
+                closeButton.style.cursor = 'pointer';
+                closeButton.style.fontWeight = 'bold';
+                closeButton.style.display = 'block';
+                closeButton.style.marginLeft = 'auto';
+                closeButton.style.marginRight = 'auto';
+                
+                closeButton.addEventListener('click', () => {
+                    document.body.removeChild(dialogOverlay);
+                });
+                
+                dialogBox.appendChild(dialogTitle);
+                dialogBox.appendChild(dialogContent);
+                dialogBox.appendChild(goToSiteButton);
+                dialogBox.appendChild(closeButton);
+                dialogOverlay.appendChild(dialogBox);
+                document.body.appendChild(dialogOverlay);
+                
+                // Mostriamo un messaggio di successo
+                showToast('File Excel esportato con successo! Segui le istruzioni per convertirlo in PDF.', 'success');
+                
+            } catch (error) {
+                console.error("Errore durante l'esportazione:", error);
+                showToast(`Errore durante l'esportazione: ${error.message}`, "error");
             }
         }
 
@@ -11298,10 +11432,11 @@ END:VCARD`;
         });
     </script>
 
-    <!-- Script per il riconoscimento vocale -->
     <script>
-        // Funzione per aggiungere il pulsante di riconoscimento vocale alla barra di navigazione
+        // Script vuoto per mantenere la struttura del documento
         function setupVoiceRecognitionButton() {
+            // Funzione disabilitata
+            return;
             // Trova il placeholder per il pulsante vocale
             const placeholder = document.getElementById('voice-button-placeholder');
             if (!placeholder) {
@@ -12372,14 +12507,10 @@ END:VCARD`;
             }
         }
 
-        // Inizializza il pulsante di riconoscimento vocale quando il documento è pronto
-        document.addEventListener('DOMContentLoaded', () => {
-            setupVoiceRecognitionButton();
-        });
+
     </script>
     
-    <!-- Integrazione per riconoscimento vocale avanzato (versione semplificata) -->
-    <script src="https://cdn.jsdelivr.net/gh/lyakhu955/ore-pws@main/whisper-web-simple.js"></script>
+
 
 </body>
 </html>
