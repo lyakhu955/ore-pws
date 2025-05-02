@@ -3742,7 +3742,7 @@
                                             <select id="backupFrequencySelect" class="settings-select">
                                                 <option value="change">Ad ogni modifica</option>
                                                 <option value="hourly">Ogni ora</option>
-                                                <option value="daily" selected>Giornaliero</option>
+                                                <option value="daily">Giornaliero</option>
                                                 <option value="weekly">Settimanale</option>
                                             </select>
                                         </div>
@@ -10912,6 +10912,9 @@ END:VCARD`;
             updateProviderSelectionUI();
             updateCloudAccountUI();
             
+            // Configura il backup automatico con le impostazioni salvate
+            setupAutoBackup();
+            
             // Aggiungi event listeners
             setupProviderSelectionListeners();
             setupBackupControlListeners();
@@ -11199,12 +11202,28 @@ END:VCARD`;
             const autoBackupEnabled = localStorage.getItem('autoBackupEnabled') !== 'false'; // Default: true
             const backupFrequency = localStorage.getItem('backupFrequency') || 'daily';
             
+            console.log('Configurazione backup automatico - Frequenza:', backupFrequency, 'Abilitato:', autoBackupEnabled);
+            
             // Aggiorna UI
             const autoBackupToggle = document.getElementById('autoBackupToggle');
             const frequencySelect = document.getElementById('backupFrequencySelect');
             
             if (autoBackupToggle) autoBackupToggle.checked = autoBackupEnabled;
-            if (frequencySelect) frequencySelect.value = backupFrequency;
+            
+            // Imposta il valore del selettore della frequenza
+            if (frequencySelect) {
+                // Verifica se l'opzione esiste
+                const optionExists = Array.from(frequencySelect.options).some(option => option.value === backupFrequency);
+                
+                if (optionExists) {
+                    frequencySelect.value = backupFrequency;
+                    console.log('Frequenza di backup impostata su:', backupFrequency);
+                } else {
+                    console.warn('Opzione di frequenza non valida:', backupFrequency, 'Impostazione predefinita: daily');
+                    frequencySelect.value = 'daily';
+                    localStorage.setItem('backupFrequency', 'daily');
+                }
+            }
             
             // Cancella eventuali timer esistenti
             if (window.autoBackupTimer) {
