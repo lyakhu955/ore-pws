@@ -2449,21 +2449,24 @@
             color: var(--md-sys-color-primary);
         }
         
-        .toggle-excel-files[aria-expanded="true"] .toggle-icon {
+        /* Rimuoviamo questa regola che potrebbe causare problemi */
+        /* .toggle-excel-files[aria-expanded="true"] .toggle-icon {
             transform: rotate(180deg);
-        }
+        } */
         
         .excel-files-container {
             max-height: 300px;
             overflow-y: auto;
-            transition: max-height 0.3s ease, padding 0.3s ease;
+            transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.3s ease;
             padding: 1rem;
+            opacity: 1;
         }
         
         .excel-files-container.collapsed {
             max-height: 0;
             padding: 0 1rem;
             overflow: hidden;
+            opacity: 0;
         }
         
         .excel-files-list {
@@ -6346,6 +6349,9 @@
                 // Salviamo l'array aggiornato
                 saveExcelFiles(files);
                 
+                // Aggiorniamo solo la lista dei file senza reinizializzare il toggle
+                updateExcelFilesList();
+                
                 console.log("Metadati del file Excel salvati con successo");
             } catch (error) {
                 console.error("Errore nel salvataggio dei metadati del file Excel:", error);
@@ -6364,7 +6370,7 @@
                 // Salviamo l'array aggiornato
                 saveExcelFiles(updatedFiles);
                 
-                // Aggiorniamo la lista dei file
+                // Aggiorniamo solo la lista dei file senza reinizializzare il toggle
                 updateExcelFilesList();
                 
                 // Se non ci sono più file, chiudiamo la sezione
@@ -6425,26 +6431,51 @@
                 return;
             }
             
-            // Impostiamo lo stato iniziale
-            toggleButton.setAttribute('aria-expanded', 'false');
+            // Rimuoviamo eventuali listener precedenti per evitare duplicati
+            // Cloniamo il pulsante per rimuovere tutti gli event listener
+            const newToggleButton = toggleButton.cloneNode(true);
+            toggleButton.parentNode.replaceChild(newToggleButton, toggleButton);
             
-            // Aggiungiamo l'event listener per il toggle
-            toggleButton.addEventListener('click', function() {
-                const isExpanded = toggleButton.getAttribute('aria-expanded') === 'true';
+            // Funzione per gestire il toggle
+            function toggleExcelFiles(event) {
+                // Preveniamo il comportamento predefinito del pulsante
+                event.preventDefault();
+                
+                // Otteniamo lo stato corrente
+                const isExpanded = newToggleButton.getAttribute('aria-expanded') === 'true';
+                
+                // Log per debug
+                console.log("Toggle cliccato. Stato attuale:", isExpanded ? "aperto" : "chiuso");
                 
                 // Invertiamo lo stato
-                toggleButton.setAttribute('aria-expanded', !isExpanded);
+                const newState = !isExpanded;
+                newToggleButton.setAttribute('aria-expanded', newState);
                 
-                // Aggiorniamo la classe del container
-                if (isExpanded) {
-                    container.classList.add('collapsed');
-                } else {
+                // Aggiorniamo la classe del container e l'icona
+                if (newState) {
+                    // Apriamo il container
                     container.classList.remove('collapsed');
-                    
-                    // Aggiorniamo la lista quando si apre il container
-                    updateExcelFilesList();
+                    newToggleButton.querySelector('.toggle-icon').textContent = 'expand_less';
+                    console.log("Container aperto");
+                } else {
+                    // Chiudiamo il container
+                    container.classList.add('collapsed');
+                    newToggleButton.querySelector('.toggle-icon').textContent = 'expand_more';
+                    console.log("Container chiuso");
                 }
-            });
+                
+                return false; // Preveniamo la propagazione dell'evento
+            }
+            
+            // Aggiungiamo l'event listener per il toggle
+            newToggleButton.addEventListener('click', toggleExcelFiles);
+            
+            // Impostiamo lo stato iniziale (chiuso)
+            newToggleButton.setAttribute('aria-expanded', 'false');
+            container.classList.add('collapsed');
+            newToggleButton.querySelector('.toggle-icon').textContent = 'expand_more';
+            
+            console.log("Toggle dei file Excel inizializzato correttamente");
             
             // Manteniamo la sezione sempre chiusa di default, indipendentemente dal numero di file
             // L'utente potrà espanderla manualmente quando desidera
@@ -6454,11 +6485,15 @@
             try {
                 // Recuperiamo l'elemento della lista
                 const excelFilesList = document.getElementById('excelFilesList');
+                const container = document.getElementById('excelFilesContainer');
                 
                 if (!excelFilesList) {
                     console.error("Elemento excelFilesList non trovato");
                     return;
                 }
+                
+                // Non forziamo più la chiusura del container qui
+                // Lasciamo che lo stato del toggle sia gestito dalla funzione initExcelFilesToggle
                 
                 // Recuperiamo i file esistenti
                 const files = getExcelFiles();
