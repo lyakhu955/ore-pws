@@ -3960,11 +3960,13 @@
             <span class="material-symbols-outlined">calendar_month</span>
             <span>Calendario</span>
         </a>
-        <a href="#" class="nav-item" data-section="monthly-report-section">
+        <a href="#" class="nav-item" data-section="monthly-report-section" style="margin-right: 30px;">
              <span class="material-symbols-outlined">summarize</span>
             <span>Riepilogo</span>
         </a>
-         <a href="#" class="nav-item" data-section="ferie-malattie-section">
+        <!-- Spazio per il pulsante vocale -->
+        <div id="voice-button-placeholder"></div>
+        <a href="#" class="nav-item" data-section="ferie-malattie-section" style="margin-left: 30px;">
             <span class="material-symbols-outlined">hotel_class</span> <!-- or event_busy / medical_services -->
             <span>Assenze</span>
         </a>
@@ -11293,6 +11295,681 @@ END:VCARD`;
                     initCloudBackup();
                 }
             }
+        });
+    </script>
+
+    <!-- Script per il riconoscimento vocale -->
+    <script>
+        // Funzione per aggiungere il pulsante di riconoscimento vocale alla barra di navigazione
+        function setupVoiceRecognitionButton() {
+            // Trova il placeholder per il pulsante vocale
+            const placeholder = document.getElementById('voice-button-placeholder');
+            if (!placeholder) {
+                console.error("Placeholder per il pulsante vocale non trovato");
+                return;
+            }
+            
+            // Crea il contenitore per il pulsante centrale
+            const centerButtonContainer = document.createElement('div');
+            centerButtonContainer.className = 'voice-btn-container';
+            
+            // Crea il pulsante di riconoscimento vocale
+            const voiceButton = document.createElement('button');
+            voiceButton.id = 'voiceRecognitionBtn';
+            voiceButton.className = 'voice-recognition-btn';
+            voiceButton.innerHTML = '<span class="material-symbols-outlined">mic</span>';
+            voiceButton.setAttribute('aria-label', 'Inserisci ore con voce');
+            
+            // Crea l'elemento onda per l'animazione
+            const wave = document.createElement('div');
+            wave.className = 'voice-recognition-wave';
+            voiceButton.appendChild(wave);
+            
+            // Aggiungi il pulsante al contenitore
+            centerButtonContainer.appendChild(voiceButton);
+            
+            // Inserisci il contenitore nel placeholder
+            placeholder.appendChild(centerButtonContainer);
+            
+            // Aggiungi gli stili CSS per il pulsante
+            const style = document.createElement('style');
+            style.textContent = `
+                /* Manteniamo la barra di navigazione fissa in basso */
+                .bottom-nav {
+                    position: fixed !important;
+                    bottom: 0 !important;
+                    left: 0 !important;
+                    width: 100% !important;
+                    z-index: 1000 !important;
+                }
+                
+                /* Stile per il placeholder del pulsante vocale */
+                #voice-button-placeholder {
+                    position: relative;
+                    width: 0;
+                    height: 0;
+                    overflow: visible;
+                }
+                
+                .voice-btn-container {
+                    position: absolute;
+                    left: 50%;
+                    top: -30px;
+                    transform: translateX(-50%);
+                    z-index: 100;
+                }
+                
+                .voice-recognition-btn {
+                    width: 56px;
+                    height: 56px;
+                    border-radius: 50%;
+                    background-color: var(--md-sys-color-primary);
+                    color: var(--md-sys-color-on-primary);
+                    box-shadow: var(--elevation-3);
+                    border: none;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.3s ease;
+                    transform: scale(1);
+                    position: relative;
+                }
+                
+                .voice-recognition-btn .material-symbols-outlined {
+                    font-size: 24px;
+                }
+                
+                .voice-recognition-btn:hover {
+                    box-shadow: var(--elevation-4);
+                    transform: scale(1.05);
+                }
+                
+                .voice-recognition-btn.listening {
+                    animation: pulse-rainbow 2s infinite;
+                }
+                
+                @keyframes pulse-rainbow {
+                    0% {
+                        box-shadow: 0 0 0 0 rgba(0, 106, 106, 0.7);
+                        background-color: var(--md-sys-color-primary);
+                    }
+                    25% {
+                        background-color: #9c27b0;
+                    }
+                    50% {
+                        box-shadow: 0 0 0 15px rgba(0, 106, 106, 0);
+                        background-color: #2196f3;
+                    }
+                    75% {
+                        background-color: #4caf50;
+                    }
+                    100% {
+                        box-shadow: 0 0 0 0 rgba(0, 106, 106, 0);
+                        background-color: var(--md-sys-color-primary);
+                    }
+                }
+                
+                .voice-tooltip {
+                    position: fixed;
+                    bottom: 80px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background-color: var(--md-sys-color-surface-variant);
+                    color: var(--md-sys-color-on-surface-variant);
+                    padding: 15px 20px;
+                    border-radius: var(--border-radius-medium);
+                    box-shadow: var(--elevation-3);
+                    z-index: 1000;
+                    max-width: 80%;
+                    text-align: center;
+                    transition: all 0.3s ease;
+                }
+                
+                .voice-tooltip.success {
+                    background-color: var(--md-sys-color-primary-container);
+                    color: var(--md-sys-color-on-primary-container);
+                }
+                
+                .voice-tooltip.error {
+                    background-color: var(--md-sys-color-error-container);
+                    color: var(--md-sys-color-on-error-container);
+                }
+                
+                .voice-recognition-wave {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 100px;
+                    height: 100px;
+                    border-radius: 50%;
+                    background-color: rgba(255, 255, 255, 0.1);
+                    z-index: -1;
+                    opacity: 0;
+                }
+                
+                .voice-recognition-btn.listening .voice-recognition-wave {
+                    animation: wave-out 2s infinite;
+                    opacity: 1;
+                }
+                
+                @keyframes wave-out {
+                    0% {
+                        width: 56px;
+                        height: 56px;
+                        opacity: 0.7;
+                    }
+                    100% {
+                        width: 200px;
+                        height: 200px;
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Inizializza il riconoscimento vocale
+            setupVoiceRecognition(voiceButton);
+        }
+
+        // Funzione per configurare il riconoscimento vocale
+        function setupVoiceRecognition(voiceButton) {
+            // Verifica il supporto del browser
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                console.warn("Il browser non supporta il riconoscimento vocale");
+                voiceButton.style.display = 'none';
+                return;
+            }
+            
+            // Crea l'elemento onda per l'animazione
+            const wave = document.createElement('div');
+            wave.className = 'voice-recognition-wave';
+            voiceButton.appendChild(wave);
+            
+            // Inizializza il riconoscimento vocale
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'it-IT';
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            
+            // Crea un elemento per mostrare il testo riconosciuto in tempo reale
+            let tooltip = null;
+            
+            // Gestisci il click sul pulsante
+            voiceButton.addEventListener('click', () => {
+                if (voiceButton.classList.contains('listening')) {
+                    // Ferma il riconoscimento se è già in corso
+                    recognition.stop();
+                } else {
+                    // Crea il tooltip per mostrare il testo riconosciuto
+                    tooltip = document.createElement('div');
+                    tooltip.className = 'voice-tooltip';
+                    tooltip.innerHTML = 'Sto ascoltando... <br><small>Prova a dire: "oggi inizio 7 pausa mezzora fine 17 descrizione pws punto ufficio"</small>';
+                    document.body.appendChild(tooltip);
+                    
+                    // Cambia l'aspetto del pulsante
+                    voiceButton.classList.add('listening');
+                    
+                    // Riproduci un suono di avvio
+                    playSound('start');
+                    
+                    // Avvia il riconoscimento
+                    recognition.start();
+                }
+            });
+            
+            // Gestisci i risultati intermedi
+            recognition.onresult = (event) => {
+                const transcript = Array.from(event.results)
+                    .map(result => result[0].transcript)
+                    .join('');
+                
+                // Aggiorna il tooltip con il testo riconosciuto
+                if (tooltip) {
+                    tooltip.innerHTML = `"${transcript}"`;
+                }
+                
+                // Se è un risultato finale, elabora il testo
+                if (event.results[0].isFinal) {
+                    processAdvancedVoiceInput(transcript);
+                }
+            };
+            
+            // Quando il riconoscimento termina
+            recognition.onend = () => {
+                // Ripristina l'aspetto del pulsante
+                voiceButton.classList.remove('listening');
+                
+                // Rimuovi il tooltip dopo un breve ritardo
+                if (tooltip) {
+                    setTimeout(() => {
+                        tooltip.remove();
+                        tooltip = null;
+                    }, 3000);
+                }
+            };
+            
+            // Gestisci gli errori
+            recognition.onerror = (event) => {
+                console.error('Errore nel riconoscimento vocale:', event.error);
+                
+                if (tooltip) {
+                    tooltip.innerHTML = `Errore: ${event.error === 'no-speech' ? 'Non ho sentito nulla' : 'Riprova per favore'}`;
+                    tooltip.classList.add('error');
+                }
+                
+                // Ripristina l'aspetto del pulsante
+                voiceButton.classList.remove('listening');
+                
+                // Riproduci un suono di errore
+                playSound('error');
+            };
+        }
+
+        // Funzione per elaborare l'input vocale avanzato
+        function processAdvancedVoiceInput(text) {
+            console.log('Elaboro input vocale avanzato:', text);
+            
+            // Normalizza il testo (minuscolo)
+            const normalizedText = text.toLowerCase();
+            
+            // Estrai la data con maggiore flessibilità
+            let date = new Date();
+            const datePatterns = [
+                { pattern: /oggi|today/i, handler: () => new Date() },
+                { pattern: /ieri|yesterday/i, handler: () => { 
+                    const d = new Date(); d.setDate(d.getDate() - 1); return d; 
+                }},
+                { pattern: /domani|tomorrow/i, handler: () => { 
+                    const d = new Date(); d.setDate(d.getDate() + 1); return d; 
+                }},
+                { pattern: /lunedì|lunedi/i, handler: () => getNextDayOfWeek(1) },
+                { pattern: /martedì|martedi/i, handler: () => getNextDayOfWeek(2) },
+                { pattern: /mercoledì|mercoledi/i, handler: () => getNextDayOfWeek(3) },
+                { pattern: /giovedì|giovedi/i, handler: () => getNextDayOfWeek(4) },
+                { pattern: /venerdì|venerdi/i, handler: () => getNextDayOfWeek(5) },
+                { pattern: /sabato/i, handler: () => getNextDayOfWeek(6) },
+                { pattern: /domenica/i, handler: () => getNextDayOfWeek(0) },
+                // Riconosce anche date nel formato "il 15 maggio" o "15/5"
+                { pattern: /il\s+(\d{1,2})\s+(\w+)/i, handler: (match) => {
+                    const day = parseInt(match[1]);
+                    const monthNames = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", 
+                                       "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
+                    const monthIndex = monthNames.findIndex(m => match[2].startsWith(m));
+                    if (monthIndex >= 0) {
+                        const d = new Date();
+                        d.setDate(day);
+                        d.setMonth(monthIndex);
+                        return d;
+                    }
+                    return new Date();
+                }},
+                { pattern: /(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/i, handler: (match) => {
+                    const day = parseInt(match[1]);
+                    const month = parseInt(match[2]) - 1; // I mesi in JS sono 0-based
+                    const year = match[3] ? parseInt(match[3]) : new Date().getFullYear();
+                    // Gestisci anni a 2 cifre
+                    const fullYear = year < 100 ? (year < 50 ? 2000 + year : 1900 + year) : year;
+                    return new Date(fullYear, month, day);
+                }}
+            ];
+            
+            // Cerca una corrispondenza con i pattern di data
+            for (const dateMatcher of datePatterns) {
+                const match = normalizedText.match(dateMatcher.pattern);
+                if (match) {
+                    date = dateMatcher.handler(match);
+                    break;
+                }
+            }
+            
+            // Estrai ora di inizio con maggiore flessibilità
+            let startTime = null;
+            const startPatterns = [
+                // Formato "inizio 7" o "inizio alle 7"
+                { pattern: /inizio\s+(?:alle\s+)?(\d+)(?::(\d+))?/i, handler: (match) => {
+                    const hours = parseInt(match[1]);
+                    const minutes = match[2] ? parseInt(match[2]) : 0;
+                    return hours * 60 + minutes;
+                }},
+                // Formato "dalle 9" o "da 9:30"
+                { pattern: /da(?:lle)?\s+(\d+)(?::(\d+))?/i, handler: (match) => {
+                    const hours = parseInt(match[1]);
+                    const minutes = match[2] ? parseInt(match[2]) : 0;
+                    return hours * 60 + minutes;
+                }},
+                // Formato "ho iniziato alle 8"
+                { pattern: /(?:ho\s+)?iniziato\s+(?:alle\s+)?(\d+)(?::(\d+))?/i, handler: (match) => {
+                    const hours = parseInt(match[1]);
+                    const minutes = match[2] ? parseInt(match[2]) : 0;
+                    return hours * 60 + minutes;
+                }},
+                // Formato "7-17" (orario completo)
+                { pattern: /^.*?(\d+)(?::(\d+))?\s*(?:-|–|fino|a)\s*(\d+)(?::(\d+))?/i, handler: (match) => {
+                    const hours = parseInt(match[1]);
+                    const minutes = match[2] ? parseInt(match[2]) : 0;
+                    return hours * 60 + minutes;
+                }}
+            ];
+            
+            // Cerca una corrispondenza con i pattern di ora di inizio
+            for (const startMatcher of startPatterns) {
+                const match = normalizedText.match(startMatcher.pattern);
+                if (match) {
+                    startTime = startMatcher.handler(match);
+                    break;
+                }
+            }
+            
+            // Estrai ora di fine con maggiore flessibilità
+            let endTime = null;
+            const endPatterns = [
+                // Formato "fine 17" o "fine alle 17"
+                { pattern: /fine\s+(?:alle\s+)?(\d+)(?::(\d+))?/i, handler: (match) => {
+                    const hours = parseInt(match[1]);
+                    const minutes = match[2] ? parseInt(match[2]) : 0;
+                    return hours * 60 + minutes;
+                }},
+                // Formato "alle 17" o "a 17:30" (dopo un pattern di inizio)
+                { pattern: /(?:alle|a)\s+(\d+)(?::(\d+))?/i, handler: (match) => {
+                    const hours = parseInt(match[1]);
+                    const minutes = match[2] ? parseInt(match[2]) : 0;
+                    return hours * 60 + minutes;
+                }},
+                // Formato "ho finito alle 18"
+                { pattern: /(?:ho\s+)?finito\s+(?:alle\s+)?(\d+)(?::(\d+))?/i, handler: (match) => {
+                    const hours = parseInt(match[1]);
+                    const minutes = match[2] ? parseInt(match[2]) : 0;
+                    return hours * 60 + minutes;
+                }},
+                // Formato "7-17" (orario completo)
+                { pattern: /(\d+)(?::(\d+))?\s*(?:-|–|fino|a)\s*(\d+)(?::(\d+))?/i, handler: (match) => {
+                    const hours = parseInt(match[3]);
+                    const minutes = match[4] ? parseInt(match[4]) : 0;
+                    return hours * 60 + minutes;
+                }}
+            ];
+            
+            // Cerca una corrispondenza con i pattern di ora di fine
+            for (const endMatcher of endPatterns) {
+                const match = normalizedText.match(endMatcher.pattern);
+                if (match) {
+                    endTime = endMatcher.handler(match);
+                    break;
+                }
+            }
+            
+            // Estrai pausa con maggiore flessibilità
+            let pauseTime = 0;
+            const pausePatterns = [
+                // Formato "pausa 1:30" o "pausa 1"
+                { pattern: /pausa\s+(?:di\s+)?(\d+)(?::(\d+))?/i, handler: (match) => {
+                    const hours = parseInt(match[1]);
+                    const minutes = match[2] ? parseInt(match[2]) : 0;
+                    return hours * 60 + minutes;
+                }},
+                // Formato "pausa di un'ora" o "pausa 1 ora"
+                { pattern: /pausa\s+(?:di\s+)?(?:un['']?ora|1\s+ora)/i, handler: () => 60 },
+                // Formato "pausa di mezz'ora" o "pausa mezzora"
+                { pattern: /pausa\s+(?:di\s+)?mez(?:z[''])?ora/i, handler: () => 30 },
+                // Formato "pausa 2 ore"
+                { pattern: /pausa\s+(?:di\s+)?(\d+)\s+(?:ore|ora)/i, handler: (match) => parseInt(match[1]) * 60 },
+                // Formato "pausa 30 minuti"
+                { pattern: /pausa\s+(?:di\s+)?(\d+)\s+minuti/i, handler: (match) => parseInt(match[1]) },
+                // Formato "con pausa di 45 minuti"
+                { pattern: /con\s+pausa\s+(?:di\s+)?(\d+)\s+minuti/i, handler: (match) => parseInt(match[1]) },
+                // Formato "con pausa di un'ora"
+                { pattern: /con\s+pausa\s+(?:di\s+)?(?:un['']?ora|1\s+ora)/i, handler: () => 60 },
+                // Formato "con pausa di mezz'ora"
+                { pattern: /con\s+pausa\s+(?:di\s+)?mez(?:z[''])?ora/i, handler: () => 30 }
+            ];
+            
+            // Cerca una corrispondenza con i pattern di pausa
+            for (const pauseMatcher of pausePatterns) {
+                const match = normalizedText.match(pauseMatcher.pattern);
+                if (match) {
+                    pauseTime = pauseMatcher.handler(match);
+                    break;
+                }
+            }
+            
+            // Estrai ore totali direttamente menzionate
+            let directHours = 0;
+            let directMinutes = 0;
+            const hoursPatterns = [
+                // Formato "8 ore" o "8 ore e 30 minuti"
+                { pattern: /(\d+)\s+or[ae]/i, handler: (match) => parseInt(match[1]) },
+                // Formato "8 ore e mezza" o "8 ore e mezzo"
+                { pattern: /(\d+)\s+or[ae]\s+e\s+mezz[ao]/i, handler: (match) => {
+                    directMinutes = 30;
+                    return parseInt(match[1]);
+                }},
+                // Formato "8 ore e 30" o "8 e 30"
+                { pattern: /(\d+)(?:\s+or[ae])?\s+e\s+(\d+)(?:\s+minuti)?/i, handler: (match) => {
+                    directMinutes = parseInt(match[2]);
+                    return parseInt(match[1]);
+                }},
+                // Formato "8.5 ore" o "8,5 ore"
+                { pattern: /(\d+)[.,](\d+)\s+or[ae]/i, handler: (match) => {
+                    directMinutes = parseInt(match[2]) * 6; // Converte decimali in minuti (es. 0.5 -> 30 min)
+                    return parseInt(match[1]);
+                }}
+            ];
+            
+            // Cerca una corrispondenza con i pattern di ore dirette
+            for (const hoursMatcher of hoursPatterns) {
+                const match = normalizedText.match(hoursMatcher.pattern);
+                if (match) {
+                    directHours = hoursMatcher.handler(match);
+                    break;
+                }
+            }
+            
+            // Calcola le ore totali
+            let totalHours = 0;
+            let totalMinutes = 0;
+            
+            if (directHours > 0 || directMinutes > 0) {
+                // Se le ore sono state specificate direttamente, usa quelle
+                totalHours = directHours;
+                totalMinutes = directMinutes;
+            } else if (startTime !== null && endTime !== null) {
+                // Altrimenti, calcola in base a inizio e fine
+                let totalMinutesWorked = endTime - startTime - pauseTime;
+                
+                // Gestisci il caso in cui l'ora di fine sia il giorno successivo
+                if (totalMinutesWorked < 0) {
+                    totalMinutesWorked += 24 * 60; // Aggiungi 24 ore in minuti
+                }
+                
+                totalHours = Math.floor(totalMinutesWorked / 60);
+                totalMinutes = totalMinutesWorked % 60;
+            }
+            
+            // Estrai la descrizione con maggiore flessibilità
+            let description = "";
+            const descPatterns = [
+                // Formato "descrizione xyz"
+                { pattern: /descrizione\s+(.+?)(?:\s+(?:inizio|fine|pausa|ore)|$)/i, handler: (match) => match[1] },
+                // Formato "per xyz" o "su xyz"
+                { pattern: /(?:per|su|di)\s+(.+?)(?:\s+(?:inizio|fine|pausa|ore)|$)/i, handler: (match) => match[1] },
+                // Formato "lavorato su xyz"
+                { pattern: /lavorato\s+(?:su|per|al)\s+(.+?)(?:\s+(?:inizio|fine|pausa|ore)|$)/i, handler: (match) => match[1] }
+            ];
+            
+            // Cerca una corrispondenza con i pattern di descrizione
+            for (const descMatcher of descPatterns) {
+                const match = normalizedText.match(descMatcher.pattern);
+                if (match) {
+                    description = descMatcher.handler(match);
+                    break;
+                }
+            }
+            
+            // Sostituisci "punto" con "." nella descrizione
+            description = description.replace(/\s+punto\s+/g, '.');
+            
+            // Formatta la data per il campo input
+            const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            
+            // Prepara i dati da inserire nel form
+            const entryData = {
+                date: formattedDate,
+                hours: totalHours,
+                minutes: totalMinutes,
+                description: description,
+                startTime: startTime !== null ? formatMinutesToTime(startTime) : "",
+                endTime: endTime !== null ? formatMinutesToTime(endTime) : "",
+                pauseTime: pauseTime > 0 ? (pauseTime / 60).toFixed(1).replace('.0', '') : "0"
+            };
+            
+            // Inserisci i dati nel form
+            fillEntryForm(entryData);
+            
+            // Mostra un messaggio di conferma
+            showConfirmationTooltip(entryData);
+            
+            // Riproduci un suono di successo
+            playSound('success');
+        }
+
+        // Funzione per ottenere il prossimo giorno della settimana
+        function getNextDayOfWeek(dayOfWeek) {
+            const today = new Date();
+            const todayDay = today.getDay(); // 0 = domenica, 1 = lunedì, ...
+            
+            let daysToAdd = dayOfWeek - todayDay;
+            if (daysToAdd <= 0) {
+                daysToAdd += 7; // Vai alla prossima settimana
+            }
+            
+            const nextDay = new Date(today);
+            nextDay.setDate(today.getDate() + daysToAdd);
+            return nextDay;
+        }
+
+        // Funzione per formattare i minuti in formato orario (HH:MM)
+        function formatMinutesToTime(minutes) {
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+        }
+
+        // Funzione per compilare il form con i dati riconosciuti
+        function fillEntryForm(data) {
+            // Trova i campi del form
+            const dateField = document.getElementById('date');
+            const hoursField = document.getElementById('hours');
+            const minutesField = document.getElementById('minutes');
+            const descriptionField = document.getElementById('description');
+            const startTimeField = document.getElementById('startTime');
+            const endTimeField = document.getElementById('endTime');
+            const pauseField = document.getElementById('pause');
+            
+            // Compila i campi se esistono
+            if (dateField) dateField.value = data.date;
+            if (hoursField) hoursField.value = data.hours;
+            if (minutesField) minutesField.value = data.minutes;
+            if (descriptionField) descriptionField.value = data.description;
+            if (startTimeField) startTimeField.value = data.startTime;
+            if (endTimeField) endTimeField.value = data.endTime;
+            if (pauseField) pauseField.value = data.pauseTime;
+            
+            // Se esiste un pulsante di invio, simula un click dopo un breve ritardo
+            setTimeout(() => {
+                const submitButton = document.querySelector('#addEntryForm button[type="submit"]');
+                if (submitButton && data.hours > 0) {
+                    // Opzionale: invia automaticamente il form
+                    // submitButton.click();
+                }
+            }, 1500);
+        }
+
+        // Funzione per mostrare un tooltip di conferma
+        function showConfirmationTooltip(data) {
+            const tooltip = document.createElement('div');
+            tooltip.className = 'voice-tooltip success';
+            
+            let message = `<strong>Ho inserito:</strong><br>`;
+            message += `Data: ${formatDateForDisplay(data.date)}<br>`;
+            
+            if (data.startTime && data.endTime) {
+                message += `Orario: ${data.startTime} - ${data.endTime}`;
+                if (data.pauseTime > 0) {
+                    message += ` (pausa: ${data.pauseTime} ore)`;
+                }
+                message += `<br>`;
+            }
+            
+            message += `Ore: ${data.hours}h ${data.minutes > 0 ? data.minutes + 'm' : ''}<br>`;
+            
+            if (data.description) {
+                message += `Descrizione: ${data.description}`;
+            }
+            
+            tooltip.innerHTML = message;
+            document.body.appendChild(tooltip);
+            
+            // Rimuovi il tooltip dopo alcuni secondi
+            setTimeout(() => {
+                tooltip.style.opacity = '0';
+                setTimeout(() => tooltip.remove(), 500);
+            }, 5000);
+        }
+
+        // Funzione per formattare la data per la visualizzazione
+        function formatDateForDisplay(dateString) {
+            const date = new Date(dateString);
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('it-IT', options);
+        }
+
+        // Funzione per riprodurre suoni di feedback
+        function playSound(type) {
+            // Crea suoni semplici con l'API Web Audio
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            switch(type) {
+                case 'start':
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(440, audioContext.currentTime + 0.2);
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                    break;
+                case 'success':
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(880, audioContext.currentTime + 0.1);
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                    break;
+                case 'error':
+                    oscillator.type = 'sawtooth';
+                    oscillator.frequency.setValueAtTime(330, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(220, audioContext.currentTime + 0.3);
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                    break;
+            }
+        }
+
+        // Inizializza il pulsante di riconoscimento vocale quando il documento è pronto
+        document.addEventListener('DOMContentLoaded', () => {
+            setupVoiceRecognitionButton();
         });
     </script>
 
