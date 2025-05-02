@@ -9670,6 +9670,17 @@ END:VCARD`;
         // Carica le API di Google (nuova versione con Google Identity Services)
         function loadGoogleApi() {
             return new Promise((resolve, reject) => {
+                console.log('Avvio caricamento delle API Google...');
+                
+                // Verifica se le API sono già caricate
+                if (window.gapi && window.google && window.google.accounts) {
+                    console.log('API Google già caricate, inizializzazione...');
+                    initializeGoogleApis()
+                        .then(resolve)
+                        .catch(reject);
+                    return;
+                }
+                
                 // Carica prima lo script di Google Identity Services
                 const gisScript = document.createElement('script');
                 gisScript.src = 'https://accounts.google.com/gsi/client';
@@ -9682,36 +9693,10 @@ END:VCARD`;
                     const gapiScript = document.createElement('script');
                     gapiScript.src = 'https://apis.google.com/js/api.js';
                     gapiScript.onload = () => {
-                        gapi.load('client', async () => {
-                           try {
-                                await gapi.client.init({
-                                    discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
-                                });
-                                
-                                console.log('Google API client inizializzato con successo');
-                                
-                                // Configura Google Identity Services
-                                window.googleAuthClient = google.accounts.oauth2.initTokenClient({
-                                     client_id: '927051615660-tfhk7s28v2ni4nsbmlbimaon5mg582o8.apps.googleusercontent.com',
-                                    scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file openid profile email',
-                                    callback: (tokenResponse) => {
-                                        if (tokenResponse && tokenResponse.access_token) {
-                                            // Imposta il token di accesso per le richieste API
-                                            gapi.client.setToken(tokenResponse);
-                                            console.log('Token di accesso ottenuto con successo');
-                                        }
-                                    },
-                                    error_callback: (error) => {
-                                        console.error('Errore durante l\'autenticazione:', error);
-                                    }
-                                });
-                                
-                                resolve();
-                            } catch (error) {
-                                console.error('Errore nell\'inizializzazione delle Google API:', error);
-                                reject(error);
-                            }
-                        });
+                       console.log('Google API client caricato, inizializzazione...');
+                        initializeGoogleApis()
+                            .then(resolve)
+                            .catch(reject);
                     };
                     gapiScript.onerror = () => {
                         console.error('Impossibile caricare lo script delle API di Google');
@@ -9724,6 +9709,46 @@ END:VCARD`;
                     reject(new Error('Impossibile caricare Google Identity Services'));
                 };
                 document.head.appendChild(gisScript);
+            });
+        }
+        
+        // Funzione separata per inizializzare le API Google
+        async function initializeGoogleApis() {
+            return new Promise((resolve, reject) => {
+                gapi.load('client', async () => {
+                    try {
+                        console.log('Inizializzazione del client Google API...');
+                        
+                         await gapi.client.init({
+                            discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
+                        });
+                        
+                        console.log('Google API client inizializzato con successo');
+                        
+                        // Configura Google Identity Services
+                        window.googleAuthClient = google.accounts.oauth2.initTokenClient({
+                            client_id: '927051615660-tfhk7s28v2ni4nsbmlbimaon5mg582o8.apps.googleusercontent.com',
+                            scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file openid profile email',
+                            prompt: 'consent',  // Forza la visualizzazione del consenso
+                            callback: (tokenResponse) => {
+                                if (tokenResponse && tokenResponse.access_token) {
+                                    // Imposta il token di accesso per le richieste API
+                                    gapi.client.setToken(tokenResponse);
+                                    console.log('Token di accesso ottenuto con successo');
+                                }
+                            },
+                            error_callback: (error) => {
+                                console.error('Errore durante l\'autenticazione:', error);
+                            }
+                        });
+                        
+                        console.log('Client di autenticazione Google inizializzato con successo');
+                        resolve();
+                   } catch (error) {
+                        console.error('Errore nell\'inizializzazione delle Google API:', error);
+                        reject(error);
+                     }
+                });
             });
         }
 
@@ -9850,6 +9875,22 @@ END:VCARD`;
                     
                     console.log('Avvio procedura di login Google...');
                     
+                    // Reinizializza il client di autenticazione per assicurarsi che sia aggiornato
+                    window.googleAuthClient = google.accounts.oauth2.initTokenClient({
+                        client_id: '927051615660-tfhk7s28v2ni4nsbmlbimaon5mg582o8.apps.googleusercontent.com',
+                        scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file openid profile email',
+                        callback: (tokenResponse) => {
+                            console.log('Callback di autenticazione chiamato');
+                            if (tokenResponse && tokenResponse.access_token) {
+                                gapi.client.setToken(tokenResponse);
+                                console.log('Token di accesso impostato nel client');
+                            }
+                        },
+                        error_callback: (error) => {
+                            console.error('Errore durante l\'autenticazione:', error);
+                        }
+                    });
+                    
                     // Utilizziamo la nuova API di Google Identity Services
                     return new Promise((resolve, reject) => {
                         if (!window.googleAuthClient) {
@@ -9857,10 +9898,18 @@ END:VCARD`;
                             return;
                         }
                         
+                        // Salva il callback originale
+                        const originalCallback = window.googleAuthClient.callback;
+                        
+                        // Imposta un nuovo callback temporaneo
                         window.googleAuthClient.callback = async (tokenResponse) => {
+                            // Ripristina il callback originale
+                            window.googleAuthClient.callback = originalCallback;
+                            
                             if (tokenResponse && tokenResponse.access_token) {
                                 // Imposta il token di accesso per le richieste API
                                 gapi.client.setToken(tokenResponse);
+                                console.log('Token di accesso ottenuto:', tokenResponse.access_token.substring(0, 10) + '...');
                                 
                                 try {
                                     // Ottieni informazioni sull'utente
@@ -9885,20 +9934,37 @@ END:VCARD`;
                                         localStorage.setItem('cloudUserData', JSON.stringify(this.userData));
                                         
                                         console.log('Login Google completato con successo:', this.userData.email);
+                                        
+                                        // Chiama anche il callback originale
+                                        if (originalCallback) {
+                                            originalCallback(tokenResponse);
+                                        }
+                                        
                                         resolve(this.userData);
                                     } else {
+                                        console.error('Errore nella risposta userinfo:', await response.text());
                                         reject(new Error('Impossibile ottenere le informazioni utente'));
                                     }
                                 } catch (error) {
+                                    console.error('Errore nel recupero delle informazioni utente:', error);
                                     reject(new Error(`Errore nel recupero delle informazioni utente: ${error.message}`));
                                 }
                             } else {
+                                console.error('Nessun token ricevuto durante il login');
                                 reject(new Error('Autenticazione fallita: nessun token ricevuto'));
                             }
                         };
                         
                         // Avvia il flusso di autenticazione
-                        window.googleAuthClient.requestAccessToken();
+                        try {
+                            console.log('Richiesta token di accesso...');
+                            window.googleAuthClient.requestAccessToken();
+                        } catch (error) {
+                            console.error('Errore durante la richiesta del token:', error);
+                            // Ripristina il callback originale in caso di errore
+                            window.googleAuthClient.callback = originalCallback;
+                            reject(error);
+                        }
                     });
                 } catch (error) {
                     console.error('Errore durante login Google:', error);
@@ -9942,10 +10008,19 @@ END:VCARD`;
                 try {
                     console.log('Ricerca file di backup in Google Drive...');
                     
-                    // Verifica se l'utente è autenticato
-                    if (!gapi.client.getToken()) {
-                        throw new Error('Utente non autenticato');
+                    // Verifica se l'utente è autenticato e ottieni un token valido
+                    const token = gapi.client.getToken();
+                    if (!token || !token.access_token) {
+                        console.log('Token non trovato, richiedo un nuovo token...');
+                        await this.refreshToken();
                     }
+                    
+                    // Verifica nuovamente il token dopo il refresh
+                    if (!gapi.client.getToken() || !gapi.client.getToken().access_token) {
+                        throw new Error('Impossibile ottenere un token valido');
+                    }
+                    
+                    console.log('Token valido trovato, procedo con la ricerca del file di backup');
                     
                     // Cerca il file di backup esistente
                     const response = await gapi.client.drive.files.list({
@@ -10000,10 +10075,15 @@ END:VCARD`;
                     console.error('Errore nella ricerca/creazione del file di backup:', error);
                     
                     // Se l'errore è di autenticazione, richiedi un nuovo token
-                    if (error.status === 401) {
-                        console.log('Token scaduto, richiedo un nuovo token...');
-                        await this.refreshToken();
-                        return this.findOrCreateBackupFile(); // Riprova dopo il refresh del token
+                    if (error.status === 401 || error.message.includes('auth')) {
+                        console.log('Token scaduto o problema di autenticazione, richiedo un nuovo token...');
+                        try {
+                            await this.refreshToken();
+                            return this.findOrCreateBackupFile(); // Riprova dopo il refresh del token
+                        } catch (refreshError) {
+                            console.error('Errore durante il refresh del token:', refreshError);
+                            throw new Error('Impossibile autenticarsi. Prova a effettuare nuovamente il login.');
+                        }
                     }
                     
                     throw new Error(`Errore nella gestione del file di backup: ${error.message || 'Errore sconosciuto'}`);
@@ -10013,22 +10093,64 @@ END:VCARD`;
             // Metodo per aggiornare il token se scaduto
             async refreshToken() {
                 return new Promise((resolve, reject) => {
+                    console.log('Avvio procedura di refresh del token...');
+                    
                     if (!window.googleAuthClient) {
-                        reject(new Error('Client di autenticazione Google non inizializzato'));
-                        return;
+                        console.error('Client di autenticazione Google non inizializzato');
+                        
+                        // Proviamo a reinizializzare il client
+                        try {
+                            window.googleAuthClient = google.accounts.oauth2.initTokenClient({
+                                client_id: '927051615660-tfhk7s28v2ni4nsbmlbimaon5mg582o8.apps.googleusercontent.com',
+                                scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file openid profile email',
+                                callback: (tokenResponse) => {
+                                    if (tokenResponse && tokenResponse.access_token) {
+                                        gapi.client.setToken(tokenResponse);
+                                        console.log('Token di accesso ottenuto con successo');
+                                    }
+                                }
+                            });
+                        } catch (error) {
+                            console.error('Errore durante la reinizializzazione del client:', error);
+                            reject(new Error('Client di autenticazione Google non inizializzato'));
+                            return;
+                        }
                     }
                     
+                    // Salva il callback originale
+                    const originalCallback = window.googleAuthClient.callback;
+                    
+                    // Imposta un nuovo callback temporaneo
                     window.googleAuthClient.callback = (tokenResponse) => {
+                        // Ripristina il callback originale
+                        window.googleAuthClient.callback = originalCallback;
+                        
                         if (tokenResponse && tokenResponse.access_token) {
+                            // Imposta il token di accesso per le richieste API
                             gapi.client.setToken(tokenResponse);
-                            console.log('Token di accesso aggiornato con successo');
+                            console.log('Token di accesso aggiornato con successo:', tokenResponse.access_token.substring(0, 10) + '...');
+                            
+                            // Chiama anche il callback originale
+                            if (originalCallback) {
+                                originalCallback(tokenResponse);
+                            }
+                            
                             resolve(tokenResponse);
                         } else {
+                            console.error('Nessun token ricevuto durante il refresh');
                             reject(new Error('Impossibile aggiornare il token di accesso'));
                         }
                     };
                     
-                    window.googleAuthClient.requestAccessToken();
+                    // Richiedi un nuovo token
+                    try {
+                        window.googleAuthClient.requestAccessToken();
+                    } catch (error) {
+                        console.error('Errore durante la richiesta del token:', error);
+                        // Ripristina il callback originale in caso di errore
+                        window.googleAuthClient.callback = originalCallback;
+                        reject(error);
+                    }
                 });
             }
             
