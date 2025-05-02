@@ -10811,26 +10811,32 @@ END:VCARD`;
             }
             
             // Esegui backup con il provider corrente
-            async backup(data) {
+            async backup(data, silent = false) {
                 if (!this.currentProvider || !this.providers[this.currentProvider]) {
                     throw new Error("Nessun provider cloud selezionato");
                 }
                 
                 try {
-                    // Mostra un messaggio di caricamento
-                    showToast('Backup in corso...', 'info');
+                    // Mostra un messaggio di caricamento solo se non è in modalità silenziosa
+                    if (!silent) {
+                        showToast('Backup in corso...', 'info');
+                    }
                     
                     const result = await this.providers[this.currentProvider].backup(data);
                     
-                    // Mostra un messaggio di successo
-                    showToast('Backup completato con successo', 'success');
+                    // Mostra un messaggio di successo solo se non è in modalità silenziosa
+                    if (!silent) {
+                        showToast('Backup completato con successo', 'success');
+                    }
                     
                     return result;
                 } catch (error) {
                     console.error('Errore durante il backup:', error);
                     
-                    // Mostra un messaggio di errore
-                    showToast(`Errore durante il backup: ${error.message}`, 'error');
+                    // Mostra un messaggio di errore solo se non è in modalità silenziosa
+                    if (!silent) {
+                        showToast(`Errore durante il backup: ${error.message}`, 'error');
+                    }
                     
                     throw error;
                 }
@@ -11088,9 +11094,9 @@ END:VCARD`;
                         manualBackupBtn.innerHTML = '<span class="spinner"></span> Backup in corso...';
                         manualBackupBtn.disabled = true;
                         
-                        // Esegui il backup
+                        // Esegui il backup (modalità non silenziosa)
                         const data = getDb(); // La tua funzione esistente
-                        const result = await cloudManager.backup(data);
+                        const result = await cloudManager.backup(data, false);
                         
                         // Aggiorna l'UI
                         const currentProvider = cloudManager.getCurrentProvider();
@@ -11253,19 +11259,20 @@ END:VCARD`;
             // Pianifica backup periodico
             window.autoBackupTimer = setInterval(async () => {
                 if (cloudManager.getCurrentProvider()) {
-                    console.log('Esecuzione backup automatico...');
+                    console.log('Esecuzione backup automatico periodico...');
                     try {
                         const data = getDb();
-                        const result = await cloudManager.backup(data);
+                        // Usa la modalità silenziosa (true come secondo parametro)
+                        const result = await cloudManager.backup(data, true);
                         
                         // Aggiorna l'UI
                         const currentProvider = cloudManager.getCurrentProvider();
                         localStorage.setItem(`lastBackupTime_${currentProvider}`, result.timestamp);
                         updateLastBackupInfo();
                         
-                        console.log('Backup automatico completato');
+                        console.log('Backup automatico periodico completato');
                     } catch (error) {
-                        console.error('Errore durante il backup automatico:', error);
+                        console.error('Errore durante il backup automatico periodico:', error);
                     }
                 }
             }, intervalMs);
@@ -11283,15 +11290,18 @@ END:VCARD`;
                     
                     window.backupDebounceTimer = setTimeout(() => {
                         if (cloudManager.getCurrentProvider()) {
-                            cloudManager.backup(data).then(result => {
+                            // Esegui il backup senza mostrare notifiche
+                            const provider = cloudManager.getProvider(cloudManager.getCurrentProvider());
+                            provider.backup(data).then(result => {
                                 const currentProvider = cloudManager.getCurrentProvider();
                                 localStorage.setItem(`lastBackupTime_${currentProvider}`, result.timestamp);
                                 updateLastBackupInfo();
+                                console.log('Backup automatico completato silenziosamente');
                             }).catch(error => {
                                 console.error('Errore durante il backup automatico:', error);
                             });
                         }
-                    }, 10000); // 10 secondi di debounce
+                    }, 1000); // 1 secondo di debounce (più immediato)
                     
                     return result;
                 };
