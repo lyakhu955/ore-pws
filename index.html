@@ -11506,7 +11506,20 @@ END:VCARD`;
                     // Crea il tooltip per mostrare il testo riconosciuto
                     tooltip = document.createElement('div');
                     tooltip.className = 'voice-tooltip';
-                    tooltip.innerHTML = 'Sto ascoltando... <br><small>Prova a dire: "oggi inizio 7 pausa mezzora fine 17 descrizione pws punto ufficio"</small>';
+                    
+                    // Controlla se ci sono già dati nel form
+                    const startTimeField = document.getElementById('startTime');
+                    const endTimeField = document.getElementById('endTime');
+                    const hasData = startTimeField && startTimeField.value || endTimeField && endTimeField.value;
+                    
+                    if (hasData) {
+                        // Se ci sono già dati, suggerisci di dire "salva"
+                        tooltip.innerHTML = 'Sto ascoltando... <br><small>Puoi dire "salva" per salvare i dati già inseriti, oppure dettare nuovi dati</small>';
+                    } else {
+                        // Altrimenti, suggerisci il formato completo
+                        tooltip.innerHTML = 'Sto ascoltando... <br><small>Prova a dire: "oggi inizio 7 pausa mezzora fine 17 descrizione pws punto ufficio"</small>';
+                    }
+                    
                     document.body.appendChild(tooltip);
                     
                     // Cambia l'aspetto del pulsante
@@ -11572,19 +11585,91 @@ END:VCARD`;
         function processAdvancedVoiceInput(text) {
             console.log('Elaboro input vocale avanzato:', text);
             
-            // Normalizza il testo (minuscolo)
-            const normalizedText = text.toLowerCase();
+            // Normalizza il testo (minuscolo) e correggi alcuni errori comuni di riconoscimento
+            let normalizedText = text.toLowerCase();
             
-            // Controlla se l'utente ha detto "salva" per salvare le ore
+            // Correzioni per numeri e parole comuni che potrebbero essere riconosciuti male
+            normalizedText = normalizedText
+                // Correzioni per numeri
+                .replace(/un[oa]?(?=\s|$)/g, '1')
+                .replace(/due/g, '2')
+                .replace(/tre/g, '3')
+                .replace(/quattro/g, '4')
+                .replace(/cinque/g, '5')
+                .replace(/sei/g, '6')
+                .replace(/sette/g, '7')
+                .replace(/otto/g, '8')
+                .replace(/nove/g, '9')
+                .replace(/dieci/g, '10')
+                .replace(/undici/g, '11')
+                .replace(/dodici/g, '12')
+                .replace(/tredici/g, '13')
+                .replace(/quattordici/g, '14')
+                .replace(/quindici/g, '15')
+                .replace(/sedici/g, '16')
+                .replace(/diciassette/g, '17')
+                .replace(/diciotto/g, '18')
+                .replace(/diciannove/g, '19')
+                .replace(/venti/g, '20')
+                .replace(/ventuno/g, '21')
+                .replace(/ventidue/g, '22')
+                .replace(/ventitre/g, '23')
+                .replace(/ventiquattro/g, '24')
+                // Correzioni per orari
+                .replace(/mezzogiorno/g, '12')
+                .replace(/mezzanotte/g, '0')
+                // Correzioni per frazioni di ora
+                .replace(/un quarto/g, '15 minuti')
+                .replace(/tre quarti/g, '45 minuti')
+                .replace(/mezzo/g, 'mezza')
+                // Correzioni per errori comuni
+                .replace(/inizia/g, 'inizio')
+                .replace(/finisco/g, 'fine')
+                .replace(/finisce/g, 'fine')
+                .replace(/finito/g, 'fine')
+                .replace(/pausa di/g, 'pausa')
+                .replace(/con pausa/g, 'pausa')
+                .replace(/senza pausa/g, 'pausa 0');
+            
+            // Controlla se l'utente ha detto solo "salva" o simili (senza altri comandi)
+            const saveOnlyCommand = normalizedText.match(/^(?:salva|conferma|invia|registra|ok)$/i);
+            if (saveOnlyCommand) {
+                console.log('Comando di solo salvataggio riconosciuto, salvo i dati inseriti manualmente...');
+                
+                // Prima di salvare, assicuriamoci che le ore totali siano calcolate
+                if (typeof calculateTotalHours === 'function') {
+                    calculateTotalHours();
+                }
+                
+                // Trova il pulsante di invio e fai clic su di esso dopo un breve ritardo
+                setTimeout(() => {
+                    const submitButton = document.querySelector('#addEntryForm button[type="submit"]');
+                    if (submitButton) {
+                        submitButton.click();
+                    }
+                }, 200); // Piccolo ritardo per assicurarsi che il calcolo sia completato
+                
+                return; // Esci dalla funzione dopo aver salvato
+            }
+            
+            // Controlla se l'utente ha detto "salva" come parte di un comando più lungo
             const saveCommand = normalizedText.match(/salva|conferma|invia|registra|ok/i);
             if (saveCommand) {
-                // Trova il pulsante di invio e fai clic su di esso
-                const submitButton = document.querySelector('#addEntryForm button[type="submit"]');
-                if (submitButton) {
-                    console.log('Comando di salvataggio riconosciuto, invio il form...');
-                    submitButton.click();
-                    return; // Esci dalla funzione dopo aver salvato
+                // Prima di salvare, assicuriamoci che le ore totali siano calcolate
+                if (typeof calculateTotalHours === 'function') {
+                    calculateTotalHours();
                 }
+                
+                // Trova il pulsante di invio e fai clic su di esso dopo un breve ritardo
+                setTimeout(() => {
+                    const submitButton = document.querySelector('#addEntryForm button[type="submit"]');
+                    if (submitButton) {
+                        console.log('Comando di salvataggio riconosciuto, invio il form...');
+                        submitButton.click();
+                    }
+                }, 200); // Piccolo ritardo per assicurarsi che il calcolo sia completato
+                
+                return; // Esci dalla funzione dopo aver salvato
             }
             
             // Estrai la data con maggiore flessibilità
@@ -11640,26 +11725,59 @@ END:VCARD`;
             // Estrai ora di inizio con maggiore flessibilità
             let startTime = null;
             const startPatterns = [
-                // Formato "inizio 7" o "inizio alle 7"
-                { pattern: /inizio\s+(?:alle\s+)?(\d+)(?::(\d+))?/i, handler: (match) => {
+                // Formato "dalle 7 alle 17" o "da 7 a 17"
+                { pattern: /da(?:lle)?\s+(\d+)(?:[.,:](\d+))?\s+(?:alle|a)\s+(\d+)(?:[.,:](\d+))?/i, handler: (match) => {
                     const hours = parseInt(match[1]);
                     const minutes = match[2] ? parseInt(match[2]) : 0;
                     return hours * 60 + minutes;
                 }},
-                // Formato "dalle 9" o "da 9:30"
-                { pattern: /da(?:lle)?\s+(\d+)(?::(\d+))?/i, handler: (match) => {
+                // Formato "inizio 7" o "inizio alle 7" con vari separatori (: . ,)
+                { pattern: /inizio\s+(?:alle\s+)?(\d+)(?:[.,:](\d+))?/i, handler: (match) => {
                     const hours = parseInt(match[1]);
                     const minutes = match[2] ? parseInt(match[2]) : 0;
                     return hours * 60 + minutes;
                 }},
-                // Formato "ho iniziato alle 8"
-                { pattern: /(?:ho\s+)?iniziato\s+(?:alle\s+)?(\d+)(?::(\d+))?/i, handler: (match) => {
+                // Formato "dalle 9" o "da 9:30" con vari separatori (ma non seguito da "alle" o "a")
+                { pattern: /da(?:lle)?\s+(\d+)(?:[.,:](\d+))?(?!\s+(?:alle|a))/i, handler: (match) => {
                     const hours = parseInt(match[1]);
                     const minutes = match[2] ? parseInt(match[2]) : 0;
                     return hours * 60 + minutes;
                 }},
-                // Formato "7-17" (orario completo)
-                { pattern: /^.*?(\d+)(?::(\d+))?\s*(?:-|–|fino|a)\s*(\d+)(?::(\d+))?/i, handler: (match) => {
+                // Formato "ho iniziato alle 8" con vari separatori
+                { pattern: /(?:ho\s+)?iniziato\s+(?:alle\s+)?(\d+)(?:[.,:](\d+))?/i, handler: (match) => {
+                    const hours = parseInt(match[1]);
+                    const minutes = match[2] ? parseInt(match[2]) : 0;
+                    return hours * 60 + minutes;
+                }},
+                // Formato "entrato alle 8" o "sono entrato alle 8"
+                { pattern: /(?:sono\s+)?entrat[oa]\s+(?:alle\s+)?(\d+)(?:[.,:](\d+))?/i, handler: (match) => {
+                    const hours = parseInt(match[1]);
+                    const minutes = match[2] ? parseInt(match[2]) : 0;
+                    return hours * 60 + minutes;
+                }},
+                // Formato "arrivato alle 8" o "sono arrivato alle 8"
+                { pattern: /(?:sono\s+)?arrivat[oa]\s+(?:alle\s+)?(\d+)(?:[.,:](\d+))?/i, handler: (match) => {
+                    const hours = parseInt(match[1]);
+                    const minutes = match[2] ? parseInt(match[2]) : 0;
+                    return hours * 60 + minutes;
+                }},
+                // Formato "inizio 7 e mezza" o "inizio 7 e 30"
+                { pattern: /inizio\s+(\d+)\s+e\s+(?:mezza|mezzo|30)/i, handler: (match) => {
+                    const hours = parseInt(match[1]);
+                    return hours * 60 + 30;
+                }},
+                // Formato "inizio 7 e un quarto" o "inizio 7 e 15"
+                { pattern: /inizio\s+(\d+)\s+e\s+(?:un\s+quarto|15)/i, handler: (match) => {
+                    const hours = parseInt(match[1]);
+                    return hours * 60 + 15;
+                }},
+                // Formato "inizio 7 e tre quarti" o "inizio 7 e 45"
+                { pattern: /inizio\s+(\d+)\s+e\s+(?:tre\s+quarti|45)/i, handler: (match) => {
+                    const hours = parseInt(match[1]);
+                    return hours * 60 + 45;
+                }},
+                // Formato "7-17" (orario completo) con vari separatori
+                { pattern: /^.*?(\d+)(?:[.,:](\d+))?\s*(?:-|–|fino|a)\s*(\d+)(?:[.,:](\d+))?/i, handler: (match) => {
                     const hours = parseInt(match[1]);
                     const minutes = match[2] ? parseInt(match[2]) : 0;
                     return hours * 60 + minutes;
@@ -11678,26 +11796,53 @@ END:VCARD`;
             // Estrai ora di fine con maggiore flessibilità
             let endTime = null;
             const endPatterns = [
-                // Formato "fine 17" o "fine alle 17"
-                { pattern: /fine\s+(?:alle\s+)?(\d+)(?::(\d+))?/i, handler: (match) => {
+                // Formato "dalle 7 alle 17" o "da 7 a 17"
+                { pattern: /da(?:lle)?\s+(\d+)(?:[.,:](\d+))?\s+(?:alle|a)\s+(\d+)(?:[.,:](\d+))?/i, handler: (match) => {
+                    const hours = parseInt(match[3]);
+                    const minutes = match[4] ? parseInt(match[4]) : 0;
+                    return hours * 60 + minutes;
+                }},
+                // Formato "fine 17" o "fine alle 17" con vari separatori
+                { pattern: /fine\s+(?:alle\s+)?(\d+)(?:[.,:](\d+))?/i, handler: (match) => {
                     const hours = parseInt(match[1]);
                     const minutes = match[2] ? parseInt(match[2]) : 0;
                     return hours * 60 + minutes;
                 }},
-                // Formato "alle 17" o "a 17:30" (dopo un pattern di inizio)
-                { pattern: /(?:alle|a)\s+(\d+)(?::(\d+))?/i, handler: (match) => {
+                // Formato "alle 17" o "a 17:30" (dopo un pattern di inizio) con vari separatori
+                { pattern: /(?:alle|a)\s+(\d+)(?:[.,:](\d+))?/i, handler: (match) => {
                     const hours = parseInt(match[1]);
                     const minutes = match[2] ? parseInt(match[2]) : 0;
                     return hours * 60 + minutes;
                 }},
-                // Formato "ho finito alle 18"
-                { pattern: /(?:ho\s+)?finito\s+(?:alle\s+)?(\d+)(?::(\d+))?/i, handler: (match) => {
+                // Formato "ho finito alle 18" con vari separatori
+                { pattern: /(?:ho\s+)?finito\s+(?:alle\s+)?(\d+)(?:[.,:](\d+))?/i, handler: (match) => {
                     const hours = parseInt(match[1]);
                     const minutes = match[2] ? parseInt(match[2]) : 0;
                     return hours * 60 + minutes;
                 }},
-                // Formato "7-17" (orario completo)
-                { pattern: /(\d+)(?::(\d+))?\s*(?:-|–|fino|a)\s*(\d+)(?::(\d+))?/i, handler: (match) => {
+                // Formato "uscito alle 18" o "sono uscito alle 18"
+                { pattern: /(?:sono\s+)?uscit[oa]\s+(?:alle\s+)?(\d+)(?:[.,:](\d+))?/i, handler: (match) => {
+                    const hours = parseInt(match[1]);
+                    const minutes = match[2] ? parseInt(match[2]) : 0;
+                    return hours * 60 + minutes;
+                }},
+                // Formato "fine 17 e mezza" o "fine 17 e 30"
+                { pattern: /fine\s+(\d+)\s+e\s+(?:mezza|mezzo|30)/i, handler: (match) => {
+                    const hours = parseInt(match[1]);
+                    return hours * 60 + 30;
+                }},
+                // Formato "fine 17 e un quarto" o "fine 17 e 15"
+                { pattern: /fine\s+(\d+)\s+e\s+(?:un\s+quarto|15)/i, handler: (match) => {
+                    const hours = parseInt(match[1]);
+                    return hours * 60 + 15;
+                }},
+                // Formato "fine 17 e tre quarti" o "fine 17 e 45"
+                { pattern: /fine\s+(\d+)\s+e\s+(?:tre\s+quarti|45)/i, handler: (match) => {
+                    const hours = parseInt(match[1]);
+                    return hours * 60 + 45;
+                }},
+                // Formato "7-17" (orario completo) con vari separatori
+                { pattern: /(\d+)(?:[.,:](\d+))?\s*(?:-|–|fino|a)\s*(\d+)(?:[.,:](\d+))?/i, handler: (match) => {
                     const hours = parseInt(match[3]);
                     const minutes = match[4] ? parseInt(match[4]) : 0;
                     return hours * 60 + minutes;
@@ -11716,8 +11861,8 @@ END:VCARD`;
             // Estrai pausa con maggiore flessibilità
             let pauseTime = 0;
             const pausePatterns = [
-                // Formato "pausa 1:30" o "pausa 1"
-                { pattern: /pausa\s+(?:di\s+)?(\d+)(?::(\d+))?/i, handler: (match) => {
+                // Formato "pausa 1:30" o "pausa 1" con vari separatori
+                { pattern: /pausa\s+(?:di\s+)?(\d+)(?:[.,:](\d+))?/i, handler: (match) => {
                     const hours = parseInt(match[1]);
                     const minutes = match[2] ? parseInt(match[2]) : 0;
                     return hours * 60 + minutes;
@@ -11735,7 +11880,20 @@ END:VCARD`;
                 // Formato "con pausa di un'ora"
                 { pattern: /con\s+pausa\s+(?:di\s+)?(?:un['']?ora|1\s+ora)/i, handler: () => 60 },
                 // Formato "con pausa di mezz'ora"
-                { pattern: /con\s+pausa\s+(?:di\s+)?mez(?:z[''])?ora/i, handler: () => 30 }
+                { pattern: /con\s+pausa\s+(?:di\s+)?mez(?:z[''])?ora/i, handler: () => 30 },
+                // Formato "pausa un quarto d'ora" o "pausa 15 minuti"
+                { pattern: /pausa\s+(?:di\s+)?(?:un\s+quarto|quarto\s+d['']ora)/i, handler: () => 15 },
+                // Formato "pausa tre quarti d'ora" o "pausa 45 minuti"
+                { pattern: /pausa\s+(?:di\s+)?(?:tre\s+quarti|quarti\s+d['']ora)/i, handler: () => 45 },
+                // Formato "pausa pranzo" (default 1 ora)
+                { pattern: /pausa\s+pranzo/i, handler: () => 60 },
+                // Formato "senza pausa" o "pausa zero"
+                { pattern: /(?:senza|no)\s+pausa|pausa\s+(?:zero|0)/i, handler: () => 0 },
+                // Formato "pausa 1 e mezza" (1 ora e 30 minuti)
+                { pattern: /pausa\s+(\d+)\s+e\s+(?:mezza|mezzo|30)/i, handler: (match) => {
+                    const hours = parseInt(match[1]);
+                    return hours * 60 + 30;
+                }}
             ];
             
             // Cerca una corrispondenza con i pattern di pausa
@@ -11808,7 +11966,15 @@ END:VCARD`;
                 // Formato "per xyz" o "su xyz"
                 { pattern: /(?:per|su|di)\s+(.+?)(?:\s+(?:inizio|fine|pausa|ore)|$)/i, handler: (match) => match[1] },
                 // Formato "lavorato su xyz"
-                { pattern: /lavorato\s+(?:su|per|al)\s+(.+?)(?:\s+(?:inizio|fine|pausa|ore)|$)/i, handler: (match) => match[1] }
+                { pattern: /lavorato\s+(?:su|per|al|con)\s+(.+?)(?:\s+(?:inizio|fine|pausa|ore)|$)/i, handler: (match) => match[1] },
+                // Formato "progetto xyz"
+                { pattern: /progetto\s+(.+?)(?:\s+(?:inizio|fine|pausa|ore)|$)/i, handler: (match) => match[1] },
+                // Formato "attività xyz"
+                { pattern: /attivit[àa]\s+(.+?)(?:\s+(?:inizio|fine|pausa|ore)|$)/i, handler: (match) => match[1] },
+                // Formato "cliente xyz"
+                { pattern: /cliente\s+(.+?)(?:\s+(?:inizio|fine|pausa|ore)|$)/i, handler: (match) => match[1] },
+                // Formato "commessa xyz"
+                { pattern: /commessa\s+(.+?)(?:\s+(?:inizio|fine|pausa|ore)|$)/i, handler: (match) => match[1] }
             ];
             
             // Cerca una corrispondenza con i pattern di descrizione
@@ -11817,6 +11983,61 @@ END:VCARD`;
                 if (match) {
                     description = descMatcher.handler(match);
                     break;
+                }
+            }
+            
+            // Se non è stata trovata una descrizione esplicita, estrai il testo rimanente come descrizione
+            if (!description) {
+                // Crea una copia del testo normalizzato
+                let remainingText = normalizedText;
+                
+                // Rimuovi le parti già riconosciute (data, orari, pausa)
+                const partsToRemove = [
+                    // Date
+                    /oggi|ieri|domani|lunedì|lunedi|martedì|martedi|mercoledì|mercoledi|giovedì|giovedi|venerdì|venerdi|sabato|domenica/gi,
+                    // Orari di inizio
+                    /inizio\s+(?:alle\s+)?(\d+)(?:[.,:](\d+))?/gi,
+                    /da(?:lle)?\s+(\d+)(?:[.,:](\d+))?/gi,
+                    /(?:ho\s+)?iniziato\s+(?:alle\s+)?(\d+)(?:[.,:](\d+))?/gi,
+                    /(?:sono\s+)?entrat[oa]\s+(?:alle\s+)?(\d+)(?:[.,:](\d+))?/gi,
+                    /(?:sono\s+)?arrivat[oa]\s+(?:alle\s+)?(\d+)(?:[.,:](\d+))?/gi,
+                    // Orari di fine
+                    /fine\s+(?:alle\s+)?(\d+)(?:[.,:](\d+))?/gi,
+                    /(?:alle|a)\s+(\d+)(?:[.,:](\d+))?/gi,
+                    /(?:ho\s+)?finito\s+(?:alle\s+)?(\d+)(?:[.,:](\d+))?/gi,
+                    /(?:sono\s+)?uscit[oa]\s+(?:alle\s+)?(\d+)(?:[.,:](\d+))?/gi,
+                    // Formati orari completi
+                    /(\d+)(?:[.,:](\d+))?\s*(?:-|–|fino|a)\s*(\d+)(?:[.,:](\d+))?/gi,
+                    // Pause
+                    /pausa\s+(?:di\s+)?(\d+)(?:[.,:](\d+))?/gi,
+                    /pausa\s+(?:di\s+)?(?:un['']?ora|1\s+ora)/gi,
+                    /pausa\s+(?:di\s+)?mez(?:z[''])?ora/gi,
+                    /pausa\s+(?:di\s+)?(\d+)\s+(?:ore|ora)/gi,
+                    /pausa\s+(?:di\s+)?(\d+)\s+minuti/gi,
+                    /con\s+pausa\s+(?:di\s+)?(\d+)\s+minuti/gi,
+                    /con\s+pausa\s+(?:di\s+)?(?:un['']?ora|1\s+ora)/gi,
+                    /con\s+pausa\s+(?:di\s+)?mez(?:z[''])?ora/gi,
+                    /pausa\s+(?:di\s+)?(?:un\s+quarto|quarto\s+d['']ora)/gi,
+                    /pausa\s+(?:di\s+)?(?:tre\s+quarti|quarti\s+d['']ora)/gi,
+                    /pausa\s+pranzo/gi,
+                    /(?:senza|no)\s+pausa|pausa\s+(?:zero|0)/gi,
+                    // Parole chiave da rimuovere
+                    /salva|conferma|invia|registra|ok/gi,
+                    // Rimuovi parole comuni e preposizioni isolate
+                    /\b(e|con|il|la|lo|le|gli|i|di|a|da|in|su|per|tra|fra)\b/gi
+                ];
+                
+                // Rimuovi tutte le parti riconosciute
+                partsToRemove.forEach(pattern => {
+                    remainingText = remainingText.replace(pattern, ' ');
+                });
+                
+                // Pulisci il testo rimanente (rimuovi spazi multipli, spazi all'inizio e alla fine)
+                remainingText = remainingText.replace(/\s+/g, ' ').trim();
+                
+                // Se c'è ancora del testo, usalo come descrizione
+                if (remainingText) {
+                    description = remainingText;
                 }
             }
             
@@ -11932,6 +12153,14 @@ END:VCARD`;
             if (startTimeField) startTimeField.value = data.startTime;
             if (endTimeField) endTimeField.value = data.endTime;
             if (pauseField) pauseField.value = data.pauseTime;
+            
+            // Calcola automaticamente le ore totali dopo l'inserimento vocale
+            // Cerca la funzione di calcolo ore e chiamala se esiste
+            if (typeof calculateTotalHours === 'function') {
+                setTimeout(() => {
+                    calculateTotalHours();
+                }, 100); // Piccolo ritardo per assicurarsi che i campi siano stati aggiornati
+            }
             
             // Non facciamo più il click automatico, l'utente dovrà dire "salva" per salvare
             // o fare click manualmente sul pulsante di invio
