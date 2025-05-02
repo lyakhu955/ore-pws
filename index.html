@@ -10027,11 +10027,15 @@ END:VCARD`;
                     window.googleAuthClient = google.accounts.oauth2.initTokenClient({
                         client_id: '927051615660-tfhk7s28v2ni4nsbmlbimaon5mg582o8.apps.googleusercontent.com',
                         scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file openid profile email',
+                        prompt: 'consent',
                         callback: (tokenResponse) => {
                             console.log('Callback di autenticazione chiamato');
                             if (tokenResponse && tokenResponse.access_token) {
                                 gapi.client.setToken(tokenResponse);
                                 console.log('Token di accesso impostato nel client');
+                                
+                                // Imposta esplicitamente lo stato di login
+                                this.isLoggedIn = true;
                             }
                         },
                         error_callback: (error) => {
@@ -11211,9 +11215,22 @@ END:VCARD`;
                         manualBackupBtn.innerHTML = '<span class="spinner"></span> Backup in corso...';
                         manualBackupBtn.disabled = true;
                         
-                        // Esegui il backup (modalità con login automatico)
+                        // Prima verifica se l'utente è già autenticato
+                        const isLoggedIn = await cloudManager.checkAuthStatus();
+                        
+                        // Se non è autenticato, mostra un messaggio e reindirizza al login
+                        if (!isLoggedIn) {
+                            showToast('Per eseguire il backup è necessario accedere al tuo account Google', 'warning');
+                            await loginWithSelectedProvider();
+                            // Verifica nuovamente se l'utente è autenticato dopo il login
+                            if (!await cloudManager.checkAuthStatus()) {
+                                throw new Error('Login non riuscito. Impossibile eseguire il backup.');
+                            }
+                        }
+                        
+                        // Ora esegui il backup (senza tentare il login automatico)
                         const data = getDb(); // La tua funzione esistente
-                        const result = await cloudManager.backup(data, true);
+                        const result = await cloudManager.backup(data, false);
                         
                         // Aggiorna l'UI
                         const currentProvider = cloudManager.getCurrentProvider();
@@ -11246,6 +11263,19 @@ END:VCARD`;
                         const originalText = restoreBackupBtn.innerHTML;
                         restoreBackupBtn.innerHTML = '<span class="spinner"></span> Ripristino in corso...';
                         restoreBackupBtn.disabled = true;
+                        
+                        // Prima verifica se l'utente è già autenticato
+                        const isLoggedIn = await cloudManager.checkAuthStatus();
+                        
+                        // Se non è autenticato, mostra un messaggio e reindirizza al login
+                        if (!isLoggedIn) {
+                            showToast('Per ripristinare il backup è necessario accedere al tuo account Google', 'warning');
+                            await loginWithSelectedProvider();
+                            // Verifica nuovamente se l'utente è autenticato dopo il login
+                            if (!await cloudManager.checkAuthStatus()) {
+                                throw new Error('Login non riuscito. Impossibile ripristinare il backup.');
+                            }
+                        }
                         
                         // Esegui il ripristino
                         const result = await cloudManager.restore();
