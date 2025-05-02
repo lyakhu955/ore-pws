@@ -10997,16 +10997,18 @@ END:VCARD`;
         let cloudManager = null;
 
         // Funzione principale di inizializzazione
-        async function initCloudBackup() {
+        async function initCloudBackup(skipAuthCheck = false) {
             // Crea il gestore se non esiste
             if (!cloudManager) {
                 cloudManager = new CloudBackupManager();
                 
-                // Verifica lo stato di autenticazione di tutti i provider
-                try {
-                    await cloudManager.checkAuthStatus();
-                } catch (error) {
-                    console.warn('Errore durante la verifica dello stato di autenticazione:', error);
+                // Verifica lo stato di autenticazione di tutti i provider solo se richiesto
+                if (!skipAuthCheck) {
+                    try {
+                        await cloudManager.checkAuthStatus();
+                    } catch (error) {
+                        console.warn('Errore durante la verifica dello stato di autenticazione:', error);
+                    }
                 }
             }
             
@@ -11416,7 +11418,8 @@ END:VCARD`;
                     mutations.forEach((mutation) => {
                         if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
                             if (settingsSection.classList.contains('active')) {
-                                initCloudBackup();
+                                // Inizializza senza verificare l'autenticazione automaticamente
+                                initCloudBackup(true);
                             }
                         }
                     });
@@ -11426,7 +11429,8 @@ END:VCARD`;
                 
                 // Inizializza anche se la sezione è già attiva al caricamento
                 if (settingsSection.classList.contains('active')) {
-                    initCloudBackup();
+                    // Inizializza senza verificare l'autenticazione automaticamente
+                    initCloudBackup(true);
                 }
             }
         });
