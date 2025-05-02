@@ -3188,6 +3188,20 @@
             z-index: 3;
         }
 
+        /* Fix per il menu contestuale su iOS */
+        #pws-logo {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
+        }
+        
+        #pws-logo img {
+            pointer-events: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
@@ -3197,10 +3211,12 @@
 <body>
     <header>
         <div class="header-content">
-            <div class="logo">
+            <div class="logo bouncing-logo" id="pws-logo">
                 <img src="https://i.imgur.com/BnllByD.png"
                      alt="PWS Logo" 
-                     class="bouncing-logo">
+                     draggable="false"
+                     style="pointer-events: none; /* Impedisce che l'immagine riceva eventi touch/click */"
+                     >
             </div>
             <div class="header-actions">
                 <!-- Pulsante Gratta e Vinci -->
@@ -8043,7 +8059,7 @@ END:VCARD`;
              document.body.style.animation = 'none';
              console.log("Animazioni body resettate all'avvio");
              
-             const logo = document.querySelector('.bouncing-logo');
+             const logo = document.getElementById('pws-logo');
              if (logo) {
                  // Variabili per gestire la pressione prolungata
                  let pressTimer;
