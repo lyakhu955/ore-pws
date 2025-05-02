@@ -11575,6 +11575,18 @@ END:VCARD`;
             // Normalizza il testo (minuscolo)
             const normalizedText = text.toLowerCase();
             
+            // Controlla se l'utente ha detto "salva" per salvare le ore
+            const saveCommand = normalizedText.match(/salva|conferma|invia|registra|ok/i);
+            if (saveCommand) {
+                // Trova il pulsante di invio e fai clic su di esso
+                const submitButton = document.querySelector('#addEntryForm button[type="submit"]');
+                if (submitButton) {
+                    console.log('Comando di salvataggio riconosciuto, invio il form...');
+                    submitButton.click();
+                    return; // Esci dalla funzione dopo aver salvato
+                }
+            }
+            
             // Estrai la data con maggiore flessibilità
             let date = new Date();
             const datePatterns = [
@@ -11822,7 +11834,7 @@ END:VCARD`;
                 description: description,
                 startTime: startTime !== null ? formatMinutesToTime(startTime) : "",
                 endTime: endTime !== null ? formatMinutesToTime(endTime) : "",
-                pauseTime: pauseTime > 0 ? (pauseTime / 60).toFixed(1).replace('.0', '') : "0"
+                pauseTime: pauseTime > 0 ? formatPauseTime(pauseTime) : "0"
             };
             
             // Inserisci i dati nel form
@@ -11850,11 +11862,55 @@ END:VCARD`;
             return nextDay;
         }
 
-        // Funzione per formattare i minuti in formato orario (HH:MM)
+        // Funzione per formattare i minuti in formato orario (solo il numero, senza :00)
         function formatMinutesToTime(minutes) {
             const hours = Math.floor(minutes / 60);
             const mins = minutes % 60;
-            return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+            
+            // Se i minuti sono 0, restituisci solo l'ora senza decimali
+            if (mins === 0) {
+                return String(hours);
+            } 
+            // Se i minuti sono 30 (mezz'ora), restituisci formato decimale con .5
+            else if (mins === 30) {
+                return `${hours}.5`;
+            }
+            // Per altri valori di minuti, usa il formato con i due punti
+            else {
+                return `${hours}:${String(mins).padStart(2, '0')}`;
+            }
+        }
+        
+        // Funzione per formattare il tempo di pausa in formato decimale
+        function formatPauseTime(pauseMinutes) {
+            const hours = Math.floor(pauseMinutes / 60);
+            const mins = pauseMinutes % 60;
+            
+            // Se è un'ora esatta
+            if (mins === 0) {
+                return String(hours);
+            }
+            // Se è mezz'ora o multipli di mezz'ora
+            else if (mins === 30) {
+                return `${hours}.5`;
+            }
+            // Per 15 minuti (0.25)
+            else if (mins === 15) {
+                return hours > 0 ? `${hours}.25` : "0.25";
+            }
+            // Per 45 minuti (0.75)
+            else if (mins === 45) {
+                return hours > 0 ? `${hours}.75` : "0.75";
+            }
+            // Per altri valori, arrotonda al più vicino 0.25
+            else {
+                const fraction = Math.round((mins / 60) * 4) / 4;
+                if (fraction === 0) {
+                    return String(hours);
+                } else {
+                    return `${hours + fraction}`.replace(/\.?0+$/, '');
+                }
+            }
         }
 
         // Funzione per compilare il form con i dati riconosciuti
@@ -11877,14 +11933,8 @@ END:VCARD`;
             if (endTimeField) endTimeField.value = data.endTime;
             if (pauseField) pauseField.value = data.pauseTime;
             
-            // Se esiste un pulsante di invio, simula un click dopo un breve ritardo
-            setTimeout(() => {
-                const submitButton = document.querySelector('#addEntryForm button[type="submit"]');
-                if (submitButton && data.hours > 0) {
-                    // Opzionale: invia automaticamente il form
-                    // submitButton.click();
-                }
-            }, 1500);
+            // Non facciamo più il click automatico, l'utente dovrà dire "salva" per salvare
+            // o fare click manualmente sul pulsante di invio
         }
 
         // Funzione per mostrare un tooltip di conferma
