@@ -9827,7 +9827,8 @@ END:VCARD`;
                         window.googleAuthClient = google.accounts.oauth2.initTokenClient({
                             client_id: '927051615660-tfhk7s28v2ni4nsbmlbimaon5mg582o8.apps.googleusercontent.com',
                             scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file openid profile email',
-                            prompt: 'consent',  // Forza la visualizzazione del consenso
+                            prompt: '',  // Non mostrare il consenso se possibile
+                            auto_select: true,  // Seleziona automaticamente l'account
                             callback: (tokenResponse) => {
                                 if (tokenResponse && tokenResponse.access_token) {
                                     // Imposta il token di accesso per le richieste API
@@ -10027,7 +10028,8 @@ END:VCARD`;
                     window.googleAuthClient = google.accounts.oauth2.initTokenClient({
                         client_id: '927051615660-tfhk7s28v2ni4nsbmlbimaon5mg582o8.apps.googleusercontent.com',
                         scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file openid profile email',
-                        prompt: 'consent',
+                        prompt: '',  // Non mostrare il consenso se possibile
+                        auto_select: true,  // Seleziona automaticamente l'account
                         callback: (tokenResponse) => {
                             console.log('Callback di autenticazione chiamato');
                             if (tokenResponse && tokenResponse.access_token) {
@@ -10036,6 +10038,9 @@ END:VCARD`;
                                 
                                 // Imposta esplicitamente lo stato di login
                                 this.isLoggedIn = true;
+                                
+                                // Salva il token in localStorage per mantenerlo tra i refresh
+                                localStorage.setItem('googleAuthToken', JSON.stringify(tokenResponse));
                             }
                         },
                         error_callback: (error) => {
@@ -11002,6 +11007,8 @@ END:VCARD`;
             
             // Verifica lo stato di autenticazione di tutti i provider
             async checkAuthStatus() {
+                let anyLoggedIn = false;
+                
                 // Per ogni provider, verifica se l'utente è già autenticato
                 for (const [providerId, provider] of Object.entries(this.providers)) {
                     try {
@@ -11014,12 +11021,15 @@ END:VCARD`;
                                 this.selectedProvider = providerId;
                                 this.preferredProvider = providerId;
                                 localStorage.setItem('preferredCloudProvider', providerId);
+                                anyLoggedIn = true;
                             }
                         }
                     } catch (error) {
                         console.warn(`Errore durante la verifica dello stato di autenticazione per ${providerId}:`, error);
                     }
                 }
+                
+                return anyLoggedIn;
             }
         }
 
@@ -11035,7 +11045,9 @@ END:VCARD`;
                 // Verifica lo stato di autenticazione di tutti i provider solo se richiesto
                 if (!skipAuthCheck) {
                     try {
-                        await cloudManager.checkAuthStatus();
+                        // Verifica lo stato di autenticazione e restituisce true se almeno un provider è autenticato
+                        const isLoggedIn = await cloudManager.checkAuthStatus();
+                        console.log('Stato di autenticazione verificato:', isLoggedIn ? 'Autenticato' : 'Non autenticato');
                     } catch (error) {
                         console.warn('Errore durante la verifica dello stato di autenticazione:', error);
                     }
@@ -11483,8 +11495,37 @@ END:VCARD`;
         }
 
         // Aggiungi alla funzione di inizializzazione principale
-        document.addEventListener('DOMContentLoaded', () => {
-            // ... altre inizializzazioni
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Carica le API di Google
+            try {
+                await loadGoogleApi();
+                
+                // Inizializza il backup cloud
+                await initCloudBackup();
+                
+                // Tenta di ripristinare automaticamente la sessione all'avvio
+                const savedToken = localStorage.getItem('googleAuthToken');
+                if (savedToken && cloudManager) {
+                    try {
+                        console.log('Trovato token salvato, tentativo di ripristino automatico della sessione...');
+                        const provider = cloudManager.getProvider('google');
+                        if (provider) {
+                            await provider.checkAuthStatus();
+                            console.log('Sessione ripristinata automaticamente');
+                            
+                            // Aggiorna l'interfaccia utente
+                            updateProviderSelectionUI();
+                            updateCloudAccountUI();
+                        }
+                    } catch (e) {
+                        console.warn('Impossibile ripristinare automaticamente la sessione:', e);
+                    }
+                }
+                
+                console.log('Inizializzazione del backup cloud completata');
+            } catch (error) {
+                console.error('Errore durante l\'inizializzazione del backup cloud:', error);
+            }
             
             // Inizializza il backup cloud quando la sezione impostazioni è attiva
             const settingsSection = document.getElementById('settings-section');
