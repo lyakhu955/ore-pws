@@ -10325,18 +10325,18 @@ END:VCARD`;
                     if (!this.isLoggedIn) {
                         // Prima di tutto, proviamo a verificare lo stato di autenticazione
                         // Potrebbe essere che l'utente sia autenticato ma lo stato non sia stato aggiornato
-                        await this.checkAuthStatus();
+                        const authStatus = await this.checkAuthStatus();
                         
                         // Se ancora non è autenticato e showLoginPrompt è true, tenta di autenticare
-                        if (!this.isLoggedIn && showLoginPrompt) {
+                        if (!authStatus && showLoginPrompt) {
                             console.log('Utente non autenticato, tentativo di login automatico...');
                             await this.login();
                             
                             // Verifica se il login è riuscito
-                            if (!this.isLoggedIn) {
+                            if (!await this.checkAuthStatus()) {
                                 throw new Error("Login fallito. Impossibile eseguire il backup.");
                             }
-                        } else if (!this.isLoggedIn) {
+                        } else if (!authStatus) {
                             throw new Error("Utente non autenticato");
                         }
                     }
@@ -10402,12 +10402,19 @@ END:VCARD`;
             }
             
             async restore() {
-                if (!this.isLoggedIn) {
-                    throw new Error("Utente non autenticato");
-                }
-                
                 try {
                     await this.ensureApiLoaded();
+                    
+                    // Verifica se l'utente è autenticato
+                    if (!this.isLoggedIn) {
+                        // Prima di tutto, proviamo a verificare lo stato di autenticazione
+                        const authStatus = await this.checkAuthStatus();
+                        
+                        // Se ancora non è autenticato, lancia un errore
+                        if (!authStatus) {
+                            throw new Error("Utente non autenticato");
+                        }
+                    }
                     
                     console.log('Avvio ripristino da Google Drive...');
                     
@@ -11215,22 +11222,33 @@ END:VCARD`;
                         manualBackupBtn.innerHTML = '<span class="spinner"></span> Backup in corso...';
                         manualBackupBtn.disabled = true;
                         
-                        // Prima verifica se l'utente è già autenticato
-                        const isLoggedIn = await cloudManager.checkAuthStatus();
+                        // Ottieni i dati da salvare
+                        const data = getDb(); // La tua funzione esistente
                         
-                        // Se non è autenticato, mostra un messaggio e reindirizza al login
-                        if (!isLoggedIn) {
-                            showToast('Per eseguire il backup è necessario accedere al tuo account Google', 'warning');
-                            await loginWithSelectedProvider();
-                            // Verifica nuovamente se l'utente è autenticato dopo il login
-                            if (!await cloudManager.checkAuthStatus()) {
-                                throw new Error('Login non riuscito. Impossibile eseguire il backup.');
+                        let result;
+                        
+                        try {
+                            // Esegui il backup direttamente
+                            result = await cloudManager.backup(data, true);
+                        } catch (error) {
+                            // Se l'errore è dovuto all'autenticazione, prova a fare login esplicito
+                            if (error.message.includes("autenticato") || error.message.includes("login")) {
+                                showToast('Tentativo di accesso al tuo account Google...', 'info');
+                                
+                                try {
+                                    // Prova a fare login esplicito
+                                    await loginWithSelectedProvider();
+                                    
+                                    // Riprova il backup dopo il login
+                                    result = await cloudManager.backup(data, false);
+                                } catch (loginError) {
+                                    throw new Error(`Impossibile accedere: ${loginError.message}`);
+                                }
+                            } else {
+                                // Se è un altro tipo di errore, propagalo
+                                throw error;
                             }
                         }
-                        
-                        // Ora esegui il backup (senza tentare il login automatico)
-                        const data = getDb(); // La tua funzione esistente
-                        const result = await cloudManager.backup(data, false);
                         
                         // Aggiorna l'UI
                         const currentProvider = cloudManager.getCurrentProvider();
@@ -11264,21 +11282,30 @@ END:VCARD`;
                         restoreBackupBtn.innerHTML = '<span class="spinner"></span> Ripristino in corso...';
                         restoreBackupBtn.disabled = true;
                         
-                        // Prima verifica se l'utente è già autenticato
-                        const isLoggedIn = await cloudManager.checkAuthStatus();
+                        let result;
                         
-                        // Se non è autenticato, mostra un messaggio e reindirizza al login
-                        if (!isLoggedIn) {
-                            showToast('Per ripristinare il backup è necessario accedere al tuo account Google', 'warning');
-                            await loginWithSelectedProvider();
-                            // Verifica nuovamente se l'utente è autenticato dopo il login
-                            if (!await cloudManager.checkAuthStatus()) {
-                                throw new Error('Login non riuscito. Impossibile ripristinare il backup.');
+                        try {
+                            // Esegui il ripristino direttamente
+                            result = await cloudManager.restore();
+                        } catch (error) {
+                            // Se l'errore è dovuto all'autenticazione, prova a fare login esplicito
+                            if (error.message.includes("autenticato") || error.message.includes("login")) {
+                                showToast('Tentativo di accesso al tuo account Google...', 'info');
+                                
+                                try {
+                                    // Prova a fare login esplicito
+                                    await loginWithSelectedProvider();
+                                    
+                                    // Riprova il ripristino dopo il login
+                                    result = await cloudManager.restore();
+                                } catch (loginError) {
+                                    throw new Error(`Impossibile accedere: ${loginError.message}`);
+                                }
+                            } else {
+                                // Se è un altro tipo di errore, propagalo
+                                throw error;
                             }
                         }
-                        
-                        // Esegui il ripristino
-                        const result = await cloudManager.restore();
                         
                         // Chiedi conferma all'utente
                         const backupDate = new Date(result.timestamp).toLocaleString();
