@@ -9885,7 +9885,7 @@ END:VCARD`;
             // Metodi che ogni provider deve implementare
             async login() { throw new Error("Non implementato"); }
             async logout() { throw new Error("Non implementato"); }
-            async backup(data) { throw new Error("Non implementato"); }
+            async backup(data, showLoginPrompt = true) { throw new Error("Non implementato"); }
             async restore() { throw new Error("Non implementato"); }
             
             // Metodi comuni a tutti i provider
@@ -10310,13 +10310,25 @@ END:VCARD`;
                 });
             }
             
-            async backup(data) {
-                if (!this.isLoggedIn) {
-                    throw new Error("Utente non autenticato");
-                }
-                
+            async backup(data, showLoginPrompt = true) {
                 try {
                     await this.ensureApiLoaded();
+                    
+                    // Verifica se l'utente è autenticato
+                    if (!this.isLoggedIn) {
+                        // Se non è autenticato e showLoginPrompt è true, tenta di autenticare
+                        if (showLoginPrompt) {
+                            console.log('Utente non autenticato, tentativo di login automatico...');
+                            await this.login();
+                            
+                            // Verifica se il login è riuscito
+                            if (!this.isLoggedIn) {
+                                throw new Error("Login fallito. Impossibile eseguire il backup.");
+                            }
+                        } else {
+                            throw new Error("Utente non autenticato");
+                        }
+                    }
                     
                     console.log('Avvio backup su Google Drive...');
                     
@@ -11192,9 +11204,9 @@ END:VCARD`;
                         manualBackupBtn.innerHTML = '<span class="spinner"></span> Backup in corso...';
                         manualBackupBtn.disabled = true;
                         
-                        // Esegui il backup (modalità non silenziosa)
+                        // Esegui il backup (modalità con login automatico)
                         const data = getDb(); // La tua funzione esistente
-                        const result = await cloudManager.backup(data, false);
+                        const result = await cloudManager.backup(data, true);
                         
                         // Aggiorna l'UI
                         const currentProvider = cloudManager.getCurrentProvider();
