@@ -11454,6 +11454,21 @@ END:VCARD`;
                     opacity: 1;
                 }
                 
+                /* Stile per indicare che Whisper AI è disponibile */
+                .voice-recognition-btn[data-ai="true"]::after {
+                    content: "AI";
+                    position: absolute;
+                    top: -5px;
+                    right: -5px;
+                    background-color: var(--md-sys-color-tertiary);
+                    color: var(--md-sys-color-on-tertiary);
+                    font-size: 10px;
+                    font-weight: bold;
+                    padding: 2px 4px;
+                    border-radius: 8px;
+                    box-shadow: var(--elevation-1);
+                }
+                
                 @keyframes wave-out {
                     0% {
                         width: 56px;
@@ -11475,11 +11490,28 @@ END:VCARD`;
 
         // Funzione per configurare il riconoscimento vocale
         function setupVoiceRecognition(voiceButton) {
-            // Verifica il supporto del browser
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                console.warn("Il browser non supporta il riconoscimento vocale");
-                voiceButton.style.display = 'none';
-                return;
+            // Verifica il supporto del browser per il riconoscimento vocale nativo
+            const hasNativeRecognition = ('webkitSpeechRecognition' in window) || ('SpeechRecognition' in window);
+            
+            if (!hasNativeRecognition) {
+                console.warn("Il browser non supporta il riconoscimento vocale nativo");
+                // Non nascondiamo il pulsante perché proveremo a usare Whisper
+            }
+            
+            // Inizializza Whisper AI in background
+            try {
+                if (window.WhisperAI) {
+                    window.WhisperAI.init().then(() => {
+                        console.log('Whisper AI inizializzato con successo!');
+                        // Aggiungi un indicatore visivo che Whisper è disponibile
+                        voiceButton.setAttribute('data-ai', 'true');
+                        voiceButton.setAttribute('title', 'Riconoscimento vocale avanzato con AI disponibile');
+                    }).catch(err => {
+                        console.warn('Impossibile inizializzare Whisper AI:', err);
+                    });
+                }
+            } catch (e) {
+                console.warn('Whisper AI non disponibile:', e);
             }
             
             // Crea l'elemento onda per l'animazione
@@ -11487,98 +11519,192 @@ END:VCARD`;
             wave.className = 'voice-recognition-wave';
             voiceButton.appendChild(wave);
             
-            // Inizializza il riconoscimento vocale
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'it-IT';
-            recognition.continuous = false;
-            recognition.interimResults = true;
+            // Inizializza il riconoscimento vocale nativo (se supportato)
+            let recognition = null;
+            if (hasNativeRecognition) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.lang = 'it-IT';
+                recognition.continuous = false;
+                recognition.interimResults = true;
+            }
             
             // Crea un elemento per mostrare il testo riconosciuto in tempo reale
             let tooltip = null;
             
+            // Flag per tenere traccia della modalità di riconoscimento
+            let isUsingWhisper = false;
+            
             // Gestisci il click sul pulsante
-            voiceButton.addEventListener('click', () => {
+            voiceButton.addEventListener('click', async () => {
                 if (voiceButton.classList.contains('listening')) {
                     // Ferma il riconoscimento se è già in corso
-                    recognition.stop();
-                } else {
-                    // Crea il tooltip per mostrare il testo riconosciuto
-                    tooltip = document.createElement('div');
-                    tooltip.className = 'voice-tooltip';
-                    
-                    // Controlla se ci sono già dati nel form
-                    const startTimeField = document.getElementById('startTime');
-                    const endTimeField = document.getElementById('endTime');
-                    const hasData = startTimeField && startTimeField.value || endTimeField && endTimeField.value;
-                    
-                    if (hasData) {
-                        // Se ci sono già dati, suggerisci di dire "salva"
-                        tooltip.innerHTML = 'Sto ascoltando... <br><small>Puoi dire "salva" per salvare i dati già inseriti, oppure dettare nuovi dati</small>';
-                    } else {
-                        // Altrimenti, suggerisci il formato completo
-                        tooltip.innerHTML = 'Sto ascoltando... <br><small>Prova a dire: "oggi inizio 7 pausa mezzora fine 17 descrizione pws punto ufficio"</small>';
+                    if (recognition && !isUsingWhisper) {
+                        recognition.stop();
                     }
-                    
-                    document.body.appendChild(tooltip);
-                    
-                    // Cambia l'aspetto del pulsante
-                    voiceButton.classList.add('listening');
-                    
-                    // Riproduci un suono di avvio
-                    playSound('start');
-                    
-                    // Avvia il riconoscimento
+                    return;
+                }
+                
+                // Crea il tooltip per mostrare il testo riconosciuto
+                tooltip = document.createElement('div');
+                tooltip.className = 'voice-tooltip';
+                
+                // Controlla se ci sono già dati nel form
+                const startTimeField = document.getElementById('startTime');
+                const endTimeField = document.getElementById('endTime');
+                const hasData = startTimeField && startTimeField.value || endTimeField && endTimeField.value;
+                
+                if (hasData) {
+                    // Se ci sono già dati, suggerisci di dire "salva"
+                    tooltip.innerHTML = 'Sto ascoltando... <br><small>Puoi dire "salva" per salvare i dati già inseriti, oppure dettare nuovi dati</small>';
+                } else {
+                    // Altrimenti, suggerisci il formato completo
+                    tooltip.innerHTML = 'Sto ascoltando... <br><small>Prova a dire: "oggi inizio 7 pausa mezzora fine 17 descrizione pws punto ufficio"</small>';
+                }
+                
+                document.body.appendChild(tooltip);
+                
+                // Cambia l'aspetto del pulsante
+                voiceButton.classList.add('listening');
+                
+                // Riproduci un suono di avvio
+                playSound('start');
+                
+                // Decidi quale sistema di riconoscimento utilizzare
+                // Prova prima Whisper AI se disponibile
+                if (window.WhisperAI && window.WhisperAI.transcribe) {
+                    try {
+                        isUsingWhisper = true;
+                        
+                        // Aggiorna il tooltip per indicare che stiamo usando Whisper AI
+                        tooltip.innerHTML = 'Sto ascoltando con Whisper AI... <br><small>(Riconoscimento vocale avanzato)</small>';
+                        
+                        // Avvia la registrazione e trascrizione con Whisper
+                        const transcript = await window.WhisperAI.transcribe(7000); // 7 secondi di registrazione
+                        
+                        if (transcript) {
+                            // Aggiorna il tooltip con il testo riconosciuto
+                            tooltip.innerHTML = `"${transcript}"`;
+                            
+                            // Elabora il testo riconosciuto
+                            processAdvancedVoiceInput(transcript);
+                            
+                            // Ripristina l'aspetto del pulsante
+                            voiceButton.classList.remove('listening');
+                            
+                            // Rimuovi il tooltip dopo un breve ritardo
+                            setTimeout(() => {
+                                if (tooltip && tooltip.parentNode) {
+                                    tooltip.remove();
+                                    tooltip = null;
+                                }
+                            }, 3000);
+                        } else {
+                            throw new Error('Trascrizione fallita');
+                        }
+                    } catch (error) {
+                        console.warn('Errore con Whisper AI, utilizzo riconoscimento nativo:', error);
+                        isUsingWhisper = false;
+                        
+                        // Se Whisper fallisce e il riconoscimento nativo è disponibile, usalo come fallback
+                        if (recognition) {
+                            tooltip.innerHTML = 'Sto ascoltando... <br><small>(Riconoscimento vocale standard)</small>';
+                            recognition.start();
+                        } else {
+                            // Entrambi i metodi hanno fallito
+                            tooltip.innerHTML = 'Errore nel riconoscimento vocale';
+                            tooltip.classList.add('error');
+                            
+                            // Ripristina l'aspetto del pulsante
+                            voiceButton.classList.remove('listening');
+                            
+                            // Riproduci un suono di errore
+                            playSound('error');
+                            
+                            // Rimuovi il tooltip dopo un breve ritardo
+                            setTimeout(() => {
+                                if (tooltip && tooltip.parentNode) {
+                                    tooltip.remove();
+                                    tooltip = null;
+                                }
+                            }, 3000);
+                        }
+                    }
+                } else if (recognition) {
+                    // Se Whisper non è disponibile, usa il riconoscimento nativo
                     recognition.start();
+                } else {
+                    // Nessun sistema di riconoscimento disponibile
+                    tooltip.innerHTML = 'Riconoscimento vocale non supportato in questo browser';
+                    tooltip.classList.add('error');
+                    
+                    // Ripristina l'aspetto del pulsante
+                    voiceButton.classList.remove('listening');
+                    
+                    // Riproduci un suono di errore
+                    playSound('error');
+                    
+                    // Rimuovi il tooltip dopo un breve ritardo
+                    setTimeout(() => {
+                        if (tooltip && tooltip.parentNode) {
+                            tooltip.remove();
+                            tooltip = null;
+                        }
+                    }, 3000);
                 }
             });
             
-            // Gestisci i risultati intermedi
-            recognition.onresult = (event) => {
-                const transcript = Array.from(event.results)
-                    .map(result => result[0].transcript)
-                    .join('');
+            // Configura gli eventi per il riconoscimento vocale nativo (se disponibile)
+            if (recognition) {
+                // Gestisci i risultati intermedi
+                recognition.onresult = (event) => {
+                    const transcript = Array.from(event.results)
+                        .map(result => result[0].transcript)
+                        .join('');
+                    
+                    // Aggiorna il tooltip con il testo riconosciuto
+                    if (tooltip) {
+                        tooltip.innerHTML = `"${transcript}"`;
+                    }
+                    
+                    // Se è un risultato finale, elabora il testo
+                    if (event.results[0].isFinal) {
+                        processAdvancedVoiceInput(transcript);
+                    }
+                };
                 
-                // Aggiorna il tooltip con il testo riconosciuto
-                if (tooltip) {
-                    tooltip.innerHTML = `"${transcript}"`;
-                }
+                // Quando il riconoscimento termina
+                recognition.onend = () => {
+                    // Ripristina l'aspetto del pulsante
+                    voiceButton.classList.remove('listening');
+                    
+                    // Rimuovi il tooltip dopo un breve ritardo
+                    if (tooltip) {
+                        setTimeout(() => {
+                            if (tooltip && tooltip.parentNode) {
+                                tooltip.remove();
+                                tooltip = null;
+                            }
+                        }, 3000);
+                    }
+                };
                 
-                // Se è un risultato finale, elabora il testo
-                if (event.results[0].isFinal) {
-                    processAdvancedVoiceInput(transcript);
-                }
-            };
-            
-            // Quando il riconoscimento termina
-            recognition.onend = () => {
-                // Ripristina l'aspetto del pulsante
-                voiceButton.classList.remove('listening');
-                
-                // Rimuovi il tooltip dopo un breve ritardo
-                if (tooltip) {
-                    setTimeout(() => {
-                        tooltip.remove();
-                        tooltip = null;
-                    }, 3000);
-                }
-            };
-            
-            // Gestisci gli errori
-            recognition.onerror = (event) => {
-                console.error('Errore nel riconoscimento vocale:', event.error);
-                
-                if (tooltip) {
-                    tooltip.innerHTML = `Errore: ${event.error === 'no-speech' ? 'Non ho sentito nulla' : 'Riprova per favore'}`;
-                    tooltip.classList.add('error');
-                }
-                
-                // Ripristina l'aspetto del pulsante
-                voiceButton.classList.remove('listening');
-                
-                // Riproduci un suono di errore
-                playSound('error');
-            };
+                // Gestisci gli errori
+                recognition.onerror = (event) => {
+                    console.error('Errore nel riconoscimento vocale:', event.error);
+                    
+                    if (tooltip) {
+                        tooltip.innerHTML = `Errore: ${event.error === 'no-speech' ? 'Non ho sentito nulla' : 'Riprova per favore'}`;
+                        tooltip.classList.add('error');
+                    }
+                    
+                    // Ripristina l'aspetto del pulsante
+                    voiceButton.classList.remove('listening');
+                    
+                    // Riproduci un suono di errore
+                    playSound('error');
+                };
+            }
         }
 
         // Funzione per elaborare l'input vocale avanzato
@@ -12251,6 +12377,9 @@ END:VCARD`;
             setupVoiceRecognitionButton();
         });
     </script>
+    
+    <!-- Integrazione per riconoscimento vocale avanzato (versione semplificata) -->
+    <script src="https://cdn.jsdelivr.net/gh/lyakhu955/ore-pws@main/whisper-web-simple.js"></script>
 
 </body>
 </html>
