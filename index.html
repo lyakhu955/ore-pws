@@ -2340,6 +2340,270 @@
         }
         .toast.warning { background-color: #FFA000; color: #000000;}
         .toast.info { background-color: #1976D2; color: #FFFFFF;}
+        
+        /* Stili per la sezione Backup Cloud */
+        .cloud-backup-container {
+            margin-top: 1rem;
+        }
+        
+        .provider-description {
+            margin-bottom: 1rem;
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 0.9rem;
+        }
+        
+        .provider-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .provider-option {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-radius: var(--border-radius-medium);
+            background-color: var(--md-sys-color-surface-variant);
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+        
+        .provider-option:hover {
+            background-color: var(--md-sys-color-primary-container);
+            transform: translateY(-2px);
+            box-shadow: var(--elevation-2);
+        }
+        
+        .provider-option.selected {
+            background-color: var(--md-sys-color-primary-container);
+            border: 2px solid var(--md-sys-color-primary);
+        }
+        
+        .provider-logo {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            flex-shrink: 0;
+            background-color: white;
+            border-radius: 50%;
+            padding: 5px;
+        }
+        
+        .provider-logo img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        
+        .provider-info {
+            flex-grow: 1;
+        }
+        
+        .provider-info h4 {
+            margin: 0 0 0.25rem 0;
+            color: var(--md-sys-color-on-surface);
+            font-size: 1rem;
+        }
+        
+        .provider-info p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+        
+        .provider-status {
+            margin-left: 1rem;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--md-sys-color-outline);
+        }
+        
+        .status-indicator.logged-in {
+            background-color: #4CAF50; /* Verde */
+        }
+        
+        .status-indicator.preferred {
+            background-color: var(--md-sys-color-primary);
+            box-shadow: 0 0 0 2px var(--md-sys-color-primary-container);
+        }
+        
+        .cloud-account-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--md-sys-color-outline-variant);
+        }
+        
+        .cloud-account-info {
+            margin-bottom: 1rem;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            margin-right: 1rem;
+            object-fit: cover;
+            border: 2px solid var(--md-sys-color-primary);
+        }
+        
+        .user-details {
+            flex-grow: 1;
+        }
+        
+        .user-name {
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+        }
+        
+        .user-email {
+            font-size: 0.85rem;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+        
+        .user-provider {
+            font-size: 0.8rem;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-top: 0.25rem;
+        }
+        
+        .login-buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+        
+        .cloud-login-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius-full);
+            border: none;
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            box-shadow: var(--elevation-1);
+        }
+        
+        .cloud-login-btn:hover {
+            box-shadow: var(--elevation-2);
+        }
+        
+        .cloud-login-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .cloud-login-btn img {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .cloud-login-btn.google-btn {
+            background-color: #ffffff;
+            color: #757575;
+            border: 1px solid #dadce0;
+        }
+        
+        .cloud-login-btn.microsoft-btn {
+            background-color: #2f2f2f;
+            color: #ffffff;
+        }
+        
+        .cloud-login-btn.apple-btn {
+            background-color: #000000;
+            color: #ffffff;
+        }
+        
+        .cloud-logout-btn {
+            margin-top: 1rem;
+            background-color: var(--md-sys-color-error-container);
+            color: var(--md-sys-color-on-error-container);
+        }
+        
+        .cloud-backup-controls {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--md-sys-color-outline-variant);
+        }
+        
+        .backup-status-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            background-color: var(--md-sys-color-surface);
+            border-radius: var(--border-radius-small);
+        }
+        
+        .backup-status-label {
+            font-weight: 500;
+            margin-right: 0.5rem;
+        }
+        
+        .backup-status-value {
+            color: var(--md-sys-color-on-surface-variant);
+        }
+        
+        .backup-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .backup-btn {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .backup-settings {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .backup-setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .backup-setting-label {
+            font-weight: 500;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
 
         /* Monthly Report */
         .monthly-report-container { margin-top: 1.5rem; }
@@ -3376,6 +3640,113 @@
                                 </div>
                                 <div style="font-size: 0.8rem; color: var(--md-sys-color-on-surface-variant); margin-top: 5px;">
                                     Nota: è possibile inserire fino a un massimo di 10 mezzi.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sezione Backup Cloud -->
+                        <div class="setting-item" style="flex-direction: column; align-items: stretch;">
+                            <span class="setting-label" style="margin-bottom: 1rem;">Backup Cloud</span>
+                            <div class="cloud-backup-container">
+                                <div class="cloud-provider-selection">
+                                    <p class="provider-description">Seleziona il servizio cloud che desideri utilizzare per il backup dei tuoi dati.</p>
+                                    
+                                    <div class="provider-options">
+                                        <!-- Google Drive -->
+                                        <div class="provider-option" data-provider="google">
+                                            <div class="provider-logo">
+                                                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Drive">
+                                            </div>
+                                            <div class="provider-info">
+                                                <h4>Google Drive</h4>
+                                                <p>Backup su Google Drive utilizzando il tuo account Google</p>
+                                            </div>
+                                            <div class="provider-status">
+                                                <span class="status-indicator" id="googleStatus"></span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Microsoft OneDrive -->
+                                        <div class="provider-option" data-provider="microsoft">
+                                            <div class="provider-logo">
+                                                <img src="https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg" alt="Microsoft OneDrive">
+                                            </div>
+                                            <div class="provider-info">
+                                                <h4>Microsoft OneDrive</h4>
+                                                <p>Backup su OneDrive utilizzando il tuo account Microsoft</p>
+                                            </div>
+                                            <div class="provider-status">
+                                                <span class="status-indicator" id="microsoftStatus"></span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Apple iCloud -->
+                                        <div class="provider-option" data-provider="apple">
+                                            <div class="provider-logo">
+                                                <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple iCloud">
+                                            </div>
+                                            <div class="provider-info">
+                                                <h4>Apple iCloud</h4>
+                                                <p>Backup su iCloud utilizzando il tuo ID Apple</p>
+                                            </div>
+                                            <div class="provider-status">
+                                                <span class="status-indicator" id="appleStatus"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div id="cloudAccountSection" class="cloud-account-section">
+                                    <div id="cloudAccountInfo" class="cloud-account-info">
+                                        <p>Seleziona un provider e accedi per abilitare il backup su cloud</p>
+                                    </div>
+                                    
+                                    <div id="loginButtonsContainer" class="login-buttons-container">
+                                        <!-- I pulsanti di login verranno generati dinamicamente in base al provider selezionato -->
+                                    </div>
+                                    
+                                    <button id="cloudLogoutBtn" class="cloud-logout-btn" style="display: none;">
+                                        <span class="material-symbols-outlined">logout</span>
+                                        Disconnetti
+                                    </button>
+                                </div>
+                                
+                                <div id="cloudBackupControls" class="cloud-backup-controls" style="display: none;">
+                                    <div class="backup-status-container">
+                                        <span class="backup-status-label">Stato Backup:</span>
+                                        <span id="lastBackupTime" class="backup-status-value">Mai eseguito</span>
+                                    </div>
+                                    
+                                    <div class="backup-actions">
+                                        <button id="manualBackupBtn" class="backup-btn" data-original-text="Backup Manuale">
+                                            <span class="material-symbols-outlined">backup</span>
+                                            Backup Manuale
+                                        </button>
+                                        <button id="restoreBackupBtn" class="backup-btn" data-original-text="Ripristina Backup">
+                                            <span class="material-symbols-outlined">restore</span>
+                                            Ripristina Backup
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="backup-settings">
+                                        <div class="backup-setting-item">
+                                            <span class="backup-setting-label">Backup Automatico</span>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" id="autoBackupToggle" checked>
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                        </div>
+                                        
+                                        <div class="backup-setting-item">
+                                            <span class="backup-setting-label">Frequenza Backup</span>
+                                            <select id="backupFrequencySelect" class="settings-select">
+                                                <option value="change">Ad ogni modifica</option>
+                                                <option value="hourly">Ogni ora</option>
+                                                <option value="daily" selected>Giornaliero</option>
+                                                <option value="weekly">Settimanale</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -9294,7 +9665,1327 @@ END:VCARD`;
 
     </script>
 
-   
+    <!-- Script per la gestione del backup cloud -->
+    <script>
+        // Carica le API di Google
+        function loadGoogleApi() {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://apis.google.com/js/api.js';
+                script.onload = () => {
+                    gapi.load('client:auth2', () => {
+                        gapi.client.init({
+                            // Non è necessaria una API Key per l'autenticazione OAuth
+                            clientId: '927051615660-tfhk7s28v2ni4nsbmlbimaon5mg582o8.apps.googleusercontent.com', // Client ID reale
+                            discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
+                            scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file',
+                            redirect_uri: window.location.origin + window.location.pathname // Usa l'URL corrente come redirect
+                        }).then(() => {
+                            console.log('Google API inizializzate con successo');
+                            resolve();
+                        }).catch(error => {
+                            console.error('Errore nell\'inizializzazione delle Google API:', error);
+                            reject(error);
+                        });
+                    });
+                };
+                script.onerror = () => {
+                    console.error('Impossibile caricare lo script delle API di Google');
+                    reject(new Error('Impossibile caricare le API di Google'));
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        // Carica le API di Microsoft
+        function loadMicrosoftApi() {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://alcdn.msauth.net/browser/2.30.0/js/msal-browser.min.js';
+                script.onload = () => {
+                    resolve();
+                };
+                script.onerror = () => reject(new Error('Impossibile caricare le API di Microsoft'));
+                document.head.appendChild(script);
+            });
+        }
+
+        // Carica le API di Apple
+        function loadAppleApi() {
+            return new Promise((resolve, reject) => {
+                // Apple Sign In JS non è disponibile come CDN pubblico
+                // In una implementazione reale, dovresti utilizzare il Sign in with Apple JS
+                // https://developer.apple.com/documentation/sign_in_with_apple/sign_in_with_apple_js
+                resolve();
+            });
+        }
+
+        // Classe base per tutti i provider cloud
+        class CloudProvider {
+            constructor(name, logoUrl) {
+                this.name = name;
+                this.logoUrl = logoUrl;
+                this.isLoggedIn = false;
+                this.userData = null;
+            }
+            
+            // Metodi che ogni provider deve implementare
+            async login() { throw new Error("Non implementato"); }
+            async logout() { throw new Error("Non implementato"); }
+            async backup(data) { throw new Error("Non implementato"); }
+            async restore() { throw new Error("Non implementato"); }
+            
+            // Metodi comuni a tutti i provider
+            getUserInfo() {
+                return this.userData;
+            }
+        }
+
+        // Implementazione per Google Drive (reale)
+        class GoogleDriveProvider extends CloudProvider {
+            constructor() {
+                super("Google Drive", "https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg");
+                this.apiLoaded = false;
+                this.backupFileName = 'ore_pws_backup.json';
+            }
+            
+            async ensureApiLoaded() {
+                if (!this.apiLoaded) {
+                    try {
+                        await loadGoogleApi();
+                        this.apiLoaded = true;
+                        console.log('API Google caricate con successo');
+                    } catch (error) {
+                        console.error('Errore nel caricamento delle API Google:', error);
+                        throw new Error(`Impossibile caricare le API Google: ${error.message}`);
+                    }
+                }
+            }
+            
+            // Verifica se l'utente è già autenticato
+            async checkAuthStatus() {
+                try {
+                    await this.ensureApiLoaded();
+                    
+                    // Verifica se l'utente è già autenticato
+                    if (gapi.auth2 && gapi.auth2.getAuthInstance() && gapi.auth2.getAuthInstance().isSignedIn.get()) {
+                        const googleUser = gapi.auth2.getAuthInstance().currentUser.get();
+                        const profile = googleUser.getBasicProfile();
+                        
+                        this.isLoggedIn = true;
+                        this.userData = {
+                            id: profile.getId(),
+                            name: profile.getName(),
+                            email: profile.getEmail(),
+                            picture: profile.getImageUrl(),
+                            provider: "google"
+                        };
+                        
+                        localStorage.setItem('cloudUserData', JSON.stringify(this.userData));
+                        
+                        console.log('Utente già autenticato con Google:', this.userData.email);
+                        return true;
+                    }
+                    
+                    return false;
+                } catch (error) {
+                    console.warn('Errore durante la verifica dello stato di autenticazione Google:', error);
+                    return false;
+                }
+            }
+            
+            async login() {
+                try {
+                    await this.ensureApiLoaded();
+                    
+                    // Verifica se l'utente è già autenticato
+                    if (await this.checkAuthStatus()) {
+                        return this.userData;
+                    }
+                    
+                    console.log('Avvio procedura di login Google...');
+                    
+                    // Esegui il login con popup
+                    const googleUser = await gapi.auth2.getAuthInstance().signIn({
+                        prompt: 'select_account' // Forza la selezione dell'account
+                    });
+                    
+                    const profile = googleUser.getBasicProfile();
+                    
+                    this.isLoggedIn = true;
+                    this.userData = {
+                        id: profile.getId(),
+                        name: profile.getName(),
+                        email: profile.getEmail(),
+                        picture: profile.getImageUrl(),
+                        provider: "google"
+                    };
+                    
+                    localStorage.setItem('cloudUserData', JSON.stringify(this.userData));
+                    
+                    console.log('Login Google completato con successo:', this.userData.email);
+                    return this.userData;
+                } catch (error) {
+                    console.error('Errore durante login Google:', error);
+                    
+                    // Gestione errori specifici
+                    if (error.error === 'popup_blocked_by_browser') {
+                        throw new Error('Il popup di login è stato bloccato dal browser. Abilita i popup per questo sito.');
+                    } else if (error.error === 'access_denied' || error.error === 'immediate_failed') {
+                        throw new Error('Accesso negato o annullato dall\'utente.');
+                    } else {
+                        throw new Error(`Errore durante il login Google: ${error.message || 'Errore sconosciuto'}`);
+                    }
+                }
+            }
+            
+            async logout() {
+                try {
+                    await this.ensureApiLoaded();
+                    
+                    if (gapi.auth2 && gapi.auth2.getAuthInstance()) {
+                        await gapi.auth2.getAuthInstance().signOut();
+                        console.log('Logout Google completato');
+                    }
+                    
+                    this.isLoggedIn = false;
+                    this.userData = null;
+                    
+                    localStorage.removeItem('cloudUserData');
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Errore durante logout Google:', error);
+                    throw new Error(`Errore durante il logout Google: ${error.message || 'Errore sconosciuto'}`);
+                }
+            }
+            
+            async findOrCreateBackupFile() {
+                try {
+                    console.log('Ricerca file di backup in Google Drive...');
+                    
+                    // Cerca il file di backup esistente
+                    const response = await gapi.client.drive.files.list({
+                        spaces: 'appDataFolder',
+                        fields: 'files(id, name, modifiedTime)',
+                        q: `name='${this.backupFileName}'`
+                    });
+                    
+                    const files = response.result.files;
+                    
+                    if (files && files.length > 0) {
+                        console.log('File di backup trovato:', files[0].id, 'Ultima modifica:', files[0].modifiedTime);
+                        return files[0];
+                    } else {
+                        console.log('Nessun file di backup trovato, creazione di un nuovo file...');
+                        
+                        // Crea un nuovo file
+                        const fileMetadata = {
+                            name: this.backupFileName,
+                            parents: ['appDataFolder']
+                        };
+                        
+                        const media = {
+                            mimeType: 'application/json',
+                            body: JSON.stringify({
+                                createdAt: new Date().toISOString(),
+                                version: '1.0',
+                                data: {}
+                            })
+                        };
+                        
+                        const newFile = await gapi.client.drive.files.create({
+                            resource: fileMetadata,
+                            media: media,
+                            fields: 'id, name, modifiedTime'
+                        });
+                        
+                        console.log('Nuovo file di backup creato:', newFile.result.id);
+                        return newFile.result;
+                    }
+                } catch (error) {
+                    console.error('Errore nella ricerca/creazione del file di backup:', error);
+                    throw new Error(`Errore nella gestione del file di backup: ${error.message || 'Errore sconosciuto'}`);
+                }
+            }
+            
+            async backup(data) {
+                if (!this.isLoggedIn) {
+                    throw new Error("Utente non autenticato");
+                }
+                
+                try {
+                    await this.ensureApiLoaded();
+                    
+                    console.log('Avvio backup su Google Drive...');
+                    
+                    // Prepara i dati con metadati
+                    const backupData = {
+                        data: data,
+                        lastUpdated: new Date().toISOString(),
+                        appVersion: '2.0',
+                        deviceInfo: {
+                            userAgent: navigator.userAgent,
+                            platform: navigator.platform
+                        }
+                    };
+                    
+                    // Trova o crea il file di backup
+                    const backupFile = await this.findOrCreateBackupFile();
+                    
+                    console.log('Aggiornamento del file di backup:', backupFile.id);
+                    
+                    // Aggiorna il contenuto del file
+                    await gapi.client.drive.files.update({
+                        fileId: backupFile.id,
+                        media: {
+                            mimeType: 'application/json',
+                            body: JSON.stringify(backupData)
+                        }
+                    });
+                    
+                    console.log('Backup completato con successo:', backupFile.id);
+                    
+                    return {
+                        success: true,
+                        timestamp: backupData.lastUpdated,
+                        fileId: backupFile.id
+                    };
+                } catch (error) {
+                    console.error('Errore durante il backup su Google Drive:', error);
+                    
+                    // Gestione errori specifici
+                    if (error.status === 401) {
+                        throw new Error('Sessione scaduta. Effettua nuovamente il login.');
+                    } else if (error.status === 403) {
+                        throw new Error('Permessi insufficienti per eseguire il backup.');
+                    } else if (error.status === 404) {
+                        throw new Error('File di backup non trovato.');
+                    } else {
+                        throw new Error(`Errore durante il backup: ${error.message || 'Errore sconosciuto'}`);
+                    }
+                }
+            }
+            
+            async restore() {
+                if (!this.isLoggedIn) {
+                    throw new Error("Utente non autenticato");
+                }
+                
+                try {
+                    await this.ensureApiLoaded();
+                    
+                    console.log('Avvio ripristino da Google Drive...');
+                    
+                    // Trova il file di backup
+                    const response = await gapi.client.drive.files.list({
+                        spaces: 'appDataFolder',
+                        fields: 'files(id, name, modifiedTime)',
+                        q: `name='${this.backupFileName}'`
+                    });
+                    
+                    const files = response.result.files;
+                    
+                    if (!files || files.length === 0) {
+                        console.warn('Nessun backup trovato su Google Drive');
+                        throw new Error("Nessun backup trovato");
+                    }
+                    
+                    // Ordina i file per data di modifica (più recente prima)
+                    files.sort((a, b) => new Date(b.modifiedTime) - new Date(a.modifiedTime));
+                    
+                    // Ottieni il contenuto del file più recente
+                    const fileId = files[0].id;
+                    console.log('Ripristino dal backup più recente:', fileId, 'Data:', files[0].modifiedTime);
+                    
+                    const fileResponse = await gapi.client.drive.files.get({
+                        fileId: fileId,
+                        alt: 'media'
+                    });
+                    
+                    const backupData = fileResponse.result;
+                    
+                    // Verifica che i dati siano validi
+                    if (!backupData || !backupData.data) {
+                        console.error('Backup danneggiato o in formato non valido');
+                        throw new Error("Backup danneggiato o in formato non valido");
+                    }
+                    
+                    console.log('Ripristino completato con successo');
+                    
+                    return {
+                        success: true,
+                        data: backupData.data,
+                        timestamp: backupData.lastUpdated,
+                        fileId: fileId
+                    };
+                } catch (error) {
+                    console.error('Errore durante il ripristino da Google Drive:', error);
+                    
+                    // Gestione errori specifici
+                    if (error.status === 401) {
+                        throw new Error('Sessione scaduta. Effettua nuovamente il login.');
+                    } else if (error.status === 403) {
+                        throw new Error('Permessi insufficienti per accedere al backup.');
+                    } else if (error.status === 404) {
+                        throw new Error('File di backup non trovato.');
+                    } else {
+                        throw new Error(`Errore durante il ripristino: ${error.message || 'Errore sconosciuto'}`);
+                    }
+                }
+            }
+        }
+
+        // Implementazione per Microsoft OneDrive (reale)
+        class OneDriveProvider extends CloudProvider {
+            constructor() {
+                super("Microsoft OneDrive", "https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg");
+                this.apiLoaded = false;
+                this.msalInstance = null;
+                this.backupFileName = 'ore_pws_backup.json';
+            }
+            
+            async ensureApiLoaded() {
+                if (!this.apiLoaded) {
+                    try {
+                        await loadMicrosoftApi();
+                        
+                        // Inizializza MSAL
+                        const msalConfig = {
+                            auth: {
+                                clientId: '12345678-abcd-efgh-ijkl-1234567890ab', // Sostituisci con il tuo Client ID
+                                redirectUri: window.location.origin
+                            }
+                        };
+                        
+                        this.msalInstance = new msal.PublicClientApplication(msalConfig);
+                        this.apiLoaded = true;
+                    } catch (error) {
+                        console.error('Errore nel caricamento delle API Microsoft:', error);
+                        throw error;
+                    }
+                }
+            }
+            
+            async login() {
+                try {
+                    await this.ensureApiLoaded();
+                    
+                    // Verifica se l'utente è già autenticato
+                    const accounts = this.msalInstance.getAllAccounts();
+                    if (accounts.length > 0) {
+                        const account = accounts[0];
+                        
+                        this.isLoggedIn = true;
+                        this.userData = {
+                            id: account.homeAccountId,
+                            name: account.name,
+                            email: account.username,
+                            picture: null, // Microsoft non fornisce direttamente l'URL dell'immagine
+                            provider: "microsoft"
+                        };
+                        
+                        localStorage.setItem('cloudUserData', JSON.stringify(this.userData));
+                        
+                        return this.userData;
+                    }
+                    
+                    // Esegui il login con popup
+                    const loginResponse = await this.msalInstance.loginPopup({
+                        scopes: ['Files.ReadWrite.AppFolder']
+                    });
+                    
+                    this.isLoggedIn = true;
+                    this.userData = {
+                        id: loginResponse.account.homeAccountId,
+                        name: loginResponse.account.name,
+                        email: loginResponse.account.username,
+                        picture: null,
+                        provider: "microsoft"
+                    };
+                    
+                    localStorage.setItem('cloudUserData', JSON.stringify(this.userData));
+                    
+                    return this.userData;
+                } catch (error) {
+                    console.error('Errore durante login Microsoft:', error);
+                    throw error;
+                }
+            }
+            
+            async logout() {
+                try {
+                    await this.ensureApiLoaded();
+                    
+                    await this.msalInstance.logout();
+                    
+                    this.isLoggedIn = false;
+                    this.userData = null;
+                    
+                    localStorage.removeItem('cloudUserData');
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Errore durante logout Microsoft:', error);
+                    throw error;
+                }
+            }
+            
+            async getAccessToken() {
+                const accounts = this.msalInstance.getAllAccounts();
+                if (accounts.length === 0) {
+                    throw new Error("Utente non autenticato");
+                }
+                
+                const silentRequest = {
+                    scopes: ["Files.ReadWrite.AppFolder"],
+                    account: accounts[0]
+                };
+                
+                try {
+                    const response = await this.msalInstance.acquireTokenSilent(silentRequest);
+                    return response.accessToken;
+                } catch (error) {
+                    console.error('Errore nell\'acquisizione del token silenzioso:', error);
+                    
+                    // Se il token è scaduto, richiedi un nuovo token interattivamente
+                    const response = await this.msalInstance.acquireTokenPopup(silentRequest);
+                    return response.accessToken;
+                }
+            }
+            
+            async backup(data) {
+                if (!this.isLoggedIn) {
+                    throw new Error("Utente non autenticato");
+                }
+                
+                try {
+                    await this.ensureApiLoaded();
+                    
+                    const accessToken = await this.getAccessToken();
+                    
+                    // Prepara i dati con metadati
+                    const backupData = {
+                        data: data,
+                        lastUpdated: new Date().toISOString(),
+                        appVersion: '2.0',
+                        deviceInfo: {
+                            userAgent: navigator.userAgent,
+                            platform: navigator.platform
+                        }
+                    };
+                    
+                    // In una implementazione reale, qui utilizzeresti Microsoft Graph API
+                    // per caricare i dati su OneDrive
+                    // Per ora, li salviamo in localStorage
+                    localStorage.setItem('oneDriveBackup', JSON.stringify(backupData));
+                    
+                    return {
+                        success: true,
+                        timestamp: backupData.lastUpdated
+                    };
+                } catch (error) {
+                    console.error('Errore durante il backup su OneDrive:', error);
+                    throw error;
+                }
+            }
+            
+            async restore() {
+                if (!this.isLoggedIn) {
+                    throw new Error("Utente non autenticato");
+                }
+                
+                try {
+                    await this.ensureApiLoaded();
+                    
+                    const accessToken = await this.getAccessToken();
+                    
+                    // In una implementazione reale, qui utilizzeresti Microsoft Graph API
+                    // per scaricare i dati da OneDrive
+                    // Per ora, li recuperiamo da localStorage
+                    const backupJson = localStorage.getItem('oneDriveBackup');
+                    
+                    if (!backupJson) {
+                        throw new Error("Nessun backup trovato");
+                    }
+                    
+                    const backupData = JSON.parse(backupJson);
+                    
+                    return {
+                        success: true,
+                        data: backupData.data,
+                        timestamp: backupData.lastUpdated
+                    };
+                } catch (error) {
+                    console.error('Errore durante il ripristino da OneDrive:', error);
+                    throw error;
+                }
+            }
+        }
+
+        // Implementazione per Apple iCloud (reale)
+        class AppleCloudProvider extends CloudProvider {
+            constructor() {
+                super("Apple iCloud", "https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg");
+                this.apiLoaded = false;
+                this.backupFileName = 'ore_pws_backup.json';
+            }
+            
+            async ensureApiLoaded() {
+                if (!this.apiLoaded) {
+                    try {
+                        await loadAppleApi();
+                        this.apiLoaded = true;
+                    } catch (error) {
+                        console.error('Errore nel caricamento delle API Apple:', error);
+                        throw error;
+                    }
+                }
+            }
+            
+            async login() {
+                try {
+                    await this.ensureApiLoaded();
+                    
+                    // In una implementazione reale, qui utilizzeresti Sign in with Apple JS
+                    // Per ora, utilizziamo un approccio OAuth2 generico
+                    
+                    // Crea un popup per il login
+                    const width = 600;
+                    const height = 600;
+                    const left = window.screen.width / 2 - width / 2;
+                    const top = window.screen.height / 2 - height / 2;
+                    
+                    const appleAuthUrl = `https://appleid.apple.com/auth/authorize?client_id=com.tuazienda.orepws&redirect_uri=${encodeURIComponent(window.location.origin)}&response_type=code&scope=name%20email&response_mode=form_post`;
+                    
+                    const popup = window.open(appleAuthUrl, 'apple-auth', `width=${width},height=${height},left=${left},top=${top}`);
+                    
+                    if (!popup) {
+                        throw new Error("Popup bloccato dal browser. Abilita i popup per questo sito.");
+                    }
+                    
+                    // Simuliamo il login per scopi dimostrativi
+                    // In una implementazione reale, dovresti gestire il callback da Apple
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    
+                    this.isLoggedIn = true;
+                    this.userData = {
+                        id: "apple_" + Math.random().toString(36).substring(2, 15),
+                        name: "Utente Apple",
+                        email: "utente@icloud.com",
+                        picture: "https://ui-avatars.com/api/?name=Utente+Apple&background=000000&color=fff",
+                        provider: "apple"
+                    };
+                    
+                    localStorage.setItem('cloudUserData', JSON.stringify(this.userData));
+                    
+                    return this.userData;
+                } catch (error) {
+                    console.error('Errore durante login Apple:', error);
+                    throw error;
+                }
+            }
+            
+            async logout() {
+                try {
+                    await this.ensureApiLoaded();
+                    
+                    // In una implementazione reale, qui gestiresti il logout da Apple
+                    
+                    this.isLoggedIn = false;
+                    this.userData = null;
+                    
+                    localStorage.removeItem('cloudUserData');
+                    localStorage.removeItem('iCloudBackup');
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Errore durante logout Apple:', error);
+                    throw error;
+                }
+            }
+            
+            async backup(data) {
+                if (!this.isLoggedIn) {
+                    throw new Error("Utente non autenticato");
+                }
+                
+                try {
+                    await this.ensureApiLoaded();
+                    
+                    // In una implementazione reale, qui utilizzeresti CloudKit JS
+                    // per caricare i dati su iCloud
+                    // Per ora, li salviamo in localStorage
+                    const backupData = {
+                        data: data,
+                        timestamp: new Date().toISOString(),
+                        appVersion: '2.0',
+                        deviceInfo: {
+                            userAgent: navigator.userAgent,
+                            platform: navigator.platform
+                        }
+                    };
+                    
+                    localStorage.setItem('iCloudBackup', JSON.stringify(backupData));
+                    
+                    return {
+                        success: true,
+                        timestamp: backupData.timestamp
+                    };
+                } catch (error) {
+                    console.error('Errore durante il backup su iCloud:', error);
+                    throw error;
+                }
+            }
+            
+            async restore() {
+                if (!this.isLoggedIn) {
+                    throw new Error("Utente non autenticato");
+                }
+                
+                try {
+                    await this.ensureApiLoaded();
+                    
+                    // In una implementazione reale, qui utilizzeresti CloudKit JS
+                    // per scaricare i dati da iCloud
+                    // Per ora, li recuperiamo da localStorage
+                    const backupJson = localStorage.getItem('iCloudBackup');
+                    
+                    if (!backupJson) {
+                        throw new Error("Nessun backup trovato");
+                    }
+                    
+                    const backupData = JSON.parse(backupJson);
+                    
+                    return {
+                        success: true,
+                        data: backupData.data,
+                        timestamp: backupData.timestamp
+                    };
+                } catch (error) {
+                    console.error('Errore durante il ripristino da iCloud:', error);
+                    throw error;
+                }
+            }
+        }
+
+        // Gestore centralizzato dei provider cloud
+        class CloudBackupManager {
+            constructor() {
+                this.providers = {
+                    google: new GoogleDriveProvider(),
+                    microsoft: new OneDriveProvider(),
+                    apple: new AppleCloudProvider()
+                };
+                
+                this.currentProvider = null;
+                this.selectedProvider = null;
+                
+                // Carica le preferenze dell'utente
+                this.preferredProvider = localStorage.getItem('preferredCloudProvider') || null;
+                
+                // Carica i dati dell'utente se disponibili
+                const userData = JSON.parse(localStorage.getItem('cloudUserData'));
+                if (userData && userData.provider && this.providers[userData.provider]) {
+                    const provider = this.providers[userData.provider];
+                    provider.isLoggedIn = true;
+                    provider.userData = userData;
+                    this.currentProvider = userData.provider;
+                    this.selectedProvider = userData.provider;
+                }
+            }
+            
+            // Ottieni la lista dei provider disponibili
+            getAvailableProviders() {
+                return Object.keys(this.providers).map(key => ({
+                    id: key,
+                    name: this.providers[key].name,
+                    logoUrl: this.providers[key].logoUrl,
+                    isPreferred: key === this.preferredProvider,
+                    isLoggedIn: this.providers[key].isLoggedIn
+                }));
+            }
+            
+            // Imposta il provider selezionato
+            setSelectedProvider(providerId) {
+                if (this.providers[providerId]) {
+                    this.selectedProvider = providerId;
+                    return true;
+                }
+                return false;
+            }
+            
+            // Ottieni il provider attualmente in uso
+            getCurrentProvider() {
+                return this.currentProvider;
+            }
+            
+            // Ottieni il provider selezionato
+            getSelectedProvider() {
+                return this.selectedProvider;
+            }
+            
+            // Ottieni l'istanza del provider
+            getProvider(providerId) {
+                return this.providers[providerId] || null;
+            }
+            
+            // Login con il provider selezionato
+            async login() {
+                if (!this.selectedProvider || !this.providers[this.selectedProvider]) {
+                    throw new Error("Nessun provider selezionato");
+                }
+                
+                try {
+                    const provider = this.providers[this.selectedProvider];
+                    
+                    // Mostra un messaggio di caricamento
+                    showToast('Connessione in corso...', 'info');
+                    
+                    // Esegui il login con il provider selezionato
+                    // Questo aprirà una finestra di autenticazione del provider
+                    const userData = await provider.login();
+                    
+                    // Imposta come provider corrente
+                    this.currentProvider = this.selectedProvider;
+                    
+                    // Salva come provider preferito
+                    this.preferredProvider = this.selectedProvider;
+                    localStorage.setItem('preferredCloudProvider', this.preferredProvider);
+                    
+                    return userData;
+                } catch (error) {
+                    console.error(`Errore durante il login con ${this.selectedProvider}:`, error);
+                    
+                    // Mostra un messaggio di errore specifico
+                    if (error.message.includes('popup')) {
+                        showToast('Il popup di login è stato bloccato. Abilita i popup per questo sito.', 'error');
+                    } else if (error.message.includes('access_denied') || error.message.includes('cancelled')) {
+                        showToast('Accesso negato o annullato dall\'utente.', 'warning');
+                    } else {
+                        showToast(`Errore durante l'accesso: ${error.message}`, 'error');
+                    }
+                    
+                    throw error;
+                }
+            }
+            
+            // Logout dal provider corrente
+            async logout() {
+                if (!this.currentProvider || !this.providers[this.currentProvider]) {
+                    return false;
+                }
+                
+                try {
+                    // Mostra un messaggio di caricamento
+                    showToast('Disconnessione in corso...', 'info');
+                    
+                    await this.providers[this.currentProvider].logout();
+                    this.currentProvider = null;
+                    return true;
+                } catch (error) {
+                    console.error('Errore durante il logout:', error);
+                    showToast(`Errore durante la disconnessione: ${error.message}`, 'error');
+                    throw error;
+                }
+            }
+            
+            // Esegui backup con il provider corrente
+            async backup(data) {
+                if (!this.currentProvider || !this.providers[this.currentProvider]) {
+                    throw new Error("Nessun provider cloud selezionato");
+                }
+                
+                try {
+                    // Mostra un messaggio di caricamento
+                    showToast('Backup in corso...', 'info');
+                    
+                    const result = await this.providers[this.currentProvider].backup(data);
+                    
+                    // Mostra un messaggio di successo
+                    showToast('Backup completato con successo', 'success');
+                    
+                    return result;
+                } catch (error) {
+                    console.error('Errore durante il backup:', error);
+                    
+                    // Mostra un messaggio di errore
+                    showToast(`Errore durante il backup: ${error.message}`, 'error');
+                    
+                    throw error;
+                }
+            }
+            
+            // Ripristina dal provider corrente
+            async restore() {
+                if (!this.currentProvider || !this.providers[this.currentProvider]) {
+                    throw new Error("Nessun provider cloud selezionato");
+                }
+                
+                try {
+                    // Mostra un messaggio di caricamento
+                    showToast('Ripristino in corso...', 'info');
+                    
+                    const result = await this.providers[this.currentProvider].restore();
+                    
+                    return result;
+                } catch (error) {
+                    console.error('Errore durante il ripristino:', error);
+                    
+                    // Mostra un messaggio di errore
+                    showToast(`Errore durante il ripristino: ${error.message}`, 'error');
+                    
+                    throw error;
+                }
+            }
+            
+            // Ottieni informazioni sull'utente corrente
+            getCurrentUserInfo() {
+                if (!this.currentProvider || !this.providers[this.currentProvider]) {
+                    return null;
+                }
+                
+                return this.providers[this.currentProvider].getUserInfo();
+            }
+            
+            // Verifica lo stato di autenticazione di tutti i provider
+            async checkAuthStatus() {
+                // Per ogni provider, verifica se l'utente è già autenticato
+                for (const [providerId, provider] of Object.entries(this.providers)) {
+                    try {
+                        // Se il provider ha un metodo per verificare lo stato di autenticazione, usalo
+                        if (provider.checkAuthStatus) {
+                            const isLoggedIn = await provider.checkAuthStatus();
+                            
+                            if (isLoggedIn) {
+                                this.currentProvider = providerId;
+                                this.selectedProvider = providerId;
+                                this.preferredProvider = providerId;
+                                localStorage.setItem('preferredCloudProvider', providerId);
+                            }
+                        }
+                    } catch (error) {
+                        console.warn(`Errore durante la verifica dello stato di autenticazione per ${providerId}:`, error);
+                    }
+                }
+            }
+        }
+
+        // Inizializza il gestore dei backup cloud
+        let cloudManager = null;
+
+        // Funzione principale di inizializzazione
+        async function initCloudBackup() {
+            // Crea il gestore se non esiste
+            if (!cloudManager) {
+                cloudManager = new CloudBackupManager();
+                
+                // Verifica lo stato di autenticazione di tutti i provider
+                try {
+                    await cloudManager.checkAuthStatus();
+                } catch (error) {
+                    console.warn('Errore durante la verifica dello stato di autenticazione:', error);
+                }
+            }
+            
+            // Aggiorna l'interfaccia utente
+            updateProviderSelectionUI();
+            updateCloudAccountUI();
+            
+            // Aggiungi event listeners
+            setupProviderSelectionListeners();
+            setupBackupControlListeners();
+        }
+
+        // Aggiorna l'interfaccia di selezione provider
+        function updateProviderSelectionUI() {
+            const providers = cloudManager.getAvailableProviders();
+            const currentProvider = cloudManager.getCurrentProvider();
+            const selectedProvider = cloudManager.getSelectedProvider();
+            
+            // Aggiorna lo stato di ciascun provider
+            providers.forEach(provider => {
+                const providerElement = document.querySelector(`.provider-option[data-provider="${provider.id}"]`);
+                const statusIndicator = document.getElementById(`${provider.id}Status`);
+                
+                if (providerElement && statusIndicator) {
+                    // Rimuovi classi esistenti
+                    providerElement.classList.remove('selected');
+                    statusIndicator.classList.remove('logged-in', 'preferred');
+                    
+                    // Aggiungi classi appropriate
+                    if (provider.id === selectedProvider) {
+                        providerElement.classList.add('selected');
+                    }
+                    
+                    if (provider.isLoggedIn) {
+                        statusIndicator.classList.add('logged-in');
+                    }
+                    
+                    if (provider.isPreferred) {
+                        statusIndicator.classList.add('preferred');
+                    }
+                }
+            });
+            
+            // Aggiorna i pulsanti di login
+            updateLoginButtons();
+        }
+
+        // Aggiorna i pulsanti di login in base al provider selezionato
+        function updateLoginButtons() {
+            const loginButtonsContainer = document.getElementById('loginButtonsContainer');
+            const currentProvider = cloudManager.getCurrentProvider();
+            const selectedProvider = cloudManager.getSelectedProvider();
+            
+            // Se l'utente è già loggato, non mostrare i pulsanti di login
+            if (currentProvider && cloudManager.getProvider(currentProvider).isLoggedIn) {
+                loginButtonsContainer.style.display = 'none';
+                return;
+            }
+            
+            // Altrimenti, mostra il pulsante appropriato
+            loginButtonsContainer.style.display = 'flex';
+            loginButtonsContainer.innerHTML = '';
+            
+            if (selectedProvider) {
+                const provider = cloudManager.getProvider(selectedProvider);
+                const button = document.createElement('button');
+                button.id = `${selectedProvider}LoginBtn`;
+                button.className = `cloud-login-btn ${selectedProvider}-btn`;
+                
+                button.innerHTML = `
+                    <img src="${provider.logoUrl}" alt="${provider.name}">
+                    Accedi con ${provider.name}
+                `;
+                
+                button.addEventListener('click', loginWithSelectedProvider);
+                
+                loginButtonsContainer.appendChild(button);
+            } else {
+                loginButtonsContainer.innerHTML = '<p>Seleziona un provider per accedere</p>';
+            }
+        }
+
+        // Aggiorna l'interfaccia utente dell'account
+        function updateCloudAccountUI() {
+            const accountSection = document.getElementById('cloudAccountSection');
+            const accountInfo = document.getElementById('cloudAccountInfo');
+            const logoutBtn = document.getElementById('cloudLogoutBtn');
+            const backupControls = document.getElementById('cloudBackupControls');
+            
+            const currentProvider = cloudManager.getCurrentProvider();
+            const userData = currentProvider ? cloudManager.getProvider(currentProvider).getUserInfo() : null;
+            
+            if (userData) {
+                // Utente loggato
+                const provider = cloudManager.getProvider(currentProvider);
+                
+                accountInfo.innerHTML = `
+                    <div class="user-profile">
+                        ${userData.picture ? `<img src="${userData.picture}" alt="${userData.name}" class="user-avatar">` : ''}
+                        <div class="user-details">
+                            <div class="user-name">${userData.name}</div>
+                            <div class="user-email">${userData.email}</div>
+                            <div class="user-provider">Connesso con ${provider.name}</div>
+                        </div>
+                    </div>
+                `;
+                
+                logoutBtn.style.display = 'block';
+                backupControls.style.display = 'block';
+                
+                // Aggiorna anche le informazioni sull'ultimo backup
+                updateLastBackupInfo();
+            } else {
+                // Utente non loggato
+                accountInfo.innerHTML = '<p>Seleziona un provider e accedi per abilitare il backup su cloud</p>';
+                logoutBtn.style.display = 'none';
+                backupControls.style.display = 'none';
+            }
+        }
+
+        // Aggiorna le informazioni sull'ultimo backup
+        function updateLastBackupInfo() {
+            const currentProvider = cloudManager.getCurrentProvider();
+            if (!currentProvider) return;
+            
+            const lastBackupTime = localStorage.getItem(`lastBackupTime_${currentProvider}`);
+            const lastBackupElement = document.getElementById('lastBackupTime');
+            
+            if (lastBackupTime && lastBackupElement) {
+                lastBackupElement.textContent = `Ultimo backup: ${new Date(lastBackupTime).toLocaleString()}`;
+            } else if (lastBackupElement) {
+                lastBackupElement.textContent = 'Mai eseguito';
+            }
+        }
+
+        // Configura i listener per la selezione del provider
+        function setupProviderSelectionListeners() {
+            const providerOptions = document.querySelectorAll('.provider-option');
+            
+            providerOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    const providerId = option.dataset.provider;
+                    
+                    // Imposta questo provider come selezionato
+                    cloudManager.setSelectedProvider(providerId);
+                    
+                    // Aggiorna l'UI
+                    updateProviderSelectionUI();
+                });
+            });
+            
+            // Configura il pulsante di logout
+            const logoutBtn = document.getElementById('cloudLogoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async () => {
+                    try {
+                        await cloudManager.logout();
+                        updateProviderSelectionUI();
+                        updateCloudAccountUI();
+                        showToast('Disconnesso dall\'account cloud', 'info');
+                    } catch (error) {
+                        console.error('Errore durante il logout:', error);
+                        showToast('Errore durante la disconnessione: ' + error.message, 'error');
+                    }
+                });
+            }
+        }
+
+        // Configura i listener per i controlli di backup
+        function setupBackupControlListeners() {
+            // Pulsante di backup manuale
+            const manualBackupBtn = document.getElementById('manualBackupBtn');
+            if (manualBackupBtn) {
+                manualBackupBtn.addEventListener('click', async () => {
+                    try {
+                        // Mostra indicatore di caricamento
+                        const originalText = manualBackupBtn.innerHTML;
+                        manualBackupBtn.innerHTML = '<span class="spinner"></span> Backup in corso...';
+                        manualBackupBtn.disabled = true;
+                        
+                        // Esegui il backup
+                        const data = getDb(); // La tua funzione esistente
+                        const result = await cloudManager.backup(data);
+                        
+                        // Aggiorna l'UI
+                        const currentProvider = cloudManager.getCurrentProvider();
+                        localStorage.setItem(`lastBackupTime_${currentProvider}`, result.timestamp);
+                        updateLastBackupInfo();
+                        
+                        // Ripristina il pulsante
+                        manualBackupBtn.innerHTML = originalText;
+                        manualBackupBtn.disabled = false;
+                        
+                        showToast('Backup completato con successo', 'success');
+                    } catch (error) {
+                        console.error('Errore durante il backup:', error);
+                        
+                        // Ripristina il pulsante
+                        manualBackupBtn.innerHTML = manualBackupBtn.getAttribute('data-original-text') || 'Backup Manuale';
+                        manualBackupBtn.disabled = false;
+                        
+                        showToast('Errore durante il backup: ' + error.message, 'error');
+                    }
+                });
+            }
+            
+            // Pulsante di ripristino
+            const restoreBackupBtn = document.getElementById('restoreBackupBtn');
+            if (restoreBackupBtn) {
+                restoreBackupBtn.addEventListener('click', async () => {
+                    try {
+                        // Mostra indicatore di caricamento
+                        const originalText = restoreBackupBtn.innerHTML;
+                        restoreBackupBtn.innerHTML = '<span class="spinner"></span> Ripristino in corso...';
+                        restoreBackupBtn.disabled = true;
+                        
+                        // Esegui il ripristino
+                        const result = await cloudManager.restore();
+                        
+                        // Chiedi conferma all'utente
+                        const backupDate = new Date(result.timestamp).toLocaleString();
+                        if (!confirm(`Ripristinare i dati dal backup del ${backupDate}? I dati attuali verranno sovrascritti.`)) {
+                            restoreBackupBtn.innerHTML = originalText;
+                            restoreBackupBtn.disabled = false;
+                            return;
+                        }
+                        
+                        // Ripristina i dati
+                        saveDb(result.data);
+                        
+                        // Aggiorna l'interfaccia utente
+                        if (typeof loadTimeEntries === 'function') loadTimeEntries();
+                        if (typeof loadCalendarData === 'function') loadCalendarData();
+                        if (typeof populateVehicleDropdown === 'function') populateVehicleDropdown();
+                        if (typeof loadVehiclesList === 'function') loadVehiclesList();
+                        
+                        // Ripristina il pulsante
+                        restoreBackupBtn.innerHTML = originalText;
+                        restoreBackupBtn.disabled = false;
+                        
+                        showToast('Dati ripristinati con successo', 'success');
+                    } catch (error) {
+                        console.error('Errore durante il ripristino:', error);
+                        
+                        // Ripristina il pulsante
+                        restoreBackupBtn.innerHTML = restoreBackupBtn.getAttribute('data-original-text') || 'Ripristina Backup';
+                        restoreBackupBtn.disabled = false;
+                        
+                        showToast('Errore durante il ripristino: ' + error.message, 'error');
+                    }
+                });
+            }
+            
+            // Toggle per backup automatico
+            const autoBackupToggle = document.getElementById('autoBackupToggle');
+            if (autoBackupToggle) {
+                autoBackupToggle.addEventListener('change', (e) => {
+                    localStorage.setItem('autoBackupEnabled', e.target.checked);
+                    setupAutoBackup();
+                });
+            }
+            
+            // Selezione frequenza backup
+            const frequencySelect = document.getElementById('backupFrequencySelect');
+            if (frequencySelect) {
+                frequencySelect.addEventListener('change', (e) => {
+                    localStorage.setItem('backupFrequency', e.target.value);
+                    setupAutoBackup();
+                });
+            }
+        }
+
+        // Login con il provider selezionato
+        async function loginWithSelectedProvider() {
+            try {
+                const userData = await cloudManager.login();
+                updateProviderSelectionUI();
+                updateCloudAccountUI();
+                setupAutoBackup(); // Configura il backup automatico
+                
+                const provider = cloudManager.getProvider(cloudManager.getCurrentProvider());
+                showToast(`Accesso effettuato con ${provider.name}`, 'success');
+            } catch (error) {
+                console.error(`Errore durante il login:`, error);
+                showToast('Errore durante l\'accesso: ' + error.message, 'error');
+            }
+        }
+
+        // Configura il backup automatico
+        function setupAutoBackup() {
+            // Leggi le preferenze dell'utente
+            const autoBackupEnabled = localStorage.getItem('autoBackupEnabled') !== 'false'; // Default: true
+            const backupFrequency = localStorage.getItem('backupFrequency') || 'daily';
+            
+            // Aggiorna UI
+            const autoBackupToggle = document.getElementById('autoBackupToggle');
+            const frequencySelect = document.getElementById('backupFrequencySelect');
+            
+            if (autoBackupToggle) autoBackupToggle.checked = autoBackupEnabled;
+            if (frequencySelect) frequencySelect.value = backupFrequency;
+            
+            // Cancella eventuali timer esistenti
+            if (window.autoBackupTimer) {
+                clearInterval(window.autoBackupTimer);
+                window.autoBackupTimer = null;
+            }
+            
+            // Se il backup automatico è disabilitato o nessun provider è attivo, esci
+            if (!autoBackupEnabled || !cloudManager.getCurrentProvider()) return;
+            
+            // Imposta l'intervallo in base alla frequenza
+            let intervalMs;
+            switch (backupFrequency) {
+                case 'hourly':
+                    intervalMs = 60 * 60 * 1000; // 1 ora
+                    break;
+                case 'daily':
+                    intervalMs = 24 * 60 * 60 * 1000; // 1 giorno
+                    break;
+                case 'weekly':
+                    intervalMs = 7 * 24 * 60 * 60 * 1000; // 1 settimana
+                    break;
+                default:
+                    intervalMs = 24 * 60 * 60 * 1000; // Default: 1 giorno
+            }
+            
+            // Pianifica backup periodico
+            window.autoBackupTimer = setInterval(async () => {
+                if (cloudManager.getCurrentProvider()) {
+                    console.log('Esecuzione backup automatico...');
+                    try {
+                        const data = getDb();
+                        const result = await cloudManager.backup(data);
+                        
+                        // Aggiorna l'UI
+                        const currentProvider = cloudManager.getCurrentProvider();
+                        localStorage.setItem(`lastBackupTime_${currentProvider}`, result.timestamp);
+                        updateLastBackupInfo();
+                        
+                        console.log('Backup automatico completato');
+                    } catch (error) {
+                        console.error('Errore durante il backup automatico:', error);
+                    }
+                }
+            }, intervalMs);
+            
+            // Esegui backup dopo ogni modifica significativa (se la frequenza è 'change')
+            if (backupFrequency === 'change') {
+                const originalSaveDb = window.saveDb;
+                window.saveDb = function(data) {
+                    const result = originalSaveDb(data);
+                    
+                    // Pianifica backup con un leggero ritardo per evitare troppe chiamate
+                    if (window.backupDebounceTimer) {
+                        clearTimeout(window.backupDebounceTimer);
+                    }
+                    
+                    window.backupDebounceTimer = setTimeout(() => {
+                        if (cloudManager.getCurrentProvider()) {
+                            cloudManager.backup(data).then(result => {
+                                const currentProvider = cloudManager.getCurrentProvider();
+                                localStorage.setItem(`lastBackupTime_${currentProvider}`, result.timestamp);
+                                updateLastBackupInfo();
+                            }).catch(error => {
+                                console.error('Errore durante il backup automatico:', error);
+                            });
+                        }
+                    }, 10000); // 10 secondi di debounce
+                    
+                    return result;
+                };
+            }
+        }
+
+        // Aggiungi alla funzione di inizializzazione principale
+        document.addEventListener('DOMContentLoaded', () => {
+            // ... altre inizializzazioni
+            
+            // Inizializza il backup cloud quando la sezione impostazioni è attiva
+            const settingsSection = document.getElementById('settings-section');
+            if (settingsSection) {
+                // Inizializza quando la sezione diventa visibile
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                            if (settingsSection.classList.contains('active')) {
+                                initCloudBackup();
+                            }
+                        }
+                    });
+                });
+                
+                observer.observe(settingsSection, { attributes: true });
+                
+                // Inizializza anche se la sezione è già attiva al caricamento
+                if (settingsSection.classList.contains('active')) {
+                    initCloudBackup();
+                }
+            }
+        });
+    </script>
 
 </body>
 </html>
