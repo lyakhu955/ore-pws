@@ -9826,12 +9826,35 @@ END:VCARD`;
                     
                     // Verifica se abbiamo un token valido
                     const token = gapi.client.getToken();
-                    if (token && token.access_token) {
+                    
+                    // Verifica se abbiamo un token salvato in localStorage
+                    const savedToken = localStorage.getItem('googleAuthToken');
+                    
+                    // Se non abbiamo un token attivo ma abbiamo un token salvato, proviamo a usarlo
+                    if ((!token || !token.access_token) && savedToken) {
+                        try {
+                            console.log('Trovato token salvato, tentativo di ripristino sessione...');
+                            const parsedToken = JSON.parse(savedToken);
+                            
+                            // Imposta il token salvato
+                            gapi.client.setToken(parsedToken);
+                            
+                            console.log('Token ripristinato da localStorage');
+                        } catch (e) {
+                            console.warn('Errore nel ripristino del token da localStorage:', e);
+                            localStorage.removeItem('googleAuthToken');
+                        }
+                    }
+                    
+                    // Ottieni il token aggiornato (potrebbe essere quello appena ripristinato)
+                    const currentToken = gapi.client.getToken();
+                    
+                    if (currentToken && currentToken.access_token) {
                         // Ottieni informazioni sull'utente
                         try {
                             const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                                 headers: {
-                                    'Authorization': `Bearer ${token.access_token}`
+                                    'Authorization': `Bearer ${currentToken.access_token}`
                                 }
                             });
                             
@@ -9847,13 +9870,40 @@ END:VCARD`;
                                     provider: "google"
                                 };
                                 
+                                // Salva i dati utente
                                 localStorage.setItem('cloudUserData', JSON.stringify(this.userData));
                                 
-                                console.log('Utente già autenticato con Google:', this.userData.email);
+                                // Salva il token aggiornato
+                                localStorage.setItem('googleAuthToken', JSON.stringify(currentToken));
+                                
+                                console.log('Utente autenticato con Google:', this.userData.email);
                                 return true;
+                            } else {
+                                // Token non valido o scaduto
+                                console.warn('Token non valido o scaduto, status:', response.status);
+                                
+                                // Se il token è scaduto (401), proviamo a rinnovarlo
+                                if (response.status === 401) {
+                                    console.log('Token scaduto, tentativo di rinnovo...');
+                                    try {
+                                        await this.refreshToken();
+                                        // Riprova la verifica dopo il refresh
+                                        return this.checkAuthStatus();
+                                    } catch (refreshError) {
+                                        console.error('Impossibile rinnovare il token:', refreshError);
+                                        // Pulisci i token salvati
+                                        localStorage.removeItem('googleAuthToken');
+                                        gapi.client.setToken(null);
+                                    }
+                                }
                             }
                         } catch (error) {
                             console.warn('Errore nel recupero delle informazioni utente:', error);
+                            // Pulisci i token salvati in caso di errore
+                            if (error.message.includes('401') || error.message.includes('403')) {
+                                localStorage.removeItem('googleAuthToken');
+                                gapi.client.setToken(null);
+                            }
                         }
                     }
                     
@@ -9910,6 +9960,9 @@ END:VCARD`;
                                 // Imposta il token di accesso per le richieste API
                                 gapi.client.setToken(tokenResponse);
                                 console.log('Token di accesso ottenuto:', tokenResponse.access_token.substring(0, 10) + '...');
+                                
+                                // Salva il token in localStorage per mantenerlo tra i refresh
+                                localStorage.setItem('googleAuthToken', JSON.stringify(tokenResponse));
                                 
                                 try {
                                     // Ottieni informazioni sull'utente
@@ -9994,7 +10047,9 @@ END:VCARD`;
                     this.isLoggedIn = false;
                     this.userData = null;
                     
+                    // Rimuovi i dati utente e il token da localStorage
                     localStorage.removeItem('cloudUserData');
+                    localStorage.removeItem('googleAuthToken');
                     
                     console.log('Logout Google completato');
                     return true;
@@ -10129,6 +10184,9 @@ END:VCARD`;
                             // Imposta il token di accesso per le richieste API
                             gapi.client.setToken(tokenResponse);
                             console.log('Token di accesso aggiornato con successo:', tokenResponse.access_token.substring(0, 10) + '...');
+                            
+                            // Salva il token aggiornato in localStorage
+                            localStorage.setItem('googleAuthToken', JSON.stringify(tokenResponse));
                             
                             // Chiama anche il callback originale
                             if (originalCallback) {
