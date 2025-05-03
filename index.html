@@ -10052,7 +10052,7 @@ END:VCARD`;
             constructor() {
                 super("Google Drive", "https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg");
                 this.apiLoaded = false;
-                this.backupFileName = 'ore_pws_backup.json';
+                this.backupFileName = 'Ore PWS - Backup Dati.json';
                 this.accessToken = null;
                 this.tokenExpiry = null;
                 this.tokenRefreshTimer = null; // Timer per il rinnovo automatico del token
@@ -10407,11 +10407,10 @@ END:VCARD`;
                     
                     console.log('Token valido trovato, procedo con la ricerca del file di backup');
                     
-                    // Cerca il file di backup esistente
+                    // Cerca il file di backup esistente nella cartella principale di Drive (non in appDataFolder)
                     const response = await gapi.client.drive.files.list({
-                        spaces: 'appDataFolder',
                         fields: 'files(id, name, modifiedTime)',
-                        q: `name='${this.backupFileName}'`
+                        q: `name='${this.backupFileName}' and trashed=false`
                     });
                     
                     const files = response.result.files;
@@ -10422,10 +10421,11 @@ END:VCARD`;
                     } else {
                         console.log('Nessun file di backup trovato, creazione di un nuovo file...');
                         
-                        // Crea un nuovo file
+                        // Crea un nuovo file nella cartella principale di Drive
                         const fileMetadata = {
                             name: this.backupFileName,
-                            parents: ['appDataFolder']
+                            // Non specifichiamo parents, così il file sarà salvato nella cartella principale
+                            description: 'Backup dei dati di Ore PWS - Questo file contiene i tuoi dati di lavoro'
                         };
                         
                         const emptyData = {
@@ -10628,6 +10628,9 @@ END:VCARD`;
                     
                     console.log('Backup completato con successo:', backupFile.id);
                     
+                    // Mostra un messaggio all'utente che il file è visibile in Google Drive
+                    showToast("Backup completato! Il file 'Ore PWS - Backup Dati.json' è ora visibile nel tuo Google Drive.", "success", 6000);
+                    
                     return {
                         success: true,
                         timestamp: backupData.lastUpdated,
@@ -10672,11 +10675,10 @@ END:VCARD`;
                     
                     console.log('Avvio ripristino da Google Drive...');
                     
-                    // Trova il file di backup
+                    // Trova il file di backup nella cartella principale di Drive
                     const response = await gapi.client.drive.files.list({
-                        spaces: 'appDataFolder',
                         fields: 'files(id, name, modifiedTime)',
-                        q: `name='${this.backupFileName}'`
+                        q: `name='${this.backupFileName}' and trashed=false`
                     });
                     
                     const files = response.result.files;
