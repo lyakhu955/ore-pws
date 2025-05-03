@@ -10907,7 +10907,7 @@ END:VCARD`;
             }
             
             // Login con il provider selezionato
-            async login() {
+            async login(manualTrigger = false) {
                 if (!this.selectedProvider || !this.providers[this.selectedProvider]) {
                     throw new Error("Nessun provider selezionato");
                 }
@@ -10920,7 +10920,13 @@ END:VCARD`;
                     
                     // Esegui il login con il provider selezionato
                     // Questo aprirà una finestra di autenticazione del provider
-                    const userData = await provider.login();
+                    // Passa il parametro manualTrigger al provider
+                    const userData = await provider.login(manualTrigger);
+                    
+                    // Se il login è fallito, esci
+                    if (!userData) {
+                        throw new Error("Login fallito. Riprova più tardi.");
+                    }
                     
                     // Imposta come provider corrente
                     this.currentProvider = this.selectedProvider;
@@ -10935,9 +10941,11 @@ END:VCARD`;
                     
                     // Mostra un messaggio di errore specifico
                     if (error.message.includes('popup')) {
-                        showToast('Il popup di login è stato bloccato. Abilita i popup per questo sito.', 'error');
+                        showToast('Il popup di login è stato bloccato. Abilita i popup per questo sito e riprova.', 'error', 5000);
                     } else if (error.message.includes('access_denied') || error.message.includes('cancelled')) {
                         showToast('Accesso negato o annullato dall\'utente.', 'warning');
+                    } else if (error.message.includes('Failed to open popup')) {
+                        showToast('Impossibile aprire la finestra di login. Clicca nuovamente sul pulsante di accesso.', 'error', 5000);
                     } else {
                         showToast(`Errore durante l'accesso: ${error.message}`, 'error');
                     }
@@ -11252,10 +11260,24 @@ END:VCARD`;
             // Pulsante di backup manuale
             const manualBackupBtn = document.getElementById('manualBackupBtn');
             if (manualBackupBtn) {
+                // Salva il testo originale per ripristinarlo dopo
+                manualBackupBtn.setAttribute('data-original-text', manualBackupBtn.innerHTML);
+                
+                // Flag per prevenire clic multipli
+                let isProcessing = false;
+                
                 manualBackupBtn.addEventListener('click', async () => {
+                    // Previeni clic multipli
+                    if (isProcessing) {
+                        console.log('Operazione già in corso, ignoro il clic');
+                        return;
+                    }
+                    
+                    isProcessing = true;
+                    
                     try {
                         // Mostra indicatore di caricamento
-                        const originalText = manualBackupBtn.innerHTML;
+                        const originalText = manualBackupBtn.getAttribute('data-original-text') || manualBackupBtn.innerHTML;
                         manualBackupBtn.innerHTML = '<span class="spinner"></span> Backup in corso...';
                         manualBackupBtn.disabled = true;
                         
@@ -11263,48 +11285,52 @@ END:VCARD`;
                         const data = getDb(); // La tua funzione esistente
                         
                         let result;
+                        let isAuthenticated = false;
                         
+                        // Verifica prima se l'utente è autenticato
                         try {
-                            // Esegui il backup direttamente
-                            result = await cloudManager.backup(data, true);
+                            isAuthenticated = await cloudManager.checkAuthStatus();
                         } catch (error) {
-                            // Se l'errore è dovuto all'autenticazione, prova a fare login esplicito
-                            if (error.message.includes("autenticato") || error.message.includes("login")) {
-                                showToast('Tentativo di accesso al tuo account Google...', 'info');
+                            console.log('Errore durante la verifica dello stato di autenticazione:', error);
+                            isAuthenticated = false;
+                        }
+                        
+                        // Se non è autenticato, mostra il pulsante di login
+                        if (!isAuthenticated) {
+                            showToast('Per eseguire il backup, effettua prima l\'accesso', 'info');
+                            
+                            try {
+                                // Prova a fare login esplicito
+                                await loginWithSelectedProvider();
                                 
-                                try {
-                                    // Prova a fare login esplicito
-                                    await loginWithSelectedProvider();
-                                    
-                                    // Riprova il backup dopo il login
-                                    result = await cloudManager.backup(data, false);
-                                } catch (loginError) {
-                                    throw new Error(`Impossibile accedere: ${loginError.message}`);
+                                // Verifica nuovamente l'autenticazione
+                                isAuthenticated = await cloudManager.checkAuthStatus();
+                                
+                                if (!isAuthenticated) {
+                                    throw new Error("Accesso non riuscito. Riprova più tardi.");
                                 }
-                            } else {
-                                // Se è un altro tipo di errore, propagalo
-                                throw error;
+                            } catch (loginError) {
+                                throw new Error(`Impossibile accedere: ${loginError.message}`);
                             }
                         }
+                        
+                        // Ora che siamo sicuri che l'utente è autenticato, esegui il backup
+                        result = await cloudManager.backup(data, false);
                         
                         // Aggiorna l'UI
                         const currentProvider = cloudManager.getCurrentProvider();
                         localStorage.setItem(`lastBackupTime_${currentProvider}`, result.timestamp);
                         updateLastBackupInfo();
                         
-                        // Ripristina il pulsante
-                        manualBackupBtn.innerHTML = originalText;
-                        manualBackupBtn.disabled = false;
-                        
                         showToast('Backup completato con successo', 'success');
                     } catch (error) {
                         console.error('Errore durante il backup:', error);
-                        
-                        // Ripristina il pulsante
+                        showToast('Errore durante il backup: ' + error.message, 'error');
+                    } finally {
+                        // Ripristina il pulsante indipendentemente dal risultato
                         manualBackupBtn.innerHTML = manualBackupBtn.getAttribute('data-original-text') || 'Backup Manuale';
                         manualBackupBtn.disabled = false;
-                        
-                        showToast('Errore durante il backup: ' + error.message, 'error');
+                        isProcessing = false;
                     }
                 });
             }
@@ -11312,43 +11338,65 @@ END:VCARD`;
             // Pulsante di ripristino
             const restoreBackupBtn = document.getElementById('restoreBackupBtn');
             if (restoreBackupBtn) {
+                // Salva il testo originale per ripristinarlo dopo
+                restoreBackupBtn.setAttribute('data-original-text', restoreBackupBtn.innerHTML);
+                
+                // Flag per prevenire clic multipli
+                let isProcessing = false;
+                
                 restoreBackupBtn.addEventListener('click', async () => {
+                    // Previeni clic multipli
+                    if (isProcessing) {
+                        console.log('Operazione già in corso, ignoro il clic');
+                        return;
+                    }
+                    
+                    isProcessing = true;
+                    
                     try {
                         // Mostra indicatore di caricamento
-                        const originalText = restoreBackupBtn.innerHTML;
+                        const originalText = restoreBackupBtn.getAttribute('data-original-text') || restoreBackupBtn.innerHTML;
                         restoreBackupBtn.innerHTML = '<span class="spinner"></span> Ripristino in corso...';
                         restoreBackupBtn.disabled = true;
                         
                         let result;
+                        let isAuthenticated = false;
                         
+                        // Verifica prima se l'utente è autenticato
                         try {
-                            // Esegui il ripristino direttamente
-                            result = await cloudManager.restore();
+                            isAuthenticated = await cloudManager.checkAuthStatus();
                         } catch (error) {
-                            // Se l'errore è dovuto all'autenticazione, prova a fare login esplicito
-                            if (error.message.includes("autenticato") || error.message.includes("login")) {
-                                showToast('Tentativo di accesso al tuo account Google...', 'info');
+                            console.log('Errore durante la verifica dello stato di autenticazione:', error);
+                            isAuthenticated = false;
+                        }
+                        
+                        // Se non è autenticato, mostra il pulsante di login
+                        if (!isAuthenticated) {
+                            showToast('Per ripristinare un backup, effettua prima l\'accesso', 'info');
+                            
+                            try {
+                                // Prova a fare login esplicito
+                                await loginWithSelectedProvider();
                                 
-                                try {
-                                    // Prova a fare login esplicito
-                                    await loginWithSelectedProvider();
-                                    
-                                    // Riprova il ripristino dopo il login
-                                    result = await cloudManager.restore();
-                                } catch (loginError) {
-                                    throw new Error(`Impossibile accedere: ${loginError.message}`);
+                                // Verifica nuovamente l'autenticazione
+                                isAuthenticated = await cloudManager.checkAuthStatus();
+                                
+                                if (!isAuthenticated) {
+                                    throw new Error("Accesso non riuscito. Riprova più tardi.");
                                 }
-                            } else {
-                                // Se è un altro tipo di errore, propagalo
-                                throw error;
+                            } catch (loginError) {
+                                throw new Error(`Impossibile accedere: ${loginError.message}`);
                             }
                         }
+                        
+                        // Ora che siamo sicuri che l'utente è autenticato, esegui il ripristino
+                        result = await cloudManager.restore();
                         
                         // Chiedi conferma all'utente
                         const backupDate = new Date(result.timestamp).toLocaleString();
                         if (!confirm(`Ripristinare i dati dal backup del ${backupDate}? I dati attuali verranno sovrascritti.`)) {
-                            restoreBackupBtn.innerHTML = originalText;
-                            restoreBackupBtn.disabled = false;
+                            // L'utente ha annullato
+                            showToast('Ripristino annullato dall\'utente', 'info');
                             return;
                         }
                         
@@ -11361,19 +11409,15 @@ END:VCARD`;
                         if (typeof populateVehicleDropdown === 'function') populateVehicleDropdown();
                         if (typeof loadVehiclesList === 'function') loadVehiclesList();
                         
-                        // Ripristina il pulsante
-                        restoreBackupBtn.innerHTML = originalText;
-                        restoreBackupBtn.disabled = false;
-                        
                         showToast('Dati ripristinati con successo', 'success');
                     } catch (error) {
                         console.error('Errore durante il ripristino:', error);
-                        
-                        // Ripristina il pulsante
+                        showToast('Errore durante il ripristino: ' + error.message, 'error');
+                    } finally {
+                        // Ripristina il pulsante indipendentemente dal risultato
                         restoreBackupBtn.innerHTML = restoreBackupBtn.getAttribute('data-original-text') || 'Ripristina Backup';
                         restoreBackupBtn.disabled = false;
-                        
-                        showToast('Errore durante il ripristino: ' + error.message, 'error');
+                        isProcessing = false;
                     }
                 });
             }
@@ -11400,16 +11444,26 @@ END:VCARD`;
         // Login con il provider selezionato
         async function loginWithSelectedProvider() {
             try {
-                const userData = await cloudManager.login();
+                // Passiamo manualTrigger=true per indicare che è un'azione esplicita dell'utente
+                const userData = await cloudManager.login(true);
+                
+                // Se il login è fallito, esci
+                if (!userData) {
+                    throw new Error("Login fallito. Riprova più tardi.");
+                }
+                
                 updateProviderSelectionUI();
                 updateCloudAccountUI();
                 setupAutoBackup(); // Configura il backup automatico
                 
                 const provider = cloudManager.getProvider(cloudManager.getCurrentProvider());
                 showToast(`Accesso effettuato con ${provider.name}`, 'success');
+                
+                return userData; // Restituisci i dati utente per consentire operazioni successive
             } catch (error) {
                 console.error(`Errore durante il login:`, error);
                 showToast('Errore durante l\'accesso: ' + error.message, 'error');
+                throw error; // Propaga l'errore per gestirlo a livello superiore
             }
         }
 
