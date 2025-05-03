@@ -1041,6 +1041,20 @@
             will-change: transform, opacity, filter, box-shadow !important;
         }
         
+        /* Stile per evidenziare il pulsante di login */
+        @keyframes highlight-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 106, 106, 0.7); transform: scale(1); }
+            50% { box-shadow: 0 0 0 10px rgba(0, 106, 106, 0); transform: scale(1.05); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 106, 106, 0); transform: scale(1); }
+        }
+        
+        .highlight-button {
+            animation: highlight-pulse 1.5s infinite;
+            box-shadow: 0 0 10px var(--md-sys-color-primary);
+            position: relative;
+            z-index: 100;
+        }
+        
         @keyframes pulse-animation {
             0% {
                 transform: scale(1);
@@ -10013,7 +10027,7 @@ END:VCARD`;
                 }
             }
             
-            async login() {
+            async login(manualTrigger = false) {
                 try {
                     await this.ensureApiLoaded();
                     
@@ -10024,12 +10038,20 @@ END:VCARD`;
                     
                     console.log('Avvio procedura di login Google...');
                     
+                    // Se non è stato attivato manualmente e non siamo in risposta a un clic dell'utente,
+                    // mostra un messaggio e interrompi il processo
+                    if (!manualTrigger) {
+                        console.log('Login richiesto. Utilizzare il pulsante di accesso.');
+                        showToast("Per sincronizzare con Google Drive, effettua l'accesso usando il pulsante dedicato.", "info", 5000);
+                        return null;
+                    }
+                    
                     // Reinizializza il client di autenticazione per assicurarsi che sia aggiornato
                     window.googleAuthClient = google.accounts.oauth2.initTokenClient({
                         client_id: '927051615660-tfhk7s28v2ni4nsbmlbimaon5mg582o8.apps.googleusercontent.com',
                         scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file openid profile email',
-                        prompt: '',  // Non mostrare il consenso se possibile
-                        auto_select: true,  // Seleziona automaticamente l'account
+                        prompt: 'consent',  // Mostra sempre il consenso per evitare problemi
+                        auto_select: false,  // Lascia che l'utente scelga l'account
                         callback: (tokenResponse) => {
                             console.log('Callback di autenticazione chiamato');
                             if (tokenResponse && tokenResponse.access_token) {
@@ -10041,10 +10063,19 @@ END:VCARD`;
                                 
                                 // Salva il token in localStorage per mantenerlo tra i refresh
                                 localStorage.setItem('googleAuthToken', JSON.stringify(tokenResponse));
+                                
+                                // Aggiorna l'interfaccia utente
+                                if (typeof updateCloudAccountUI === 'function') {
+                                    updateCloudAccountUI();
+                                }
+                                
+                                // Mostra un messaggio di successo
+                                showToast("Accesso effettuato con successo!", "success");
                             }
                         },
                         error_callback: (error) => {
                             console.error('Errore durante l\'autenticazione:', error);
+                            showToast("Errore durante l'accesso: " + (error.message || "Errore sconosciuto"), "error");
                         }
                     });
                     
@@ -10118,7 +10149,21 @@ END:VCARD`;
                         // Avvia il flusso di autenticazione
                         try {
                             console.log('Richiesta token di accesso...');
-                            window.googleAuthClient.requestAccessToken();
+                            // Utilizziamo un timeout per assicurarci che il popup venga aperto in risposta all'azione dell'utente
+                            setTimeout(() => {
+                                try {
+                                    window.googleAuthClient.requestAccessToken({
+                                        prompt: 'consent',  // Mostra sempre il consenso per evitare problemi
+                                        hint: ''  // Non suggerire account specifici
+                                    });
+                                } catch (error) {
+                                    console.error('Errore durante la richiesta del token:', error);
+                                    showToast("Errore durante l'apertura della finestra di accesso. Verifica che i popup non siano bloccati.", "error", 5000);
+                                    // Ripristina il callback originale in caso di errore
+                                    window.googleAuthClient.callback = originalCallback;
+                                    reject(error);
+                                }
+                            }, 100);
                         } catch (error) {
                             console.error('Errore durante la richiesta del token:', error);
                             // Ripristina il callback originale in caso di errore
@@ -10257,67 +10302,39 @@ END:VCARD`;
                 return new Promise((resolve, reject) => {
                     console.log('Avvio procedura di refresh del token...');
                     
-                    if (!window.googleAuthClient) {
-                        console.error('Client di autenticazione Google non inizializzato');
-                        
-                        // Proviamo a reinizializzare il client
-                        try {
-                            window.googleAuthClient = google.accounts.oauth2.initTokenClient({
-                                client_id: '927051615660-tfhk7s28v2ni4nsbmlbimaon5mg582o8.apps.googleusercontent.com',
-                                scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file openid profile email',
-                                callback: (tokenResponse) => {
-                                    if (tokenResponse && tokenResponse.access_token) {
-                                        gapi.client.setToken(tokenResponse);
-                                        console.log('Token di accesso ottenuto con successo');
-                                    }
-                                }
-                            });
-                        } catch (error) {
-                            console.error('Errore durante la reinizializzazione del client:', error);
-                            reject(new Error('Client di autenticazione Google non inizializzato'));
-                            return;
-                        }
+                    // Pulisci i token esistenti che potrebbero essere scaduti
+                    localStorage.removeItem('googleAuthToken');
+                    if (gapi && gapi.client) {
+                        gapi.client.setToken(null);
                     }
                     
-                    // Salva il callback originale
-                    const originalCallback = window.googleAuthClient.callback;
+                    // Imposta lo stato di login come false
+                    this.isLoggedIn = false;
                     
-                    // Imposta un nuovo callback temporaneo
-                    window.googleAuthClient.callback = (tokenResponse) => {
-                        // Ripristina il callback originale
-                        window.googleAuthClient.callback = originalCallback;
+                    // Mostra un messaggio all'utente
+                    showToast("Sessione scaduta. Per favore, effettua nuovamente l'accesso.", "warning", 5000);
+                    
+                    // Aggiorna l'interfaccia utente per mostrare lo stato di disconnessione
+                    if (typeof updateCloudAccountUI === 'function') {
+                        updateCloudAccountUI();
+                    }
+                    
+                    // Invece di tentare un refresh automatico, che potrebbe essere bloccato,
+                    // informiamo l'utente che deve effettuare nuovamente l'accesso manualmente
+                    reject(new Error('Sessione scaduta. Richiesto nuovo login manuale.'));
+                    
+                    // Mostra il pulsante di login se esiste
+                    const loginButton = document.getElementById('googleLoginBtn');
+                    if (loginButton) {
+                        loginButton.style.display = 'block';
                         
-                        if (tokenResponse && tokenResponse.access_token) {
-                            // Imposta il token di accesso per le richieste API
-                            gapi.client.setToken(tokenResponse);
-                            console.log('Token di accesso aggiornato con successo:', tokenResponse.access_token.substring(0, 10) + '...');
-                            
-                            // Salva il token aggiornato in localStorage
-                            localStorage.setItem('googleAuthToken', JSON.stringify(tokenResponse));
-                            
-                            // Imposta lo stato di login
-                            this.isLoggedIn = true;
-                            
-                            // Chiama anche il callback originale
-                            if (originalCallback) {
-                                originalCallback(tokenResponse);
-                            }
-                            
-                            resolve(tokenResponse);
-                        } else {
-                            console.error('Nessun token ricevuto durante il refresh');
-                            reject(new Error('Impossibile aggiornare il token di accesso'));
-                        }
-                    };
-                    
-                    // Richiedi un nuovo token senza mostrare il popup di consenso
-                    try {
-                        window.googleAuthClient.requestAccessToken({prompt: ''});
-                    } catch (error) {
-                        console.error('Errore durante la richiesta del token:', error);
-                        // Ripristina il callback originale in caso di errore
-                        window.googleAuthClient.callback = originalCallback;
-                        reject(error);
+                        // Aggiungi una classe per evidenziare il pulsante
+                        loginButton.classList.add('highlight-button');
+                        
+                        // Rimuovi la classe dopo 3 secondi
+                        setTimeout(() => {
+                            loginButton.classList.remove('highlight-button');
+                        }, 3000);
                     }
                 });
             }
@@ -10332,15 +10349,23 @@ END:VCARD`;
                         // Potrebbe essere che l'utente sia autenticato ma lo stato non sia stato aggiornato
                         const authStatus = await this.checkAuthStatus();
                         
-                        // Se ancora non è autenticato e showLoginPrompt è true, tenta di autenticare
+                        // Se ancora non è autenticato e showLoginPrompt è true, informa l'utente
                         if (!authStatus && showLoginPrompt) {
-                            console.log('Utente non autenticato, tentativo di login automatico...');
-                            await this.login();
+                            console.log('Utente non autenticato, richiesto login manuale...');
+                            // Non tentiamo più il login automatico, ma informiamo l'utente
+                            showToast("Per sincronizzare con Google Drive, effettua l'accesso usando il pulsante dedicato.", "info", 5000);
                             
-                            // Verifica se il login è riuscito
-                            if (!await this.checkAuthStatus()) {
-                                throw new Error("Login fallito. Impossibile eseguire il backup.");
+                            // Evidenzia il pulsante di login se esiste
+                            const loginButton = document.getElementById('googleLoginBtn');
+                            if (loginButton) {
+                                loginButton.style.display = 'block';
+                                loginButton.classList.add('highlight-button');
+                                setTimeout(() => {
+                                    loginButton.classList.remove('highlight-button');
+                                }, 3000);
                             }
+                            
+                            throw new Error("Login richiesto. Utilizzare il pulsante di accesso.");
                         } else if (!authStatus) {
                             throw new Error("Utente non autenticato");
                         }
