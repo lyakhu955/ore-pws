@@ -4267,10 +4267,23 @@
         // Function to show toast notification
         function showToast(message, type = 'info', duration = 3000) {
             const container = document.getElementById('toast-container');
-             if (!container) {
-                 console.error("Toast container non trovato!");
-                 return; // Exit if container doesn't exist
-             }
+            if (!container) {
+                console.error("Toast container non trovato!");
+                return; // Exit if container doesn't exist
+            }
+
+            // Verifica se esiste già un toast con lo stesso messaggio e tipo
+            const existingToasts = Array.from(container.querySelectorAll('.toast'));
+            const duplicateToast = existingToasts.find(t => 
+                t.textContent === message && 
+                t.classList.contains(type)
+            );
+            
+            // Se esiste già un toast identico, non ne creiamo un altro
+            if (duplicateToast) {
+                console.log("Toast duplicato ignorato:", message);
+                return;
+            }
 
             // Assicuriamoci che il container sia visibile e sopra tutto
             container.style.zIndex = "10000";
@@ -4295,11 +4308,11 @@
 
             // Trigger transition for appearance
             requestAnimationFrame(() => {
-                 // We need a double requestAnimationFrame to ensure the transition works on add
+                // We need a double requestAnimationFrame to ensure the transition works on add
                 requestAnimationFrame(() => {
-                     toast.classList.add('show');
-                     console.log("Toast mostrato:", message); // Log per debug
-                 });
+                    toast.classList.add('show');
+                    console.log("Toast mostrato:", message); // Log per debug
+                });
             });
 
             // Remove toast after duration
@@ -10975,21 +10988,21 @@ END:VCARD`;
             }
             
             // Esegui backup con il provider corrente
-            async backup(data, silent = false) {
+            async backup(data, silent = false, skipToasts = false) {
                 if (!this.currentProvider || !this.providers[this.currentProvider]) {
                     throw new Error("Nessun provider cloud selezionato");
                 }
                 
                 try {
-                    // Mostra un messaggio di caricamento solo se non è in modalità silenziosa
-                    if (!silent) {
+                    // Mostra un messaggio di caricamento solo se non è in modalità silenziosa e non si devono saltare i toast
+                    if (!silent && !skipToasts) {
                         showToast('Backup in corso...', 'info');
                     }
                     
                     const result = await this.providers[this.currentProvider].backup(data);
                     
-                    // Mostra un messaggio di successo solo se non è in modalità silenziosa
-                    if (!silent) {
+                    // Mostra un messaggio di successo solo se non è in modalità silenziosa e non si devono saltare i toast
+                    if (!silent && !skipToasts) {
                         showToast('Backup completato con successo', 'success');
                     }
                     
@@ -10997,8 +11010,8 @@ END:VCARD`;
                 } catch (error) {
                     console.error('Errore durante il backup:', error);
                     
-                    // Mostra un messaggio di errore solo se non è in modalità silenziosa
-                    if (!silent) {
+                    // Mostra un messaggio di errore solo se non è in modalità silenziosa e non si devono saltare i toast
+                    if (!silent && !skipToasts) {
                         showToast(`Errore durante il backup: ${error.message}`, 'error');
                     }
                     
@@ -11007,14 +11020,16 @@ END:VCARD`;
             }
             
             // Ripristina dal provider corrente
-            async restore() {
+            async restore(skipToasts = false) {
                 if (!this.currentProvider || !this.providers[this.currentProvider]) {
                     throw new Error("Nessun provider cloud selezionato");
                 }
                 
                 try {
-                    // Mostra un messaggio di caricamento
-                    showToast('Ripristino in corso...', 'info');
+                    // Mostra un messaggio di caricamento solo se non si devono saltare i toast
+                    if (!skipToasts) {
+                        showToast('Ripristino in corso...', 'info');
+                    }
                     
                     const result = await this.providers[this.currentProvider].restore();
                     
@@ -11022,8 +11037,10 @@ END:VCARD`;
                 } catch (error) {
                     console.error('Errore durante il ripristino:', error);
                     
-                    // Mostra un messaggio di errore
-                    showToast(`Errore durante il ripristino: ${error.message}`, 'error');
+                    // Mostra un messaggio di errore solo se non si devono saltare i toast
+                    if (!skipToasts) {
+                        showToast(`Errore durante il ripristino: ${error.message}`, 'error');
+                    }
                     
                     throw error;
                 }
@@ -11315,13 +11332,15 @@ END:VCARD`;
                         }
                         
                         // Ora che siamo sicuri che l'utente è autenticato, esegui il backup
-                        result = await cloudManager.backup(data, false);
+                        // Passiamo true come terzo parametro per saltare i toast nel metodo backup
+                        result = await cloudManager.backup(data, false, true);
                         
                         // Aggiorna l'UI
                         const currentProvider = cloudManager.getCurrentProvider();
                         localStorage.setItem(`lastBackupTime_${currentProvider}`, result.timestamp);
                         updateLastBackupInfo();
                         
+                        // Mostriamo il toast di successo qui, una sola volta
                         showToast('Backup completato con successo', 'success');
                     } catch (error) {
                         console.error('Errore durante il backup:', error);
@@ -11390,7 +11409,8 @@ END:VCARD`;
                         }
                         
                         // Ora che siamo sicuri che l'utente è autenticato, esegui il ripristino
-                        result = await cloudManager.restore();
+                        // Passiamo true per saltare i toast nel metodo restore
+                        result = await cloudManager.restore(true);
                         
                         // Chiedi conferma all'utente
                         const backupDate = new Date(result.timestamp).toLocaleString();
