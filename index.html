@@ -3485,8 +3485,131 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- Custom Navigation Styles -->
-    <script src="nav-update.js"></script>
+    <!-- Custom Navigation Styles (inline) -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Create a style element
+        const styleElement = document.createElement('style');
+        
+        // Add our new navigation styles
+        styleElement.textContent = `
+            /* Modern Bottom Navigation Redesign */
+            .bottom-nav {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                background-color: var(--md-sys-color-surface);
+                box-shadow: var(--elevation-2);
+                padding: 0.75rem 0;
+                display: flex;
+                justify-content: space-around;
+                align-items: center;
+                z-index: 1000;
+                border-top-left-radius: 16px;
+                border-top-right-radius: 16px;
+            }
+
+            .nav-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-decoration: none;
+                color: var(--md-sys-color-on-surface-variant);
+                font-size: 0.75rem;
+                padding: 0.5rem 0.75rem;
+                border-radius: var(--border-radius-full);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                flex: 1;
+                text-align: center;
+                min-height: 56px;
+                position: relative;
+                overflow: visible;
+            }
+
+            .nav-item .material-symbols-outlined {
+                font-size: 1.75rem;
+                margin-bottom: 4px;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            
+            .nav-item span {
+                display: block;
+                line-height: 1.2;
+                white-space: nowrap;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                opacity: 0.9;
+            }
+
+            .nav-item.active {
+                color: var(--md-sys-color-primary);
+                font-weight: 500;
+                transform: translateY(-8px);
+            }
+            
+            .nav-item.active .material-symbols-outlined {
+                font-variation-settings: 'FILL' 1, 'wght' 600;
+                font-size: 2rem;
+                filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+            }
+            
+            /* Remove the ::before element as requested */
+            .nav-item.active::before {
+                display: none !important;
+            }
+            
+            .nav-item::before {
+                display: none !important;
+            }
+            
+            /* Bordo inferiore per l'elemento attivo */
+            .nav-item.active::after {
+                content: '';
+                display: block;
+                width: 50%;
+                height: 4px;
+                background-color: var(--md-sys-color-primary);
+                border-radius: var(--border-radius-full);
+                position: absolute;
+                bottom: -8px;
+                left: 50%;
+                transform: translateX(-50%);
+                transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            
+            /* Hover effect */
+            .nav-item:hover {
+                color: var(--md-sys-color-on-surface);
+                background-color: rgba(0, 106, 106, 0.08);
+                transform: translateY(-2px);
+            }
+            
+            .nav-item:active {
+                transform: scale(0.95);
+            }
+            
+            /* Media queries for responsive design */
+            @media (max-width: 768px) {
+                .bottom-nav { padding: 0.25rem 0; }
+                .nav-item { font-size: 0.65rem; min-height: 52px; padding: 0.25rem 0.5rem; }
+                .nav-item .material-symbols-outlined { font-size: 1.5rem; }
+                .nav-item.active .material-symbols-outlined { font-size: 1.7rem; }
+                .nav-item.active::after { height: 3px; }
+            }
+            
+            @media (max-width: 480px) {
+                .nav-item { font-size: 0.6rem; }
+                .nav-item .material-symbols-outlined { font-size: 1.4rem; }
+                .nav-item.active .material-symbols-outlined { font-size: 1.6rem; }
+                .nav-item.active { transform: translateY(-6px); }
+            }
+        `;
+        
+        // Add the style element to the head
+        document.head.appendChild(styleElement);
+    });
+    </script>
 </head>
 <body>
     <header>
