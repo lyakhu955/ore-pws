@@ -16,6 +16,7 @@ let isLoggedIn = false;
 let currentUser = null;
 let userPhotoUrl = null;
 let userEmail = null;
+let tokenRefreshTimer = null; // Timer per il rinnovo automatico del token
 
 // Inizializza Firebase
 function initFirebase() {
@@ -27,6 +28,9 @@ function initFirebase() {
   } else {
     console.log('Firebase già inizializzato');
   }
+  
+  // Tenta di ripristinare la sessione precedente
+  tryRestoreSession();
   
   // Configura il listener per i cambiamenti di stato dell'autenticazione
   firebase.auth().onAuthStateChanged(handleAuthStateChanged);
@@ -104,6 +108,47 @@ function initFirebase() {
   checkAuthState();
 }
 
+// Tenta di ripristinare la sessione precedente
+function tryRestoreSession() {
+  // Verifica se c'è un utente salvato nel localStorage
+  const savedUser = localStorage.getItem('firebaseUser');
+  
+  if (savedUser) {
+    try {
+      console.log('Trovato utente salvato, tentativo di ripristino sessione...');
+      
+      // Verifica se l'utente è già autenticato
+      const currentUser = firebase.auth().currentUser;
+      
+      if (!currentUser) {
+        console.log('Nessun utente autenticato, tentativo di ripristino automatico della sessione...');
+        
+        // Firebase gestisce automaticamente il ripristino della sessione
+        // ma possiamo forzare un controllo dello stato di autenticazione
+        firebase.auth().onAuthStateChanged((user) => {
+          if (user) {
+            console.log('Sessione ripristinata automaticamente da Firebase');
+          } else {
+            console.log('Impossibile ripristinare automaticamente la sessione');
+            // Rimuovi i dati salvati se non è possibile ripristinare la sessione
+            localStorage.removeItem('firebaseUser');
+            localStorage.removeItem('googleAuthToken');
+          }
+        });
+      } else {
+        console.log('Utente già autenticato, sessione attiva');
+      }
+    } catch (error) {
+      console.error('Errore durante il tentativo di ripristino della sessione:', error);
+      // Rimuovi i dati salvati in caso di errore
+      localStorage.removeItem('firebaseUser');
+      localStorage.removeItem('googleAuthToken');
+    }
+  } else {
+    console.log('Nessun utente salvato trovato');
+  }
+}
+
 // Gestisce i cambiamenti di stato dell'autenticazione
 function handleAuthStateChanged(user) {
   if (user) {
@@ -127,6 +172,9 @@ function handleAuthStateChanged(user) {
       // Salva anche il token per il sistema esistente
       user.getIdToken().then(token => {
         localStorage.setItem('googleAuthToken', token);
+        
+        // Imposta il rinnovo automatico del token
+        setupTokenRefresh();
       });
     }
     
@@ -166,6 +214,12 @@ function handleAuthStateChanged(user) {
     currentUser = null;
     userPhotoUrl = null;
     userEmail = null;
+    
+    // Cancella il timer di rinnovo del token
+    if (tokenRefreshTimer) {
+      clearTimeout(tokenRefreshTimer);
+      tokenRefreshTimer = null;
+    }
     
     console.log('Utente Firebase non autenticato');
     
@@ -438,12 +492,52 @@ function refreshAccessToken() {
   return currentUser.getIdToken(true)
     .then((token) => {
       console.log('Token Firebase aggiornato con successo');
+      
+      // Salva il token nel localStorage
+      localStorage.setItem('googleAuthToken', token);
+      
+      // Imposta il rinnovo automatico del token
+      setupTokenRefresh();
+      
       return token;
     })
     .catch((error) => {
       console.error('Errore durante l\'aggiornamento del token Firebase:', error);
       throw error;
     });
+}
+
+// Funzione per impostare il rinnovo automatico del token
+function setupTokenRefresh() {
+  // Cancella eventuali timer esistenti
+  if (tokenRefreshTimer) {
+    clearTimeout(tokenRefreshTimer);
+  }
+  
+  // Se non c'è un utente autenticato, non fare nulla
+  if (!currentUser) {
+    return;
+  }
+  
+  // Firebase rinnova automaticamente il token ID, ma possiamo forzare un refresh periodico
+  // per assicurarci che il token sia sempre valido
+  // Il token di Firebase dura tipicamente 3600 secondi (1 ora)
+  const refreshTime = 50 * 60 * 1000; // 50 minuti in millisecondi
+  
+  console.log(`Programmato rinnovo automatico del token Firebase tra ${refreshTime/1000/60} minuti.`);
+  
+  // Imposta il timer per rinnovare il token automaticamente
+  tokenRefreshTimer = setTimeout(async () => {
+    console.log('Rinnovo automatico del token Firebase in corso...');
+    try {
+      await refreshAccessToken();
+      console.log('Token Firebase rinnovato automaticamente con successo');
+    } catch (error) {
+      console.warn('Errore nel rinnovo automatico del token Firebase:', error);
+      // Se fallisce, prova a verificare lo stato di autenticazione
+      checkAuthState();
+    }
+  }, refreshTime);
 }
 
 // Backup su Google Drive
@@ -645,7 +739,9 @@ window.firebaseAuth = {
   getCurrentUser: () => currentUser,
   getUserEmail: () => userEmail,
   getUserPhotoUrl: () => userPhotoUrl,
-  getToken: getValidAccessToken
+  getToken: getValidAccessToken,
+  refreshToken: refreshAccessToken,
+  setupTokenRefresh: setupTokenRefresh
 };
 
 // Intercetta le chiamate fetch per aggiungere il token di autenticazione
