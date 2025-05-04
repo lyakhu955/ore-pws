@@ -13211,8 +13211,65 @@ END:VCARD`;
     <!-- Il tuo script di autenticazione -->
     <script src="firebase-auth.js"></script>
     
+    <!-- Stili per l'interfaccia utente di Firebase -->
+    <style>
+        #firebase-auth-container {
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            z-index: 1000;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            width: 250px;
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        #firebase-auth-container .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        #firebase-auth-container .profile-pic {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+        }
+        
+        #firebase-auth-container .logout-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: auto;
+        }
+        
+        #firebase-auth-container .btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+    </style>
+    
     <!-- Script di integrazione Firebase -->
     <script>
+        // Disabilita temporaneamente il sistema di autenticazione esistente
+        window.disableExistingAuthSystem = true;
+        
         // Inizializza l'oggetto cloudManager se non esiste
         window.cloudManager = window.cloudManager || {
             getCurrentProvider: function() { return null; },
@@ -13220,6 +13277,39 @@ END:VCARD`;
             getUserInfo: function() { return null; },
             checkAuthStatus: function() { return Promise.resolve(false); }
         };
+        
+        // Sovrascrive le funzioni di autenticazione esistenti
+        if (window.disableExistingAuthSystem) {
+            // Sovrascrive la funzione di controllo dello stato di autenticazione
+            window.checkAuthStatus = function() {
+                console.log('Funzione checkAuthStatus sovrascritta da Firebase');
+                if (typeof firebase !== 'undefined' && firebase.auth) {
+                    const user = firebase.auth().currentUser;
+                    return Promise.resolve(user !== null);
+                }
+                return Promise.resolve(false);
+            };
+            
+            // Sovrascrive la funzione di refresh del token
+            window.refreshToken = function() {
+                console.log('Funzione refreshToken sovrascritta da Firebase');
+                if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+                    return firebase.auth().currentUser.getIdToken(true)
+                        .then(function(token) {
+                            localStorage.setItem('googleAuthToken', token);
+                            return token;
+                        });
+                }
+                return Promise.reject(new Error('Utente non autenticato'));
+            };
+            
+            // Sovrascrive la funzione di inizializzazione del backup cloud
+            window.initCloudBackup = function() {
+                console.log('Funzione initCloudBackup sovrascritta da Firebase');
+                // Non fa nulla, lascia che Firebase gestisca l'autenticazione
+                return Promise.resolve();
+            };
+        }
         
         // Funzione per aggiornare l'interfaccia utente di Firebase
         function updateFirebaseUI(user) {
