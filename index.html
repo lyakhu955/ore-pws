@@ -3604,46 +3604,6 @@
                 .nav-item.active .material-symbols-outlined { font-size: 1.6rem; }
                 .nav-item.active { transform: translateY(-6px); }
             }
-            
-            /* Stile per il profilo utente */
-            .user-profile {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                padding: 5px 10px;
-                background-color: var(--md-sys-color-surface-variant);
-                border-radius: 20px;
-                margin: 5px 0;
-            }
-            
-            .profile-pic {
-                width: 30px;
-                height: 30px;
-                border-radius: 50%;
-                object-fit: cover;
-            }
-            
-            .logout-btn {
-                background-color: var(--md-sys-color-error);
-                color: var(--md-sys-color-on-error);
-                border: none;
-                border-radius: 4px;
-                padding: 5px 10px;
-                cursor: pointer;
-                font-size: 12px;
-                margin-left: auto;
-            }
-            
-            .logout-btn:hover {
-                background-color: var(--md-sys-color-error-container);
-                color: var(--md-sys-color-on-error-container);
-            }
-            
-            /* Stile per i pulsanti disabilitati */
-            .cloud-feature.disabled {
-                opacity: 0.6;
-                cursor: not-allowed;
-            }
         `;
         
         // Add the style element to the head
@@ -3833,8 +3793,8 @@
                                     <div class="provider-options">
                                         <!-- Google Drive -->
                                         <div class="provider-option" data-provider="google">
-                                            <div class="provider-logo" style="background-color: var(--md-sys-color-primary-container); color: var(--md-sys-color-primary);">
-                                                <span class="material-symbols-outlined" style="font-size: 24px;">cloud</span>
+                                            <div class="provider-logo">
+                                                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Drive">
                                             </div>
                                             <div class="provider-info">
                                                 <h4>Google Drive</h4>
@@ -10090,7 +10050,7 @@ END:VCARD`;
         // Implementazione per Google Drive (reale) con Google Identity Services
         class GoogleDriveProvider extends CloudProvider {
             constructor() {
-                super("Google Drive", "cloud"); // Utilizziamo il nome dell'icona Material Symbols invece dell'URL
+                super("Google Drive", "https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg");
                 this.apiLoaded = false;
                 this.backupFileName = 'Ore PWS - Backup Dati.json';
                 this.accessToken = null;
@@ -10221,34 +10181,12 @@ END:VCARD`;
                     return;
                 }
                 
-                // Salva il timestamp di quando è stato ottenuto il token
-                if (!tokenResponse.obtained_at) {
-                    tokenResponse.obtained_at = Date.now();
-                    localStorage.setItem('googleAuthToken', JSON.stringify(tokenResponse));
-                }
-                
                 // Calcola quando rinnovare il token (5 minuti prima della scadenza)
                 // Il token di Google dura tipicamente 3600 secondi (1 ora)
                 const expiresIn = tokenResponse.expires_in || 3600;
+                const refreshTime = (expiresIn - 300) * 1000; // Converti in millisecondi e sottrai 5 minuti
                 
-                // Calcola il tempo rimanente basato su quando è stato ottenuto il token
-                const elapsedTime = (Date.now() - tokenResponse.obtained_at) / 1000;
-                const remainingTime = Math.max(0, expiresIn - elapsedTime);
-                
-                // Rinnova 5 minuti prima della scadenza o immediatamente se mancano meno di 10 minuti
-                const refreshTime = Math.max(0, remainingTime - 300) * 1000; // Converti in millisecondi
-                
-                console.log(`Token ottenuto ${Math.round(elapsedTime)} secondi fa. Valido per altri ${Math.round(remainingTime)} secondi.`);
-                console.log(`Programmato rinnovo automatico tra ${Math.round(refreshTime/1000)} secondi.`);
-                
-                // Se il token sta per scadere, rinnovalo immediatamente
-                if (refreshTime < 10000) { // Meno di 10 secondi
-                    console.log('Token quasi scaduto, rinnovo immediato...');
-                    this.refreshToken().catch(error => {
-                        console.warn('Errore nel rinnovo immediato del token:', error);
-                    });
-                    return;
-                }
+                console.log(`Token valido per ${expiresIn} secondi. Programmato rinnovo automatico tra ${refreshTime/1000} secondi.`);
                 
                 // Imposta il timer per rinnovare il token automaticamente
                 this.tokenRefreshTimer = setTimeout(async () => {
@@ -10289,8 +10227,6 @@ END:VCARD`;
                         scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file openid profile email',
                         prompt: 'consent',  // Mostra sempre il consenso per evitare problemi
                         auto_select: false,  // Lascia che l'utente scelga l'account
-                        access_type: 'offline', // Richiede un refresh token
-                        include_granted_scopes: true, // Include tutti gli scope già concessi
                         callback: (tokenResponse) => {
                             console.log('Callback di autenticazione chiamato');
                             if (tokenResponse && tokenResponse.access_token) {
@@ -10299,9 +10235,6 @@ END:VCARD`;
                                 
                                 // Imposta esplicitamente lo stato di login
                                 this.isLoggedIn = true;
-                                
-                                // Aggiungi il timestamp di quando è stato ottenuto il token
-                                tokenResponse.obtained_at = Date.now();
                                 
                                 // Salva il token in localStorage per mantenerlo tra i refresh
                                 localStorage.setItem('googleAuthToken', JSON.stringify(tokenResponse));
@@ -10343,9 +10276,6 @@ END:VCARD`;
                                 // Imposta il token di accesso per le richieste API
                                 gapi.client.setToken(tokenResponse);
                                 console.log('Token di accesso ottenuto:', tokenResponse.access_token.substring(0, 10) + '...');
-                                
-                                // Aggiungi il timestamp di quando è stato ottenuto il token
-                                tokenResponse.obtained_at = Date.now();
                                 
                                 // Salva il token in localStorage per mantenerlo tra i refresh
                                 localStorage.setItem('googleAuthToken', JSON.stringify(tokenResponse));
@@ -10400,35 +10330,13 @@ END:VCARD`;
                             // Utilizziamo un timeout per assicurarci che il popup venga aperto in risposta all'azione dell'utente
                             setTimeout(() => {
                                 try {
-                                    // Verifica se siamo su un dispositivo mobile
-                                    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                                    
-                                    // Su mobile, utilizziamo un approccio diverso per evitare problemi con i popup
-                                    if (isMobile) {
-                                        console.log('Dispositivo mobile rilevato, utilizzo approccio specifico per mobile...');
-                                        // Mostra un messaggio all'utente
-                                        showToast('Apertura pagina di login Google...', 'info');
-                                    }
-                                    
-                                    // Richiedi il token di accesso
                                     window.googleAuthClient.requestAccessToken({
                                         prompt: 'consent',  // Mostra sempre il consenso per evitare problemi
-                                        hint: '',  // Non suggerire account specifici
-                                        access_type: 'offline', // Richiede un refresh token
-                                        include_granted_scopes: true // Include tutti gli scope già concessi
+                                        hint: ''  // Non suggerire account specifici
                                     });
                                 } catch (error) {
                                     console.error('Errore durante la richiesta del token:', error);
-                                    
-                                    // Verifica se siamo su un dispositivo mobile
-                                    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                                    
-                                    if (isMobile) {
-                                        showToast("Errore durante l'apertura della pagina di login. Prova ad abilitare i popup nel tuo browser o usa un browser diverso.", "error", 8000);
-                                    } else {
-                                        showToast("Errore durante l'apertura della finestra di accesso. Verifica che i popup non siano bloccati.", "error", 5000);
-                                    }
-                                    
+                                    showToast("Errore durante l'apertura della finestra di accesso. Verifica che i popup non siano bloccati.", "error", 5000);
                                     // Ripristina il callback originale in caso di errore
                                     window.googleAuthClient.callback = originalCallback;
                                     reject(error);
@@ -10436,16 +10344,6 @@ END:VCARD`;
                             }, 100);
                         } catch (error) {
                             console.error('Errore durante la richiesta del token:', error);
-                            
-                            // Verifica se siamo su un dispositivo mobile
-                            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                            
-                            if (isMobile) {
-                                showToast("Errore durante l'apertura della pagina di login. Prova ad abilitare i popup nel tuo browser o usa un browser diverso.", "error", 8000);
-                            } else {
-                                showToast("Errore durante l'apertura della finestra di accesso. Verifica che i popup non siano bloccati.", "error", 5000);
-                            }
-                            
                             // Ripristina il callback originale in caso di errore
                             window.googleAuthClient.callback = originalCallback;
                             reject(error);
@@ -10622,9 +10520,6 @@ END:VCARD`;
                             
                             // Imposta il nuovo token
                             gapi.client.setToken(tokenResponse);
-                            
-                            // Aggiungi il timestamp di quando è stato ottenuto il token
-                            tokenResponse.obtained_at = Date.now();
                             
                             // Salva il token in localStorage
                             localStorage.setItem('googleAuthToken', JSON.stringify(tokenResponse));
@@ -11404,131 +11299,6 @@ END:VCARD`;
         // Inizializza il gestore dei backup cloud
         let cloudManager = null;
 
-        // Funzione per mostrare la finestra di dialogo per il login cloud
-        function showCloudLoginPrompt() {
-            console.log('Mostro finestra di dialogo per login cloud...');
-            // Crea la finestra di dialogo
-            const dialogOverlay = document.createElement('div');
-            dialogOverlay.className = 'dialog-overlay';
-            dialogOverlay.style.position = 'fixed';
-            dialogOverlay.style.top = '0';
-            dialogOverlay.style.left = '0';
-            dialogOverlay.style.width = '100%';
-            dialogOverlay.style.height = '100%';
-            dialogOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-            dialogOverlay.style.zIndex = '9999';
-            dialogOverlay.style.display = 'flex';
-            dialogOverlay.style.justifyContent = 'center';
-            dialogOverlay.style.alignItems = 'center';
-            
-            const dialogBox = document.createElement('div');
-            dialogBox.className = 'dialog-box';
-            dialogBox.style.backgroundColor = 'var(--md-sys-color-surface)';
-            dialogBox.style.color = 'var(--md-sys-color-on-surface)';
-            dialogBox.style.borderRadius = 'var(--border-radius-large)';
-            dialogBox.style.padding = '1.5rem';
-            dialogBox.style.maxWidth = '90%';
-            dialogBox.style.width = '350px';
-            dialogBox.style.boxShadow = 'var(--elevation-3)';
-            dialogBox.style.textAlign = 'center';
-            
-            // Aggiungi l'icona
-            const icon = document.createElement('span');
-            icon.className = 'material-symbols-outlined';
-            icon.style.fontSize = '3rem';
-            icon.style.color = 'var(--md-sys-color-primary)';
-            icon.style.marginBottom = '1rem';
-            icon.textContent = 'cloud_sync';
-            
-            // Aggiungi il titolo
-            const title = document.createElement('h3');
-            title.style.marginBottom = '1rem';
-            title.textContent = 'Salva i tuoi dati sul cloud';
-            
-            // Aggiungi il messaggio
-            const message = document.createElement('p');
-            message.style.marginBottom = '1.5rem';
-            message.textContent = 'Ciao lavoratore! Per non rischiare di perdere i tuoi dati, sarebbe meglio salvarli sul cloud di Google tramite il tuo account. Vuoi procedere con il login?';
-            
-            // Aggiungi la nota sulla possibilità di cambiare idea
-            const note = document.createElement('p');
-            note.style.fontSize = '0.85rem';
-            note.style.marginBottom = '1.5rem';
-            note.style.color = 'var(--md-sys-color-on-surface-variant)';
-            note.textContent = 'Se cambi idea, potrai sempre modificare questa scelta dalla pagina Impostazioni in un secondo momento.';
-            
-            // Aggiungi i pulsanti
-            const buttonContainer = document.createElement('div');
-            buttonContainer.style.display = 'flex';
-            buttonContainer.style.justifyContent = 'space-between';
-            buttonContainer.style.gap = '1rem';
-            
-            const acceptButton = document.createElement('button');
-            acceptButton.className = 'btn';
-            acceptButton.style.backgroundColor = 'var(--md-sys-color-primary)';
-            acceptButton.style.color = 'var(--md-sys-color-on-primary)';
-            acceptButton.style.flex = '1';
-            acceptButton.textContent = 'Accetta';
-            
-            const rejectButton = document.createElement('button');
-            rejectButton.className = 'btn';
-            rejectButton.style.backgroundColor = 'var(--md-sys-color-surface-variant)';
-            rejectButton.style.color = 'var(--md-sys-color-on-surface-variant)';
-            rejectButton.style.flex = '1';
-            rejectButton.textContent = 'Rifiuta';
-            
-            // Aggiungi gli eventi ai pulsanti
-            acceptButton.addEventListener('click', async () => {
-                // Salva la scelta dell'utente
-                localStorage.setItem('cloudLoginChoice', 'accept');
-                
-                // Chiudi la finestra di dialogo
-                document.body.removeChild(dialogOverlay);
-                
-                // Tenta di effettuare il login
-                try {
-                    console.log('Utente ha accettato il login, avvio procedura di login...');
-                    
-                    // Imposta Google come provider selezionato
-                    cloudManager.setSelectedProvider('google');
-                    
-                    // Avvia il processo di login esplicito (con manualTrigger=true)
-                    await loginWithSelectedProvider();
-                    
-                    console.log('Login completato con successo');
-                } catch (e) {
-                    console.warn('Impossibile effettuare il login:', e);
-                    showToast('Impossibile effettuare il login. Riprova dalle impostazioni.', 'error');
-                }
-            });
-            
-            rejectButton.addEventListener('click', () => {
-                // Salva la scelta dell'utente
-                localStorage.setItem('cloudLoginChoice', 'reject');
-                
-                // Chiudi la finestra di dialogo
-                document.body.removeChild(dialogOverlay);
-                
-                // Mostra un messaggio all'utente
-                showToast('Potrai sempre effettuare il login dalle impostazioni in seguito.', 'info', 5000);
-            });
-            
-            // Assembla la finestra di dialogo
-            buttonContainer.appendChild(rejectButton);
-            buttonContainer.appendChild(acceptButton);
-            
-            dialogBox.appendChild(icon);
-            dialogBox.appendChild(title);
-            dialogBox.appendChild(message);
-            dialogBox.appendChild(note);
-            dialogBox.appendChild(buttonContainer);
-            
-            dialogOverlay.appendChild(dialogBox);
-            
-            // Aggiungi la finestra di dialogo al body
-            document.body.appendChild(dialogOverlay);
-        }
-
         // Funzione principale di inizializzazione
         async function initCloudBackup(skipAuthCheck = false) {
             // Crea il gestore se non esiste
@@ -11616,20 +11386,10 @@ END:VCARD`;
                 button.id = `${selectedProvider}LoginBtn`;
                 button.className = `cloud-login-btn ${selectedProvider}-btn`;
                 
-                // Verifica se logoUrl è un URL o un nome di icona Material Symbols
-                const isIconName = !provider.logoUrl.includes('://') && !provider.logoUrl.startsWith('data:');
-                
-                if (isIconName) {
-                    button.innerHTML = `
-                        <span class="material-symbols-outlined">${provider.logoUrl}</span>
-                        Accedi con ${provider.name}
-                    `;
-                } else {
-                    button.innerHTML = `
-                        <img src="${provider.logoUrl}" alt="${provider.name}">
-                        Accedi con ${provider.name}
-                    `;
-                }
+                button.innerHTML = `
+                    <img src="${provider.logoUrl}" alt="${provider.name}">
+                    Accedi con ${provider.name}
+                `;
                 
                 button.addEventListener('click', loginWithSelectedProvider);
                 
@@ -12055,30 +11815,9 @@ END:VCARD`;
                 // Inizializza il backup cloud
                 await initCloudBackup();
                 
-                // Verifica se l'utente ha già fatto una scelta sul login automatico
-                const loginChoice = localStorage.getItem('cloudLoginChoice');
+                // Tenta di ripristinare automaticamente la sessione all'avvio
                 const savedToken = localStorage.getItem('googleAuthToken');
-                
-                console.log('Stato login cloud - Scelta salvata:', loginChoice);
-                console.log('Stato login cloud - Token salvato:', savedToken ? 'Presente' : 'Assente');
-                console.log('Stato login cloud - Cloud Manager:', cloudManager ? 'Inizializzato' : 'Non inizializzato');
-                
-                // Funzione per verificare se il dispositivo è mobile
-                const isMobileDevice = () => {
-                    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                    console.log('Rilevamento dispositivo - User Agent:', navigator.userAgent);
-                    console.log('Rilevamento dispositivo - È mobile:', isMobile);
-                    return isMobile;
-                };
-                
-                // Se siamo su mobile e non è stata fatta una scelta precedente, mostra la finestra di dialogo
-                if (isMobileDevice() && !loginChoice && cloudManager) {
-                    // Mostra la finestra di dialogo per chiedere all'utente se desidera effettuare il login
-                    console.log('Dispositivo mobile rilevato, mostro finestra di dialogo per login cloud...');
-                    showCloudLoginPrompt();
-                } 
-                // Se l'utente ha già accettato o non siamo su mobile, tenta di ripristinare la sessione (solo se c'è un token)
-                else if ((loginChoice === 'accept' || !isMobileDevice()) && savedToken && cloudManager) {
+                if (savedToken && cloudManager) {
                     try {
                         console.log('Trovato token salvato, tentativo di ripristino automatico della sessione...');
                         const provider = cloudManager.getProvider('google');
@@ -13204,176 +12943,7 @@ END:VCARD`;
 
     </script>
     
-    <!-- Firebase App (la libreria core di Firebase) -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <!-- Firebase Auth -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-    <!-- Il tuo script di autenticazione -->
-    <script src="firebase-auth.js"></script>
-    
-    <!-- Stili per l'interfaccia utente di Firebase -->
-    <style>
-        #firebase-auth-container {
-            position: fixed;
-            top: 60px;
-            right: 20px;
-            z-index: 1000;
-            background-color: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            width: 250px;
-            font-family: 'Roboto', sans-serif;
-        }
-        
-        #firebase-auth-container .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        #firebase-auth-container .profile-pic {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-        }
-        
-        #firebase-auth-container .logout-btn {
-            background-color: #f44336;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-size: 12px;
-            margin-left: auto;
-        }
-        
-        #firebase-auth-container .btn {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            background-color: #4285F4;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 8px 16px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-    </style>
-    
-    <!-- Script di integrazione Firebase -->
-    <script>
-        // Disabilita temporaneamente il sistema di autenticazione esistente
-        window.disableExistingAuthSystem = true;
-        
-        // Inizializza l'oggetto cloudManager se non esiste
-        window.cloudManager = window.cloudManager || {
-            getCurrentProvider: function() { return null; },
-            isAuthenticated: function() { return false; },
-            getUserInfo: function() { return null; },
-            checkAuthStatus: function() { return Promise.resolve(false); }
-        };
-        
-        // Sovrascrive le funzioni di autenticazione esistenti
-        if (window.disableExistingAuthSystem) {
-            // Sovrascrive la funzione updateCloudAccountUI
-            window.updateCloudAccountUI = function() {
-                console.log('Funzione updateCloudAccountUI sovrascritta da Firebase');
-                // Non fa nulla, lascia che Firebase gestisca l'interfaccia utente
-            };
-            
-            // Sovrascrive la funzione di controllo dello stato di autenticazione
-            window.checkAuthStatus = function() {
-                console.log('Funzione checkAuthStatus sovrascritta da Firebase');
-                if (typeof firebase !== 'undefined' && firebase.auth) {
-                    const user = firebase.auth().currentUser;
-                    return Promise.resolve(user !== null);
-                }
-                return Promise.resolve(false);
-            };
-            
-            // Sovrascrive la funzione di refresh del token
-            window.refreshToken = function() {
-                console.log('Funzione refreshToken sovrascritta da Firebase');
-                if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
-                    return firebase.auth().currentUser.getIdToken(true)
-                        .then(function(token) {
-                            localStorage.setItem('googleAuthToken', token);
-                            return token;
-                        });
-                }
-                return Promise.reject(new Error('Utente non autenticato'));
-            };
-            
-            // Sovrascrive la funzione di inizializzazione del backup cloud
-            window.initCloudBackup = function() {
-                console.log('Funzione initCloudBackup sovrascritta da Firebase');
-                // Non fa nulla, lascia che Firebase gestisca l'autenticazione
-                return Promise.resolve();
-            };
-        }
-        
-        // Salva la funzione showToast originale se esiste
-        if (typeof window.showToast === 'function') {
-            window.originalShowToast = window.showToast;
-        }
-        
-        // Funzione per aggiornare l'interfaccia utente di Firebase
-        function updateFirebaseUI(user) {
-            console.log('Aggiornamento UI Firebase:', user ? 'Utente autenticato' : 'Utente non autenticato');
-            
-            // Crea un elemento UI personalizzato per Firebase
-            let firebaseUIContainer = document.getElementById('firebase-auth-container');
-            
-            if (!firebaseUIContainer) {
-                // Crea un nuovo container per l'UI di Firebase
-                firebaseUIContainer = document.createElement('div');
-                firebaseUIContainer.id = 'firebase-auth-container';
-                firebaseUIContainer.style.position = 'fixed';
-                firebaseUIContainer.style.top = '60px';
-                firebaseUIContainer.style.right = '20px';
-                firebaseUIContainer.style.zIndex = '1000';
-                document.body.appendChild(firebaseUIContainer);
-            }
-            
-            if (user) {
-                // Utente autenticato, mostra le informazioni dell'utente
-                firebaseUIContainer.innerHTML = `
-                    <div class="user-profile">
-                        ${user.photoURL ? `<img src="${user.photoURL}" alt="Foto profilo" class="profile-pic">` : ''}
-                        <span>${user.email}</span>
-                        <button onclick="logoutFromGoogle()" class="logout-btn">Disconnetti</button>
-                    </div>
-                `;
-            } else {
-                // Utente non autenticato, mostra il pulsante di login
-                firebaseUIContainer.innerHTML = `
-                    <div style="text-align: center; padding: 5px; background-color: var(--md-sys-color-surface-variant); border-radius: 8px; margin-bottom: 8px; font-size: 12px;">
-                        Accedi per sincronizzare i tuoi dati
-                    </div>
-                    <button onclick="loginWithGoogle()" class="btn" style="background-color: #4285F4; color: white; border: none; border-radius: 4px; padding: 8px 16px; cursor: pointer; display: flex; align-items: center; gap: 8px; width: 100%;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 48 48">
-                            <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
-                            <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
-                            <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
-                            <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
-                        </svg>
-                        Accedi con Google
-                    </button>
-                    <div style="font-size: 10px; margin-top: 5px; color: var(--md-sys-color-on-surface-variant); text-align: center;">
-                        Se il popup viene bloccato, disabilita il blocco popup per questo sito
-                    </div>
-                `;
-            }
-            
-            // Non aggiorniamo più l'interfaccia utente esistente
-            // perché abbiamo sovrascritto la funzione updateCloudAccountUI
-        }
-    </script>
+
 
 </body>
 </html>
