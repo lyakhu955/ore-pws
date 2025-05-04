@@ -272,6 +272,9 @@ function updateUIAfterAuth(user) {
       createOrUpdateFirebaseUI(user);
     }
     
+    // Forza l'aggiornamento dei pulsanti di login
+    forceUpdateLoginButtons();
+    
     // Mostra un messaggio di benvenuto
     showToast(`Benvenuto, ${user.displayName || user.email}!`, "success");
   } else {
@@ -292,6 +295,60 @@ function updateUIAfterAuth(user) {
     } else {
       console.log('Aggiornamento elemento UI personalizzato');
       createOrUpdateFirebaseUI(null);
+    }
+    
+    // Forza l'aggiornamento dei pulsanti di login
+    forceUpdateLoginButtons();
+  }
+}
+
+// Funzione per forzare l'aggiornamento dei pulsanti di login
+function forceUpdateLoginButtons() {
+  console.log('Forzatura aggiornamento pulsanti di login...');
+  
+  // Verifica se la funzione updateLoginButtons esiste
+  if (typeof window.updateLoginButtons === 'function') {
+    console.log('Chiamata a updateLoginButtons()');
+    window.updateLoginButtons();
+  } else {
+    console.log('La funzione updateLoginButtons non esiste, creazione pulsante di login manuale...');
+    
+    // Trova il container dei pulsanti di login
+    const loginButtonsContainer = document.getElementById('loginButtonsContainer');
+    if (loginButtonsContainer) {
+      console.log('Container dei pulsanti di login trovato, aggiornamento...');
+      
+      // Verifica se l'utente è già autenticato
+      if (firebase.auth().currentUser) {
+        console.log('Utente già autenticato, nascondo i pulsanti di login...');
+        loginButtonsContainer.style.display = 'none';
+        return;
+      }
+      
+      // Altrimenti, mostra il pulsante di login
+      loginButtonsContainer.style.display = 'flex';
+      loginButtonsContainer.innerHTML = '';
+      
+      // Crea il pulsante di login
+      const button = document.createElement('button');
+      button.id = 'googleLoginBtn';
+      button.className = 'cloud-login-btn google-btn';
+      
+      button.innerHTML = `
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Drive">
+        Accedi con Google Drive
+      `;
+      
+      // Aggiungi l'event listener
+      button.addEventListener('click', function() {
+        console.log('Pulsante di login cliccato, tentativo di login...');
+        loginWithGoogle();
+      });
+      
+      // Aggiungi il pulsante al container
+      loginButtonsContainer.appendChild(button);
+    } else {
+      console.warn('Container dei pulsanti di login non trovato');
     }
   }
 }
@@ -825,7 +882,49 @@ function integrateWithCloudManager() {
       }
     };
     
+    // Assicurati che il provider Google sia correttamente configurato
+    const googleProvider = originalCloudManager.getProvider('google');
+    if (googleProvider) {
+      console.log('Provider Google trovato, configurazione in corso...');
+      
+      // Aggiungi un hook per il login con Google
+      const originalGoogleLogin = googleProvider.login;
+      googleProvider.login = async function() {
+        try {
+          console.log('Tentativo di login con Google tramite provider...');
+          
+          // Verifica se l'utente è già autenticato con Firebase
+          if (firebase.auth().currentUser) {
+            console.log('Utente già autenticato con Firebase:', firebase.auth().currentUser.email);
+            
+            // Ottieni le informazioni dell'utente
+            const user = firebase.auth().currentUser;
+            return {
+              id: user.uid,
+              name: user.displayName || user.email,
+              email: user.email,
+              picture: user.photoURL,
+              provider: 'google'
+            };
+          }
+          
+          // Altrimenti, chiama la funzione di login originale
+          return await originalGoogleLogin.call(this);
+        } catch (error) {
+          console.error('Errore durante il login con Google:', error);
+          throw error;
+        }
+      };
+    }
+    
     console.log('Integrazione con il sistema di backup cloud completata');
+    
+    // Forza l'aggiornamento dell'interfaccia utente
+    if (typeof window.updateProviderSelectionUI === 'function') {
+      console.log('Aggiornamento interfaccia utente del sistema di backup cloud...');
+      window.updateProviderSelectionUI();
+    }
+    
     return;
   }
   
@@ -842,12 +941,19 @@ function integrateWithCloudManager() {
     setSelectedProvider: function(providerId) {
       // Non fa nulla, supportiamo solo Google
       console.log('Selezione provider:', providerId);
+      
+      // Forza l'aggiornamento dell'interfaccia utente
+      if (typeof window.updateProviderSelectionUI === 'function') {
+        console.log('Aggiornamento interfaccia utente dopo la selezione del provider...');
+        window.updateProviderSelectionUI();
+      }
     },
     getAvailableProviders: function() {
       return [{
         id: 'google',
         name: 'Google Drive',
-        logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg'
+        logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg',
+        isLoggedIn: firebase.auth().currentUser !== null
       }];
     },
     getProvider: function(providerId) {
@@ -870,23 +976,91 @@ function integrateWithCloudManager() {
           };
         },
         login: function() {
+          console.log('Tentativo di login con Google tramite provider...');
           return new Promise((resolve, reject) => {
-            loginWithGoogle()
-              .then(() => {
-                const user = firebase.auth().currentUser;
-                if (user) {
+            // Usa la funzione loginWithGoogle esistente
+            try {
+              // Crea un nuovo provider Google
+              const provider = new firebase.auth.GoogleAuthProvider();
+              
+              // Aggiungi gli scope necessari per Google Drive
+              provider.addScope('profile');
+              provider.addScope('https://www.googleapis.com/auth/drive.file');
+              provider.addScope('https://www.googleapis.com/auth/drive.appdata');
+              
+              // Richiedi sempre il consenso per ottenere un refresh token
+              provider.setCustomParameters({
+                prompt: 'consent',
+                access_type: 'offline'
+              });
+              
+              // Prova prima con il popup, che è più affidabile
+              console.log('Tentativo di login con popup...');
+              firebase.auth().signInWithPopup(provider)
+                .then((result) => {
+                  console.log('Login completato con popup:', result.user.email);
+                  
+                  // Salva il token nel localStorage
+                  if (result.credential && result.credential.accessToken) {
+                    localStorage.setItem('googleAuthToken', result.credential.accessToken);
+                    console.log('Token salvato nel localStorage');
+                  } else {
+                    // Se non abbiamo un token nell'oggetto credential, otteniamolo direttamente dall'utente
+                    result.user.getIdToken().then(token => {
+                      localStorage.setItem('googleAuthToken', token);
+                      console.log('Token ottenuto dall\'utente e salvato nel localStorage');
+                    });
+                  }
+                  
+                  // Mostra una notifica di successo
+                  showToast("Accesso effettuato con successo!", "success");
+                  
+                  // Aggiorna lo stato di autenticazione
+                  handleAuthStateChanged(result.user);
+                  
+                  // Risolvi la promessa con i dati dell'utente
                   resolve({
-                    id: user.uid,
-                    name: user.displayName || user.email,
-                    email: user.email,
-                    picture: user.photoURL,
+                    id: result.user.uid,
+                    name: result.user.displayName || result.user.email,
+                    email: result.user.email,
+                    picture: result.user.photoURL,
                     provider: 'google'
                   });
-                } else {
-                  reject(new Error('Login fallito'));
-                }
-              })
-              .catch(reject);
+                })
+                .catch((error) => {
+                  console.error('Errore durante il login con popup:', error);
+                  
+                  // Se il popup è bloccato o fallisce, prova con il redirect
+                  if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
+                    console.log('Popup bloccato o chiuso, tentativo con redirect...');
+                    
+                    // Usa il metodo redirect come fallback
+                    try {
+                      firebase.auth().signInWithRedirect(provider)
+                        .then(() => {
+                          // Questo non verrà mai eseguito perché il redirect reindirizza la pagina
+                          resolve(null);
+                        })
+                        .catch((redirectError) => {
+                          console.error('Errore durante il redirect per login Firebase:', redirectError);
+                          showToast("Errore durante l'accesso: " + redirectError.message, "error");
+                          reject(redirectError);
+                        });
+                    } catch (e) {
+                      console.error('Eccezione durante il tentativo di login con redirect:', e);
+                      showToast("Errore imprevisto durante l'accesso. Riprova più tardi.", "error");
+                      reject(e);
+                    }
+                  } else {
+                    // Mostra un messaggio di errore per altri tipi di errori
+                    showToast("Errore durante l'accesso: " + error.message, "error");
+                    reject(error);
+                  }
+                });
+            } catch (error) {
+              console.error('Errore durante il login con Google:', error);
+              reject(error);
+            }
           });
         },
         logout: function() {
@@ -916,24 +1090,13 @@ function integrateWithCloudManager() {
     },
     login: function(manualTrigger = false) {
       if (manualTrigger) {
-        return new Promise((resolve, reject) => {
-          loginWithGoogle()
-            .then(() => {
-              const user = firebase.auth().currentUser;
-              if (user) {
-                resolve({
-                  id: user.uid,
-                  name: user.displayName || user.email,
-                  email: user.email,
-                  picture: user.photoURL,
-                  provider: 'google'
-                });
-              } else {
-                reject(new Error('Login fallito'));
-              }
-            })
-            .catch(reject);
-        });
+        console.log('Tentativo di login con provider selezionato...');
+        const provider = this.getProvider(this.getSelectedProvider());
+        if (provider && typeof provider.login === 'function') {
+          return provider.login();
+        } else {
+          return Promise.reject(new Error('Provider non valido o funzione di login non disponibile'));
+        }
       } else {
         return Promise.resolve(null);
       }
@@ -942,6 +1105,12 @@ function integrateWithCloudManager() {
       return logoutFromGoogle();
     }
   };
+  
+  // Forza l'aggiornamento dell'interfaccia utente
+  if (typeof window.updateProviderSelectionUI === 'function') {
+    console.log('Aggiornamento interfaccia utente del sistema di backup cloud...');
+    window.updateProviderSelectionUI();
+  }
 }
 
 // Funzione per inizializzare Firebase in modo sicuro
