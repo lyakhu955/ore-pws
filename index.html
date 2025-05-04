@@ -3604,6 +3604,46 @@
                 .nav-item.active .material-symbols-outlined { font-size: 1.6rem; }
                 .nav-item.active { transform: translateY(-6px); }
             }
+            
+            /* Stile per il profilo utente */
+            .user-profile {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 5px 10px;
+                background-color: var(--md-sys-color-surface-variant);
+                border-radius: 20px;
+                margin: 5px 0;
+            }
+            
+            .profile-pic {
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                object-fit: cover;
+            }
+            
+            .logout-btn {
+                background-color: var(--md-sys-color-error);
+                color: var(--md-sys-color-on-error);
+                border: none;
+                border-radius: 4px;
+                padding: 5px 10px;
+                cursor: pointer;
+                font-size: 12px;
+                margin-left: auto;
+            }
+            
+            .logout-btn:hover {
+                background-color: var(--md-sys-color-error-container);
+                color: var(--md-sys-color-on-error-container);
+            }
+            
+            /* Stile per i pulsanti disabilitati */
+            .cloud-feature.disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
         `;
         
         // Add the style element to the head
@@ -10181,12 +10221,34 @@ END:VCARD`;
                     return;
                 }
                 
+                // Salva il timestamp di quando è stato ottenuto il token
+                if (!tokenResponse.obtained_at) {
+                    tokenResponse.obtained_at = Date.now();
+                    localStorage.setItem('googleAuthToken', JSON.stringify(tokenResponse));
+                }
+                
                 // Calcola quando rinnovare il token (5 minuti prima della scadenza)
                 // Il token di Google dura tipicamente 3600 secondi (1 ora)
                 const expiresIn = tokenResponse.expires_in || 3600;
-                const refreshTime = (expiresIn - 300) * 1000; // Converti in millisecondi e sottrai 5 minuti
                 
-                console.log(`Token valido per ${expiresIn} secondi. Programmato rinnovo automatico tra ${refreshTime/1000} secondi.`);
+                // Calcola il tempo rimanente basato su quando è stato ottenuto il token
+                const elapsedTime = (Date.now() - tokenResponse.obtained_at) / 1000;
+                const remainingTime = Math.max(0, expiresIn - elapsedTime);
+                
+                // Rinnova 5 minuti prima della scadenza o immediatamente se mancano meno di 10 minuti
+                const refreshTime = Math.max(0, remainingTime - 300) * 1000; // Converti in millisecondi
+                
+                console.log(`Token ottenuto ${Math.round(elapsedTime)} secondi fa. Valido per altri ${Math.round(remainingTime)} secondi.`);
+                console.log(`Programmato rinnovo automatico tra ${Math.round(refreshTime/1000)} secondi.`);
+                
+                // Se il token sta per scadere, rinnovalo immediatamente
+                if (refreshTime < 10000) { // Meno di 10 secondi
+                    console.log('Token quasi scaduto, rinnovo immediato...');
+                    this.refreshToken().catch(error => {
+                        console.warn('Errore nel rinnovo immediato del token:', error);
+                    });
+                    return;
+                }
                 
                 // Imposta il timer per rinnovare il token automaticamente
                 this.tokenRefreshTimer = setTimeout(async () => {
@@ -10227,6 +10289,8 @@ END:VCARD`;
                         scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file openid profile email',
                         prompt: 'consent',  // Mostra sempre il consenso per evitare problemi
                         auto_select: false,  // Lascia che l'utente scelga l'account
+                        access_type: 'offline', // Richiede un refresh token
+                        include_granted_scopes: true, // Include tutti gli scope già concessi
                         callback: (tokenResponse) => {
                             console.log('Callback di autenticazione chiamato');
                             if (tokenResponse && tokenResponse.access_token) {
@@ -10235,6 +10299,9 @@ END:VCARD`;
                                 
                                 // Imposta esplicitamente lo stato di login
                                 this.isLoggedIn = true;
+                                
+                                // Aggiungi il timestamp di quando è stato ottenuto il token
+                                tokenResponse.obtained_at = Date.now();
                                 
                                 // Salva il token in localStorage per mantenerlo tra i refresh
                                 localStorage.setItem('googleAuthToken', JSON.stringify(tokenResponse));
@@ -10276,6 +10343,9 @@ END:VCARD`;
                                 // Imposta il token di accesso per le richieste API
                                 gapi.client.setToken(tokenResponse);
                                 console.log('Token di accesso ottenuto:', tokenResponse.access_token.substring(0, 10) + '...');
+                                
+                                // Aggiungi il timestamp di quando è stato ottenuto il token
+                                tokenResponse.obtained_at = Date.now();
                                 
                                 // Salva il token in localStorage per mantenerlo tra i refresh
                                 localStorage.setItem('googleAuthToken', JSON.stringify(tokenResponse));
@@ -10343,7 +10413,9 @@ END:VCARD`;
                                     // Richiedi il token di accesso
                                     window.googleAuthClient.requestAccessToken({
                                         prompt: 'consent',  // Mostra sempre il consenso per evitare problemi
-                                        hint: ''  // Non suggerire account specifici
+                                        hint: '',  // Non suggerire account specifici
+                                        access_type: 'offline', // Richiede un refresh token
+                                        include_granted_scopes: true // Include tutti gli scope già concessi
                                     });
                                 } catch (error) {
                                     console.error('Errore durante la richiesta del token:', error);
@@ -10550,6 +10622,9 @@ END:VCARD`;
                             
                             // Imposta il nuovo token
                             gapi.client.setToken(tokenResponse);
+                            
+                            // Aggiungi il timestamp di quando è stato ottenuto il token
+                            tokenResponse.obtained_at = Date.now();
                             
                             // Salva il token in localStorage
                             localStorage.setItem('googleAuthToken', JSON.stringify(tokenResponse));
@@ -13129,7 +13204,12 @@ END:VCARD`;
 
     </script>
     
-
+    <!-- Firebase App (la libreria core di Firebase) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <!-- Firebase Auth -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <!-- Il tuo script di autenticazione -->
+    <script src="firebase-auth.js"></script>
 
 </body>
 </html>
