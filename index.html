@@ -3814,6 +3814,10 @@
                                     
                                     <div id="loginButtonsContainer" class="login-buttons-container">
                                         <!-- I pulsanti di login verranno generati dinamicamente in base al provider selezionato -->
+                                        <button id="googleLoginBtn" class="cloud-login-btn google-btn" onclick="loginWithGoogle()">
+                                            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Drive">
+                                            Accedi con Google Drive
+                                        </button>
                                     </div>
                                     
                                     <button id="cloudLogoutBtn" class="cloud-logout-btn" style="display: none;">
@@ -4127,6 +4131,10 @@
         <a href="#" class="nav-item" data-section="settings-section">
             <span class="material-symbols-outlined">settings</span>
             <span>Impostazioni</span>
+        </a>
+        <a href="#" class="nav-item" id="loginButton" onclick="loginWithGoogle(); return false;">
+            <span class="material-symbols-outlined">login</span>
+            <span>Accedi</span>
         </a>
     </nav>
 
@@ -11677,6 +11685,29 @@ END:VCARD`;
         // Login con il provider selezionato
         async function loginWithSelectedProvider() {
             try {
+                console.log('Tentativo di login con provider selezionato...');
+                
+                // Verifica se il provider selezionato è Google
+                const selectedProvider = cloudManager.getSelectedProvider();
+                if (selectedProvider === 'google' && typeof loginWithGoogle === 'function') {
+                    console.log('Provider Google selezionato, utilizzo loginWithGoogle()...');
+                    
+                    // Utilizza la funzione loginWithGoogle
+                    loginWithGoogle();
+                    
+                    // Aggiorna l'interfaccia utente dopo un breve ritardo
+                    setTimeout(() => {
+                        updateProviderSelectionUI();
+                        updateCloudAccountUI();
+                        setupAutoBackup(); // Configura il backup automatico
+                    }, 2000);
+                    
+                    return null;
+                }
+                
+                // Altrimenti, utilizza il sistema di backup cloud esistente
+                console.log('Utilizzo del sistema di backup cloud esistente...');
+                
                 // Passiamo manualTrigger=true per indicare che è un'azione esplicita dell'utente
                 const userData = await cloudManager.login(true);
                 
