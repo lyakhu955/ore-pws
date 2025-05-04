@@ -528,3 +528,34 @@ window.firebaseAuth = {
   getUserPhotoUrl: () => userPhotoUrl,
   getToken: getValidAccessToken
 };
+
+// Intercetta le chiamate fetch per aggiungere il token di autenticazione
+const originalFetch = window.fetch;
+window.fetch = function(url, options) {
+  // Se la richiesta è verso l'API Google e non ha già un'autorizzazione
+  if (url.includes('googleapis.com') && (!options || !options.headers || !options.headers.Authorization)) {
+    console.log('Intercettata chiamata API Google:', url);
+    
+    // Ottieni il token di autenticazione
+    return getValidAccessToken().then(token => {
+      if (!token) {
+        console.warn('Token non disponibile per la richiesta API Google');
+        return originalFetch(url, options);
+      }
+      
+      // Aggiungi il token all'header Authorization
+      const newOptions = options || {};
+      newOptions.headers = newOptions.headers || {};
+      newOptions.headers.Authorization = `Bearer ${token}`;
+      
+      console.log('Aggiunto token di autenticazione alla richiesta API Google');
+      return originalFetch(url, newOptions);
+    }).catch(error => {
+      console.error('Errore durante il recupero del token per la richiesta API Google:', error);
+      return originalFetch(url, options);
+    });
+  }
+  
+  // Altrimenti, usa il fetch originale
+  return originalFetch(url, options);
+};
