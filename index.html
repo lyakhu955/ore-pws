@@ -3814,13 +3814,13 @@
                                     
                                     <div id="loginButtonsContainer" class="login-buttons-container">
                                         <!-- I pulsanti di login verranno generati dinamicamente in base al provider selezionato -->
-                                        <button id="googleLoginBtn" class="cloud-login-btn google-btn" onclick="window.googleAuth.login()">
+                                        <button id="googleLoginBtn" class="cloud-login-btn google-btn" onclick="try { if(window.googleAuth) window.googleAuth.login(); else console.warn('googleAuth non disponibile'); } catch(e) { console.error('Errore durante il login:', e); }">
                                             <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Drive">
                                             Accedi con Google Drive
                                         </button>
                                     </div>
                                     
-                                    <button id="cloudLogoutBtn" class="cloud-logout-btn" style="display: none;" onclick="if(window.googleAuth) window.googleAuth.logout(); else if(cloudManager) cloudManager.logout();">
+                                    <button id="cloudLogoutBtn" class="cloud-logout-btn" style="display: none;" onclick="try { if(window.googleAuth) window.googleAuth.logout(); else if(cloudManager) cloudManager.logout(); else console.warn('Nessun sistema di autenticazione disponibile'); } catch(e) { console.error('Errore durante il logout:', e); localStorage.removeItem('googleAuthToken'); localStorage.removeItem('googleUserInfo'); updateCloudAccountUI(); }">
                                         <span class="material-symbols-outlined">logout</span>
                                         Disconnetti
                                     </button>
@@ -4132,7 +4132,7 @@
             <span class="material-symbols-outlined">settings</span>
             <span>Impostazioni</span>
         </a>
-        <a href="#" class="nav-item" id="loginButton" onclick="window.googleAuth.login(); return false;">
+        <a href="#" class="nav-item" id="loginButton" onclick="try { if(window.googleAuth) window.googleAuth.login(); else console.warn('googleAuth non disponibile'); } catch(e) { console.error('Errore durante il login:', e); }; return false;">
             <span class="material-symbols-outlined">login</span>
             <span>Accedi con Google</span>
         </a>
@@ -11479,7 +11479,21 @@ END:VCARD`;
                     if (logoutBtn) {
                         logoutBtn.style.display = 'block';
                         logoutBtn.onclick = function() {
-                            window.googleAuth.logout();
+                            try {
+                                if (window.googleAuth && typeof window.googleAuth.logout === 'function') {
+                                    window.googleAuth.logout();
+                                    console.log('Logout effettuato con successo tramite googleAuth');
+                                } else {
+                                    console.warn('Funzione logout di googleAuth non disponibile');
+                                }
+                            } catch (error) {
+                                console.error('Errore durante il logout:', error);
+                                // Fallback: pulisci manualmente i dati di autenticazione
+                                localStorage.removeItem('googleAuthToken');
+                                localStorage.removeItem('googleUserInfo');
+                                // Aggiorna l'interfaccia utente
+                                updateCloudAccountUI();
+                            }
                         };
                     }
                     
