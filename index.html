@@ -4132,7 +4132,7 @@
             <span class="material-symbols-outlined">settings</span>
             <span>Impostazioni</span>
         </a>
-        <a href="#" class="nav-item" id="loginButton" onclick="loginWithGoogle(); return false;">
+        <a href="#" class="nav-item" id="loginButton">
             <span class="material-symbols-outlined">login</span>
             <span>Accedi</span>
         </a>
@@ -10088,13 +10088,36 @@ END:VCARD`;
                     const token = gapi.client.getToken();
                     
                     // Verifica se abbiamo un token salvato in localStorage
-                    const savedToken = localStorage.getItem('googleAuthToken');
+                    const savedTokenStr = localStorage.getItem('googleAuthToken');
                     
                     // Se non abbiamo un token attivo ma abbiamo un token salvato, proviamo a usarlo
-                    if ((!token || !token.access_token) && savedToken) {
+                    if ((!token || !token.access_token) && savedTokenStr) {
                         try {
                             console.log('Trovato token salvato, tentativo di ripristino sessione...');
-                            const parsedToken = JSON.parse(savedToken);
+                            
+                            // Parsing del token salvato
+                            let parsedToken;
+                            try {
+                                parsedToken = JSON.parse(savedTokenStr);
+                                
+                                // Se il token è nel nuovo formato con access_token
+                                if (parsedToken.access_token) {
+                                    // Verifica se il token è scaduto
+                                    if (parsedToken.expires_at && parsedToken.expires_at > Date.now()) {
+                                        parsedToken = {
+                                            access_token: parsedToken.access_token
+                                        };
+                                    } else {
+                                        console.log('Token scaduto, non verrà utilizzato');
+                                        localStorage.removeItem('googleAuthToken');
+                                        throw new Error('Token scaduto');
+                                    }
+                                }
+                            } catch (e) {
+                                // Se non è un JSON valido o è scaduto, usa il valore come stringa
+                                console.log('Token in formato non valido o scaduto:', e);
+                                parsedToken = { access_token: savedTokenStr };
+                            }
                             
                             // Imposta il token salvato
                             gapi.client.setToken(parsedToken);
@@ -11883,21 +11906,58 @@ END:VCARD`;
                 await initCloudBackup();
                 
                 // Tenta di ripristinare automaticamente la sessione all'avvio
-                const savedToken = localStorage.getItem('googleAuthToken');
-                if (savedToken && cloudManager) {
+                const savedTokenStr = localStorage.getItem('googleAuthToken');
+                if (savedTokenStr && cloudManager) {
                     try {
                         console.log('Trovato token salvato, tentativo di ripristino automatico della sessione...');
-                        const provider = cloudManager.getProvider('google');
-                        if (provider) {
-                            await provider.checkAuthStatus();
-                            console.log('Sessione ripristinata automaticamente');
-                            
-                            // Aggiorna l'interfaccia utente
-                            updateProviderSelectionUI();
-                            updateCloudAccountUI();
+                        
+                        // Verifica se il token è valido
+                        let isValidToken = false;
+                        try {
+                            const parsedToken = JSON.parse(savedTokenStr);
+                            // Verifica se il token è nel nuovo formato con expires_at
+                            if (parsedToken.expires_at && parsedToken.expires_at > Date.now()) {
+                                isValidToken = true;
+                            } else if (parsedToken.access_token) {
+                                // Se non ha expires_at ma ha access_token, consideriamolo valido
+                                isValidToken = true;
+                            }
+                        } catch (e) {
+                            // Se non è un JSON valido, potrebbe essere un token in formato stringa
+                            isValidToken = true;
+                        }
+                        
+                        if (isValidToken) {
+                            const provider = cloudManager.getProvider('google');
+                            if (provider) {
+                                console.log('Provider Google trovato, verifica stato autenticazione...');
+                                const authStatus = await provider.checkAuthStatus();
+                                console.log('Stato autenticazione:', authStatus ? 'Autenticato' : 'Non autenticato');
+                                
+                                if (authStatus) {
+                                    console.log('Sessione ripristinata automaticamente');
+                                    
+                                    // Aggiorna l'interfaccia utente
+                                    updateProviderSelectionUI();
+                                    updateCloudAccountUI();
+                                    
+                                    // Mostra un messaggio all'utente
+                                    showToast('Sessione ripristinata automaticamente', 'success');
+                                } else {
+                                    console.warn('Token presente ma sessione non valida, pulizia token...');
+                                    localStorage.removeItem('googleAuthToken');
+                                }
+                            } else {
+                                console.warn('Provider Google non trovato');
+                            }
+                        } else {
+                            console.warn('Token scaduto o non valido, pulizia token...');
+                            localStorage.removeItem('googleAuthToken');
                         }
                     } catch (e) {
                         console.warn('Impossibile ripristinare automaticamente la sessione:', e);
+                        // In caso di errore, pulisci il token
+                        localStorage.removeItem('googleAuthToken');
                     }
                 }
                 
@@ -13020,30 +13080,67 @@ END:VCARD`;
     <script>
         // Funzione per verificare lo stato di autenticazione all'avvio
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM caricato, inizializzazione autenticazione...');
+            
             // Verifica se il pulsante di login esiste
             const loginButton = document.getElementById('loginButton');
             if (loginButton) {
+                console.log('Pulsante di login trovato, configurazione...');
+                
                 // Nascondi il pulsante di login all'avvio, verrà mostrato solo se necessario
                 loginButton.style.display = 'none';
                 
                 // Aggiungi un event listener per gestire il click sul pulsante di login
                 loginButton.addEventListener('click', function(event) {
                     event.preventDefault();
+                    console.log('Pulsante di login cliccato');
+                    
                     if (typeof loginWithGoogle === 'function') {
-                        loginWithGoogle();
+                        console.log('Chiamata a loginWithGoogle()');
+                        try {
+                            loginWithGoogle();
+                        } catch (error) {
+                            console.error('Errore durante la chiamata a loginWithGoogle():', error);
+                            showToast('Errore durante il login. Riprova più tardi.', 'error');
+                        }
                     } else {
                         console.error('Funzione loginWithGoogle non trovata');
                         showToast('Errore durante il login. Riprova più tardi.', 'error');
                     }
                 });
+            } else {
+                console.warn('Pulsante di login non trovato');
             }
             
             // Verifica lo stato di autenticazione dopo un breve ritardo
+            // Questo permette a Firebase di inizializzarsi completamente
+            const authCheckDelay = 2000; // 2 secondi
+            console.log(`Verifica dello stato di autenticazione programmata tra ${authCheckDelay}ms`);
+            
             setTimeout(function() {
-                if (typeof updateCloudAccountUI === 'function') {
-                    updateCloudAccountUI();
+                console.log('Esecuzione verifica stato di autenticazione');
+                
+                // Verifica se Firebase è inizializzato
+                if (typeof firebase !== 'undefined' && firebase.auth) {
+                    console.log('Firebase trovato, verifica utente corrente...');
+                    const user = firebase.auth().currentUser;
+                    console.log('Utente Firebase corrente:', user ? user.email : 'Nessuno');
+                } else {
+                    console.warn('Firebase non trovato o non inizializzato');
                 }
-            }, 2000);
+                
+                // Aggiorna l'interfaccia utente
+                if (typeof updateCloudAccountUI === 'function') {
+                    console.log('Chiamata a updateCloudAccountUI()');
+                    try {
+                        updateCloudAccountUI();
+                    } catch (error) {
+                        console.error('Errore durante la chiamata a updateCloudAccountUI():', error);
+                    }
+                } else {
+                    console.warn('Funzione updateCloudAccountUI non trovata');
+                }
+            }, authCheckDelay);
         });
         
         // Funzione per verificare se Firebase è caricato correttamente
