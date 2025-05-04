@@ -1220,22 +1220,86 @@ document.addEventListener('DOMContentLoaded', () => {
     window.updateCloudAccountUI = function() {
       console.log('Funzione updateCloudAccountUI integrata con Firebase');
       
-      // Chiama la funzione originale
-      originalUpdateCloudAccountUI();
+      try {
+        // Chiama la funzione originale
+        originalUpdateCloudAccountUI();
+      } catch (error) {
+        console.error('Errore durante l\'esecuzione della funzione updateCloudAccountUI originale:', error);
+      }
       
-      // Aggiorna l'interfaccia utente di Firebase
-      if (firebase.auth().currentUser) {
-        // Nascondi i pulsanti di login se l'utente è già autenticato
-        const loginButtonsContainer = document.getElementById('loginButtonsContainer');
-        if (loginButtonsContainer) {
-          loginButtonsContainer.style.display = 'none';
+      try {
+        // Aggiorna l'interfaccia utente di Firebase
+        if (firebase.auth().currentUser) {
+          console.log('Utente Firebase autenticato, aggiornamento UI...');
+          
+          // Nascondi i pulsanti di login se l'utente è già autenticato
+          const loginButtonsContainer = document.getElementById('loginButtonsContainer');
+          if (loginButtonsContainer) {
+            loginButtonsContainer.style.display = 'none';
+          }
+          
+          // Mostra il pulsante di logout
+          const logoutBtn = document.getElementById('cloudLogoutBtn');
+          if (logoutBtn) {
+            logoutBtn.style.display = 'flex';
+          }
+          
+          // Nascondi il pulsante di login nella barra di navigazione
+          const loginButton = document.getElementById('loginButton');
+          if (loginButton) {
+            loginButton.style.display = 'none';
+          }
+        } else {
+          console.log('Nessun utente Firebase autenticato');
+          
+          // Mostra il pulsante di login nella barra di navigazione
+          const loginButton = document.getElementById('loginButton');
+          if (loginButton) {
+            loginButton.style.display = '';
+          }
         }
-        
-        // Mostra il pulsante di logout
-        const logoutBtn = document.getElementById('cloudLogoutBtn');
-        if (logoutBtn) {
-          logoutBtn.style.display = 'flex';
+      } catch (error) {
+        console.error('Errore durante l\'aggiornamento dell\'interfaccia utente di Firebase:', error);
+      }
+    };
+  } else {
+    // Se la funzione updateCloudAccountUI non esiste, creala
+    window.updateCloudAccountUI = function() {
+      console.log('Funzione updateCloudAccountUI creata da Firebase');
+      
+      try {
+        // Aggiorna l'interfaccia utente di Firebase
+        if (firebase.auth().currentUser) {
+          console.log('Utente Firebase autenticato, aggiornamento UI...');
+          
+          // Nascondi i pulsanti di login se l'utente è già autenticato
+          const loginButtonsContainer = document.getElementById('loginButtonsContainer');
+          if (loginButtonsContainer) {
+            loginButtonsContainer.style.display = 'none';
+          }
+          
+          // Mostra il pulsante di logout
+          const logoutBtn = document.getElementById('cloudLogoutBtn');
+          if (logoutBtn) {
+            logoutBtn.style.display = 'flex';
+          }
+          
+          // Nascondi il pulsante di login nella barra di navigazione
+          const loginButton = document.getElementById('loginButton');
+          if (loginButton) {
+            loginButton.style.display = 'none';
+          }
+        } else {
+          console.log('Nessun utente Firebase autenticato');
+          
+          // Mostra il pulsante di login nella barra di navigazione
+          const loginButton = document.getElementById('loginButton');
+          if (loginButton) {
+            loginButton.style.display = '';
+          }
         }
+      } catch (error) {
+        console.error('Errore durante l\'aggiornamento dell\'interfaccia utente di Firebase:', error);
       }
     };
   }
