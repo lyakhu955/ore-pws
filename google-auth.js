@@ -253,43 +253,57 @@ function logoutFromGoogle() {
     return;
   }
   
-  // Ottieni il token corrente
+  console.log('Tentativo di logout...');
+  
+  // Pulisci i dati di autenticazione prima di tutto
+  clearAuthData();
+  
+  // Aggiorna l'interfaccia utente
+  updateUI(false);
+  
+  // Mostra un messaggio di successo
+  try {
+    console.log('Disconnessione effettuata con successo');
+    // Crea un toast manualmente invece di usare la funzione showToast
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-info';
+    toast.textContent = 'Disconnessione effettuata con successo';
+    toast.style.position = 'fixed';
+    toast.style.bottom = '20px';
+    toast.style.right = '20px';
+    toast.style.padding = '10px 20px';
+    toast.style.borderRadius = '4px';
+    toast.style.backgroundColor = '#2196F3';
+    toast.style.color = 'white';
+    toast.style.zIndex = '10000';
+    toast.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+    
+    // Aggiungi il toast al documento
+    document.body.appendChild(toast);
+    
+    // Rimuovi il toast dopo 3 secondi
+    setTimeout(() => {
+      if (document.body.contains(toast)) {
+        document.body.removeChild(toast);
+      }
+    }, 3000);
+  } catch (error) {
+    console.error('Errore durante la visualizzazione del toast:', error);
+  }
+  
+  // Ottieni il token corrente e revocalo in background
   const savedTokenStr = localStorage.getItem('googleAuthToken');
-  if (savedTokenStr) {
+  if (savedTokenStr && typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
     try {
       const tokenData = JSON.parse(savedTokenStr);
       
-      // Revoca il token
+      // Revoca il token in background
       google.accounts.oauth2.revoke(tokenData.access_token, done => {
         console.log('Revoca token completata:', done);
-        
-        // Pulisci i dati di autenticazione
-        clearAuthData();
-        
-        // Aggiorna l'interfaccia utente
-        updateUI(false);
-        
-        // Mostra un messaggio di successo
-        showToast('Disconnessione effettuata con successo', 'info');
       });
     } catch (error) {
       console.error('Errore durante la revoca del token:', error);
-      
-      // Pulisci comunque i dati di autenticazione
-      clearAuthData();
-      
-      // Aggiorna l'interfaccia utente
-      updateUI(false);
-      
-      // Mostra un messaggio di errore
-      showToast('Errore durante la disconnessione', 'error');
     }
-  } else {
-    // Pulisci comunque i dati di autenticazione
-    clearAuthData();
-    
-    // Aggiorna l'interfaccia utente
-    updateUI(false);
   }
 }
 
@@ -402,9 +416,9 @@ function updateUI(isAuthenticated) {
 
 // Mostra un toast
 function showToast(message, type = 'info', duration = 3000, onClick = null) {
-  // Verifica se esiste già una funzione showToast
-  if (typeof window.showToast === 'function') {
-    window.showToast(message, type, duration);
+  // Verifica se esiste già una funzione showToast globale (ma non questa funzione)
+  if (typeof window.showToastGlobal === 'function') {
+    window.showToastGlobal(message, type, duration);
     return;
   }
   
@@ -539,46 +553,146 @@ function integrateWithCloudManager() {
         return !!token;
       },
       backup: async (data, silent = false) => {
-        const token = await getValidAccessToken();
-        
-        if (!token) {
-          throw new Error('Token non valido');
+        try {
+          console.log('Tentativo di backup su Google Drive...');
+          
+          const token = await getValidAccessToken();
+          
+          if (!token) {
+            console.error('Token non valido per il backup');
+            return {
+              success: false,
+              error: 'Token non valido'
+            };
+          }
+          
+          // Trova o crea il file di backup
+          console.log('Ricerca o creazione file di backup...');
+          const backupFile = await findOrCreateBackupFile(token);
+          
+          if (!backupFile || !backupFile.id) {
+            console.error('Impossibile trovare o creare il file di backup');
+            return {
+              success: false,
+              error: 'Impossibile trovare o creare il file di backup'
+            };
+          }
+          
+          // Aggiorna il contenuto del file
+          console.log('Aggiornamento contenuto file di backup...');
+          await updateBackupFile(backupFile.id, data, token);
+          
+          console.log('Backup completato con successo');
+          
+          // Crea un toast manualmente invece di usare la funzione showToast
+          if (!silent) {
+            const toast = document.createElement('div');
+            toast.className = 'toast toast-success';
+            toast.textContent = 'Backup completato con successo';
+            toast.style.position = 'fixed';
+            toast.style.bottom = '20px';
+            toast.style.right = '20px';
+            toast.style.padding = '10px 20px';
+            toast.style.borderRadius = '4px';
+            toast.style.backgroundColor = '#4CAF50';
+            toast.style.color = 'white';
+            toast.style.zIndex = '10000';
+            toast.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+            
+            // Aggiungi il toast al documento
+            document.body.appendChild(toast);
+            
+            // Rimuovi il toast dopo 3 secondi
+            setTimeout(() => {
+              if (document.body.contains(toast)) {
+                document.body.removeChild(toast);
+              }
+            }, 3000);
+          }
+          
+          return {
+            success: true,
+            fileId: backupFile.id,
+            timestamp: new Date().toISOString()
+          };
+        } catch (error) {
+          console.error('Errore durante il backup:', error);
+          return {
+            success: false,
+            error: error.message || 'Errore sconosciuto durante il backup'
+          };
         }
-        
-        // Trova o crea il file di backup
-        const backupFile = await findOrCreateBackupFile(token);
-        
-        // Aggiorna il contenuto del file
-        await updateBackupFile(backupFile.id, data, token);
-        
-        return {
-          success: true,
-          fileId: backupFile.id,
-          timestamp: new Date().toISOString()
-        };
       },
       restore: async (silent = false) => {
-        const token = await getValidAccessToken();
-        
-        if (!token) {
-          throw new Error('Token non valido');
+        try {
+          console.log('Tentativo di ripristino da Google Drive...');
+          
+          const token = await getValidAccessToken();
+          
+          if (!token) {
+            console.error('Token non valido per il ripristino');
+            return {
+              success: false,
+              error: 'Token non valido'
+            };
+          }
+          
+          // Trova il file di backup
+          console.log('Ricerca file di backup...');
+          const backupFile = await findBackupFile(token);
+          
+          if (!backupFile) {
+            console.error('Nessun backup trovato');
+            return {
+              success: false,
+              error: 'Nessun backup trovato'
+            };
+          }
+          
+          // Ottieni il contenuto del file
+          console.log('Recupero contenuto file di backup...');
+          const data = await getBackupFileContent(backupFile.id, token);
+          
+          console.log('Ripristino completato con successo');
+          
+          // Crea un toast manualmente invece di usare la funzione showToast
+          if (!silent) {
+            const toast = document.createElement('div');
+            toast.className = 'toast toast-success';
+            toast.textContent = 'Ripristino completato con successo';
+            toast.style.position = 'fixed';
+            toast.style.bottom = '20px';
+            toast.style.right = '20px';
+            toast.style.padding = '10px 20px';
+            toast.style.borderRadius = '4px';
+            toast.style.backgroundColor = '#4CAF50';
+            toast.style.color = 'white';
+            toast.style.zIndex = '10000';
+            toast.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+            
+            // Aggiungi il toast al documento
+            document.body.appendChild(toast);
+            
+            // Rimuovi il toast dopo 3 secondi
+            setTimeout(() => {
+              if (document.body.contains(toast)) {
+                document.body.removeChild(toast);
+              }
+            }, 3000);
+          }
+          
+          return {
+            success: true,
+            data: data,
+            timestamp: backupFile.modifiedTime
+          };
+        } catch (error) {
+          console.error('Errore durante il ripristino:', error);
+          return {
+            success: false,
+            error: error.message || 'Errore sconosciuto durante il ripristino'
+          };
         }
-        
-        // Trova il file di backup
-        const backupFile = await findBackupFile(token);
-        
-        if (!backupFile) {
-          throw new Error('Nessun backup trovato');
-        }
-        
-        // Ottieni il contenuto del file
-        const data = await getBackupFileContent(backupFile.id, token);
-        
-        return {
-          success: true,
-          data: data,
-          timestamp: backupFile.modifiedTime
-        };
       }
     });
   } else {
@@ -589,6 +703,7 @@ function integrateWithCloudManager() {
 // Trova o crea il file di backup
 async function findOrCreateBackupFile(token) {
   try {
+    console.log('Ricerca file di backup esistente...');
     // Cerca il file di backup esistente
     const response = await fetch('https://www.googleapis.com/drive/v3/files?q=name%3D%27backup.json%27%20and%20trashed%3Dfalse', {
       headers: {
@@ -597,16 +712,22 @@ async function findOrCreateBackupFile(token) {
     });
     
     if (!response.ok) {
+      console.error(`Errore HTTP durante la ricerca del file: ${response.status}`);
+      const errorText = await response.text();
+      console.error('Dettagli errore:', errorText);
       throw new Error(`Errore HTTP: ${response.status}`);
     }
     
     const data = await response.json();
+    console.log('Risposta ricerca file:', data);
     
     if (data.files && data.files.length > 0) {
       // Restituisci il file esistente
+      console.log('File di backup esistente trovato:', data.files[0].id);
       return data.files[0];
     }
     
+    console.log('Nessun file di backup esistente trovato, creazione nuovo file...');
     // Crea un nuovo file di backup
     const createResponse = await fetch('https://www.googleapis.com/drive/v3/files', {
       method: 'POST',
@@ -621,19 +742,26 @@ async function findOrCreateBackupFile(token) {
     });
     
     if (!createResponse.ok) {
+      console.error(`Errore HTTP durante la creazione del file: ${createResponse.status}`);
+      const errorText = await createResponse.text();
+      console.error('Dettagli errore:', errorText);
       throw new Error(`Errore HTTP: ${createResponse.status}`);
     }
     
-    return await createResponse.json();
+    const newFile = await createResponse.json();
+    console.log('Nuovo file di backup creato:', newFile.id);
+    return newFile;
   } catch (error) {
     console.error('Errore durante la ricerca/creazione del file di backup:', error);
-    throw error;
+    // Restituisci un oggetto vuoto invece di lanciare un'eccezione
+    return { id: null };
   }
 }
 
 // Trova il file di backup
 async function findBackupFile(token) {
   try {
+    console.log('Ricerca file di backup...');
     // Cerca il file di backup esistente
     const response = await fetch('https://www.googleapis.com/drive/v3/files?q=name%3D%27backup.json%27%20and%20trashed%3Dfalse', {
       headers: {
@@ -642,49 +770,77 @@ async function findBackupFile(token) {
     });
     
     if (!response.ok) {
+      console.error(`Errore HTTP durante la ricerca del file: ${response.status}`);
+      const errorText = await response.text();
+      console.error('Dettagli errore:', errorText);
       throw new Error(`Errore HTTP: ${response.status}`);
     }
     
     const data = await response.json();
+    console.log('Risposta ricerca file:', data);
     
     if (data.files && data.files.length > 0) {
       // Restituisci il file esistente
+      console.log('File di backup trovato:', data.files[0].id);
       return data.files[0];
     }
     
+    console.log('Nessun file di backup trovato');
     return null;
   } catch (error) {
     console.error('Errore durante la ricerca del file di backup:', error);
-    throw error;
+    return null;
   }
 }
 
 // Aggiorna il contenuto del file di backup
 async function updateBackupFile(fileId, data, token) {
   try {
+    if (!fileId) {
+      console.error('ID file non valido per l\'aggiornamento');
+      throw new Error('ID file non valido');
+    }
+    
+    console.log('Aggiornamento contenuto file di backup:', fileId);
+    
+    // Converti i dati in stringa JSON se non lo sono già
+    const jsonData = typeof data === 'string' ? data : JSON.stringify(data);
+    
     const response = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
       method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(data)
+      body: jsonData
     });
     
     if (!response.ok) {
+      console.error(`Errore HTTP durante l'aggiornamento del file: ${response.status}`);
+      const errorText = await response.text();
+      console.error('Dettagli errore:', errorText);
       throw new Error(`Errore HTTP: ${response.status}`);
     }
     
-    return await response.json();
+    const result = await response.json();
+    console.log('File aggiornato con successo:', result);
+    return result;
   } catch (error) {
     console.error('Errore durante l\'aggiornamento del file di backup:', error);
-    throw error;
+    return { error: error.message };
   }
 }
 
 // Ottieni il contenuto del file di backup
 async function getBackupFileContent(fileId, token) {
   try {
+    if (!fileId) {
+      console.error('ID file non valido per il recupero del contenuto');
+      throw new Error('ID file non valido');
+    }
+    
+    console.log('Recupero contenuto file di backup:', fileId);
+    
     const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -692,13 +848,26 @@ async function getBackupFileContent(fileId, token) {
     });
     
     if (!response.ok) {
+      console.error(`Errore HTTP durante il recupero del contenuto: ${response.status}`);
+      const errorText = await response.text();
+      console.error('Dettagli errore:', errorText);
       throw new Error(`Errore HTTP: ${response.status}`);
     }
     
-    return await response.json();
+    // Prova a interpretare la risposta come JSON
+    try {
+      const jsonData = await response.json();
+      console.log('Contenuto file recuperato con successo (JSON)');
+      return jsonData;
+    } catch (jsonError) {
+      // Se non è JSON, restituisci il testo
+      console.log('Contenuto file non è JSON, restituisco come testo');
+      const textData = await response.text();
+      return textData;
+    }
   } catch (error) {
     console.error('Errore durante il recupero del contenuto del file di backup:', error);
-    throw error;
+    return null;
   }
 }
 
