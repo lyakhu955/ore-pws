@@ -12951,15 +12951,53 @@ END:VCARD`;
     <script src="firebase-auth.js"></script>
     
     <script>
+        // Funzione per verificare se Firebase è caricato correttamente
+        function checkFirebaseLoaded() {
+            if (typeof firebase !== 'undefined') {
+                console.log('Firebase caricato correttamente');
+                return true;
+            } else {
+                console.error('Firebase non caricato correttamente');
+                return false;
+            }
+        }
+        
         // Inizializza Firebase quando il documento è pronto
         document.addEventListener('DOMContentLoaded', function() {
-            // Inizializza Firebase
-            initFirebase();
+            console.log('DOM caricato, inizializzazione Firebase...');
             
-            // Verifica lo stato di autenticazione ogni volta che la pagina viene caricata
-            // Questo aiuterà a mantenere la sessione attiva
-            if (typeof checkAuthState === 'function') {
-                checkAuthState();
+            // Verifica se Firebase è caricato
+            if (checkFirebaseLoaded()) {
+                // Inizializza Firebase
+                if (typeof initFirebase === 'function') {
+                    console.log('Chiamata a initFirebase()');
+                    initFirebase();
+                } else {
+                    console.error('La funzione initFirebase non è definita');
+                }
+                
+                // Verifica lo stato di autenticazione ogni volta che la pagina viene caricata
+                if (typeof checkAuthState === 'function') {
+                    console.log('Chiamata a checkAuthState()');
+                    setTimeout(checkAuthState, 1000); // Piccolo ritardo per assicurarsi che Firebase sia completamente inizializzato
+                } else {
+                    console.error('La funzione checkAuthState non è definita');
+                }
+            } else {
+                // Riprova dopo un breve ritardo
+                setTimeout(function() {
+                    if (checkFirebaseLoaded()) {
+                        if (typeof initFirebase === 'function') {
+                            initFirebase();
+                            
+                            if (typeof checkAuthState === 'function') {
+                                setTimeout(checkAuthState, 1000);
+                            }
+                        }
+                    } else {
+                        console.error('Firebase non disponibile anche dopo il ritardo');
+                    }
+                }, 2000);
             }
         });
     </script>
