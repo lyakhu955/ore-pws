@@ -36,7 +36,27 @@ function initFirebase() {
     .then((result) => {
       if (result.user) {
         console.log('Login completato tramite redirect');
-        showToast("Accesso effettuato con successo!", "success");
+        
+        // Crea un elemento di notifica visibile
+        const notification = document.createElement('div');
+        notification.textContent = "Accesso effettuato con successo!";
+        notification.style.position = 'fixed';
+        notification.style.top = '50%';
+        notification.style.left = '50%';
+        notification.style.transform = 'translate(-50%, -50%)';
+        notification.style.backgroundColor = 'rgba(76, 175, 80, 0.9)';
+        notification.style.color = 'white';
+        notification.style.padding = '20px';
+        notification.style.borderRadius = '8px';
+        notification.style.zIndex = '10000';
+        document.body.appendChild(notification);
+        
+        // Rimuovi la notifica dopo 2 secondi
+        setTimeout(() => {
+          if (document.body.contains(notification)) {
+            document.body.removeChild(notification);
+          }
+        }, 2000);
         
         // Salva il token nel localStorage per il sistema esistente
         if (result.credential && result.credential.accessToken) {
@@ -57,7 +77,26 @@ function initFirebase() {
     .catch((error) => {
       console.error('Errore durante il recupero del risultato del redirect:', error);
       if (error.code !== 'auth/credential-already-in-use') {
-        showToast("Errore durante l'accesso: " + error.message, "error");
+        // Crea un elemento di notifica visibile per l'errore
+        const errorNotification = document.createElement('div');
+        errorNotification.textContent = "Errore durante l'accesso: " + error.message;
+        errorNotification.style.position = 'fixed';
+        errorNotification.style.top = '50%';
+        errorNotification.style.left = '50%';
+        errorNotification.style.transform = 'translate(-50%, -50%)';
+        errorNotification.style.backgroundColor = 'rgba(244, 67, 54, 0.9)';
+        errorNotification.style.color = 'white';
+        errorNotification.style.padding = '20px';
+        errorNotification.style.borderRadius = '8px';
+        errorNotification.style.zIndex = '10000';
+        document.body.appendChild(errorNotification);
+        
+        // Rimuovi la notifica dopo 3 secondi
+        setTimeout(() => {
+          if (document.body.contains(errorNotification)) {
+            document.body.removeChild(errorNotification);
+          }
+        }, 3000);
       }
     });
   
@@ -230,8 +269,26 @@ function checkAuthState() {
 function loginWithGoogle() {
   console.log('Tentativo di login con Google via Firebase...');
   
-  // Mostra un messaggio all'utente
-  showToast("Apertura pagina di accesso Google...", "info");
+  // Crea un elemento di notifica visibile
+  const notification = document.createElement('div');
+  notification.textContent = "Apertura pagina di accesso Google...";
+  notification.style.position = 'fixed';
+  notification.style.top = '50%';
+  notification.style.left = '50%';
+  notification.style.transform = 'translate(-50%, -50%)';
+  notification.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+  notification.style.color = 'white';
+  notification.style.padding = '20px';
+  notification.style.borderRadius = '8px';
+  notification.style.zIndex = '10000';
+  document.body.appendChild(notification);
+  
+  // Rimuovi la notifica dopo 3 secondi
+  setTimeout(() => {
+    if (document.body.contains(notification)) {
+      document.body.removeChild(notification);
+    }
+  }, 3000);
   
   const provider = new firebase.auth.GoogleAuthProvider();
   
@@ -245,78 +302,114 @@ function loginWithGoogle() {
     access_type: 'offline'
   });
   
-  // Determina se usare il popup o il redirect in base al dispositivo
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  // Usa sempre il metodo redirect per evitare problemi con i popup
+  console.log('Utilizzo metodo redirect per l\'autenticazione');
   
-  if (isMobile) {
-    // Su dispositivi mobili, usa il redirect per evitare problemi con i popup
-    console.log('Utilizzo metodo redirect per dispositivi mobili');
-    
-    // Salva lo stato corrente per tornare alla stessa pagina dopo il login
-    localStorage.setItem('auth_redirect_state', window.location.href);
-    
-    // Usa il metodo redirect
+  // Salva lo stato corrente per tornare alla stessa pagina dopo il login
+  localStorage.setItem('auth_redirect_state', window.location.href);
+  
+  // Usa il metodo redirect
+  try {
     firebase.auth().signInWithRedirect(provider)
       .catch((error) => {
         console.error('Errore durante il redirect per login Firebase:', error);
-        showToast("Errore durante l'accesso: " + error.message, "error");
+        
+        // Mostra un messaggio di errore
+        const errorNotification = document.createElement('div');
+        errorNotification.textContent = "Errore durante l'accesso: " + error.message;
+        errorNotification.style.position = 'fixed';
+        errorNotification.style.top = '50%';
+        errorNotification.style.left = '50%';
+        errorNotification.style.transform = 'translate(-50%, -50%)';
+        errorNotification.style.backgroundColor = 'rgba(244, 67, 54, 0.9)';
+        errorNotification.style.color = 'white';
+        errorNotification.style.padding = '20px';
+        errorNotification.style.borderRadius = '8px';
+        errorNotification.style.zIndex = '10000';
+        document.body.appendChild(errorNotification);
+        
+        // Rimuovi la notifica dopo 5 secondi
+        setTimeout(() => {
+          if (document.body.contains(errorNotification)) {
+            document.body.removeChild(errorNotification);
+          }
+        }, 5000);
       });
-  } else {
-    // Su desktop, prova prima con il popup
-    console.log('Tentativo di login con popup su desktop');
+  } catch (e) {
+    console.error('Eccezione durante il tentativo di login:', e);
     
-    try {
-      firebase.auth().signInWithPopup(provider)
-        .then((result) => {
-          // Login completato con successo
-          console.log('Login Firebase completato con successo');
-          showToast("Accesso effettuato con successo!", "success");
-          
-          // Salva il token nel localStorage per il sistema esistente
-          if (result.credential && result.credential.accessToken) {
-            localStorage.setItem('googleAuthToken', result.credential.accessToken);
-          }
-        })
-        .catch((error) => {
-          console.error('Errore durante il login Firebase con popup:', error);
-          
-          // Se il popup è stato bloccato, prova con il redirect
-          if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user' || error.message.includes('popup')) {
-            console.log('Popup bloccato, passaggio al metodo redirect');
-            showToast("Il popup è stato bloccato. Utilizzo metodo alternativo...", "warning");
-            
-            // Salva lo stato corrente
-            localStorage.setItem('auth_redirect_state', window.location.href);
-            
-            // Breve ritardo prima del redirect
-            setTimeout(() => {
-              firebase.auth().signInWithRedirect(provider);
-            }, 1000);
-          } else {
-            showToast("Errore durante l'accesso: " + error.message, "error");
-          }
-        });
-    } catch (e) {
-      console.error('Eccezione durante il tentativo di login:', e);
-      showToast("Errore imprevisto durante l'accesso. Riprova più tardi.", "error");
-    }
+    // Mostra un messaggio di errore
+    const errorNotification = document.createElement('div');
+    errorNotification.textContent = "Errore imprevisto durante l'accesso. Riprova più tardi.";
+    errorNotification.style.position = 'fixed';
+    errorNotification.style.top = '50%';
+    errorNotification.style.left = '50%';
+    errorNotification.style.transform = 'translate(-50%, -50%)';
+    errorNotification.style.backgroundColor = 'rgba(244, 67, 54, 0.9)';
+    errorNotification.style.color = 'white';
+    errorNotification.style.padding = '20px';
+    errorNotification.style.borderRadius = '8px';
+    errorNotification.style.zIndex = '10000';
+    document.body.appendChild(errorNotification);
+    
+    // Rimuovi la notifica dopo 5 secondi
+    setTimeout(() => {
+      if (document.body.contains(errorNotification)) {
+        document.body.removeChild(errorNotification);
+      }
+    }, 5000);
   }
 }
 
 // Effettua il logout
 function logoutFromGoogle() {
   console.log('Tentativo di logout da Google via Firebase...');
+  
+  // Crea un elemento di notifica visibile
+  const notification = document.createElement('div');
+  notification.textContent = "Disconnessione in corso...";
+  notification.style.position = 'fixed';
+  notification.style.top = '50%';
+  notification.style.left = '50%';
+  notification.style.transform = 'translate(-50%, -50%)';
+  notification.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+  notification.style.color = 'white';
+  notification.style.padding = '20px';
+  notification.style.borderRadius = '8px';
+  notification.style.zIndex = '10000';
+  document.body.appendChild(notification);
+  
   firebase.auth().signOut()
     .then(() => {
       console.log('Logout Firebase completato con successo');
-      showToast("Disconnessione effettuata con successo", "info");
       
       // Rimuovi il token dal localStorage
       localStorage.removeItem('googleAuthToken');
+      
+      // Aggiorna la notifica
+      notification.textContent = "Disconnessione effettuata con successo";
+      notification.style.backgroundColor = 'rgba(76, 175, 80, 0.9)';
+      
+      // Rimuovi la notifica dopo 2 secondi
+      setTimeout(() => {
+        if (document.body.contains(notification)) {
+          document.body.removeChild(notification);
+        }
+      }, 2000);
     })
     .catch((error) => {
       console.error('Errore durante il logout Firebase:', error);
-      showToast("Errore durante la disconnessione: " + error.message, "error");
+      
+      // Aggiorna la notifica con l'errore
+      notification.textContent = "Errore durante la disconnessione: " + error.message;
+      notification.style.backgroundColor = 'rgba(244, 67, 54, 0.9)';
+      
+      // Rimuovi la notifica dopo 3 secondi
+      setTimeout(() => {
+        if (document.body.contains(notification)) {
+          document.body.removeChild(notification);
+        }
+      }, 3000);
     });
 }
 
@@ -424,56 +517,45 @@ async function restoreFromGoogleDrive() {
   }
 }
 
-// Funzione per mostrare toast (assicurati che esista nel tuo codice)
+// Funzione per mostrare toast (implementazione sicura)
 function showToast(message, type = "info") {
-  // Evita la ricorsione infinita
-  if (window._showingToast) {
-    console.log(`[${type.toUpperCase()}] ${message}`);
-    return;
-  }
+  // Sempre loggare il messaggio
+  console.log(`[TOAST-${type.toUpperCase()}] ${message}`);
   
-  window._showingToast = true;
+  // Evita completamente di usare la funzione showToast globale
+  // per prevenire qualsiasi possibilità di ricorsione
   
+  // Crea un elemento toast semplice
   try {
-    // Verifica se esiste già una funzione showToast nel codice principale
-    // e se è diversa da questa funzione
-    if (typeof window.originalShowToast === 'function') {
-      window.originalShowToast(message, type);
-    } else {
-      // Implementazione di fallback
-      console.log(`[${type.toUpperCase()}] ${message}`);
-      
-      // Crea un elemento toast semplice se non esiste la funzione
-      const toast = document.createElement('div');
-      toast.className = `toast toast-${type}`;
-      toast.textContent = message;
-      toast.style.position = 'fixed';
-      toast.style.bottom = '20px';
-      toast.style.right = '20px';
-      toast.style.padding = '10px 20px';
-      toast.style.borderRadius = '4px';
-      toast.style.backgroundColor = type === 'error' ? '#f44336' : 
-                                   type === 'success' ? '#4caf50' : 
-                                   type === 'warning' ? '#ff9800' : '#2196f3';
-      toast.style.color = 'white';
-      toast.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
-      toast.style.zIndex = '10000';
-      
-      document.body.appendChild(toast);
-      
-      // Rimuovi il toast dopo 3 secondi
+    const toast = document.createElement('div');
+    toast.className = `firebase-toast firebase-toast-${type}`;
+    toast.textContent = message;
+    toast.style.position = 'fixed';
+    toast.style.bottom = '20px';
+    toast.style.right = '20px';
+    toast.style.padding = '10px 20px';
+    toast.style.borderRadius = '4px';
+    toast.style.backgroundColor = type === 'error' ? '#f44336' : 
+                                 type === 'success' ? '#4caf50' : 
+                                 type === 'warning' ? '#ff9800' : '#2196f3';
+    toast.style.color = 'white';
+    toast.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+    toast.style.zIndex = '10000';
+    
+    document.body.appendChild(toast);
+    
+    // Rimuovi il toast dopo 3 secondi
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transition = 'opacity 0.5s ease';
       setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.5s ease';
-        setTimeout(() => {
-          if (document.body.contains(toast)) {
-            document.body.removeChild(toast);
-          }
-        }, 500);
-      }, 3000);
-    }
-  } finally {
-    window._showingToast = false;
+        if (document.body.contains(toast)) {
+          document.body.removeChild(toast);
+        }
+      }, 500);
+    }, 3000);
+  } catch (error) {
+    console.error('Errore durante la visualizzazione del toast:', error);
   }
 }
 
