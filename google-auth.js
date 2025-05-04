@@ -258,52 +258,95 @@ function logoutFromGoogle() {
   // Pulisci i dati di autenticazione prima di tutto
   clearAuthData();
   
-  // Aggiorna l'interfaccia utente
-  updateUI(false);
+  // Aggiorna direttamente l'interfaccia utente senza chiamare updateUI
+  try {
+    // Aggiorna il pulsante di login nella barra di navigazione
+    const loginButton = document.getElementById('loginButton');
+    if (loginButton) {
+      loginButton.style.display = '';
+    }
+    
+    // Aggiorna i pulsanti di login
+    const loginButtonsContainer = document.getElementById('loginButtonsContainer');
+    if (loginButtonsContainer) {
+      loginButtonsContainer.style.display = 'flex';
+    }
+    
+    // Aggiorna le informazioni dell'account
+    const accountSection = document.getElementById('cloudAccountSection');
+    const accountInfo = document.getElementById('cloudAccountInfo');
+    const logoutBtn = document.getElementById('cloudLogoutBtn');
+    
+    if (accountSection) {
+      accountSection.style.display = 'none';
+    }
+    
+    if (accountInfo) {
+      accountInfo.innerHTML = '';
+    }
+    
+    if (logoutBtn) {
+      logoutBtn.style.display = 'none';
+    }
+  } catch (uiError) {
+    console.error('Errore durante l\'aggiornamento dell\'interfaccia utente:', uiError);
+  }
   
   // Mostra un messaggio di successo
   try {
     console.log('Disconnessione effettuata con successo');
-    // Crea un toast manualmente invece di usare la funzione showToast
-    const toast = document.createElement('div');
-    toast.className = 'toast toast-info';
-    toast.textContent = 'Disconnessione effettuata con successo';
-    toast.style.position = 'fixed';
-    toast.style.bottom = '20px';
-    toast.style.right = '20px';
-    toast.style.padding = '10px 20px';
-    toast.style.borderRadius = '4px';
-    toast.style.backgroundColor = '#2196F3';
-    toast.style.color = 'white';
-    toast.style.zIndex = '10000';
-    toast.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
     
-    // Aggiungi il toast al documento
-    document.body.appendChild(toast);
+    // Usa console.log come fallback sicuro
+    console.log('INFO: Disconnessione effettuata con successo');
     
-    // Rimuovi il toast dopo 3 secondi
-    setTimeout(() => {
-      if (document.body.contains(toast)) {
-        document.body.removeChild(toast);
-      }
-    }, 3000);
+    // Crea un toast manualmente senza usare la funzione showToast
+    try {
+      const toast = document.createElement('div');
+      toast.className = 'toast toast-info';
+      toast.textContent = 'Disconnessione effettuata con successo';
+      toast.style.position = 'fixed';
+      toast.style.bottom = '20px';
+      toast.style.right = '20px';
+      toast.style.padding = '10px 20px';
+      toast.style.borderRadius = '4px';
+      toast.style.backgroundColor = '#2196F3';
+      toast.style.color = 'white';
+      toast.style.zIndex = '10000';
+      toast.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+      
+      // Aggiungi il toast al documento
+      document.body.appendChild(toast);
+      
+      // Rimuovi il toast dopo 3 secondi
+      setTimeout(() => {
+        if (document.body.contains(toast)) {
+          document.body.removeChild(toast);
+        }
+      }, 3000);
+    } catch (toastError) {
+      console.error('Errore durante la creazione del toast:', toastError);
+    }
   } catch (error) {
-    console.error('Errore durante la visualizzazione del toast:', error);
+    console.error('Errore durante la visualizzazione del messaggio di logout:', error);
   }
   
   // Ottieni il token corrente e revocalo in background
-  const savedTokenStr = localStorage.getItem('googleAuthToken');
-  if (savedTokenStr && typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
-    try {
-      const tokenData = JSON.parse(savedTokenStr);
-      
-      // Revoca il token in background
-      google.accounts.oauth2.revoke(tokenData.access_token, done => {
-        console.log('Revoca token completata:', done);
-      });
-    } catch (error) {
-      console.error('Errore durante la revoca del token:', error);
+  try {
+    const savedTokenStr = localStorage.getItem('googleAuthToken');
+    if (savedTokenStr && typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+      try {
+        const tokenData = JSON.parse(savedTokenStr);
+        
+        // Revoca il token in background
+        google.accounts.oauth2.revoke(tokenData.access_token, done => {
+          console.log('Revoca token completata:', done);
+        });
+      } catch (error) {
+        console.error('Errore durante la revoca del token:', error);
+      }
     }
+  } catch (error) {
+    console.error('Errore durante il processo di revoca del token:', error);
   }
 }
 
@@ -360,100 +403,176 @@ function setupTokenRefresh(expiresAt) {
 
 // Aggiorna l'interfaccia utente
 function updateUI(isAuthenticated) {
-  // Aggiorna l'interfaccia utente in base allo stato di autenticazione
-  if (typeof window.updateCloudAccountUI === 'function') {
-    window.updateCloudAccountUI();
-  }
-  
-  // Aggiorna il pulsante di login nella barra di navigazione
-  const loginButton = document.getElementById('loginButton');
-  if (loginButton) {
-    if (isAuthenticated) {
-      loginButton.style.display = 'none';
-    } else {
-      loginButton.style.display = '';
+  try {
+    // Aggiorna il pulsante di login nella barra di navigazione
+    const loginButton = document.getElementById('loginButton');
+    if (loginButton) {
+      if (isAuthenticated) {
+        loginButton.style.display = 'none';
+      } else {
+        loginButton.style.display = '';
+      }
     }
-  }
-  
-  // Aggiorna i pulsanti di login
-  const loginButtonsContainer = document.getElementById('loginButtonsContainer');
-  if (loginButtonsContainer) {
-    if (isAuthenticated) {
-      loginButtonsContainer.style.display = 'none';
-    } else {
-      loginButtonsContainer.style.display = 'flex';
+    
+    // Aggiorna i pulsanti di login
+    const loginButtonsContainer = document.getElementById('loginButtonsContainer');
+    if (loginButtonsContainer) {
+      if (isAuthenticated) {
+        loginButtonsContainer.style.display = 'none';
+      } else {
+        loginButtonsContainer.style.display = 'flex';
+      }
     }
-  }
-  
-  // Aggiorna le informazioni dell'account
-  const accountSection = document.getElementById('cloudAccountSection');
-  const accountInfo = document.getElementById('cloudAccountInfo');
-  const logoutBtn = document.getElementById('cloudLogoutBtn');
-  
-  if (accountSection && accountInfo && logoutBtn) {
-    if (isAuthenticated && currentUser) {
-      accountSection.style.display = 'block';
-      
-      accountInfo.innerHTML = `
-        <div class="user-profile">
-          ${currentUser.picture ? `<img src="${currentUser.picture}" alt="${currentUser.name}" class="user-avatar">` : ''}
-          <div class="user-details">
-            <div class="user-name">${currentUser.name}</div>
-            <div class="user-email">${currentUser.email}</div>
+    
+    // Aggiorna le informazioni dell'account
+    const accountSection = document.getElementById('cloudAccountSection');
+    const accountInfo = document.getElementById('cloudAccountInfo');
+    const logoutBtn = document.getElementById('cloudLogoutBtn');
+    
+    if (accountSection && accountInfo && logoutBtn) {
+      if (isAuthenticated && currentUser) {
+        accountSection.style.display = 'block';
+        
+        accountInfo.innerHTML = `
+          <div class="user-profile">
+            ${currentUser.picture ? `<img src="${currentUser.picture}" alt="${currentUser.name}" class="user-avatar">` : ''}
+            <div class="user-details">
+              <div class="user-name">${currentUser.name}</div>
+              <div class="user-email">${currentUser.email}</div>
+            </div>
           </div>
-        </div>
-      `;
-      
-      logoutBtn.style.display = 'flex';
-      logoutBtn.onclick = logoutFromGoogle;
-    } else {
-      accountSection.style.display = 'none';
-      accountInfo.innerHTML = '';
-      logoutBtn.style.display = 'none';
+        `;
+        
+        logoutBtn.style.display = 'flex';
+        // Assegna la funzione di logout direttamente, senza usare logoutFromGoogle
+        logoutBtn.onclick = function() {
+          // Pulisci i dati di autenticazione
+          localStorage.removeItem('googleAuthToken');
+          localStorage.removeItem('googleUserInfo');
+          
+          // Reimposta le variabili globali
+          isLoggedIn = false;
+          currentUser = null;
+          
+          // Aggiorna l'interfaccia utente
+          if (loginButton) loginButton.style.display = '';
+          if (loginButtonsContainer) loginButtonsContainer.style.display = 'flex';
+          if (accountSection) accountSection.style.display = 'none';
+          if (accountInfo) accountInfo.innerHTML = '';
+          if (logoutBtn) logoutBtn.style.display = 'none';
+          
+          // Mostra un messaggio di successo
+          console.log('Disconnessione effettuata con successo');
+          
+          // Crea un toast manualmente
+          try {
+            const toast = document.createElement('div');
+            toast.className = 'toast toast-info';
+            toast.textContent = 'Disconnessione effettuata con successo';
+            toast.style.position = 'fixed';
+            toast.style.bottom = '20px';
+            toast.style.right = '20px';
+            toast.style.padding = '10px 20px';
+            toast.style.borderRadius = '4px';
+            toast.style.backgroundColor = '#2196F3';
+            toast.style.color = 'white';
+            toast.style.zIndex = '10000';
+            toast.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+            
+            // Aggiungi il toast al documento
+            document.body.appendChild(toast);
+            
+            // Rimuovi il toast dopo 3 secondi
+            setTimeout(() => {
+              if (document.body.contains(toast)) {
+                document.body.removeChild(toast);
+              }
+            }, 3000);
+          } catch (toastError) {
+            console.error('Errore durante la creazione del toast:', toastError);
+          }
+          
+          // Revoca il token in background
+          try {
+            const savedTokenStr = localStorage.getItem('googleAuthToken');
+            if (savedTokenStr && typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+              const tokenData = JSON.parse(savedTokenStr);
+              google.accounts.oauth2.revoke(tokenData.access_token, done => {
+                console.log('Revoca token completata:', done);
+              });
+            }
+          } catch (error) {
+            console.error('Errore durante la revoca del token:', error);
+          }
+        };
+      } else {
+        accountSection.style.display = 'none';
+        accountInfo.innerHTML = '';
+        logoutBtn.style.display = 'none';
+      }
     }
+    
+    // Non chiamiamo più updateCloudAccountUI da qui per evitare ricorsione
+    // Invece, aggiorniamo direttamente gli elementi dell'interfaccia utente
+  } catch (error) {
+    console.error('Errore durante l\'aggiornamento dell\'interfaccia utente:', error);
   }
 }
 
 // Mostra un toast
 function showToast(message, type = 'info', duration = 3000, onClick = null) {
-  // Verifica se esiste già una funzione showToast globale (ma non questa funzione)
+  // Verifica se esiste già una funzione showToast globale
+  if (typeof window.showToast === 'function' && window.showToast !== showToast) {
+    // Usa la funzione globale se esiste ed è diversa da questa
+    window.showToast(message, type, duration, onClick);
+    return;
+  }
+  
+  // Verifica se esiste la funzione showToastGlobal
   if (typeof window.showToastGlobal === 'function') {
     window.showToastGlobal(message, type, duration);
     return;
   }
   
-  // Crea un elemento toast
-  const toast = document.createElement('div');
-  toast.className = `toast toast-${type}`;
-  toast.textContent = message;
-  toast.style.position = 'fixed';
-  toast.style.bottom = '20px';
-  toast.style.right = '20px';
-  toast.style.padding = '10px 20px';
-  toast.style.borderRadius = '4px';
-  toast.style.backgroundColor = type === 'success' ? '#4CAF50' : 
-                               type === 'error' ? '#F44336' : 
-                               type === 'warning' ? '#FF9800' : '#2196F3';
-  toast.style.color = 'white';
-  toast.style.zIndex = '10000';
-  toast.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
-  toast.style.cursor = onClick ? 'pointer' : 'default';
-  
-  // Aggiungi l'evento click
-  if (onClick) {
-    toast.addEventListener('click', onClick);
-  }
-  
-  // Aggiungi il toast al documento
-  document.body.appendChild(toast);
-  
-  // Rimuovi il toast dopo la durata specificata
-  if (duration > 0) {
-    setTimeout(() => {
-      if (document.body.contains(toast)) {
-        document.body.removeChild(toast);
-      }
-    }, duration);
+  // Implementazione di fallback se nessuna funzione globale è disponibile
+  try {
+    // Crea un elemento toast
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    toast.style.position = 'fixed';
+    toast.style.bottom = '20px';
+    toast.style.right = '20px';
+    toast.style.padding = '10px 20px';
+    toast.style.borderRadius = '4px';
+    toast.style.backgroundColor = type === 'success' ? '#4CAF50' : 
+                                 type === 'error' ? '#F44336' : 
+                                 type === 'warning' ? '#FF9800' : '#2196F3';
+    toast.style.color = 'white';
+    toast.style.zIndex = '10000';
+    toast.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+    toast.style.cursor = onClick ? 'pointer' : 'default';
+    
+    // Aggiungi l'evento click
+    if (onClick) {
+      toast.addEventListener('click', onClick);
+    }
+    
+    // Aggiungi il toast al documento
+    document.body.appendChild(toast);
+    
+    // Rimuovi il toast dopo la durata specificata
+    if (duration > 0) {
+      setTimeout(() => {
+        if (document.body.contains(toast)) {
+          document.body.removeChild(toast);
+        }
+      }, duration);
+    }
+  } catch (error) {
+    // In caso di errore, usa console.log come fallback
+    console.log(`${type.toUpperCase()}: ${message}`);
+    console.error('Errore durante la visualizzazione del toast:', error);
   }
 }
 
@@ -906,7 +1025,97 @@ window.fetch = function(url, options) {
 window.googleAuth = {
   init: initGoogleAuth,
   login: loginWithGoogle,
-  logout: logoutFromGoogle,
+  // Implementazione sicura di logout che non causa ricorsione
+  logout: function() {
+    if (!isLoggedIn) {
+      console.log('Utente già disconnesso');
+      return;
+    }
+    
+    console.log('Tentativo di logout sicuro...');
+    
+    // Pulisci i dati di autenticazione
+    localStorage.removeItem('googleAuthToken');
+    localStorage.removeItem('googleUserInfo');
+    
+    // Reimposta le variabili globali
+    isLoggedIn = false;
+    currentUser = null;
+    
+    // Aggiorna direttamente l'interfaccia utente
+    try {
+      // Aggiorna il pulsante di login nella barra di navigazione
+      const loginButton = document.getElementById('loginButton');
+      if (loginButton) {
+        loginButton.style.display = '';
+      }
+      
+      // Aggiorna i pulsanti di login
+      const loginButtonsContainer = document.getElementById('loginButtonsContainer');
+      if (loginButtonsContainer) {
+        loginButtonsContainer.style.display = 'flex';
+      }
+      
+      // Aggiorna le informazioni dell'account
+      const accountSection = document.getElementById('cloudAccountSection');
+      const accountInfo = document.getElementById('cloudAccountInfo');
+      const logoutBtn = document.getElementById('cloudLogoutBtn');
+      
+      if (accountSection) {
+        accountSection.style.display = 'none';
+      }
+      
+      if (accountInfo) {
+        accountInfo.innerHTML = '';
+      }
+      
+      if (logoutBtn) {
+        logoutBtn.style.display = 'none';
+      }
+      
+      // Mostra un messaggio di successo
+      console.log('Disconnessione effettuata con successo');
+      
+      // Crea un toast manualmente
+      const toast = document.createElement('div');
+      toast.className = 'toast toast-info';
+      toast.textContent = 'Disconnessione effettuata con successo';
+      toast.style.position = 'fixed';
+      toast.style.bottom = '20px';
+      toast.style.right = '20px';
+      toast.style.padding = '10px 20px';
+      toast.style.borderRadius = '4px';
+      toast.style.backgroundColor = '#2196F3';
+      toast.style.color = 'white';
+      toast.style.zIndex = '10000';
+      toast.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+      
+      // Aggiungi il toast al documento
+      document.body.appendChild(toast);
+      
+      // Rimuovi il toast dopo 3 secondi
+      setTimeout(() => {
+        if (document.body.contains(toast)) {
+          document.body.removeChild(toast);
+        }
+      }, 3000);
+    } catch (error) {
+      console.error('Errore durante l\'aggiornamento dell\'interfaccia utente:', error);
+    }
+    
+    // Revoca il token in background
+    try {
+      const savedTokenStr = localStorage.getItem('googleAuthToken');
+      if (savedTokenStr && typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+        const tokenData = JSON.parse(savedTokenStr);
+        google.accounts.oauth2.revoke(tokenData.access_token, done => {
+          console.log('Revoca token completata:', done);
+        });
+      }
+    } catch (error) {
+      console.error('Errore durante la revoca del token:', error);
+    }
+  },
   isLoggedIn: () => isLoggedIn,
   getCurrentUser: () => currentUser,
   getUserEmail: () => userEmail,
