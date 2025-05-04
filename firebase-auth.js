@@ -91,28 +91,25 @@ function handleAuthStateChanged(user) {
       });
     }
     
-    // Crea l'oggetto cloudManager se non esiste
-    if (!window.cloudManager) {
-      console.log('Creazione oggetto cloudManager per compatibilità');
-      window.cloudManager = {
-        getCurrentProvider: function() {
-          return 'firebase';
-        },
-        isAuthenticated: function() {
-          return true;
-        },
-        getUserInfo: function() {
-          return {
-            email: user.email,
-            name: user.displayName || user.email,
-            photoUrl: user.photoURL
-          };
-        },
-        checkAuthStatus: function() {
-          return Promise.resolve(true);
-        }
+    // Aggiorna l'oggetto cloudManager
+    console.log('Aggiornamento oggetto cloudManager per utente autenticato');
+    window.cloudManager = window.cloudManager || {};
+    window.cloudManager.getCurrentProvider = function() {
+      return 'firebase';
+    };
+    window.cloudManager.isAuthenticated = function() {
+      return true;
+    };
+    window.cloudManager.getUserInfo = function() {
+      return {
+        email: user.email,
+        name: user.displayName || user.email,
+        photoUrl: user.photoURL
       };
-    }
+    };
+    window.cloudManager.checkAuthStatus = function() {
+      return Promise.resolve(true);
+    };
     
     // Aggiorna l'interfaccia utente se la funzione esiste
     if (typeof window.updateFirebaseUI === 'function') {
@@ -139,24 +136,21 @@ function handleAuthStateChanged(user) {
       localStorage.removeItem('googleAuthToken');
     }
     
-    // Crea l'oggetto cloudManager se non esiste
-    if (!window.cloudManager) {
-      console.log('Creazione oggetto cloudManager vuoto per compatibilità');
-      window.cloudManager = {
-        getCurrentProvider: function() {
-          return null;
-        },
-        isAuthenticated: function() {
-          return false;
-        },
-        getUserInfo: function() {
-          return null;
-        },
-        checkAuthStatus: function() {
-          return Promise.resolve(false);
-        }
-      };
-    }
+    // Aggiorna l'oggetto cloudManager
+    console.log('Aggiornamento oggetto cloudManager per utente non autenticato');
+    window.cloudManager = window.cloudManager || {};
+    window.cloudManager.getCurrentProvider = function() {
+      return null;
+    };
+    window.cloudManager.isAuthenticated = function() {
+      return false;
+    };
+    window.cloudManager.getUserInfo = function() {
+      return null;
+    };
+    window.cloudManager.checkAuthStatus = function() {
+      return Promise.resolve(false);
+    };
     
     // Aggiorna l'interfaccia utente se la funzione esiste
     if (typeof window.updateFirebaseUI === 'function') {
@@ -432,74 +426,117 @@ async function restoreFromGoogleDrive() {
 
 // Funzione per mostrare toast (assicurati che esista nel tuo codice)
 function showToast(message, type = "info") {
-  // Verifica se esiste già una funzione showToast nel codice principale
-  if (typeof window.showToast === 'function') {
-    window.showToast(message, type);
-  } else {
-    // Implementazione di fallback
+  // Evita la ricorsione infinita
+  if (window._showingToast) {
     console.log(`[${type.toUpperCase()}] ${message}`);
-    
-    // Crea un elemento toast semplice se non esiste la funzione
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.textContent = message;
-    toast.style.position = 'fixed';
-    toast.style.bottom = '20px';
-    toast.style.right = '20px';
-    toast.style.padding = '10px 20px';
-    toast.style.borderRadius = '4px';
-    toast.style.backgroundColor = type === 'error' ? '#f44336' : 
-                                 type === 'success' ? '#4caf50' : 
-                                 type === 'warning' ? '#ff9800' : '#2196f3';
-    toast.style.color = 'white';
-    toast.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
-    toast.style.zIndex = '10000';
-    
-    document.body.appendChild(toast);
-    
-    // Rimuovi il toast dopo 3 secondi
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transition = 'opacity 0.5s ease';
+    return;
+  }
+  
+  window._showingToast = true;
+  
+  try {
+    // Verifica se esiste già una funzione showToast nel codice principale
+    // e se è diversa da questa funzione
+    if (typeof window.originalShowToast === 'function') {
+      window.originalShowToast(message, type);
+    } else {
+      // Implementazione di fallback
+      console.log(`[${type.toUpperCase()}] ${message}`);
+      
+      // Crea un elemento toast semplice se non esiste la funzione
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.textContent = message;
+      toast.style.position = 'fixed';
+      toast.style.bottom = '20px';
+      toast.style.right = '20px';
+      toast.style.padding = '10px 20px';
+      toast.style.borderRadius = '4px';
+      toast.style.backgroundColor = type === 'error' ? '#f44336' : 
+                                   type === 'success' ? '#4caf50' : 
+                                   type === 'warning' ? '#ff9800' : '#2196f3';
+      toast.style.color = 'white';
+      toast.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+      toast.style.zIndex = '10000';
+      
+      document.body.appendChild(toast);
+      
+      // Rimuovi il toast dopo 3 secondi
       setTimeout(() => {
-        document.body.removeChild(toast);
-      }, 500);
-    }, 3000);
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.5s ease';
+        setTimeout(() => {
+          if (document.body.contains(toast)) {
+            document.body.removeChild(toast);
+          }
+        }, 500);
+      }, 3000);
+    }
+  } finally {
+    window._showingToast = false;
   }
 }
 
-// Inizializza l'oggetto cloudManager globale se non esiste
-if (!window.cloudManager) {
-  console.log('Inizializzazione oggetto cloudManager globale');
-  window.cloudManager = {
-    getCurrentProvider: function() { return null; },
-    isAuthenticated: function() { return false; },
-    getUserInfo: function() { return null; },
-    checkAuthStatus: function() { return Promise.resolve(false); }
-  };
+// Inizializza l'oggetto cloudManager globale
+console.log('Inizializzazione oggetto cloudManager globale');
+window.cloudManager = {
+  getCurrentProvider: function() { 
+    return firebase.auth().currentUser ? 'firebase' : null; 
+  },
+  isAuthenticated: function() { 
+    return firebase.auth().currentUser !== null; 
+  },
+  getUserInfo: function() { 
+    const user = firebase.auth().currentUser;
+    if (!user) return null;
+    return {
+      email: user.email,
+      name: user.displayName || user.email,
+      photoUrl: user.photoURL
+    };
+  },
+  checkAuthStatus: function() { 
+    return Promise.resolve(firebase.auth().currentUser !== null); 
+  }
+};
+
+// Funzione per inizializzare Firebase in modo sicuro
+function safeInitFirebase() {
+  // Verifica se Firebase è già caricato
+  if (typeof firebase === 'undefined') {
+    console.error('Firebase non è stato caricato correttamente');
+    return false;
+  }
+  
+  try {
+    // Inizializza Firebase
+    initFirebase();
+    return true;
+  } catch (error) {
+    console.error('Errore durante l\'inizializzazione di Firebase:', error);
+    return false;
+  }
 }
 
 // Inizializza Firebase quando il documento è pronto
 document.addEventListener('DOMContentLoaded', () => {
   console.log('DOM caricato, verifica Firebase...');
   
-  // Assicurati che l'oggetto cloudManager esista
-  if (!window.cloudManager) {
-    console.log('Creazione oggetto cloudManager globale (DOMContentLoaded)');
-    window.cloudManager = {
-      getCurrentProvider: function() { return null; },
-      isAuthenticated: function() { return false; },
-      getUserInfo: function() { return null; },
-      checkAuthStatus: function() { return Promise.resolve(false); }
-    };
-  }
+  // Disabilita il sistema di autenticazione esistente
+  window.disableExistingAuthSystem = true;
+  
+  // Sovrascrive la funzione updateCloudAccountUI
+  window.updateCloudAccountUI = function() {
+    console.log('Funzione updateCloudAccountUI sovrascritta da Firebase (DOMContentLoaded)');
+    // Non fa nulla, lascia che Firebase gestisca l'interfaccia utente
+  };
   
   // Verifica se Firebase è già caricato
   if (typeof firebase !== 'undefined') {
     console.log('Firebase trovato, inizializzazione...');
     // Ritardo l'inizializzazione per assicurarsi che tutto sia caricato
     setTimeout(() => {
-      initFirebase();
+      safeInitFirebase();
     }, 1000);
   } else {
     console.error('Firebase non è stato caricato correttamente');
@@ -507,7 +544,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       if (typeof firebase !== 'undefined') {
         console.log('Firebase trovato dopo ritardo, inizializzazione...');
-        initFirebase();
+        safeInitFirebase();
       } else {
         console.error('Firebase non disponibile anche dopo il ritardo');
       }
