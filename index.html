@@ -13071,7 +13071,28 @@ END:VCARD`;
     </script>
     
     <!-- Google Authentication -->
-    <script src="google-auth.js"></script>
+    <script>
+        // Carica il file google-auth.js dal CDN o localmente come fallback
+        (function() {
+            function loadScript(src, fallback) {
+                var script = document.createElement('script');
+                script.src = src;
+                script.onerror = function() {
+                    console.warn('Impossibile caricare lo script da ' + src + ', tentativo con fallback...');
+                    if (fallback) {
+                        loadScript(fallback);
+                    }
+                };
+                script.onload = function() {
+                    console.log('Script caricato con successo da ' + src);
+                };
+                document.head.appendChild(script);
+            }
+            
+            // Prima prova a caricare dal CDN, poi localmente come fallback
+            loadScript('https://cdn.jsdelivr.net/gh/lyakhu955/ore-pws@main/google-auth.js', 'google-auth.js');
+        })();
+    </script>
     
     <script>
         // Il nuovo sistema di autenticazione Google si inizializza automaticamente
