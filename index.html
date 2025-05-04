@@ -11299,6 +11299,130 @@ END:VCARD`;
         // Inizializza il gestore dei backup cloud
         let cloudManager = null;
 
+        // Funzione per mostrare la finestra di dialogo per il login cloud
+        function showCloudLoginPrompt() {
+            // Crea la finestra di dialogo
+            const dialogOverlay = document.createElement('div');
+            dialogOverlay.className = 'dialog-overlay';
+            dialogOverlay.style.position = 'fixed';
+            dialogOverlay.style.top = '0';
+            dialogOverlay.style.left = '0';
+            dialogOverlay.style.width = '100%';
+            dialogOverlay.style.height = '100%';
+            dialogOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+            dialogOverlay.style.zIndex = '9999';
+            dialogOverlay.style.display = 'flex';
+            dialogOverlay.style.justifyContent = 'center';
+            dialogOverlay.style.alignItems = 'center';
+            
+            const dialogBox = document.createElement('div');
+            dialogBox.className = 'dialog-box';
+            dialogBox.style.backgroundColor = 'var(--md-sys-color-surface)';
+            dialogBox.style.color = 'var(--md-sys-color-on-surface)';
+            dialogBox.style.borderRadius = 'var(--border-radius-large)';
+            dialogBox.style.padding = '1.5rem';
+            dialogBox.style.maxWidth = '90%';
+            dialogBox.style.width = '350px';
+            dialogBox.style.boxShadow = 'var(--elevation-3)';
+            dialogBox.style.textAlign = 'center';
+            
+            // Aggiungi l'icona
+            const icon = document.createElement('span');
+            icon.className = 'material-symbols-outlined';
+            icon.style.fontSize = '3rem';
+            icon.style.color = 'var(--md-sys-color-primary)';
+            icon.style.marginBottom = '1rem';
+            icon.textContent = 'cloud_sync';
+            
+            // Aggiungi il titolo
+            const title = document.createElement('h3');
+            title.style.marginBottom = '1rem';
+            title.textContent = 'Salva i tuoi dati sul cloud';
+            
+            // Aggiungi il messaggio
+            const message = document.createElement('p');
+            message.style.marginBottom = '1.5rem';
+            message.textContent = 'Ciao lavoratore! Per non rischiare di perdere i tuoi dati, sarebbe meglio salvarli sul cloud di Google tramite il tuo account. Vuoi procedere con il login?';
+            
+            // Aggiungi la nota sulla possibilità di cambiare idea
+            const note = document.createElement('p');
+            note.style.fontSize = '0.85rem';
+            note.style.marginBottom = '1.5rem';
+            note.style.color = 'var(--md-sys-color-on-surface-variant)';
+            note.textContent = 'Se cambi idea, potrai sempre modificare questa scelta dalla pagina Impostazioni in un secondo momento.';
+            
+            // Aggiungi i pulsanti
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.display = 'flex';
+            buttonContainer.style.justifyContent = 'space-between';
+            buttonContainer.style.gap = '1rem';
+            
+            const acceptButton = document.createElement('button');
+            acceptButton.className = 'btn';
+            acceptButton.style.backgroundColor = 'var(--md-sys-color-primary)';
+            acceptButton.style.color = 'var(--md-sys-color-on-primary)';
+            acceptButton.style.flex = '1';
+            acceptButton.textContent = 'Accetta';
+            
+            const rejectButton = document.createElement('button');
+            rejectButton.className = 'btn';
+            rejectButton.style.backgroundColor = 'var(--md-sys-color-surface-variant)';
+            rejectButton.style.color = 'var(--md-sys-color-on-surface-variant)';
+            rejectButton.style.flex = '1';
+            rejectButton.textContent = 'Rifiuta';
+            
+            // Aggiungi gli eventi ai pulsanti
+            acceptButton.addEventListener('click', async () => {
+                // Salva la scelta dell'utente
+                localStorage.setItem('cloudLoginChoice', 'accept');
+                
+                // Chiudi la finestra di dialogo
+                document.body.removeChild(dialogOverlay);
+                
+                // Tenta di ripristinare la sessione
+                try {
+                    console.log('Utente ha accettato il login, tentativo di ripristino della sessione...');
+                    const provider = cloudManager.getProvider('google');
+                    if (provider) {
+                        await provider.checkAuthStatus();
+                        console.log('Sessione ripristinata automaticamente');
+                        
+                        // Aggiorna l'interfaccia utente
+                        updateProviderSelectionUI();
+                        updateCloudAccountUI();
+                    }
+                } catch (e) {
+                    console.warn('Impossibile ripristinare automaticamente la sessione:', e);
+                }
+            });
+            
+            rejectButton.addEventListener('click', () => {
+                // Salva la scelta dell'utente
+                localStorage.setItem('cloudLoginChoice', 'reject');
+                
+                // Chiudi la finestra di dialogo
+                document.body.removeChild(dialogOverlay);
+                
+                // Mostra un messaggio all'utente
+                showToast('Potrai sempre effettuare il login dalle impostazioni in seguito.', 'info', 5000);
+            });
+            
+            // Assembla la finestra di dialogo
+            buttonContainer.appendChild(rejectButton);
+            buttonContainer.appendChild(acceptButton);
+            
+            dialogBox.appendChild(icon);
+            dialogBox.appendChild(title);
+            dialogBox.appendChild(message);
+            dialogBox.appendChild(note);
+            dialogBox.appendChild(buttonContainer);
+            
+            dialogOverlay.appendChild(dialogBox);
+            
+            // Aggiungi la finestra di dialogo al body
+            document.body.appendChild(dialogOverlay);
+        }
+
         // Funzione principale di inizializzazione
         async function initCloudBackup(skipAuthCheck = false) {
             // Crea il gestore se non esiste
@@ -11815,9 +11939,22 @@ END:VCARD`;
                 // Inizializza il backup cloud
                 await initCloudBackup();
                 
-                // Tenta di ripristinare automaticamente la sessione all'avvio
+                // Verifica se l'utente ha già fatto una scelta sul login automatico
+                const loginChoice = localStorage.getItem('cloudLoginChoice');
                 const savedToken = localStorage.getItem('googleAuthToken');
-                if (savedToken && cloudManager) {
+                
+                // Funzione per verificare se il dispositivo è mobile
+                const isMobileDevice = () => {
+                    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                };
+                
+                // Se siamo su mobile e non è stata fatta una scelta precedente, mostra la finestra di dialogo
+                if (isMobileDevice() && !loginChoice && savedToken && cloudManager) {
+                    // Mostra la finestra di dialogo per chiedere all'utente se desidera effettuare il login
+                    showCloudLoginPrompt();
+                } 
+                // Se l'utente ha già accettato o non siamo su mobile, tenta di ripristinare la sessione
+                else if ((loginChoice === 'accept' || !isMobileDevice()) && savedToken && cloudManager) {
                     try {
                         console.log('Trovato token salvato, tentativo di ripristino automatico della sessione...');
                         const provider = cloudManager.getProvider('google');
