@@ -12943,7 +12943,26 @@ END:VCARD`;
 
     </script>
     
-
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <!-- Firebase Authentication -->
+    <script src="firebase-auth.js"></script>
+    
+    <script>
+        // Inizializza Firebase quando il documento è pronto
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inizializza Firebase
+            initFirebase();
+            
+            // Verifica lo stato di autenticazione ogni volta che la pagina viene caricata
+            // Questo aiuterà a mantenere la sessione attiva
+            if (typeof checkAuthState === 'function') {
+                checkAuthState();
+            }
+        });
+    </script>
 
 </body>
 </html>
