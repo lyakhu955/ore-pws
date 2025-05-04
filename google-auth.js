@@ -578,98 +578,148 @@ function showToast(message, type = 'info', duration = 3000, onClick = null) {
 
 // Ottieni un token di accesso valido
 async function getValidAccessToken() {
-  const savedTokenStr = localStorage.getItem('googleAuthToken');
-  
-  if (!savedTokenStr) {
-    console.warn('Nessun token salvato trovato');
-    return null;
-  }
-  
   try {
-    const tokenData = JSON.parse(savedTokenStr);
+    const savedTokenStr = localStorage.getItem('googleAuthToken');
     
-    // Verifica se il token è ancora valido
-    if (tokenData.expires_at && tokenData.expires_at > Date.now()) {
-      return tokenData.access_token;
+    if (!savedTokenStr) {
+      console.warn('Nessun token salvato trovato');
+      return null;
     }
     
-    console.warn('Token scaduto');
-    return null;
+    try {
+      const tokenData = JSON.parse(savedTokenStr);
+      
+      // Verifica se il token è ancora valido
+      if (tokenData && tokenData.access_token && tokenData.expires_at && tokenData.expires_at > Date.now()) {
+        console.log('Token valido trovato, scade tra', Math.round((tokenData.expires_at - Date.now()) / 60000), 'minuti');
+        return tokenData.access_token;
+      }
+      
+      console.warn('Token scaduto o non valido');
+      return null;
+    } catch (parseError) {
+      console.error('Errore durante il parsing del token salvato:', parseError);
+      // Pulisci il token non valido
+      localStorage.removeItem('googleAuthToken');
+      return null;
+    }
   } catch (error) {
-    console.error('Errore durante il parsing del token salvato:', error);
+    console.error('Errore durante il recupero del token:', error);
     return null;
   }
 }
 
 // Integrazione con il sistema di backup cloud
 function integrateWithCloudManager() {
-  console.log('Integrazione con il sistema di backup cloud...');
-  
-  // Verifica se esiste già un oggetto cloudManager
-  if (window.cloudManager && typeof window.cloudManager.getAvailableProviders === 'function') {
-    console.log('Sistema di backup cloud esistente trovato, integrazione in corso...');
+  try {
+    console.log('Integrazione con il sistema di backup cloud...');
     
-    // Aggiungi un provider Google
-    window.cloudManager.addProvider({
-      id: 'google',
-      name: 'Google Drive',
-      icon: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg',
-      isLoggedIn: isLoggedIn,
-      getUserInfo: () => {
-        return currentUser ? {
-          id: currentUser.sub,
-          name: currentUser.name,
-          email: currentUser.email,
-          picture: currentUser.picture
-        } : null;
-      },
-      login: async () => {
-        return new Promise((resolve, reject) => {
-          // Salva la funzione di callback
-          const originalCallback = tokenClient.callback;
-          
-          // Sovrascrive temporaneamente la callback
-          tokenClient.callback = (response) => {
-            // Ripristina la callback originale
-            tokenClient.callback = originalCallback;
-            
-            // Gestisci la risposta
-            if (response && response.access_token) {
-              // Ottieni informazioni sull'utente
-              fetchUserInfo(response.access_token)
-                .then(userData => {
-                  // Chiama la callback originale
-                  if (originalCallback) {
-                    originalCallback(response);
-                  }
+    // Verifica se esiste già un oggetto cloudManager
+    if (window.cloudManager && typeof window.cloudManager.getAvailableProviders === 'function') {
+      console.log('Sistema di backup cloud esistente trovato, integrazione in corso...');
+      
+      // Aggiungi un provider Google
+      window.cloudManager.addProvider({
+        id: 'google',
+        name: 'Google Drive',
+        icon: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg',
+        isLoggedIn: () => isLoggedIn,
+        getUserInfo: () => {
+          return currentUser ? {
+            id: currentUser.sub,
+            name: currentUser.name,
+            email: currentUser.email,
+            picture: currentUser.picture
+          } : null;
+        },
+        login: async () => {
+          return new Promise((resolve, reject) => {
+            try {
+              // Salva la funzione di callback
+              const originalCallback = tokenClient.callback;
+              
+              // Sovrascrive temporaneamente la callback
+              tokenClient.callback = (response) => {
+                try {
+                  // Ripristina la callback originale
+                  tokenClient.callback = originalCallback;
                   
-                  // Risolvi la promessa con i dati utente
-                  resolve({
-                    id: userData.sub,
-                    name: userData.name,
-                    email: userData.email,
-                    picture: userData.picture
-                  });
-                })
-                .catch(error => {
+                  // Gestisci la risposta
+                  if (response && response.access_token) {
+                    // Ottieni informazioni sull'utente
+                    fetchUserInfo(response.access_token)
+                      .then(userData => {
+                        try {
+                          // Chiama la callback originale
+                          if (originalCallback) {
+                            originalCallback(response);
+                          }
+                          
+                          // Risolvi la promessa con i dati utente
+                          resolve({
+                            id: userData.sub,
+                            name: userData.name,
+                            email: userData.email,
+                            picture: userData.picture
+                          });
+                        } catch (error) {
+                          console.error('Errore durante la gestione della callback:', error);
+                          reject(error);
+                        }
+                      })
+                      .catch(error => {
+                        console.error('Errore durante il recupero delle informazioni utente:', error);
+                        reject(error);
+                      });
+                  } else {
+                    console.error('Token non valido ricevuto');
+                    reject(new Error('Token non valido'));
+                  }
+                } catch (error) {
+                  console.error('Errore durante la gestione della callback:', error);
                   reject(error);
-                });
-            } else {
-              reject(new Error('Token non valido'));
+                }
+              };
+              
+              // Richiedi il token
+              loginWithGoogle();
+            } catch (error) {
+              console.error('Errore durante la richiesta del token:', error);
+              reject(error);
             }
-          };
-          
-          // Richiedi il token
-          loginWithGoogle();
-        });
-      },
-      logout: async () => {
-        logoutFromGoogle();
-        return true;
-      },
+          });
+        },
+        logout: async () => {
+          try {
+            // Usa la versione sicura di logout
+            if (window.googleAuth && typeof window.googleAuth.logout === 'function') {
+              window.googleAuth.logout();
+            } else {
+              // Fallback alla versione vecchia
+              console.log('Usando il metodo di logout di fallback');
+              
+              // Pulisci i dati di autenticazione
+              localStorage.removeItem('googleAuthToken');
+              localStorage.removeItem('googleUserInfo');
+              
+              // Reimposta le variabili globali
+              isLoggedIn = false;
+              currentUser = null;
+            }
+            return true;
+          } catch (error) {
+            console.error('Errore durante il logout:', error);
+            return false;
+          }
+        },
       checkAuthStatus: async () => {
-        const token = await getValidAccessToken();
-        return !!token;
+        try {
+          const token = await getValidAccessToken();
+          return !!token;
+        } catch (error) {
+          console.error('Errore durante la verifica dello stato di autenticazione:', error);
+          return false;
+        }
       },
       backup: async (data, silent = false) => {
         try {
@@ -1120,7 +1170,14 @@ window.googleAuth = {
   getCurrentUser: () => currentUser,
   getUserEmail: () => userEmail,
   getUserPhotoUrl: () => userPhotoUrl,
-  getToken: getValidAccessToken,
+  getToken: async function() {
+    try {
+      return await getValidAccessToken();
+    } catch (error) {
+      console.error('Errore durante il recupero del token:', error);
+      return null;
+    }
+  },
   integrateWithCloudManager: integrateWithCloudManager
 };
 
