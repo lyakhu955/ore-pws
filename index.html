@@ -3793,8 +3793,8 @@
                                     <div class="provider-options">
                                         <!-- Google Drive -->
                                         <div class="provider-option" data-provider="google">
-                                            <div class="provider-logo">
-                                                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Drive">
+                                            <div class="provider-logo" style="background-color: var(--md-sys-color-primary-container); color: var(--md-sys-color-primary);">
+                                                <span class="material-symbols-outlined" style="font-size: 24px;">cloud</span>
                                             </div>
                                             <div class="provider-info">
                                                 <h4>Google Drive</h4>
@@ -10050,7 +10050,7 @@ END:VCARD`;
         // Implementazione per Google Drive (reale) con Google Identity Services
         class GoogleDriveProvider extends CloudProvider {
             constructor() {
-                super("Google Drive", "https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg");
+                super("Google Drive", "cloud"); // Utilizziamo il nome dell'icona Material Symbols invece dell'URL
                 this.apiLoaded = false;
                 this.backupFileName = 'Ore PWS - Backup Dati.json';
                 this.accessToken = null;
@@ -11301,6 +11301,7 @@ END:VCARD`;
 
         // Funzione per mostrare la finestra di dialogo per il login cloud
         function showCloudLoginPrompt() {
+            console.log('Mostro finestra di dialogo per login cloud...');
             // Crea la finestra di dialogo
             const dialogOverlay = document.createElement('div');
             dialogOverlay.className = 'dialog-overlay';
@@ -11510,10 +11511,20 @@ END:VCARD`;
                 button.id = `${selectedProvider}LoginBtn`;
                 button.className = `cloud-login-btn ${selectedProvider}-btn`;
                 
-                button.innerHTML = `
-                    <img src="${provider.logoUrl}" alt="${provider.name}">
-                    Accedi con ${provider.name}
-                `;
+                // Verifica se logoUrl è un URL o un nome di icona Material Symbols
+                const isIconName = !provider.logoUrl.includes('://') && !provider.logoUrl.startsWith('data:');
+                
+                if (isIconName) {
+                    button.innerHTML = `
+                        <span class="material-symbols-outlined">${provider.logoUrl}</span>
+                        Accedi con ${provider.name}
+                    `;
+                } else {
+                    button.innerHTML = `
+                        <img src="${provider.logoUrl}" alt="${provider.name}">
+                        Accedi con ${provider.name}
+                    `;
+                }
                 
                 button.addEventListener('click', loginWithSelectedProvider);
                 
@@ -11943,17 +11954,25 @@ END:VCARD`;
                 const loginChoice = localStorage.getItem('cloudLoginChoice');
                 const savedToken = localStorage.getItem('googleAuthToken');
                 
+                console.log('Stato login cloud - Scelta salvata:', loginChoice);
+                console.log('Stato login cloud - Token salvato:', savedToken ? 'Presente' : 'Assente');
+                console.log('Stato login cloud - Cloud Manager:', cloudManager ? 'Inizializzato' : 'Non inizializzato');
+                
                 // Funzione per verificare se il dispositivo è mobile
                 const isMobileDevice = () => {
-                    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                    console.log('Rilevamento dispositivo - User Agent:', navigator.userAgent);
+                    console.log('Rilevamento dispositivo - È mobile:', isMobile);
+                    return isMobile;
                 };
                 
                 // Se siamo su mobile e non è stata fatta una scelta precedente, mostra la finestra di dialogo
-                if (isMobileDevice() && !loginChoice && savedToken && cloudManager) {
+                if (isMobileDevice() && !loginChoice && cloudManager) {
                     // Mostra la finestra di dialogo per chiedere all'utente se desidera effettuare il login
+                    console.log('Dispositivo mobile rilevato, mostro finestra di dialogo per login cloud...');
                     showCloudLoginPrompt();
                 } 
-                // Se l'utente ha già accettato o non siamo su mobile, tenta di ripristinare la sessione
+                // Se l'utente ha già accettato o non siamo su mobile, tenta di ripristinare la sessione (solo se c'è un token)
                 else if ((loginChoice === 'accept' || !isMobileDevice()) && savedToken && cloudManager) {
                     try {
                         console.log('Trovato token salvato, tentativo di ripristino automatico della sessione...');
