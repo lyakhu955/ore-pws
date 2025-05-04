@@ -87,24 +87,32 @@ function initFirebase() {
         
         // Salva il token nel localStorage per il sistema esistente
         if (result.credential && result.credential.accessToken) {
-          localStorage.setItem('googleAuthToken', result.credential.accessToken);
+          localStorage.setItem('googleAuthToken', JSON.stringify({
+            access_token: result.credential.accessToken,
+            expires_at: Date.now() + 3600 * 1000 // 1 ora di validità
+          }));
           console.log('Token salvato nel localStorage');
         } else {
           // Se non abbiamo un token nell'oggetto credential, otteniamolo direttamente dall'utente
           result.user.getIdToken().then(token => {
-            localStorage.setItem('googleAuthToken', token);
+            localStorage.setItem('googleAuthToken', JSON.stringify({
+              access_token: token,
+              expires_at: Date.now() + 3600 * 1000 // 1 ora di validità
+            }));
             console.log('Token ottenuto dall\'utente e salvato nel localStorage');
           });
         }
         
         // Ripristina lo stato precedente se necessario
         const redirectState = localStorage.getItem('auth_redirect_state');
-        if (redirectState && redirectState !== window.location.href) {
+        if (redirectState) {
           localStorage.removeItem('auth_redirect_state');
           // Non reindirizzare se siamo già nella pagina corretta
           if (redirectState !== window.location.href) {
             console.log('Reindirizzamento a:', redirectState);
             window.location.href = redirectState;
+          } else {
+            console.log('Già nella pagina corretta, nessun reindirizzamento necessario');
           }
         }
       } else {
@@ -205,7 +213,10 @@ function handleAuthStateChanged(user) {
       // Salva anche il token per il sistema esistente
       user.getIdToken(true).then(token => {
         console.log('Token ottenuto con successo');
-        localStorage.setItem('googleAuthToken', token);
+        localStorage.setItem('googleAuthToken', JSON.stringify({
+          access_token: token,
+          expires_at: Date.now() + 3600 * 1000 // 1 ora di validità
+        }));
         
         // Imposta il rinnovo automatico del token
         setupTokenRefresh();
@@ -508,12 +519,18 @@ function loginWithGoogle() {
       
       // Salva il token nel localStorage
       if (result.credential && result.credential.accessToken) {
-        localStorage.setItem('googleAuthToken', result.credential.accessToken);
+        localStorage.setItem('googleAuthToken', JSON.stringify({
+          access_token: result.credential.accessToken,
+          expires_at: Date.now() + 3600 * 1000 // 1 ora di validità
+        }));
         console.log('Token salvato nel localStorage');
       } else {
         // Se non abbiamo un token nell'oggetto credential, otteniamolo direttamente dall'utente
         result.user.getIdToken().then(token => {
-          localStorage.setItem('googleAuthToken', token);
+          localStorage.setItem('googleAuthToken', JSON.stringify({
+            access_token: token,
+            expires_at: Date.now() + 3600 * 1000 // 1 ora di validità
+          }));
           console.log('Token ottenuto dall\'utente e salvato nel localStorage');
         });
       }
@@ -533,11 +550,15 @@ function loginWithGoogle() {
         
         // Usa il metodo redirect come fallback
         try {
-          firebase.auth().signInWithRedirect(provider)
-            .catch((redirectError) => {
-              console.error('Errore durante il redirect per login Firebase:', redirectError);
-              showToast("Errore durante l'accesso: " + redirectError.message, "error");
-            });
+          // Salva lo stato corrente per tornare alla stessa pagina dopo il login
+          localStorage.setItem('auth_redirect_state', window.location.href);
+          console.log('Stato corrente salvato prima del redirect:', window.location.href);
+          
+          // Esegui il redirect (questo causerà un ricaricamento della pagina)
+          firebase.auth().signInWithRedirect(provider);
+          
+          // Mostra un messaggio all'utente
+          showToast("Reindirizzamento alla pagina di accesso Google...", "info");
         } catch (e) {
           console.error('Eccezione durante il tentativo di login con redirect:', e);
           showToast("Errore imprevisto durante l'accesso. Riprova più tardi.", "error");
@@ -604,12 +625,38 @@ function logoutFromGoogle() {
 // Ottieni un token di accesso valido
 async function getValidAccessToken() {
   if (!currentUser) {
+    // Prova a recuperare il token dal localStorage
+    const tokenStr = localStorage.getItem('googleAuthToken');
+    if (tokenStr) {
+      try {
+        const tokenData = JSON.parse(tokenStr);
+        // Verifica se il token è ancora valido
+        if (tokenData.expires_at && tokenData.expires_at > Date.now()) {
+          console.log('Token recuperato dal localStorage');
+          return tokenData.access_token;
+        } else {
+          console.log('Token scaduto, rimozione dal localStorage');
+          localStorage.removeItem('googleAuthToken');
+        }
+      } catch (e) {
+        console.warn('Errore nel parsing del token dal localStorage:', e);
+        // Se non è un JSON valido, prova a usarlo come stringa
+        return tokenStr;
+      }
+    }
     return null;
   }
   
   try {
     // Questo metodo rinnova automaticamente il token se necessario
     const token = await currentUser.getIdToken(true);
+    
+    // Salva il token rinnovato nel localStorage
+    localStorage.setItem('googleAuthToken', JSON.stringify({
+      access_token: token,
+      expires_at: Date.now() + 3600 * 1000 // 1 ora di validità
+    }));
+    
     return token;
   } catch (error) {
     console.error('Errore durante il recupero del token Firebase:', error);
@@ -631,7 +678,10 @@ function refreshAccessToken() {
       console.log('Token Firebase aggiornato con successo');
       
       // Salva il token nel localStorage
-      localStorage.setItem('googleAuthToken', token);
+      localStorage.setItem('googleAuthToken', JSON.stringify({
+        access_token: token,
+        expires_at: Date.now() + 3600 * 1000 // 1 ora di validità
+      }));
       
       // Imposta il rinnovo automatico del token
       setupTokenRefresh();
@@ -857,13 +907,25 @@ function integrateWithCloudManager() {
           console.log('Login con Google completato, sincronizzazione con Firebase...');
           
           // Ottieni il token di accesso
-          const googleAuthToken = localStorage.getItem('googleAuthToken');
-          if (googleAuthToken) {
+          const googleAuthTokenStr = localStorage.getItem('googleAuthToken');
+          if (googleAuthTokenStr) {
             console.log('Token Google trovato, sincronizzazione con Firebase...');
             
-            // Crea una credenziale OAuth con il token
             try {
-              const credential = firebase.auth.GoogleAuthProvider.credential(null, googleAuthToken);
+              // Parsing del token
+              let tokenData;
+              try {
+                tokenData = JSON.parse(googleAuthTokenStr);
+              } catch (e) {
+                // Se non è un JSON valido, usa il valore come stringa
+                tokenData = { access_token: googleAuthTokenStr };
+              }
+              
+              // Estrai il token di accesso
+              const accessToken = tokenData.access_token || tokenData;
+              
+              // Crea una credenziale OAuth con il token
+              const credential = firebase.auth.GoogleAuthProvider.credential(null, accessToken);
               
               // Accedi a Firebase con la credenziale
               await firebase.auth().signInWithCredential(credential);
@@ -1002,12 +1064,18 @@ function integrateWithCloudManager() {
                   
                   // Salva il token nel localStorage
                   if (result.credential && result.credential.accessToken) {
-                    localStorage.setItem('googleAuthToken', result.credential.accessToken);
+                    localStorage.setItem('googleAuthToken', JSON.stringify({
+                      access_token: result.credential.accessToken,
+                      expires_at: Date.now() + 3600 * 1000 // 1 ora di validità
+                    }));
                     console.log('Token salvato nel localStorage');
                   } else {
                     // Se non abbiamo un token nell'oggetto credential, otteniamolo direttamente dall'utente
                     result.user.getIdToken().then(token => {
-                      localStorage.setItem('googleAuthToken', token);
+                      localStorage.setItem('googleAuthToken', JSON.stringify({
+                        access_token: token,
+                        expires_at: Date.now() + 3600 * 1000 // 1 ora di validità
+                      }));
                       console.log('Token ottenuto dall\'utente e salvato nel localStorage');
                     });
                   }
@@ -1036,16 +1104,18 @@ function integrateWithCloudManager() {
                     
                     // Usa il metodo redirect come fallback
                     try {
-                      firebase.auth().signInWithRedirect(provider)
-                        .then(() => {
-                          // Questo non verrà mai eseguito perché il redirect reindirizza la pagina
-                          resolve(null);
-                        })
-                        .catch((redirectError) => {
-                          console.error('Errore durante il redirect per login Firebase:', redirectError);
-                          showToast("Errore durante l'accesso: " + redirectError.message, "error");
-                          reject(redirectError);
-                        });
+                      // Salva lo stato corrente per tornare alla stessa pagina dopo il login
+                      localStorage.setItem('auth_redirect_state', window.location.href);
+                      console.log('Stato corrente salvato prima del redirect:', window.location.href);
+                      
+                      // Esegui il redirect (questo causerà un ricaricamento della pagina)
+                      firebase.auth().signInWithRedirect(provider);
+                      
+                      // Mostra un messaggio all'utente
+                      showToast("Reindirizzamento alla pagina di accesso Google...", "info");
+                      
+                      // Risolvi la promessa con null (anche se questo codice potrebbe non essere eseguito)
+                      resolve(null);
                     } catch (e) {
                       console.error('Eccezione durante il tentativo di login con redirect:', e);
                       showToast("Errore imprevisto durante l'accesso. Riprova più tardi.", "error");
@@ -1142,11 +1212,33 @@ document.addEventListener('DOMContentLoaded', () => {
   // Disabilita il sistema di autenticazione esistente
   window.disableExistingAuthSystem = true;
   
-  // Sovrascrive la funzione updateCloudAccountUI
-  window.updateCloudAccountUI = function() {
-    console.log('Funzione updateCloudAccountUI sovrascritta da Firebase (DOMContentLoaded)');
-    // Non fa nulla, lascia che Firebase gestisca l'interfaccia utente
-  };
+  // Salva la funzione updateCloudAccountUI originale se esiste
+  if (typeof window.updateCloudAccountUI === 'function') {
+    const originalUpdateCloudAccountUI = window.updateCloudAccountUI;
+    
+    // Sovrascrive la funzione updateCloudAccountUI per integrarla con Firebase
+    window.updateCloudAccountUI = function() {
+      console.log('Funzione updateCloudAccountUI integrata con Firebase');
+      
+      // Chiama la funzione originale
+      originalUpdateCloudAccountUI();
+      
+      // Aggiorna l'interfaccia utente di Firebase
+      if (firebase.auth().currentUser) {
+        // Nascondi i pulsanti di login se l'utente è già autenticato
+        const loginButtonsContainer = document.getElementById('loginButtonsContainer');
+        if (loginButtonsContainer) {
+          loginButtonsContainer.style.display = 'none';
+        }
+        
+        // Mostra il pulsante di logout
+        const logoutBtn = document.getElementById('cloudLogoutBtn');
+        if (logoutBtn) {
+          logoutBtn.style.display = 'flex';
+        }
+      }
+    };
+  }
   
   // Verifica se Firebase è già caricato
   if (typeof firebase !== 'undefined') {
@@ -1200,8 +1292,8 @@ window.fetch = function(url, options) {
       }
       
       // Aggiungi il token all'header Authorization
-      const newOptions = options || {};
-      newOptions.headers = newOptions.headers || {};
+      const newOptions = { ...options } || {};
+      newOptions.headers = { ...newOptions.headers } || {};
       newOptions.headers.Authorization = `Bearer ${token}`;
       
       console.log('Aggiunto token di autenticazione alla richiesta API Google');
