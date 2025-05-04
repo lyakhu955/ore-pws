@@ -10245,7 +10245,10 @@ END:VCARD`;
                                 this.isLoggedIn = true;
                                 
                                 // Salva il token in localStorage per mantenerlo tra i refresh
-                                localStorage.setItem('googleAuthToken', JSON.stringify(tokenResponse));
+                                localStorage.setItem('googleAuthToken', JSON.stringify({
+                                    access_token: tokenResponse.access_token,
+                                    expires_at: Date.now() + 3600 * 1000 // 1 ora di validità
+                                }));
                                 
                                 // Imposta il rinnovo automatico del token
                                 this.setupTokenRefresh(tokenResponse);
@@ -10286,7 +10289,10 @@ END:VCARD`;
                                 console.log('Token di accesso ottenuto:', tokenResponse.access_token.substring(0, 10) + '...');
                                 
                                 // Salva il token in localStorage per mantenerlo tra i refresh
-                                localStorage.setItem('googleAuthToken', JSON.stringify(tokenResponse));
+                                localStorage.setItem('googleAuthToken', JSON.stringify({
+                                    access_token: tokenResponse.access_token,
+                                    expires_at: Date.now() + 3600 * 1000 // 1 ora di validità
+                                }));
                                 
                                 try {
                                     // Ottieni informazioni sull'utente
@@ -11413,9 +11419,21 @@ END:VCARD`;
             const accountInfo = document.getElementById('cloudAccountInfo');
             const logoutBtn = document.getElementById('cloudLogoutBtn');
             const backupControls = document.getElementById('cloudBackupControls');
+            const loginButton = document.getElementById('loginButton');
             
             const currentProvider = cloudManager.getCurrentProvider();
             const userData = currentProvider ? cloudManager.getProvider(currentProvider).getUserInfo() : null;
+            
+            // Aggiorna la visibilità del pulsante di login nella barra di navigazione
+            if (loginButton) {
+                if (userData) {
+                    // Utente autenticato, nascondi il pulsante di login
+                    loginButton.style.display = 'none';
+                } else {
+                    // Utente non autenticato, mostra il pulsante di login
+                    loginButton.style.display = '';
+                }
+            }
             
             if (userData) {
                 // Utente loggato
@@ -11528,9 +11546,12 @@ END:VCARD`;
                         // Verifica prima se l'utente è autenticato
                         try {
                             isAuthenticated = await cloudManager.checkAuthStatus();
+                            console.log('Stato di autenticazione verificato per backup:', isAuthenticated ? 'Autenticato' : 'Non autenticato');
                         } catch (error) {
-                            console.log('Errore durante la verifica dello stato di autenticazione:', error);
+                            console.error('Errore durante la verifica dello stato di autenticazione per backup:', error);
                             isAuthenticated = false;
+                            // Mostra un messaggio all'utente
+                            showToast('Errore durante la verifica dello stato di autenticazione. Riprova più tardi.', 'error');
                         }
                         
                         // Se non è autenticato, mostra il pulsante di login
@@ -11605,9 +11626,12 @@ END:VCARD`;
                         // Verifica prima se l'utente è autenticato
                         try {
                             isAuthenticated = await cloudManager.checkAuthStatus();
+                            console.log('Stato di autenticazione verificato per ripristino:', isAuthenticated ? 'Autenticato' : 'Non autenticato');
                         } catch (error) {
-                            console.log('Errore durante la verifica dello stato di autenticazione:', error);
+                            console.error('Errore durante la verifica dello stato di autenticazione per ripristino:', error);
                             isAuthenticated = false;
+                            // Mostra un messaggio all'utente
+                            showToast('Errore durante la verifica dello stato di autenticazione. Riprova più tardi.', 'error');
                         }
                         
                         // Se non è autenticato, mostra il pulsante di login
@@ -11689,20 +11713,32 @@ END:VCARD`;
                 
                 // Verifica se il provider selezionato è Google
                 const selectedProvider = cloudManager.getSelectedProvider();
-                if (selectedProvider === 'google' && typeof loginWithGoogle === 'function') {
+                if (selectedProvider === 'google') {
                     console.log('Provider Google selezionato, utilizzo loginWithGoogle()...');
                     
-                    // Utilizza la funzione loginWithGoogle
-                    loginWithGoogle();
-                    
-                    // Aggiorna l'interfaccia utente dopo un breve ritardo
-                    setTimeout(() => {
-                        updateProviderSelectionUI();
-                        updateCloudAccountUI();
-                        setupAutoBackup(); // Configura il backup automatico
-                    }, 2000);
-                    
-                    return null;
+                    // Verifica se la funzione loginWithGoogle esiste
+                    if (typeof loginWithGoogle === 'function') {
+                        try {
+                            // Utilizza la funzione loginWithGoogle
+                            loginWithGoogle();
+                            
+                            // Aggiorna l'interfaccia utente dopo un breve ritardo
+                            setTimeout(() => {
+                                updateProviderSelectionUI();
+                                updateCloudAccountUI();
+                                setupAutoBackup(); // Configura il backup automatico
+                            }, 2000);
+                            
+                            return null;
+                        } catch (error) {
+                            console.error('Errore durante il login con Google:', error);
+                            showToast('Errore durante il login con Google: ' + error.message, 'error');
+                            throw error;
+                        }
+                    } else {
+                        console.warn('Funzione loginWithGoogle non trovata, utilizzo del sistema di backup cloud esistente...');
+                        // Continua con il sistema di backup cloud esistente
+                    }
                 }
                 
                 // Altrimenti, utilizza il sistema di backup cloud esistente
@@ -12982,6 +13018,34 @@ END:VCARD`;
     <script src="firebase-auth.js"></script>
     
     <script>
+        // Funzione per verificare lo stato di autenticazione all'avvio
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verifica se il pulsante di login esiste
+            const loginButton = document.getElementById('loginButton');
+            if (loginButton) {
+                // Nascondi il pulsante di login all'avvio, verrà mostrato solo se necessario
+                loginButton.style.display = 'none';
+                
+                // Aggiungi un event listener per gestire il click sul pulsante di login
+                loginButton.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    if (typeof loginWithGoogle === 'function') {
+                        loginWithGoogle();
+                    } else {
+                        console.error('Funzione loginWithGoogle non trovata');
+                        showToast('Errore durante il login. Riprova più tardi.', 'error');
+                    }
+                });
+            }
+            
+            // Verifica lo stato di autenticazione dopo un breve ritardo
+            setTimeout(function() {
+                if (typeof updateCloudAccountUI === 'function') {
+                    updateCloudAccountUI();
+                }
+            }, 2000);
+        });
+        
         // Funzione per verificare se Firebase è caricato correttamente
         function checkFirebaseLoaded() {
             if (typeof firebase !== 'undefined') {
