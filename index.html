@@ -13213,37 +13213,62 @@ END:VCARD`;
     
     <!-- Script di integrazione Firebase -->
     <script>
+        // Inizializza l'oggetto cloudManager se non esiste
+        window.cloudManager = window.cloudManager || {
+            getCurrentProvider: function() { return null; },
+            isAuthenticated: function() { return false; },
+            getUserInfo: function() { return null; },
+            checkAuthStatus: function() { return Promise.resolve(false); }
+        };
+        
         // Funzione per aggiornare l'interfaccia utente di Firebase
         function updateFirebaseUI(user) {
             console.log('Aggiornamento UI Firebase:', user ? 'Utente autenticato' : 'Utente non autenticato');
             
-            // Aggiorna l'interfaccia utente esistente se necessario
-            if (typeof updateCloudAccountUI === 'function') {
-                try {
-                    // Crea un oggetto compatibile con il sistema esistente
-                    if (user) {
-                        window.cloudManager = window.cloudManager || {};
-                        window.cloudManager.getCurrentProvider = function() {
-                            return 'firebase';
-                        };
-                        window.cloudManager.isAuthenticated = function() {
-                            return true;
-                        };
-                        window.cloudManager.getUserInfo = function() {
-                            return {
-                                email: user.email,
-                                name: user.displayName,
-                                photoUrl: user.photoURL
-                            };
-                        };
-                    }
-                    
-                    // Aggiorna l'interfaccia utente esistente
-                    updateCloudAccountUI();
-                } catch (error) {
-                    console.error('Errore durante l\'aggiornamento dell\'interfaccia utente:', error);
-                }
+            // Crea un elemento UI personalizzato per Firebase
+            let firebaseUIContainer = document.getElementById('firebase-auth-container');
+            
+            if (!firebaseUIContainer) {
+                // Crea un nuovo container per l'UI di Firebase
+                firebaseUIContainer = document.createElement('div');
+                firebaseUIContainer.id = 'firebase-auth-container';
+                firebaseUIContainer.style.position = 'fixed';
+                firebaseUIContainer.style.top = '60px';
+                firebaseUIContainer.style.right = '20px';
+                firebaseUIContainer.style.zIndex = '1000';
+                document.body.appendChild(firebaseUIContainer);
             }
+            
+            if (user) {
+                // Utente autenticato, mostra le informazioni dell'utente
+                firebaseUIContainer.innerHTML = `
+                    <div class="user-profile">
+                        ${user.photoURL ? `<img src="${user.photoURL}" alt="Foto profilo" class="profile-pic">` : ''}
+                        <span>${user.email}</span>
+                        <button onclick="logoutFromGoogle()" class="logout-btn">Disconnetti</button>
+                    </div>
+                `;
+            } else {
+                // Utente non autenticato, mostra il pulsante di login
+                firebaseUIContainer.innerHTML = `
+                    <button onclick="loginWithGoogle()" class="btn">
+                        <span class="material-symbols-outlined">cloud</span>
+                        Accedi con Google
+                    </button>
+                `;
+            }
+            
+            // Aggiorna l'interfaccia utente esistente in modo sicuro
+            setTimeout(() => {
+                try {
+                    if (typeof updateCloudAccountUI === 'function') {
+                        console.log('Tentativo di aggiornare l\'interfaccia cloud esistente...');
+                        updateCloudAccountUI();
+                    }
+                } catch (error) {
+                    console.warn('Errore non critico durante l\'aggiornamento dell\'interfaccia utente:', error);
+                }
+            }, 1000); // Ritardo per assicurarsi che tutto sia inizializzato
         }
     </script>
 
