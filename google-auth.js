@@ -521,22 +521,76 @@ function updateUI(isAuthenticated) {
 
 // Mostra un toast
 function showToast(message, type = 'info', duration = 3000, onClick = null) {
+  // Evita la ricorsione infinita
+  const isRecursiveCall = new Error().stack.split('\n').filter(line => line.includes('showToast')).length > 2;
+  if (isRecursiveCall) {
+    console.warn('Rilevata chiamata ricorsiva a showToast, interrompendo:', message);
+    console.log(`${type.toUpperCase()}: ${message}`);
+    return;
+  }
+  
   // Verifica se esiste già una funzione showToast globale
   if (typeof window.showToast === 'function' && window.showToast !== showToast) {
-    // Usa la funzione globale se esiste ed è diversa da questa
-    window.showToast(message, type, duration, onClick);
-    return;
+    try {
+      // Usa la funzione globale se esiste ed è diversa da questa
+      window.showToast(message, type, duration, onClick);
+      return;
+    } catch (error) {
+      console.error('Errore durante la chiamata a window.showToast:', error);
+      // Continua con l'implementazione di fallback
+    }
   }
   
   // Verifica se esiste la funzione showToastGlobal
   if (typeof window.showToastGlobal === 'function') {
-    window.showToastGlobal(message, type, duration);
-    return;
+    try {
+      window.showToastGlobal(message, type, duration);
+      return;
+    } catch (error) {
+      console.error('Errore durante la chiamata a window.showToastGlobal:', error);
+      // Continua con l'implementazione di fallback
+    }
   }
   
   // Implementazione di fallback se nessuna funzione globale è disponibile
   try {
-    // Crea un elemento toast
+    // Usa il container di toast se esiste
+    const container = document.getElementById('toast-container');
+    if (container) {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      
+      // Aggiungi l'evento click
+      if (onClick) {
+        toast.style.cursor = 'pointer';
+        toast.addEventListener('click', onClick);
+      }
+      
+      container.appendChild(toast);
+      
+      // Trigger transition for appearance
+      setTimeout(() => {
+        toast.classList.add('show');
+      }, 10);
+      
+      // Remove toast after duration
+      if (duration > 0) {
+        setTimeout(() => {
+          toast.classList.remove('show');
+          // Remove from DOM after transition ends
+          setTimeout(() => {
+            if (container.contains(toast)) {
+              container.removeChild(toast);
+            }
+          }, 300);
+        }, duration);
+      }
+      
+      return;
+    }
+    
+    // Fallback se non c'è un container: crea un elemento toast
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.textContent = message;
@@ -1077,93 +1131,154 @@ window.googleAuth = {
   login: loginWithGoogle,
   // Implementazione sicura di logout che non causa ricorsione
   logout: function() {
-    if (!isLoggedIn) {
-      console.log('Utente già disconnesso');
-      return;
-    }
-    
-    console.log('Tentativo di logout sicuro...');
-    
-    // Pulisci i dati di autenticazione
-    localStorage.removeItem('googleAuthToken');
-    localStorage.removeItem('googleUserInfo');
-    
-    // Reimposta le variabili globali
-    isLoggedIn = false;
-    currentUser = null;
-    
-    // Aggiorna direttamente l'interfaccia utente
     try {
-      // Aggiorna il pulsante di login nella barra di navigazione
-      const loginButton = document.getElementById('loginButton');
-      if (loginButton) {
-        loginButton.style.display = '';
+      if (!isLoggedIn) {
+        console.log('Utente già disconnesso');
+        return;
       }
       
-      // Aggiorna i pulsanti di login
-      const loginButtonsContainer = document.getElementById('loginButtonsContainer');
-      if (loginButtonsContainer) {
-        loginButtonsContainer.style.display = 'flex';
+      console.log('Tentativo di logout sicuro...');
+      
+      // Pulisci i dati di autenticazione
+      localStorage.removeItem('googleAuthToken');
+      localStorage.removeItem('googleUserInfo');
+      
+      // Reimposta le variabili globali
+      isLoggedIn = false;
+      currentUser = null;
+      userEmail = null;
+      userPhotoUrl = null;
+      
+      // Cancella il timer di refresh del token
+      if (tokenRefreshTimer) {
+        clearTimeout(tokenRefreshTimer);
+        tokenRefreshTimer = null;
       }
       
-      // Aggiorna le informazioni dell'account
-      const accountSection = document.getElementById('cloudAccountSection');
-      const accountInfo = document.getElementById('cloudAccountInfo');
-      const logoutBtn = document.getElementById('cloudLogoutBtn');
-      
-      if (accountSection) {
-        accountSection.style.display = 'none';
-      }
-      
-      if (accountInfo) {
-        accountInfo.innerHTML = '';
-      }
-      
-      if (logoutBtn) {
-        logoutBtn.style.display = 'none';
-      }
-      
-      // Mostra un messaggio di successo
-      console.log('Disconnessione effettuata con successo');
-      
-      // Crea un toast manualmente
-      const toast = document.createElement('div');
-      toast.className = 'toast toast-info';
-      toast.textContent = 'Disconnessione effettuata con successo';
-      toast.style.position = 'fixed';
-      toast.style.bottom = '20px';
-      toast.style.right = '20px';
-      toast.style.padding = '10px 20px';
-      toast.style.borderRadius = '4px';
-      toast.style.backgroundColor = '#2196F3';
-      toast.style.color = 'white';
-      toast.style.zIndex = '10000';
-      toast.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
-      
-      // Aggiungi il toast al documento
-      document.body.appendChild(toast);
-      
-      // Rimuovi il toast dopo 3 secondi
-      setTimeout(() => {
-        if (document.body.contains(toast)) {
-          document.body.removeChild(toast);
+      // Resetta il token per le richieste API
+      if (gapi && gapi.client) {
+        try {
+          gapi.client.setToken(null);
+        } catch (error) {
+          console.error('Errore durante il reset del token gapi:', error);
         }
-      }, 3000);
-    } catch (error) {
-      console.error('Errore durante l\'aggiornamento dell\'interfaccia utente:', error);
-    }
-    
-    // Revoca il token in background
-    try {
-      const savedTokenStr = localStorage.getItem('googleAuthToken');
-      if (savedTokenStr && typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
-        const tokenData = JSON.parse(savedTokenStr);
-        google.accounts.oauth2.revoke(tokenData.access_token, done => {
-          console.log('Revoca token completata:', done);
-        });
+      }
+      
+      // Aggiorna direttamente l'interfaccia utente
+      try {
+        // Aggiorna il pulsante di login nella barra di navigazione
+        const loginButton = document.getElementById('loginButton');
+        if (loginButton) {
+          loginButton.style.display = '';
+        }
+        
+        // Aggiorna i pulsanti di login
+        const loginButtonsContainer = document.getElementById('loginButtonsContainer');
+        if (loginButtonsContainer) {
+          loginButtonsContainer.style.display = 'flex';
+        }
+        
+        // Aggiorna le informazioni dell'account
+        const accountSection = document.getElementById('cloudAccountSection');
+        const accountInfo = document.getElementById('cloudAccountInfo');
+        const logoutBtn = document.getElementById('cloudLogoutBtn');
+        const backupControls = document.getElementById('cloudBackupControls');
+        
+        if (accountSection) {
+          accountSection.style.display = 'none';
+        }
+        
+        if (accountInfo) {
+          accountInfo.innerHTML = '';
+        }
+        
+        if (logoutBtn) {
+          logoutBtn.style.display = 'none';
+        }
+        
+        if (backupControls) {
+          backupControls.style.display = 'none';
+        }
+        
+        // Mostra un messaggio di successo
+        console.log('Disconnessione effettuata con successo');
+        
+        // Usa il container di toast se esiste
+        const container = document.getElementById('toast-container');
+        if (container) {
+          const toast = document.createElement('div');
+          toast.className = 'toast info';
+          toast.textContent = 'Disconnessione effettuata con successo';
+          
+          container.appendChild(toast);
+          
+          // Trigger transition for appearance
+          setTimeout(() => {
+            toast.classList.add('show');
+          }, 10);
+          
+          // Remove toast after duration
+          setTimeout(() => {
+            toast.classList.remove('show');
+            // Remove from DOM after transition ends
+            setTimeout(() => {
+              if (container.contains(toast)) {
+                container.removeChild(toast);
+              }
+            }, 300);
+          }, 3000);
+        } else {
+          // Fallback: crea un toast manualmente
+          const toast = document.createElement('div');
+          toast.className = 'toast toast-info';
+          toast.textContent = 'Disconnessione effettuata con successo';
+          toast.style.position = 'fixed';
+          toast.style.bottom = '20px';
+          toast.style.right = '20px';
+          toast.style.padding = '10px 20px';
+          toast.style.borderRadius = '4px';
+          toast.style.backgroundColor = '#2196F3';
+          toast.style.color = 'white';
+          toast.style.zIndex = '10000';
+          toast.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+          
+          // Aggiungi il toast al documento
+          document.body.appendChild(toast);
+          
+          // Rimuovi il toast dopo 3 secondi
+          setTimeout(() => {
+            if (document.body.contains(toast)) {
+              document.body.removeChild(toast);
+            }
+          }, 3000);
+        }
+      } catch (error) {
+        console.error('Errore durante l\'aggiornamento dell\'interfaccia utente:', error);
+      }
+      
+      // Revoca il token in background
+      try {
+        const savedTokenStr = localStorage.getItem('googleAuthToken');
+        if (savedTokenStr && typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+          try {
+            const tokenData = JSON.parse(savedTokenStr);
+            if (tokenData && tokenData.access_token) {
+              google.accounts.oauth2.revoke(tokenData.access_token, done => {
+                console.log('Revoca token completata:', done);
+              });
+            }
+          } catch (parseError) {
+            console.error('Errore durante il parsing del token salvato:', parseError);
+          }
+        }
+      } catch (error) {
+        console.error('Errore durante la revoca del token:', error);
       }
     } catch (error) {
-      console.error('Errore durante la revoca del token:', error);
+      console.error('Errore critico durante il logout:', error);
+      // Fallback di emergenza
+      localStorage.removeItem('googleAuthToken');
+      localStorage.removeItem('googleUserInfo');
     }
   },
   isLoggedIn: () => isLoggedIn,
