@@ -13280,6 +13280,12 @@ END:VCARD`;
         
         // Sovrascrive le funzioni di autenticazione esistenti
         if (window.disableExistingAuthSystem) {
+            // Sovrascrive la funzione updateCloudAccountUI
+            window.updateCloudAccountUI = function() {
+                console.log('Funzione updateCloudAccountUI sovrascritta da Firebase');
+                // Non fa nulla, lascia che Firebase gestisca l'interfaccia utente
+            };
+            
             // Sovrascrive la funzione di controllo dello stato di autenticazione
             window.checkAuthStatus = function() {
                 console.log('Funzione checkAuthStatus sovrascritta da Firebase');
@@ -13309,6 +13315,11 @@ END:VCARD`;
                 // Non fa nulla, lascia che Firebase gestisca l'autenticazione
                 return Promise.resolve();
             };
+        }
+        
+        // Salva la funzione showToast originale se esiste
+        if (typeof window.showToast === 'function') {
+            window.originalShowToast = window.showToast;
         }
         
         // Funzione per aggiornare l'interfaccia utente di Firebase
@@ -13359,17 +13370,8 @@ END:VCARD`;
                 `;
             }
             
-            // Aggiorna l'interfaccia utente esistente in modo sicuro
-            setTimeout(() => {
-                try {
-                    if (typeof updateCloudAccountUI === 'function') {
-                        console.log('Tentativo di aggiornare l\'interfaccia cloud esistente...');
-                        updateCloudAccountUI();
-                    }
-                } catch (error) {
-                    console.warn('Errore non critico durante l\'aggiornamento dell\'interfaccia utente:', error);
-                }
-            }, 1000); // Ritardo per assicurarsi che tutto sia inizializzato
+            // Non aggiorniamo più l'interfaccia utente esistente
+            // perché abbiamo sovrascritto la funzione updateCloudAccountUI
         }
     </script>
 
