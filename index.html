@@ -3814,13 +3814,13 @@
                                     
                                     <div id="loginButtonsContainer" class="login-buttons-container">
                                         <!-- I pulsanti di login verranno generati dinamicamente in base al provider selezionato -->
-                                        <button id="googleLoginBtn" class="cloud-login-btn google-btn" onclick="loginWithGoogle()">
+                                        <button id="googleLoginBtn" class="cloud-login-btn google-btn" onclick="window.googleAuth.login()">
                                             <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Drive">
                                             Accedi con Google Drive
                                         </button>
                                     </div>
                                     
-                                    <button id="cloudLogoutBtn" class="cloud-logout-btn" style="display: none;">
+                                    <button id="cloudLogoutBtn" class="cloud-logout-btn" style="display: none;" onclick="if(window.googleAuth) window.googleAuth.logout(); else if(cloudManager) cloudManager.logout();">
                                         <span class="material-symbols-outlined">logout</span>
                                         Disconnetti
                                     </button>
@@ -11444,46 +11444,112 @@ END:VCARD`;
             const backupControls = document.getElementById('cloudBackupControls');
             const loginButton = document.getElementById('loginButton');
             
-            const currentProvider = cloudManager.getCurrentProvider();
-            const userData = currentProvider ? cloudManager.getProvider(currentProvider).getUserInfo() : null;
-            
-            // Aggiorna la visibilità del pulsante di login nella barra di navigazione
-            if (loginButton) {
-                if (userData) {
-                    // Utente autenticato, nascondi il pulsante di login
-                    loginButton.style.display = 'none';
-                } else {
-                    // Utente non autenticato, mostra il pulsante di login
-                    loginButton.style.display = '';
+            // Verifica se stiamo usando il nuovo sistema di autenticazione Google
+            if (window.googleAuth && typeof window.googleAuth.isLoggedIn === 'function') {
+                const isGoogleLoggedIn = window.googleAuth.isLoggedIn();
+                const googleUser = window.googleAuth.getCurrentUser();
+                
+                console.log('Stato autenticazione Google:', isGoogleLoggedIn ? 'Autenticato' : 'Non autenticato');
+                
+                // Aggiorna la visibilità del pulsante di login nella barra di navigazione
+                if (loginButton) {
+                    if (isGoogleLoggedIn) {
+                        // Utente autenticato, nascondi il pulsante di login
+                        loginButton.style.display = 'none';
+                    } else {
+                        // Utente non autenticato, mostra il pulsante di login
+                        loginButton.style.display = '';
+                    }
+                }
+                
+                if (isGoogleLoggedIn && googleUser) {
+                    // Utente loggato con Google
+                    accountInfo.innerHTML = `
+                        <div class="user-profile">
+                            ${googleUser.picture ? `<img src="${googleUser.picture}" alt="${googleUser.name}" class="user-avatar">` : ''}
+                            <div class="user-details">
+                                <div class="user-name">${googleUser.name}</div>
+                                <div class="user-email">${googleUser.email}</div>
+                                <div class="user-provider">Connesso con Google Drive</div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Mostra il pulsante di logout
+                    if (logoutBtn) {
+                        logoutBtn.style.display = 'block';
+                        logoutBtn.onclick = function() {
+                            window.googleAuth.logout();
+                        };
+                    }
+                    
+                    // Mostra i controlli di backup
+                    if (backupControls) {
+                        backupControls.style.display = 'block';
+                    }
+                    
+                    // Aggiorna anche le informazioni sull'ultimo backup
+                    try {
+                        if (typeof updateLastBackupInfo === 'function') {
+                            updateLastBackupInfo();
+                        }
+                    } catch (error) {
+                        console.error('Errore durante l\'aggiornamento delle informazioni sull\'ultimo backup:', error);
+                    }
+                    
+                    return; // Esci dalla funzione, abbiamo già aggiornato l'UI
                 }
             }
             
-            if (userData) {
-                // Utente loggato
-                const provider = cloudManager.getProvider(currentProvider);
-                
-                accountInfo.innerHTML = `
-                    <div class="user-profile">
-                        ${userData.picture ? `<img src="${userData.picture}" alt="${userData.name}" class="user-avatar">` : ''}
-                        <div class="user-details">
-                            <div class="user-name">${userData.name}</div>
-                            <div class="user-email">${userData.email}</div>
-                            <div class="user-provider">Connesso con ${provider.name}</div>
-                        </div>
-                    </div>
-                `;
-                
-                logoutBtn.style.display = 'block';
-                backupControls.style.display = 'block';
-                
-                // Aggiorna anche le informazioni sull'ultimo backup
-                updateLastBackupInfo();
-            } else {
-                // Utente non loggato
-                accountInfo.innerHTML = '<p>Seleziona un provider e accedi per abilitare il backup su cloud</p>';
-                logoutBtn.style.display = 'none';
-                backupControls.style.display = 'none';
+            // Fallback al vecchio sistema se il nuovo non è disponibile o l'utente non è autenticato con Google
+            try {
+                if (typeof cloudManager !== 'undefined' && cloudManager) {
+                    const currentProvider = cloudManager.getCurrentProvider();
+                    const userData = currentProvider ? cloudManager.getProvider(currentProvider).getUserInfo() : null;
+                    
+                    // Aggiorna la visibilità del pulsante di login nella barra di navigazione
+                    if (loginButton && !loginButton.style.display) { // Non sovrascrivere se già impostato dal sistema Google
+                        if (userData) {
+                            // Utente autenticato, nascondi il pulsante di login
+                            loginButton.style.display = 'none';
+                        } else {
+                            // Utente non autenticato, mostra il pulsante di login
+                            loginButton.style.display = '';
+                        }
+                    }
+                    
+                    if (userData) {
+                        // Utente loggato
+                        const provider = cloudManager.getProvider(currentProvider);
+                        
+                        accountInfo.innerHTML = `
+                            <div class="user-profile">
+                                ${userData.picture ? `<img src="${userData.picture}" alt="${userData.name}" class="user-avatar">` : ''}
+                                <div class="user-details">
+                                    <div class="user-name">${userData.name}</div>
+                                    <div class="user-email">${userData.email}</div>
+                                    <div class="user-provider">Connesso con ${provider.name}</div>
+                                </div>
+                            </div>
+                        `;
+                        
+                        logoutBtn.style.display = 'block';
+                        backupControls.style.display = 'block';
+                        
+                        // Aggiorna anche le informazioni sull'ultimo backup
+                        updateLastBackupInfo();
+                        
+                        return; // Esci dalla funzione, abbiamo già aggiornato l'UI
+                    }
+                }
+            } catch (error) {
+                console.error('Errore durante l\'aggiornamento dell\'UI con cloudManager:', error);
             }
+            
+            // Se arriviamo qui, l'utente non è autenticato con nessun sistema
+            accountInfo.innerHTML = '<p>Seleziona un provider e accedi per abilitare il backup su cloud</p>';
+            logoutBtn.style.display = 'none';
+            backupControls.style.display = 'none';
         }
 
         // Aggiorna le informazioni sull'ultimo backup
@@ -11563,6 +11629,67 @@ END:VCARD`;
                         // Ottieni i dati da salvare
                         const data = getDb(); // La tua funzione esistente
                         
+                        // Verifica se stiamo usando il nuovo sistema di autenticazione Google
+                        if (window.googleAuth && typeof window.googleAuth.isLoggedIn === 'function') {
+                            const isGoogleLoggedIn = window.googleAuth.isLoggedIn();
+                            
+                            if (!isGoogleLoggedIn) {
+                                console.log('Utente non autenticato con Google, richiedo login...');
+                                showToast('Accedi per eseguire il backup', 'info');
+                                
+                                try {
+                                    // Richiedi login con Google
+                                    window.googleAuth.login();
+                                    
+                                    // Poiché il login è asincrono e richiede interazione utente,
+                                    // dobbiamo uscire qui e lasciare che l'utente completi il login
+                                    showToast('Completa il login con Google, poi riprova il backup', 'info');
+                                    return;
+                                } catch (error) {
+                                    console.error('Errore durante il login con Google:', error);
+                                    showToast('Errore durante il login. Riprova più tardi.', 'error');
+                                    return;
+                                }
+                            }
+                            
+                            // Ottieni un token valido
+                            const token = await window.googleAuth.getToken();
+                            
+                            if (!token) {
+                                console.error('Token non valido per il backup');
+                                showToast('Errore di autenticazione. Riprova più tardi.', 'error');
+                                return;
+                            }
+                            
+                            try {
+                                // Esegui il backup usando direttamente le API di Google Drive
+                                console.log('Esecuzione backup con Google Drive...');
+                                
+                                // Cerca o crea il file di backup
+                                const backupFile = await findOrCreateBackupFile(token);
+                                
+                                if (!backupFile || !backupFile.id) {
+                                    throw new Error('Impossibile trovare o creare il file di backup');
+                                }
+                                
+                                // Aggiorna il contenuto del file
+                                await updateBackupFile(backupFile.id, data, token);
+                                
+                                // Salva il timestamp del backup
+                                const timestamp = new Date().toISOString();
+                                localStorage.setItem('lastBackupTime_google', timestamp);
+                                updateLastBackupInfo();
+                                
+                                showToast('Backup completato con successo', 'success');
+                            } catch (error) {
+                                console.error('Errore durante il backup con Google Drive:', error);
+                                showToast(`Errore durante il backup: ${error.message || 'Errore sconosciuto'}`, 'error');
+                            }
+                            
+                            return; // Esci dalla funzione, abbiamo già gestito il backup con Google
+                        }
+                        
+                        // Fallback al vecchio sistema se il nuovo non è disponibile
                         let result;
                         let isAuthenticated = false;
                         
@@ -11643,6 +11770,94 @@ END:VCARD`;
                         restoreBackupBtn.innerHTML = '<span class="spinner"></span> Ripristino in corso...';
                         restoreBackupBtn.disabled = true;
                         
+                        // Verifica se stiamo usando il nuovo sistema di autenticazione Google
+                        if (window.googleAuth && typeof window.googleAuth.isLoggedIn === 'function') {
+                            const isGoogleLoggedIn = window.googleAuth.isLoggedIn();
+                            
+                            if (!isGoogleLoggedIn) {
+                                console.log('Utente non autenticato con Google, richiedo login...');
+                                showToast('Accedi per ripristinare un backup', 'info');
+                                
+                                try {
+                                    // Richiedi login con Google
+                                    window.googleAuth.login();
+                                    
+                                    // Poiché il login è asincrono e richiede interazione utente,
+                                    // dobbiamo uscire qui e lasciare che l'utente completi il login
+                                    showToast('Completa il login con Google, poi riprova il ripristino', 'info');
+                                    return;
+                                } catch (error) {
+                                    console.error('Errore durante il login con Google:', error);
+                                    showToast('Errore durante il login. Riprova più tardi.', 'error');
+                                    return;
+                                }
+                            }
+                            
+                            // Ottieni un token valido
+                            const token = await window.googleAuth.getToken();
+                            
+                            if (!token) {
+                                console.error('Token non valido per il ripristino');
+                                showToast('Errore di autenticazione. Riprova più tardi.', 'error');
+                                return;
+                            }
+                            
+                            try {
+                                // Esegui il ripristino usando direttamente le API di Google Drive
+                                console.log('Ricerca backup su Google Drive...');
+                                
+                                // Cerca il file di backup
+                                const response = await fetch('https://www.googleapis.com/drive/v3/files?q=name%3D%27backup.json%27%20and%20trashed%3Dfalse', {
+                                    headers: {
+                                        'Authorization': `Bearer ${token}`
+                                    }
+                                });
+                                
+                                if (!response.ok) {
+                                    throw new Error(`Errore HTTP: ${response.status}`);
+                                }
+                                
+                                const data = await response.json();
+                                
+                                if (!data.files || data.files.length === 0) {
+                                    throw new Error('Nessun backup trovato');
+                                }
+                                
+                                // Ottieni il contenuto del file
+                                const backupFile = data.files[0];
+                                const backupData = await getBackupFileContent(backupFile.id, token);
+                                
+                                if (!backupData) {
+                                    throw new Error('Impossibile leggere il contenuto del backup');
+                                }
+                                
+                                // Chiedi conferma all'utente
+                                const backupDate = new Date(backupFile.modifiedTime).toLocaleString();
+                                if (!confirm(`Ripristinare i dati dal backup del ${backupDate}? I dati attuali verranno sovrascritti.`)) {
+                                    // L'utente ha annullato
+                                    showToast('Ripristino annullato dall\'utente', 'info');
+                                    return;
+                                }
+                                
+                                // Ripristina i dati
+                                saveDb(backupData);
+                                
+                                // Aggiorna l'interfaccia utente
+                                if (typeof loadTimeEntries === 'function') loadTimeEntries();
+                                if (typeof loadCalendarData === 'function') loadCalendarData();
+                                if (typeof populateVehicleDropdown === 'function') populateVehicleDropdown();
+                                if (typeof loadVehiclesList === 'function') loadVehiclesList();
+                                
+                                showToast('Dati ripristinati con successo', 'success');
+                            } catch (error) {
+                                console.error('Errore durante il ripristino con Google Drive:', error);
+                                showToast(`Errore durante il ripristino: ${error.message || 'Errore sconosciuto'}`, 'error');
+                            }
+                            
+                            return; // Esci dalla funzione, abbiamo già gestito il ripristino con Google
+                        }
+                        
+                        // Fallback al vecchio sistema se il nuovo non è disponibile
                         let result;
                         let isAuthenticated = false;
                         
@@ -13117,6 +13332,144 @@ END:VCARD`;
                     updateProviderSelectionUI();
                     updateCloudAccountUI();
                 }, 2000);
+            }
+        }
+        
+        // Funzioni di supporto per il backup su Google Drive
+        
+        // Trova o crea il file di backup
+        async function findOrCreateBackupFile(token) {
+            try {
+                console.log('Ricerca file di backup esistente...');
+                // Cerca il file di backup esistente
+                const response = await fetch('https://www.googleapis.com/drive/v3/files?q=name%3D%27backup.json%27%20and%20trashed%3Dfalse', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    console.error(`Errore HTTP durante la ricerca del file: ${response.status}`);
+                    const errorText = await response.text();
+                    console.error('Dettagli errore:', errorText);
+                    throw new Error(`Errore HTTP: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Risposta ricerca file:', data);
+                
+                if (data.files && data.files.length > 0) {
+                    // Restituisci il file esistente
+                    console.log('File di backup esistente trovato:', data.files[0].id);
+                    return data.files[0];
+                }
+                
+                console.log('Nessun file di backup esistente trovato, creazione nuovo file...');
+                // Crea un nuovo file di backup
+                const createResponse = await fetch('https://www.googleapis.com/drive/v3/files', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: 'backup.json',
+                        mimeType: 'application/json'
+                    })
+                });
+                
+                if (!createResponse.ok) {
+                    console.error(`Errore HTTP durante la creazione del file: ${createResponse.status}`);
+                    const errorText = await createResponse.text();
+                    console.error('Dettagli errore:', errorText);
+                    throw new Error(`Errore HTTP: ${createResponse.status}`);
+                }
+                
+                const newFile = await createResponse.json();
+                console.log('Nuovo file di backup creato:', newFile.id);
+                return newFile;
+            } catch (error) {
+                console.error('Errore durante la ricerca/creazione del file di backup:', error);
+                // Restituisci un oggetto vuoto invece di lanciare un'eccezione
+                return { id: null };
+            }
+        }
+        
+        // Aggiorna il contenuto del file di backup
+        async function updateBackupFile(fileId, data, token) {
+            try {
+                if (!fileId) {
+                    console.error('ID file non valido per l\'aggiornamento');
+                    throw new Error('ID file non valido');
+                }
+                
+                console.log('Aggiornamento contenuto file di backup:', fileId);
+                
+                // Converti i dati in stringa JSON se non lo sono già
+                const jsonData = typeof data === 'string' ? data : JSON.stringify(data);
+                
+                const response = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: jsonData
+                });
+                
+                if (!response.ok) {
+                    console.error(`Errore HTTP durante l'aggiornamento del file: ${response.status}`);
+                    const errorText = await response.text();
+                    console.error('Dettagli errore:', errorText);
+                    throw new Error(`Errore HTTP: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('File aggiornato con successo:', result);
+                return result;
+            } catch (error) {
+                console.error('Errore durante l\'aggiornamento del file di backup:', error);
+                return { error: error.message };
+            }
+        }
+        
+        // Ottieni il contenuto del file di backup
+        async function getBackupFileContent(fileId, token) {
+            try {
+                if (!fileId) {
+                    console.error('ID file non valido per il recupero del contenuto');
+                    throw new Error('ID file non valido');
+                }
+                
+                console.log('Recupero contenuto file di backup:', fileId);
+                
+                const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    console.error(`Errore HTTP durante il recupero del contenuto: ${response.status}`);
+                    const errorText = await response.text();
+                    console.error('Dettagli errore:', errorText);
+                    throw new Error(`Errore HTTP: ${response.status}`);
+                }
+                
+                // Prova a interpretare la risposta come JSON
+                try {
+                    const jsonData = await response.json();
+                    console.log('Contenuto file recuperato con successo (JSON)');
+                    return jsonData;
+                } catch (jsonError) {
+                    // Se non è JSON, restituisci il testo
+                    console.log('Contenuto file non è JSON, restituisco come testo');
+                    const textData = await response.text();
+                    return textData;
+                }
+            } catch (error) {
+                console.error('Errore durante il recupero del contenuto del file di backup:', error);
+                return null;
             }
         }
         
