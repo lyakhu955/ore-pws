@@ -21,10 +21,31 @@ let tokenRefreshTimer = null; // Timer per il rinnovo automatico del token
 // Inizializza Firebase
 function initFirebase() {
   console.log('Inizializzazione Firebase...');
+  
+  // Configura Firebase con l'opzione di persistenza
+  const firebaseConfig = {
+    apiKey: "AIzaSyAsmspxrDXhxTISZq9kOwZTeUHZ99jVOqA",
+    authDomain: "ore-pws.firebaseapp.com",
+    projectId: "ore-pws",
+    storageBucket: "ore-pws.firebasestorage.app",
+    messagingSenderId: "978531048476",
+    appId: "1:978531048476:web:9d254fd6e85216adaad3d9",
+    measurementId: "G-F3CD5FKP1S"
+  };
+  
   // Inizializza Firebase solo se non è già stato inizializzato
   if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
     console.log('Firebase inizializzato con successo');
+    
+    // Imposta la persistenza per mantenere la sessione anche dopo la chiusura del browser
+    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+      .then(() => {
+        console.log('Persistenza Firebase impostata su LOCAL');
+      })
+      .catch((error) => {
+        console.error('Errore durante l\'impostazione della persistenza:', error);
+      });
   } else {
     console.log('Firebase già inizializzato');
   }
@@ -38,8 +59,10 @@ function initFirebase() {
   // Gestisci il risultato del redirect di autenticazione
   firebase.auth().getRedirectResult()
     .then((result) => {
+      console.log('Risultato del redirect ricevuto:', result);
+      
       if (result.user) {
-        console.log('Login completato tramite redirect');
+        console.log('Login completato tramite redirect, utente:', result.user.email);
         
         // Crea un elemento di notifica visibile
         const notification = document.createElement('div');
@@ -65,6 +88,13 @@ function initFirebase() {
         // Salva il token nel localStorage per il sistema esistente
         if (result.credential && result.credential.accessToken) {
           localStorage.setItem('googleAuthToken', result.credential.accessToken);
+          console.log('Token salvato nel localStorage');
+        } else {
+          // Se non abbiamo un token nell'oggetto credential, otteniamolo direttamente dall'utente
+          result.user.getIdToken().then(token => {
+            localStorage.setItem('googleAuthToken', token);
+            console.log('Token ottenuto dall\'utente e salvato nel localStorage');
+          });
         }
         
         // Ripristina lo stato precedente se necessario
@@ -73,9 +103,12 @@ function initFirebase() {
           localStorage.removeItem('auth_redirect_state');
           // Non reindirizzare se siamo già nella pagina corretta
           if (redirectState !== window.location.href) {
+            console.log('Reindirizzamento a:', redirectState);
             window.location.href = redirectState;
           }
         }
+      } else {
+        console.log('Nessun utente trovato nel risultato del redirect');
       }
     })
     .catch((error) => {
@@ -170,40 +203,23 @@ function handleAuthStateChanged(user) {
       }));
       
       // Salva anche il token per il sistema esistente
-      user.getIdToken().then(token => {
+      user.getIdToken(true).then(token => {
+        console.log('Token ottenuto con successo');
         localStorage.setItem('googleAuthToken', token);
         
         // Imposta il rinnovo automatico del token
         setupTokenRefresh();
+        
+        // Aggiorna l'interfaccia utente dopo aver ottenuto il token
+        updateUIAfterAuth(user);
+      }).catch(error => {
+        console.error('Errore durante l\'ottenimento del token:', error);
+        // Aggiorna comunque l'interfaccia utente
+        updateUIAfterAuth(user);
       });
-    }
-    
-    // Aggiorna l'oggetto cloudManager
-    console.log('Aggiornamento oggetto cloudManager per utente autenticato');
-    window.cloudManager = window.cloudManager || {};
-    window.cloudManager.getCurrentProvider = function() {
-      return 'firebase';
-    };
-    window.cloudManager.isAuthenticated = function() {
-      return true;
-    };
-    window.cloudManager.getUserInfo = function() {
-      return {
-        email: user.email,
-        name: user.displayName || user.email,
-        photoUrl: user.photoURL
-      };
-    };
-    window.cloudManager.checkAuthStatus = function() {
-      return Promise.resolve(true);
-    };
-    
-    // Aggiorna l'interfaccia utente se la funzione esiste
-    if (typeof window.updateFirebaseUI === 'function') {
-      window.updateFirebaseUI(user);
     } else {
-      console.log('La funzione updateFirebaseUI non esiste, creazione di un elemento UI personalizzato');
-      createOrUpdateFirebaseUI(user);
+      // Aggiorna l'interfaccia utente anche se localStorage non è disponibile
+      updateUIAfterAuth(user);
     }
     
     // Ottieni un token di accesso fresco
@@ -229,6 +245,47 @@ function handleAuthStateChanged(user) {
       localStorage.removeItem('googleAuthToken');
     }
     
+    // Aggiorna l'interfaccia utente per lo stato non autenticato
+    updateUIAfterAuth(null);
+  }
+}
+
+// Funzione per aggiornare l'interfaccia utente dopo l'autenticazione
+function updateUIAfterAuth(user) {
+  if (user) {
+    // Aggiorna l'oggetto cloudManager
+    console.log('Aggiornamento oggetto cloudManager per utente autenticato');
+    window.cloudManager = window.cloudManager || {};
+    window.cloudManager.getCurrentProvider = function() {
+      return 'firebase';
+    };
+    window.cloudManager.isAuthenticated = function() {
+      return true;
+    };
+    window.cloudManager.getUserInfo = function() {
+      return {
+        email: user.email,
+        name: user.displayName || user.email,
+        photoUrl: user.photoURL
+      };
+    };
+    window.cloudManager.checkAuthStatus = function() {
+      return Promise.resolve(true);
+    };
+    
+    // Aggiorna l'interfaccia utente se la funzione esiste
+    if (typeof window.updateFirebaseUI === 'function') {
+      window.updateFirebaseUI(user);
+    } else if (typeof window.updateCloudAccountUI === 'function') {
+      window.updateCloudAccountUI();
+    } else {
+      console.log('Creazione di un elemento UI personalizzato');
+      createOrUpdateFirebaseUI(user);
+    }
+    
+    // Mostra un messaggio di benvenuto
+    showToast(`Benvenuto, ${user.displayName || user.email}!`, "success");
+  } else {
     // Aggiorna l'oggetto cloudManager
     console.log('Aggiornamento oggetto cloudManager per utente non autenticato');
     window.cloudManager = window.cloudManager || {};
@@ -248,8 +305,10 @@ function handleAuthStateChanged(user) {
     // Aggiorna l'interfaccia utente se la funzione esiste
     if (typeof window.updateFirebaseUI === 'function') {
       window.updateFirebaseUI(null);
+    } else if (typeof window.updateCloudAccountUI === 'function') {
+      window.updateCloudAccountUI();
     } else {
-      console.log('La funzione updateFirebaseUI non esiste, aggiornamento elemento UI personalizzato');
+      console.log('Aggiornamento elemento UI personalizzato');
       createOrUpdateFirebaseUI(null);
     }
   }
@@ -323,6 +382,13 @@ function checkAuthState() {
 function loginWithGoogle() {
   console.log('Tentativo di login con Google via Firebase...');
   
+  // Verifica se l'utente è già autenticato
+  if (firebase.auth().currentUser) {
+    console.log('Utente già autenticato:', firebase.auth().currentUser.email);
+    showToast("Sei già autenticato come " + firebase.auth().currentUser.email, "info");
+    return;
+  }
+  
   // Crea un elemento di notifica visibile
   const notification = document.createElement('div');
   notification.textContent = "Apertura pagina di accesso Google...";
@@ -344,9 +410,11 @@ function loginWithGoogle() {
     }
   }, 3000);
   
+  // Crea un nuovo provider Google
   const provider = new firebase.auth.GoogleAuthProvider();
   
   // Aggiungi gli scope necessari per Google Drive
+  provider.addScope('profile');
   provider.addScope('https://www.googleapis.com/auth/drive.file');
   provider.addScope('https://www.googleapis.com/auth/drive.appdata');
   
@@ -356,63 +424,57 @@ function loginWithGoogle() {
     access_type: 'offline'
   });
   
-  // Usa sempre il metodo redirect per evitare problemi con i popup
-  console.log('Utilizzo metodo redirect per l\'autenticazione');
-  
   // Salva lo stato corrente per tornare alla stessa pagina dopo il login
   localStorage.setItem('auth_redirect_state', window.location.href);
+  console.log('Stato corrente salvato:', window.location.href);
   
-  // Usa il metodo redirect
-  try {
-    firebase.auth().signInWithRedirect(provider)
-      .catch((error) => {
-        console.error('Errore durante il redirect per login Firebase:', error);
-        
-        // Mostra un messaggio di errore
-        const errorNotification = document.createElement('div');
-        errorNotification.textContent = "Errore durante l'accesso: " + error.message;
-        errorNotification.style.position = 'fixed';
-        errorNotification.style.top = '50%';
-        errorNotification.style.left = '50%';
-        errorNotification.style.transform = 'translate(-50%, -50%)';
-        errorNotification.style.backgroundColor = 'rgba(244, 67, 54, 0.9)';
-        errorNotification.style.color = 'white';
-        errorNotification.style.padding = '20px';
-        errorNotification.style.borderRadius = '8px';
-        errorNotification.style.zIndex = '10000';
-        document.body.appendChild(errorNotification);
-        
-        // Rimuovi la notifica dopo 5 secondi
-        setTimeout(() => {
-          if (document.body.contains(errorNotification)) {
-            document.body.removeChild(errorNotification);
-          }
-        }, 5000);
-      });
-  } catch (e) {
-    console.error('Eccezione durante il tentativo di login:', e);
-    
-    // Mostra un messaggio di errore
-    const errorNotification = document.createElement('div');
-    errorNotification.textContent = "Errore imprevisto durante l'accesso. Riprova più tardi.";
-    errorNotification.style.position = 'fixed';
-    errorNotification.style.top = '50%';
-    errorNotification.style.left = '50%';
-    errorNotification.style.transform = 'translate(-50%, -50%)';
-    errorNotification.style.backgroundColor = 'rgba(244, 67, 54, 0.9)';
-    errorNotification.style.color = 'white';
-    errorNotification.style.padding = '20px';
-    errorNotification.style.borderRadius = '8px';
-    errorNotification.style.zIndex = '10000';
-    document.body.appendChild(errorNotification);
-    
-    // Rimuovi la notifica dopo 5 secondi
-    setTimeout(() => {
-      if (document.body.contains(errorNotification)) {
-        document.body.removeChild(errorNotification);
+  // Prova prima con il popup, che è più affidabile
+  console.log('Tentativo di login con popup...');
+  firebase.auth().signInWithPopup(provider)
+    .then((result) => {
+      console.log('Login completato con popup:', result.user.email);
+      
+      // Salva il token nel localStorage
+      if (result.credential && result.credential.accessToken) {
+        localStorage.setItem('googleAuthToken', result.credential.accessToken);
+        console.log('Token salvato nel localStorage');
+      } else {
+        // Se non abbiamo un token nell'oggetto credential, otteniamolo direttamente dall'utente
+        result.user.getIdToken().then(token => {
+          localStorage.setItem('googleAuthToken', token);
+          console.log('Token ottenuto dall\'utente e salvato nel localStorage');
+        });
       }
-    }, 5000);
-  }
+      
+      // Mostra una notifica di successo
+      showToast("Accesso effettuato con successo!", "success");
+      
+      // Aggiorna lo stato di autenticazione
+      handleAuthStateChanged(result.user);
+    })
+    .catch((error) => {
+      console.error('Errore durante il login con popup:', error);
+      
+      // Se il popup è bloccato o fallisce, prova con il redirect
+      if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
+        console.log('Popup bloccato o chiuso, tentativo con redirect...');
+        
+        // Usa il metodo redirect come fallback
+        try {
+          firebase.auth().signInWithRedirect(provider)
+            .catch((redirectError) => {
+              console.error('Errore durante il redirect per login Firebase:', redirectError);
+              showToast("Errore durante l'accesso: " + redirectError.message, "error");
+            });
+        } catch (e) {
+          console.error('Eccezione durante il tentativo di login con redirect:', e);
+          showToast("Errore imprevisto durante l'accesso. Riprova più tardi.", "error");
+        }
+      } else {
+        // Mostra un messaggio di errore per altri tipi di errori
+        showToast("Errore durante l'accesso: " + error.message, "error");
+      }
+    });
 }
 
 // Effettua il logout
@@ -486,8 +548,11 @@ async function getValidAccessToken() {
 // Aggiorna il token di accesso
 function refreshAccessToken() {
   if (!currentUser) {
+    console.warn('refreshAccessToken: Nessun utente autenticato');
     return Promise.reject(new Error('Utente non autenticato'));
   }
+  
+  console.log('Richiesta di rinnovo token per:', currentUser.email);
   
   return currentUser.getIdToken(true)
     .then((token) => {
@@ -499,10 +564,29 @@ function refreshAccessToken() {
       // Imposta il rinnovo automatico del token
       setupTokenRefresh();
       
+      // Aggiorna anche l'interfaccia utente se necessario
+      if (typeof window.updateCloudAccountUI === 'function') {
+        window.updateCloudAccountUI();
+      }
+      
       return token;
     })
     .catch((error) => {
       console.error('Errore durante l\'aggiornamento del token Firebase:', error);
+      
+      // Se l'errore è dovuto a un problema di autenticazione, prova a riautenticare l'utente
+      if (error.code === 'auth/requires-recent-login' || error.code === 'auth/user-token-expired') {
+        console.log('Token scaduto o login recente richiesto, tentativo di riautenticazione...');
+        
+        // Mostra un messaggio all'utente
+        showToast("La tua sessione è scaduta. Per favore, effettua nuovamente l'accesso.", "warning");
+        
+        // Forza il logout per richiedere una nuova autenticazione
+        setTimeout(() => {
+          logoutFromGoogle();
+        }, 2000);
+      }
+      
       throw error;
     });
 }
@@ -512,30 +596,55 @@ function setupTokenRefresh() {
   // Cancella eventuali timer esistenti
   if (tokenRefreshTimer) {
     clearTimeout(tokenRefreshTimer);
+    tokenRefreshTimer = null;
   }
   
   // Se non c'è un utente autenticato, non fare nulla
   if (!currentUser) {
+    console.warn('setupTokenRefresh: Nessun utente autenticato');
     return;
   }
   
   // Firebase rinnova automaticamente il token ID, ma possiamo forzare un refresh periodico
   // per assicurarci che il token sia sempre valido
   // Il token di Firebase dura tipicamente 3600 secondi (1 ora)
-  const refreshTime = 50 * 60 * 1000; // 50 minuti in millisecondi
+  const refreshTime = 45 * 60 * 1000; // 45 minuti in millisecondi (ridotto per maggiore sicurezza)
   
-  console.log(`Programmato rinnovo automatico del token Firebase tra ${refreshTime/1000/60} minuti.`);
+  console.log(`Programmato rinnovo automatico del token Firebase per ${currentUser.email} tra ${refreshTime/1000/60} minuti.`);
   
   // Imposta il timer per rinnovare il token automaticamente
   tokenRefreshTimer = setTimeout(async () => {
     console.log('Rinnovo automatico del token Firebase in corso...');
+    
+    // Verifica che l'utente sia ancora autenticato
+    if (!firebase.auth().currentUser) {
+      console.warn('Utente non più autenticato durante il rinnovo automatico del token');
+      return;
+    }
+    
     try {
-      await refreshAccessToken();
+      const token = await refreshAccessToken();
       console.log('Token Firebase rinnovato automaticamente con successo');
+      
+      // Salva il token rinnovato
+      localStorage.setItem('googleAuthToken', token);
+      
+      // Imposta il prossimo rinnovo
+      setupTokenRefresh();
     } catch (error) {
       console.warn('Errore nel rinnovo automatico del token Firebase:', error);
-      // Se fallisce, prova a verificare lo stato di autenticazione
-      checkAuthState();
+      
+      // Se l'errore è dovuto a un problema di autenticazione, verifica lo stato
+      if (error.code === 'auth/requires-recent-login' || error.code === 'auth/user-token-expired') {
+        console.log('Token scaduto, verifica dello stato di autenticazione...');
+        checkAuthState();
+      } else {
+        // Per altri errori, riprova tra un minuto
+        console.log('Riprovo il rinnovo del token tra 1 minuto...');
+        setTimeout(() => {
+          setupTokenRefresh();
+        }, 60000);
+      }
     }
   }, refreshTime);
 }
