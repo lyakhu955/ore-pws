@@ -13210,6 +13210,42 @@ END:VCARD`;
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <!-- Il tuo script di autenticazione -->
     <script src="firebase-auth.js"></script>
+    
+    <!-- Script di integrazione Firebase -->
+    <script>
+        // Funzione per aggiornare l'interfaccia utente di Firebase
+        function updateFirebaseUI(user) {
+            console.log('Aggiornamento UI Firebase:', user ? 'Utente autenticato' : 'Utente non autenticato');
+            
+            // Aggiorna l'interfaccia utente esistente se necessario
+            if (typeof updateCloudAccountUI === 'function') {
+                try {
+                    // Crea un oggetto compatibile con il sistema esistente
+                    if (user) {
+                        window.cloudManager = window.cloudManager || {};
+                        window.cloudManager.getCurrentProvider = function() {
+                            return 'firebase';
+                        };
+                        window.cloudManager.isAuthenticated = function() {
+                            return true;
+                        };
+                        window.cloudManager.getUserInfo = function() {
+                            return {
+                                email: user.email,
+                                name: user.displayName,
+                                photoUrl: user.photoURL
+                            };
+                        };
+                    }
+                    
+                    // Aggiorna l'interfaccia utente esistente
+                    updateCloudAccountUI();
+                } catch (error) {
+                    console.error('Errore durante l\'aggiornamento dell\'interfaccia utente:', error);
+                }
+            }
+        }
+    </script>
 
 </body>
 </html>
