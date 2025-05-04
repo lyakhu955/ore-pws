@@ -4132,9 +4132,9 @@
             <span class="material-symbols-outlined">settings</span>
             <span>Impostazioni</span>
         </a>
-        <a href="#" class="nav-item" id="loginButton">
+        <a href="#" class="nav-item" id="loginButton" onclick="window.googleAuth.login(); return false;">
             <span class="material-symbols-outlined">login</span>
-            <span>Accedi</span>
+            <span>Accedi con Google</span>
         </a>
     </nav>
 
@@ -13070,155 +13070,39 @@ END:VCARD`;
 
     </script>
     
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    
-    <!-- Firebase Authentication -->
-    <script src="firebase-auth.js"></script>
+    <!-- Google Authentication -->
+    <script src="google-auth.js"></script>
     
     <script>
-        // Funzione per verificare lo stato di autenticazione all'avvio
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM caricato, inizializzazione autenticazione...');
+        // Il nuovo sistema di autenticazione Google si inizializza automaticamente
+        // Non è necessario aggiungere altro codice qui
+        
+        // Funzione per inizializzare il sistema di backup cloud
+        function initCloudBackupSystem() {
+            console.log('Inizializzazione sistema di backup cloud...');
             
-            // Verifica se il pulsante di login esiste
-            const loginButton = document.getElementById('loginButton');
-            if (loginButton) {
-                console.log('Pulsante di login trovato, configurazione...');
-                
-                // Nascondi il pulsante di login all'avvio, verrà mostrato solo se necessario
-                loginButton.style.display = 'none';
-                
-                // Aggiungi un event listener per gestire il click sul pulsante di login
-                loginButton.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    console.log('Pulsante di login cliccato');
-                    
-                    if (typeof loginWithGoogle === 'function') {
-                        console.log('Chiamata a loginWithGoogle()');
-                        try {
-                            loginWithGoogle();
-                        } catch (error) {
-                            console.error('Errore durante la chiamata a loginWithGoogle():', error);
-                            showToast('Errore durante il login. Riprova più tardi.', 'error');
-                        }
-                    } else {
-                        console.error('Funzione loginWithGoogle non trovata');
-                        showToast('Errore durante il login. Riprova più tardi.', 'error');
-                    }
-                });
-            } else {
-                console.warn('Pulsante di login non trovato');
+            // Integra con il sistema di backup cloud
+            if (typeof window.googleAuth !== 'undefined' && typeof window.googleAuth.integrateWithCloudManager === 'function') {
+                console.log('Integrazione con il sistema di backup cloud...');
+                setTimeout(() => {
+                    window.googleAuth.integrateWithCloudManager();
+                }, 1500);
             }
             
-            // Verifica lo stato di autenticazione dopo un breve ritardo
-            // Questo permette a Firebase di inizializzarsi completamente
-            const authCheckDelay = 2000; // 2 secondi
-            console.log(`Verifica dello stato di autenticazione programmata tra ${authCheckDelay}ms`);
-            
-            setTimeout(function() {
-                console.log('Esecuzione verifica stato di autenticazione');
-                
-                // Verifica se Firebase è inizializzato
-                if (typeof firebase !== 'undefined' && firebase.auth) {
-                    console.log('Firebase trovato, verifica utente corrente...');
-                    const user = firebase.auth().currentUser;
-                    console.log('Utente Firebase corrente:', user ? user.email : 'Nessuno');
-                } else {
-                    console.warn('Firebase non trovato o non inizializzato');
-                }
-                
-                // Aggiorna l'interfaccia utente
-                if (typeof updateCloudAccountUI === 'function') {
-                    console.log('Chiamata a updateCloudAccountUI()');
-                    try {
-                        updateCloudAccountUI();
-                    } catch (error) {
-                        console.error('Errore durante la chiamata a updateCloudAccountUI():', error);
-                    }
-                } else {
-                    console.warn('Funzione updateCloudAccountUI non trovata');
-                }
-            }, authCheckDelay);
-        });
-        
-        // Funzione per verificare se Firebase è caricato correttamente
-        function checkFirebaseLoaded() {
-            if (typeof firebase !== 'undefined') {
-                console.log('Firebase caricato correttamente');
-                return true;
-            } else {
-                console.error('Firebase non caricato correttamente');
-                return false;
+            // Aggiorna l'interfaccia utente del sistema di backup cloud
+            if (typeof updateProviderSelectionUI === 'function' && typeof updateCloudAccountUI === 'function') {
+                console.log('Aggiornamento interfaccia utente del sistema di backup cloud...');
+                setTimeout(function() {
+                    updateProviderSelectionUI();
+                    updateCloudAccountUI();
+                }, 2000);
             }
         }
         
-        // Inizializza Firebase quando il documento è pronto
+        // Inizializza il sistema di backup cloud quando il DOM è caricato
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM caricato, inizializzazione Firebase...');
-            
-            // Verifica se Firebase è caricato
-            if (checkFirebaseLoaded()) {
-                // Inizializza Firebase
-                if (typeof initFirebase === 'function') {
-                    console.log('Chiamata a initFirebase()');
-                    initFirebase();
-                } else {
-                    console.error('La funzione initFirebase non è definita');
-                }
-                
-                // Verifica lo stato di autenticazione ogni volta che la pagina viene caricata
-                if (typeof checkAuthState === 'function') {
-                    console.log('Chiamata a checkAuthState()');
-                    setTimeout(checkAuthState, 1000); // Piccolo ritardo per assicurarsi che Firebase sia completamente inizializzato
-                } else {
-                    console.error('La funzione checkAuthState non è definita');
-                }
-                
-                // Integra con il sistema di backup cloud esistente
-                if (typeof integrateWithCloudManager === 'function') {
-                    console.log('Chiamata a integrateWithCloudManager()');
-                    setTimeout(integrateWithCloudManager, 1500); // Piccolo ritardo per assicurarsi che Firebase sia completamente inizializzato
-                }
-                
-                // Aggiorna l'interfaccia utente del sistema di backup cloud
-                if (typeof updateProviderSelectionUI === 'function' && typeof updateCloudAccountUI === 'function') {
-                    console.log('Aggiornamento interfaccia utente del sistema di backup cloud...');
-                    setTimeout(function() {
-                        updateProviderSelectionUI();
-                        updateCloudAccountUI();
-                    }, 2000); // Piccolo ritardo per assicurarsi che tutto sia inizializzato
-                }
-            } else {
-                // Riprova dopo un breve ritardo
-                setTimeout(function() {
-                    if (checkFirebaseLoaded()) {
-                        if (typeof initFirebase === 'function') {
-                            initFirebase();
-                            
-                            if (typeof checkAuthState === 'function') {
-                                setTimeout(checkAuthState, 1000);
-                            }
-                            
-                            // Integra con il sistema di backup cloud esistente
-                            if (typeof integrateWithCloudManager === 'function') {
-                                setTimeout(integrateWithCloudManager, 1500);
-                            }
-                            
-                            // Aggiorna l'interfaccia utente del sistema di backup cloud
-                            if (typeof updateProviderSelectionUI === 'function' && typeof updateCloudAccountUI === 'function') {
-                                setTimeout(function() {
-                                    updateProviderSelectionUI();
-                                    updateCloudAccountUI();
-                                }, 2000);
-                            }
-                        }
-                    } else {
-                        console.error('Firebase non disponibile anche dopo il ritardo');
-                    }
-                }, 2000);
-            }
+            console.log('DOM caricato, inizializzazione sistema di backup cloud...');
+            initCloudBackupSystem();
         });
     </script>
 
