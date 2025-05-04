@@ -12983,6 +12983,21 @@ END:VCARD`;
                 } else {
                     console.error('La funzione checkAuthState non è definita');
                 }
+                
+                // Integra con il sistema di backup cloud esistente
+                if (typeof integrateWithCloudManager === 'function') {
+                    console.log('Chiamata a integrateWithCloudManager()');
+                    setTimeout(integrateWithCloudManager, 1500); // Piccolo ritardo per assicurarsi che Firebase sia completamente inizializzato
+                }
+                
+                // Aggiorna l'interfaccia utente del sistema di backup cloud
+                if (typeof updateProviderSelectionUI === 'function' && typeof updateCloudAccountUI === 'function') {
+                    console.log('Aggiornamento interfaccia utente del sistema di backup cloud...');
+                    setTimeout(function() {
+                        updateProviderSelectionUI();
+                        updateCloudAccountUI();
+                    }, 2000); // Piccolo ritardo per assicurarsi che tutto sia inizializzato
+                }
             } else {
                 // Riprova dopo un breve ritardo
                 setTimeout(function() {
@@ -12992,6 +13007,19 @@ END:VCARD`;
                             
                             if (typeof checkAuthState === 'function') {
                                 setTimeout(checkAuthState, 1000);
+                            }
+                            
+                            // Integra con il sistema di backup cloud esistente
+                            if (typeof integrateWithCloudManager === 'function') {
+                                setTimeout(integrateWithCloudManager, 1500);
+                            }
+                            
+                            // Aggiorna l'interfaccia utente del sistema di backup cloud
+                            if (typeof updateProviderSelectionUI === 'function' && typeof updateCloudAccountUI === 'function') {
+                                setTimeout(function() {
+                                    updateProviderSelectionUI();
+                                    updateCloudAccountUI();
+                                }, 2000);
                             }
                         }
                     } else {
