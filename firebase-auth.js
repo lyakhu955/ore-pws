@@ -253,31 +253,20 @@ function handleAuthStateChanged(user) {
 // Funzione per aggiornare l'interfaccia utente dopo l'autenticazione
 function updateUIAfterAuth(user) {
   if (user) {
-    // Aggiorna l'oggetto cloudManager
-    console.log('Aggiornamento oggetto cloudManager per utente autenticato');
-    window.cloudManager = window.cloudManager || {};
-    window.cloudManager.getCurrentProvider = function() {
-      return 'firebase';
-    };
-    window.cloudManager.isAuthenticated = function() {
-      return true;
-    };
-    window.cloudManager.getUserInfo = function() {
-      return {
-        email: user.email,
-        name: user.displayName || user.email,
-        photoUrl: user.photoURL
-      };
-    };
-    window.cloudManager.checkAuthStatus = function() {
-      return Promise.resolve(true);
-    };
+    // Aggiorna l'interfaccia utente del sistema di backup cloud
+    if (typeof window.updateProviderSelectionUI === 'function') {
+      console.log('Aggiornamento interfaccia utente del sistema di backup cloud...');
+      window.updateProviderSelectionUI();
+    }
+    
+    if (typeof window.updateCloudAccountUI === 'function') {
+      console.log('Aggiornamento interfaccia utente dell\'account cloud...');
+      window.updateCloudAccountUI();
+    }
     
     // Aggiorna l'interfaccia utente se la funzione esiste
     if (typeof window.updateFirebaseUI === 'function') {
       window.updateFirebaseUI(user);
-    } else if (typeof window.updateCloudAccountUI === 'function') {
-      window.updateCloudAccountUI();
     } else {
       console.log('Creazione di un elemento UI personalizzato');
       createOrUpdateFirebaseUI(user);
@@ -286,27 +275,20 @@ function updateUIAfterAuth(user) {
     // Mostra un messaggio di benvenuto
     showToast(`Benvenuto, ${user.displayName || user.email}!`, "success");
   } else {
-    // Aggiorna l'oggetto cloudManager
-    console.log('Aggiornamento oggetto cloudManager per utente non autenticato');
-    window.cloudManager = window.cloudManager || {};
-    window.cloudManager.getCurrentProvider = function() {
-      return null;
-    };
-    window.cloudManager.isAuthenticated = function() {
-      return false;
-    };
-    window.cloudManager.getUserInfo = function() {
-      return null;
-    };
-    window.cloudManager.checkAuthStatus = function() {
-      return Promise.resolve(false);
-    };
+    // Aggiorna l'interfaccia utente del sistema di backup cloud
+    if (typeof window.updateProviderSelectionUI === 'function') {
+      console.log('Aggiornamento interfaccia utente del sistema di backup cloud...');
+      window.updateProviderSelectionUI();
+    }
+    
+    if (typeof window.updateCloudAccountUI === 'function') {
+      console.log('Aggiornamento interfaccia utente dell\'account cloud...');
+      window.updateCloudAccountUI();
+    }
     
     // Aggiorna l'interfaccia utente se la funzione esiste
     if (typeof window.updateFirebaseUI === 'function') {
       window.updateFirebaseUI(null);
-    } else if (typeof window.updateCloudAccountUI === 'function') {
-      window.updateCloudAccountUI();
     } else {
       console.log('Aggiornamento elemento UI personalizzato');
       createOrUpdateFirebaseUI(null);
@@ -380,7 +362,7 @@ function checkAuthState() {
 
 // Effettua il login con Google
 function loginWithGoogle() {
-  console.log('Tentativo di login con Google via Firebase...');
+  console.log('Tentativo di login con Google...');
   
   // Verifica se l'utente è già autenticato
   if (firebase.auth().currentUser) {
@@ -409,6 +391,39 @@ function loginWithGoogle() {
       document.body.removeChild(notification);
     }
   }, 3000);
+  
+  // Verifica se esiste il sistema di backup cloud
+  if (window.cloudManager && typeof window.cloudManager.login === 'function') {
+    console.log('Utilizzo del sistema di backup cloud per il login...');
+    
+    // Imposta Google come provider selezionato
+    if (typeof window.cloudManager.setSelectedProvider === 'function') {
+      window.cloudManager.setSelectedProvider('google');
+    }
+    
+    // Effettua il login con il sistema di backup cloud
+    window.cloudManager.login(true)
+      .then(userData => {
+        console.log('Login completato con successo tramite cloudManager:', userData);
+        
+        // Aggiorna l'interfaccia utente
+        if (typeof window.updateCloudAccountUI === 'function') {
+          window.updateCloudAccountUI();
+        }
+        
+        // Mostra una notifica di successo
+        showToast("Accesso effettuato con successo!", "success");
+      })
+      .catch(error => {
+        console.error('Errore durante il login con cloudManager:', error);
+        showToast("Errore durante l'accesso: " + error.message, "error");
+      });
+    
+    return;
+  }
+  
+  // Se il sistema di backup cloud non è disponibile, utilizza Firebase Auth
+  console.log('Sistema di backup cloud non disponibile, utilizzo Firebase Auth...');
   
   // Crea un nuovo provider Google
   const provider = new firebase.auth.GoogleAuthProvider();
@@ -762,28 +777,172 @@ function showToast(message, type = "info") {
   }
 }
 
-// Inizializza l'oggetto cloudManager globale
-console.log('Inizializzazione oggetto cloudManager globale');
-window.cloudManager = {
-  getCurrentProvider: function() { 
-    return firebase.auth().currentUser ? 'firebase' : null; 
-  },
-  isAuthenticated: function() { 
-    return firebase.auth().currentUser !== null; 
-  },
-  getUserInfo: function() { 
-    const user = firebase.auth().currentUser;
-    if (!user) return null;
-    return {
-      email: user.email,
-      name: user.displayName || user.email,
-      photoUrl: user.photoURL
+// Integrazione con il sistema di backup cloud esistente
+function integrateWithCloudManager() {
+  console.log('Tentativo di integrazione con il sistema di backup cloud esistente...');
+  
+  // Verifica se esiste già un oggetto cloudManager
+  if (window.cloudManager && typeof window.cloudManager.getAvailableProviders === 'function') {
+    console.log('Sistema di backup cloud esistente trovato, integrazione in corso...');
+    
+    // Salva il riferimento all'oggetto cloudManager originale
+    const originalCloudManager = window.cloudManager;
+    
+    // Aggiungi un hook per il login con Firebase
+    const originalLogin = originalCloudManager.login;
+    originalCloudManager.login = async function(manualTrigger = false) {
+      try {
+        // Chiama la funzione di login originale
+        const result = await originalLogin.call(this, manualTrigger);
+        
+        // Se il login è avvenuto con successo e il provider è Google, sincronizza con Firebase
+        if (result && this.getCurrentProvider() === 'google') {
+          console.log('Login con Google completato, sincronizzazione con Firebase...');
+          
+          // Ottieni il token di accesso
+          const googleAuthToken = localStorage.getItem('googleAuthToken');
+          if (googleAuthToken) {
+            console.log('Token Google trovato, sincronizzazione con Firebase...');
+            
+            // Crea una credenziale OAuth con il token
+            try {
+              const credential = firebase.auth.GoogleAuthProvider.credential(null, googleAuthToken);
+              
+              // Accedi a Firebase con la credenziale
+              await firebase.auth().signInWithCredential(credential);
+              console.log('Sincronizzazione con Firebase completata con successo');
+            } catch (error) {
+              console.warn('Errore durante la sincronizzazione con Firebase:', error);
+              // Non propagare l'errore, il login è comunque avvenuto con successo
+            }
+          }
+        }
+        
+        return result;
+      } catch (error) {
+        console.error('Errore durante il login:', error);
+        throw error;
+      }
     };
-  },
-  checkAuthStatus: function() { 
-    return Promise.resolve(firebase.auth().currentUser !== null); 
+    
+    console.log('Integrazione con il sistema di backup cloud completata');
+    return;
   }
-};
+  
+  // Se non esiste un oggetto cloudManager, creane uno basato su Firebase
+  console.log('Sistema di backup cloud non trovato, creazione di un oggetto cloudManager basato su Firebase...');
+  
+  window.cloudManager = {
+    getCurrentProvider: function() { 
+      return firebase.auth().currentUser ? 'google' : null; 
+    },
+    getSelectedProvider: function() {
+      return 'google';
+    },
+    setSelectedProvider: function(providerId) {
+      // Non fa nulla, supportiamo solo Google
+      console.log('Selezione provider:', providerId);
+    },
+    getAvailableProviders: function() {
+      return [{
+        id: 'google',
+        name: 'Google Drive',
+        logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg'
+      }];
+    },
+    getProvider: function(providerId) {
+      if (providerId !== 'google') return null;
+      
+      return {
+        id: 'google',
+        name: 'Google Drive',
+        logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg',
+        isLoggedIn: firebase.auth().currentUser !== null,
+        getUserInfo: function() {
+          const user = firebase.auth().currentUser;
+          if (!user) return null;
+          return {
+            id: user.uid,
+            name: user.displayName || user.email,
+            email: user.email,
+            picture: user.photoURL,
+            provider: 'google'
+          };
+        },
+        login: function() {
+          return new Promise((resolve, reject) => {
+            loginWithGoogle()
+              .then(() => {
+                const user = firebase.auth().currentUser;
+                if (user) {
+                  resolve({
+                    id: user.uid,
+                    name: user.displayName || user.email,
+                    email: user.email,
+                    picture: user.photoURL,
+                    provider: 'google'
+                  });
+                } else {
+                  reject(new Error('Login fallito'));
+                }
+              })
+              .catch(reject);
+          });
+        },
+        logout: function() {
+          return logoutFromGoogle();
+        },
+        checkAuthStatus: function() {
+          return Promise.resolve(firebase.auth().currentUser !== null);
+        }
+      };
+    },
+    isAuthenticated: function() { 
+      return firebase.auth().currentUser !== null; 
+    },
+    getUserInfo: function() { 
+      const user = firebase.auth().currentUser;
+      if (!user) return null;
+      return {
+        id: user.uid,
+        name: user.displayName || user.email,
+        email: user.email,
+        picture: user.photoURL,
+        provider: 'google'
+      };
+    },
+    checkAuthStatus: function() { 
+      return Promise.resolve(firebase.auth().currentUser !== null); 
+    },
+    login: function(manualTrigger = false) {
+      if (manualTrigger) {
+        return new Promise((resolve, reject) => {
+          loginWithGoogle()
+            .then(() => {
+              const user = firebase.auth().currentUser;
+              if (user) {
+                resolve({
+                  id: user.uid,
+                  name: user.displayName || user.email,
+                  email: user.email,
+                  picture: user.photoURL,
+                  provider: 'google'
+                });
+              } else {
+                reject(new Error('Login fallito'));
+              }
+            })
+            .catch(reject);
+        });
+      } else {
+        return Promise.resolve(null);
+      }
+    },
+    logout: function() {
+      return logoutFromGoogle();
+    }
+  };
+}
 
 // Funzione per inizializzare Firebase in modo sicuro
 function safeInitFirebase() {
@@ -796,6 +955,10 @@ function safeInitFirebase() {
   try {
     // Inizializza Firebase
     initFirebase();
+    
+    // Integra con il sistema di backup cloud esistente
+    integrateWithCloudManager();
+    
     return true;
   } catch (error) {
     console.error('Errore durante l\'inizializzazione di Firebase:', error);
