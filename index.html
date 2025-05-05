@@ -3663,17 +3663,17 @@
                             <div class="time-row">
                                 <div class="form-group">
                                     <label for="startTime">Ora Inizio:</label>
-                                    <input type="text" id="startTime" class="form-control time-input" placeholder="Es. 7" required>
+                                    <input type="text" id="startTime" class="form-control time-input" placeholder="Es. 7">
                                 </div>
                                 <div class="form-group">
                                     <label for="endTime">Ora Fine:</label>
-                                    <input type="text" id="endTime" class="form-control time-input" placeholder="Es. 17" required>
+                                    <input type="text" id="endTime" class="form-control time-input" placeholder="Es. 17">
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label for="breakTime">Pausa (ore):</label>
-                                <input type="number" id="breakTime" class="form-control compact-input" step="0.5" min="0" value="0.5" required>
+                                <input type="number" id="breakTime" class="form-control compact-input" step="0.5" min="0" value="0.5">
                             </div>
 
                             <div class="form-group">
@@ -4889,20 +4889,30 @@
             const selectedVehicle = vehicleSelect.value; // Get selected vehicle ID or name
 
              // Basic validation
-             if (!date || !startTime || !endTime) {
-                 showToast("Data, Ora Inizio e Ora Fine sono obbligatori.", "error");
+             if (!date) {
+                 showToast("La data è obbligatoria.", "error");
                  return;
              }
-              // Allow 0 hours only if start/end are explicitly 0 (e.g., placeholder for non-work day info?)
-              // Or maybe disallow 0 hours completely? Let's disallow for now.
-             if (totalHours <= 0) {
-                  showToast("Le ore totali calcolate devono essere maggiori di zero.", "error");
-                  return;
-              }
-              if (notturne < 0 || transferta < 0 || breakTime < 0) {
-                   showToast("Ore notturne, trasferta e pausa non possono essere negative.", "error");
-                  return;
-              }
+             
+             // Verifica se almeno uno tra ore e descrizione è presente
+             const hasTimeData = startTime && endTime;
+             const hasDescription = description.trim() !== '';
+             
+             if (!hasTimeData && !hasDescription) {
+                 showToast("Inserisci almeno le ore di lavoro o una descrizione.", "error");
+                 return;
+             }
+             
+             // Se sono state inserite le ore, verifica che siano valide
+             if (hasTimeData && totalHours <= 0) {
+                 showToast("Se inserisci orari, le ore totali devono essere maggiori di zero.", "error");
+                 return;
+             }
+             
+             if (notturne < 0 || transferta < 0 || breakTime < 0) {
+                 showToast("Ore notturne, trasferta e pausa non possono essere negative.", "error");
+                 return;
+             }
 
 
             const entryId = form.dataset.editingId || Date.now().toString();
@@ -8482,6 +8492,20 @@
                  const endTime = parseFloat(endStr);
                  const breakTime = parseFloat(breakStr) || 0; // Default break to 0 if invalid
 
+                 // Verifica se entrambi i campi orari sono vuoti
+                 if (startTimeInput.value === '' && endTimeInput.value === '') {
+                     // Se entrambi i campi sono vuoti, imposta le ore totali a 0
+                     totalHoursInput.value = '0.0';
+                     return;
+                 }
+                 
+                 // Se solo uno dei due campi è compilato, non possiamo calcolare le ore
+                 if ((startTimeInput.value === '' && endTimeInput.value !== '') || 
+                     (startTimeInput.value !== '' && endTimeInput.value === '')) {
+                     totalHoursInput.value = '';
+                     return;
+                 }
+                 
                  // Only calculate if start and end times are valid numbers
                  if (!isNaN(startTime) && !isNaN(endTime)) {
                      let totalHours = 0;
