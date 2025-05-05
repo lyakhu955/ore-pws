@@ -10160,6 +10160,9 @@ END:VCARD`;
                             scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file openid profile email',
                             prompt: '',  // Non mostrare il consenso se possibile
                             auto_select: true,  // Seleziona automaticamente l'account
+                            // Richiedi un token con scadenza più lunga (massimo consentito)
+                            access_type: 'offline',  // Richiedi un refresh token
+                            include_granted_scopes: true,  // Include tutti gli scope già concessi
                             callback: (tokenResponse) => {
                                 if (tokenResponse && tokenResponse.access_token) {
                                     // Imposta il token di accesso per le richieste API
@@ -10264,20 +10267,50 @@ END:VCARD`;
                     
                     // Verifica se abbiamo un token salvato in localStorage
                     const savedToken = localStorage.getItem('googleAuthToken');
+                    const tokenExpiry = localStorage.getItem('googleTokenExpiry');
+                    
+                    // Verifica se il token è scaduto
+                    let isTokenExpired = false;
+                    if (tokenExpiry) {
+                        const expiryTime = parseInt(tokenExpiry, 10);
+                        // Considera il token scaduto se mancano meno di 5 minuti alla scadenza
+                        isTokenExpired = Date.now() > (expiryTime - (5 * 60 * 1000));
+                        
+                        if (isTokenExpired) {
+                            console.log('Token scaduto o in scadenza, necessario refresh');
+                        } else {
+                            console.log(`Token valido fino a: ${new Date(expiryTime).toLocaleString()}`);
+                        }
+                    }
                     
                     // Se non abbiamo un token attivo ma abbiamo un token salvato, proviamo a usarlo
-                    if ((!token || !token.access_token) && savedToken) {
+                    if ((!token || !token.access_token || isTokenExpired) && savedToken) {
                         try {
                             console.log('Trovato token salvato, tentativo di ripristino sessione...');
                             const parsedToken = JSON.parse(savedToken);
                             
-                            // Imposta il token salvato
-                            gapi.client.setToken(parsedToken);
-                            
-                            console.log('Token ripristinato da localStorage');
+                            // Se il token è scaduto, tentiamo un refresh
+                            if (isTokenExpired) {
+                                console.log('Tentativo di refresh del token scaduto...');
+                                try {
+                                    // Imposta temporaneamente il token per poter fare il refresh
+                                    gapi.client.setToken(parsedToken);
+                                    await this.refreshToken();
+                                    console.log('Token refreshato con successo');
+                                    return true; // Il refresh ha già impostato tutto
+                                } catch (refreshError) {
+                                    console.warn('Errore nel refresh del token:', refreshError);
+                                    // Continua con il flusso normale
+                                }
+                            } else {
+                                // Imposta il token salvato
+                                gapi.client.setToken(parsedToken);
+                                console.log('Token ripristinato da localStorage');
+                            }
                         } catch (e) {
                             console.warn('Errore nel ripristino del token da localStorage:', e);
                             localStorage.removeItem('googleAuthToken');
+                            localStorage.removeItem('googleTokenExpiry');
                         }
                     }
                     
@@ -10364,12 +10397,18 @@ END:VCARD`;
                     return;
                 }
                 
-                // Calcola quando rinnovare il token (5 minuti prima della scadenza)
-                // Il token di Google dura tipicamente 3600 secondi (1 ora)
+                // Salva la data di scadenza del token
                 const expiresIn = tokenResponse.expires_in || 3600;
+                const expiryTime = Date.now() + (expiresIn * 1000);
+                
+                // Salva la data di scadenza in localStorage
+                localStorage.setItem('googleTokenExpiry', expiryTime.toString());
+                
+                // Calcola quando rinnovare il token (5 minuti prima della scadenza)
                 const refreshTime = (expiresIn - 300) * 1000; // Converti in millisecondi e sottrai 5 minuti
                 
                 console.log(`Token valido per ${expiresIn} secondi. Programmato rinnovo automatico tra ${refreshTime/1000} secondi.`);
+                console.log(`Token scadrà il: ${new Date(expiryTime).toLocaleString()}`);
                 
                 // Imposta il timer per rinnovare il token automaticamente
                 this.tokenRefreshTimer = setTimeout(async () => {
@@ -10379,8 +10418,22 @@ END:VCARD`;
                         console.log('Token rinnovato automaticamente con successo');
                     } catch (error) {
                         console.warn('Errore nel rinnovo automatico del token:', error);
-                        // Se fallisce, prova a ripristinare la sessione
-                        this.checkAuthStatus();
+                        
+                        // Se fallisce, prova a ripristinare la sessione in modo silenzioso
+                        try {
+                            const isLoggedIn = await this.checkAuthStatus();
+                            if (isLoggedIn) {
+                                console.log('Sessione ripristinata con successo dopo il fallimento del refresh');
+                            } else {
+                                console.warn('Impossibile ripristinare la sessione dopo il fallimento del refresh');
+                                // Mostra un messaggio all'utente solo se è attivo sul sito
+                                if (document.visibilityState === 'visible') {
+                                    showToast('La sessione è scaduta. Effettua nuovamente l\'accesso per continuare a utilizzare il backup su cloud.', 'warning', 8000);
+                                }
+                            }
+                        } catch (e) {
+                            console.error('Errore durante il tentativo di ripristino della sessione:', e);
+                        }
                     }
                 }, refreshTime);
             }
@@ -10410,6 +10463,9 @@ END:VCARD`;
                         scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file openid profile email',
                         prompt: 'consent',  // Mostra sempre il consenso per evitare problemi
                         auto_select: false,  // Lascia che l'utente scelga l'account
+                        // Richiedi un token con scadenza più lunga (massimo consentito)
+                        access_type: 'offline',  // Richiedi un refresh token
+                        include_granted_scopes: true,  // Include tutti gli scope già concessi
                         callback: (tokenResponse) => {
                             console.log('Callback di autenticazione chiamato');
                             if (tokenResponse && tokenResponse.access_token) {
@@ -10670,25 +10726,45 @@ END:VCARD`;
                     if (!window.googleAuthClient) {
                         console.error('Client di autenticazione Google non disponibile');
                         
-                        // Pulisci i token esistenti che potrebbero essere scaduti
-                        localStorage.removeItem('googleAuthToken');
-                        if (gapi && gapi.client) {
-                            gapi.client.setToken(null);
+                        // Tenta di caricare il client di autenticazione Google
+                        try {
+                            // Verifica se il client è già stato caricato ma non è stato inizializzato correttamente
+                            if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+                                console.log('API Google Identity Services trovate, tentativo di inizializzazione...');
+                                
+                                // Inizializza il client di autenticazione
+                                initGoogleAuth().then(() => {
+                                    console.log('Client di autenticazione Google inizializzato con successo');
+                                    // Riprova il refresh dopo l'inizializzazione
+                                    this.refreshToken().then(resolve).catch(reject);
+                                }).catch(error => {
+                                    console.error('Errore durante l\'inizializzazione del client di autenticazione:', error);
+                                    this.handleRefreshFailure(currentToken, reject);
+                                });
+                                
+                                return; // Esci dalla funzione, il callback gestirà il resto
+                            } else {
+                                // Carica le API Google Identity Services
+                                loadGoogleIdentityServices().then(() => {
+                                    console.log('API Google Identity Services caricate con successo');
+                                    // Inizializza il client di autenticazione
+                                    return initGoogleAuth();
+                                }).then(() => {
+                                    console.log('Client di autenticazione Google inizializzato con successo');
+                                    // Riprova il refresh dopo l'inizializzazione
+                                    this.refreshToken().then(resolve).catch(reject);
+                                }).catch(error => {
+                                    console.error('Errore durante il caricamento delle API Google Identity Services:', error);
+                                    this.handleRefreshFailure(currentToken, reject);
+                                });
+                                
+                                return; // Esci dalla funzione, il callback gestirà il resto
+                            }
+                        } catch (error) {
+                            console.error('Errore durante il tentativo di caricamento delle API Google:', error);
+                            this.handleRefreshFailure(currentToken, reject);
+                            return;
                         }
-                        
-                        // Imposta lo stato di login come false
-                        this.isLoggedIn = false;
-                        
-                        // Mostra un messaggio all'utente
-                        showToast("Impossibile rinnovare la sessione. Per favore, effettua nuovamente l'accesso.", "warning", 5000);
-                        
-                        // Aggiorna l'interfaccia utente per mostrare lo stato di disconnessione
-                        if (typeof updateCloudAccountUI === 'function') {
-                            updateCloudAccountUI();
-                        }
-                        
-                        reject(new Error('Client di autenticazione non disponibile'));
-                        return;
                     }
                     
                     // Configura il callback per il refresh del token
@@ -10707,6 +10783,11 @@ END:VCARD`;
                             // Salva il token in localStorage
                             localStorage.setItem('googleAuthToken', JSON.stringify(tokenResponse));
                             
+                            // Salva la data di scadenza del token
+                            const expiresIn = tokenResponse.expires_in || 3600;
+                            const expiryTime = Date.now() + (expiresIn * 1000);
+                            localStorage.setItem('googleTokenExpiry', expiryTime.toString());
+                            
                             // Imposta il timer per il prossimo rinnovo automatico
                             this.setupTokenRefresh(tokenResponse);
                             
@@ -10721,9 +10802,11 @@ END:VCARD`;
                             if (currentToken && currentToken.access_token) {
                                 console.log('Ripristino del token precedente');
                                 gapi.client.setToken(currentToken);
+                                resolve(currentToken); // Continuiamo con il token precedente
+                            } else {
+                                // Se non abbiamo un token precedente, segnala l'errore
+                                this.handleRefreshFailure(currentToken, reject);
                             }
-                            
-                            reject(new Error('Refresh token fallito'));
                         }
                     };
                     
@@ -10740,10 +10823,38 @@ END:VCARD`;
                             gapi.client.setToken(currentToken);
                             resolve(currentToken);
                         } else {
-                            reject(error);
+                            this.handleRefreshFailure(currentToken, reject, error);
                         }
                     }
                 });
+            }
+            
+            // Gestisce il fallimento del refresh del token
+            handleRefreshFailure(currentToken, reject, error = null) {
+                console.error('Gestione fallimento refresh token:', error || 'Nessun token ricevuto');
+                
+                // Pulisci i token esistenti che potrebbero essere scaduti
+                localStorage.removeItem('googleAuthToken');
+                localStorage.removeItem('googleTokenExpiry');
+                
+                if (gapi && gapi.client) {
+                    gapi.client.setToken(null);
+                }
+                
+                // Imposta lo stato di login come false
+                this.isLoggedIn = false;
+                
+                // Mostra un messaggio all'utente solo se è attivo sul sito
+                if (document.visibilityState === 'visible') {
+                    showToast("La sessione è scaduta. Effettua nuovamente l'accesso per continuare a utilizzare il backup su cloud.", "warning", 5000);
+                }
+                
+                // Aggiorna l'interfaccia utente per mostrare lo stato di disconnessione
+                if (typeof updateCloudAccountUI === 'function') {
+                    updateCloudAccountUI();
+                }
+                
+                reject(new Error('Impossibile rinnovare il token'));
             }
             
             async backup(data, showLoginPrompt = true) {
