@@ -11167,7 +11167,33 @@ END:VCARD`;
                     // Configura il callback per il refresh del token
                     const originalCallback = window.googleAuthClient.callback;
                     
+                    // Imposta un timeout per gestire il caso in cui Google non risponda
+                    let timeoutId = setTimeout(() => {
+                        console.warn('Timeout durante il refresh del token');
+                        
+                        // Ripristina il callback originale
+                        window.googleAuthClient.callback = originalCallback;
+                        
+                        // Tenta un login completo
+                        console.log('Tentativo di login completo dopo timeout del refresh...');
+                        this.login(true).then(resolve).catch(loginError => {
+                            console.error('Anche il login completo è fallito dopo timeout:', loginError);
+                            
+                            // Se anche il login completo fallisce, torniamo al token precedente se disponibile
+                            if (currentToken && currentToken.access_token) {
+                                console.log('Ripristino del token precedente dopo timeout');
+                                gapi.client.setToken(currentToken);
+                                resolve(currentToken); // Continuiamo con il token precedente
+                            } else {
+                                this.handleRefreshFailure(currentToken, reject, new Error('Timeout durante il refresh del token'));
+                            }
+                        });
+                    }, 30000); // 30 secondi di timeout
+                    
                     window.googleAuthClient.callback = (tokenResponse) => {
+                        // Cancella il timeout
+                        clearTimeout(timeoutId);
+                        
                         // Ripristina il callback originale
                         window.googleAuthClient.callback = originalCallback;
                         
@@ -11215,13 +11241,21 @@ END:VCARD`;
                     
                     // Tenta il refresh silenzioso del token
                     try {
-                       // Richiedi un nuovo token con prompt vuoto per tentare un refresh silenzioso
+                        // Richiedi un nuovo token con prompt vuoto per tentare un refresh silenzioso
+                        // Secondo la documentazione di Google, per ottenere un refresh token è necessario
+                        // utilizzare access_type: 'offline' e prompt: 'consent'
+                        // Ma per un refresh silenzioso, utilizziamo prompt: '' per evitare di mostrare la finestra di consenso
                         window.googleAuthClient.requestAccessToken({
                             prompt: '',
-                            // Richiedi esplicitamente un refresh token
-                            access_type: 'offline'
+                            access_type: 'offline',
+                            // Aggiungiamo un parametro login_hint se abbiamo informazioni sull'utente
+                            // per aumentare le probabilità di successo del refresh silenzioso
+                            ...(this.userData && this.userData.email ? { login_hint: this.userData.email } : {})
                         });
                     } catch (error) {
+                        // Cancella il timeout in caso di errore
+                        clearTimeout(timeoutId);
+                        
                         console.error('Errore durante la richiesta del token:', error);
                         
                         // Tenta un login completo
