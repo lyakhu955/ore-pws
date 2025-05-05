@@ -10855,6 +10855,9 @@ END:VCARD`;
                                         
                                         console.log('Login Google completato con successo:', this.userData.email);
                                         
+                                        // Imposta il rinnovo automatico del token
+                                        this.setupTokenRefresh(tokenResponse);
+                                        
                                         // Chiama anche il callback originale
                                         if (originalCallback) {
                                             originalCallback(tokenResponse);
@@ -10883,7 +10886,8 @@ END:VCARD`;
                                 try {
                                     window.googleAuthClient.requestAccessToken({
                                         prompt: 'consent',  // Mostra sempre il consenso per evitare problemi
-                                        hint: ''  // Non suggerire account specifici
+                                        hint: '',  // Non suggerire account specifici
+                                        access_type: 'offline'  // Richiedi un refresh token
                                     });
                                 } catch (error) {
                                     console.error('Errore durante la richiesta del token:', error);
