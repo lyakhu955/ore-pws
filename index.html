@@ -4107,6 +4107,14 @@
                         </div>
 
                         <div class="setting-item">
+                            <span class="setting-label">Sfondo Animato PWS</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="pwsParticlesToggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="setting-item">
                             <span class="setting-label">Cancella Dati</span>
                             <button id="clearData" class="delete-btn">
                                 <span class="material-symbols-outlined">delete_forever</span> Cancella Tutto
@@ -4897,6 +4905,14 @@
                  // Applica il tema iniziale
                  if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
                      applyTheme(true);
+                     
+                     // Evento personalizzato per notificare il tema iniziale
+                     setTimeout(() => {
+                         const themeChangeEvent = new CustomEvent('themeChange', { 
+                             detail: { isDark: true } 
+                         });
+                         document.dispatchEvent(themeChangeEvent);
+                     }, 100);
                  } else {
                      applyTheme(false);
                  }
@@ -4926,6 +4942,12 @@
                              s.offsetHeight; // Forza reflow
                              s.style.display = ''; 
                          });
+                         
+                         // Evento personalizzato per notificare il cambio tema
+                         const themeChangeEvent = new CustomEvent('themeChange', { 
+                             detail: { isDark: isDark } 
+                         });
+                         document.dispatchEvent(themeChangeEvent);
                      }, 50);
                  });
              } else {
@@ -13860,7 +13882,274 @@ END:VCARD`;
 
     </script>
     
+    <!-- Stile per le card trasparenti integrato -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Crea un elemento style per le card trasparenti
+        const style = document.createElement('style');
+        style.textContent = `
+            /* Stile trasparente per le card */
+            .card {
+                background-color: rgba(218, 229, 228, 0.0) !important; /* Versione più trasparente per tema chiaro */
+                color: var(--md-sys-color-on-surface-variant);
+                backdrop-filter: blur(5px) !important; /* Effetto sfocatura per migliorare la leggibilità */
+                -webkit-backdrop-filter: blur(5px) !important; /* Per Safari */
+                transition: all 0.3s ease !important;
+                border: 1px solid rgba(191, 201, 200, 0.5) !important; /* Bordo più trasparente */
+            }
+            
+            /* Versione trasparente per tema scuro */
+            .dark-theme .card {
+                background-color: rgba(63, 73, 72, 0.0) !important; /* Versione più trasparente per tema scuro */
+                border: 1px solid rgba(137, 147, 146, 0.5) !important; /* Bordo più trasparente per tema scuro */
+            }
+            
+            /* Effetto hover per le card */
+            .card:hover {
+                backdrop-filter: blur(8px) !important;
+                -webkit-backdrop-filter: blur(8px) !important;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+            }
+            
+            /* Stile per i titoli nelle card */
+            .card h2, .card h3 {
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Leggera ombra per migliorare la leggibilità */
+            }
+        `;
+        document.head.appendChild(style);
+        console.log('Stile card trasparenti integrato');
+    });
+    </script>
+    
+    <!-- PWS Particles Background -->
+    <div id="pws-particles-container"></div>
 
+    <!-- Librerie per le particelle PWS -->
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles-engine@2/tsparticles.engine.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles-shape-text@2/tsparticles.shape.text.min.js"></script>
+
+    <!-- Script per le particelle PWS -->
+    <script>
+    // Configurazione delle particelle PWS
+    document.addEventListener('DOMContentLoaded', function() {
+        // Aggiungi lo stile per il contenitore delle particelle
+        const style = document.createElement('style');
+        style.textContent = `
+            #pws-particles-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: -1;
+                pointer-events: none;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Carica le particelle solo se sono abilitate
+        const particlesEnabled = localStorage.getItem('pws-particles-enabled') !== 'false';
+        
+        // Inizializza il toggle nelle impostazioni
+        const particlesToggle = document.getElementById('pwsParticlesToggle');
+        if (particlesToggle) {
+            particlesToggle.checked = particlesEnabled;
+            
+            particlesToggle.addEventListener('change', function() {
+                localStorage.setItem('pws-particles-enabled', this.checked);
+                
+                if (this.checked) {
+                    // Se non esiste già il container delle particelle, inizializza
+                    if (!tsParticles.domItem(0)) {
+                        initParticles();
+                    } else {
+                        document.getElementById('pws-particles-container').style.display = 'block';
+                    }
+                } else {
+                    // Nascondi le particelle senza distruggerle
+                    document.getElementById('pws-particles-container').style.display = 'none';
+                }
+                
+                // Mostra un toast di conferma
+                if (typeof showToast === 'function') {
+                    showToast(this.checked ? 'Sfondo animato PWS attivato' : 'Sfondo animato PWS disattivato', 'info');
+                }
+            });
+        }
+        
+        if (particlesEnabled) {
+            initParticles();
+        }
+    });
+
+    // Funzione per inizializzare le particelle
+    async function initParticles() {
+        // Ottieni i colori dal tema
+        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--md-sys-color-primary').trim();
+        const secondaryColor = getComputedStyle(document.documentElement).getPropertyValue('--md-sys-color-secondary').trim();
+        const tertiaryColor = getComputedStyle(document.documentElement).getPropertyValue('--md-sys-color-tertiary').trim();
+        
+        // Rileva se è un dispositivo mobile
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // Configurazione ottimizzata per mobile
+        const particleCount = isMobile ? 120 : 100;
+        const particleSize = isMobile ? { min: 5, max: 12 } : { min: 6, max: 15 };
+        const linkDistance = isMobile ? 120 : 180;
+        const moveSpeed = isMobile ? 1 : 1.5;
+        
+        await tsParticles.load("pws-particles-container", {
+            fullScreen: {
+                enable: false
+            },
+            fpsLimit: 60,
+            particles: {
+                number: {
+                    value: particleCount,
+                    density: {
+                        enable: true,
+                        value_area: 800
+                    }
+                },
+                color: {
+                    value: [primaryColor, secondaryColor, tertiaryColor, "#FFFFFF"]
+                },
+                shape: {
+                    type: ["char", "circle"],
+                    options: {
+                        char: {
+                            value: ["P", "W", "S"],
+                            font: "Roboto",
+                            style: "bold",
+                            weight: "900",
+                            fill: true
+                        }
+                    }
+                },
+                opacity: {
+                    value: 0.7,
+                    random: true,
+                    anim: {
+                        enable: true,
+                        speed: 0.5,
+                        opacity_min: 0.3,
+                        sync: false
+                    }
+                },
+                size: {
+                    value: particleSize,
+                    random: true,
+                    anim: {
+                        enable: true,
+                        speed: 1,
+                        size_min: isMobile ? 4 : 5,
+                        sync: false
+                    }
+                },
+                links: {
+                    enable: true,
+                    distance: linkDistance,
+                    color: primaryColor,
+                    opacity: 0.3,
+                    width: 1,
+                    triangles: {
+                        enable: false
+                    }
+                },
+                move: {
+                    enable: true,
+                    speed: moveSpeed,
+                    direction: "none",
+                    random: false,
+                    straight: false,
+                    out_mode: "out",
+                    bounce: false,
+                    attract: {
+                        enable: false,
+                        rotateX: 300,
+                        rotateY: 600
+                    }
+                }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: {
+                    onhover: {
+                        enable: !isMobile, // Disabilita su mobile per migliorare le prestazioni
+                        mode: "grab"
+                    },
+                    onclick: {
+                        enable: true,
+                        mode: "push"
+                    },
+                    resize: true
+                },
+                modes: {
+                    grab: {
+                        distance: 150,
+                        links: {
+                            opacity: 0.5,
+                            color: "#FFFFFF"
+                        }
+                    },
+                    bubble: {
+                        distance: 200,
+                        size: 25,
+                        duration: 1.5,
+                        opacity: 0.8,
+                        speed: 2
+                    },
+                    repulse: {
+                        distance: 200,
+                        duration: 0.4
+                    },
+                    push: {
+                        particles_nb: isMobile ? 1 : 2
+                    },
+                    remove: {
+                        particles_nb: 2
+                    }
+                }
+            },
+            retina_detect: true,
+            pauseOnBlur: true
+        });
+        
+        // Aggiorna i colori quando cambia il tema
+        document.addEventListener('themeChange', updateParticlesColors);
+    }
+
+    // Funzione per aggiornare i colori delle particelle in base al tema
+    function updateParticlesColors() {
+        const container = tsParticles.domItem(0);
+        if (!container) return;
+        
+        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--md-sys-color-primary').trim();
+        const secondaryColor = getComputedStyle(document.documentElement).getPropertyValue('--md-sys-color-secondary').trim();
+        const tertiaryColor = getComputedStyle(document.documentElement).getPropertyValue('--md-sys-color-tertiary').trim();
+        
+        try {
+            // Verifica che le proprietà esistano prima di modificarle
+            if (container.options && container.options.particles) {
+                if (container.options.particles.color) {
+                    container.options.particles.color.value = [primaryColor, secondaryColor, tertiaryColor, "#FFFFFF"];
+                }
+                
+                if (container.options.particles.line_linked) {
+                    container.options.particles.line_linked.color = primaryColor;
+                } else if (container.options.particles.links) {
+                    // In alcune versioni di tsParticles si usa 'links' invece di 'line_linked'
+                    container.options.particles.links.color = primaryColor;
+                }
+                
+                container.refresh();
+            }
+        } catch (error) {
+            console.log("Errore nell'aggiornamento dei colori delle particelle:", error);
+        }
+    }
+    </script>
 
 </body>
 </html>
