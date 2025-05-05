@@ -2499,6 +2499,19 @@
             border: 2px solid var(--md-sys-color-primary);
         }
         
+        .user-avatar-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            margin-right: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-primary);
+            border: 2px solid var(--md-sys-color-primary);
+        }
+        
         .user-details {
             flex-grow: 1;
         }
@@ -3821,7 +3834,7 @@
                                         <!-- Google Drive -->
                                         <div class="provider-option" data-provider="google">
                                             <div class="provider-logo">
-                                                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Drive">
+                                                <span class="material-symbols-outlined" style="color: #4285F4; font-size: 28px;">cloud</span>
                                             </div>
                                             <div class="provider-info">
                                                 <h4>Google Drive</h4>
@@ -10216,7 +10229,11 @@ END:VCARD`;
         // Implementazione per Google Drive (reale) con Google Identity Services
         class GoogleDriveProvider extends CloudProvider {
             constructor() {
-                super("Google Drive", "https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg");
+                // Utilizziamo un'icona Material invece dell'URL esterno
+                super("Google Drive", "");
+                this.iconClass = "material-symbols-outlined";
+                this.iconName = "cloud";
+                this.iconColor = "#4285F4"; // Colore blu di Google
                 this.apiLoaded = false;
                 this.backupFileName = 'Ore PWS - Backup Dati.json';
                 this.accessToken = null;
@@ -11523,6 +11540,30 @@ END:VCARD`;
                     if (provider.isPreferred) {
                         statusIndicator.classList.add('preferred');
                     }
+                    
+                    // Aggiorna l'icona se il provider ha proprietà iconClass e iconName
+                    const providerInstance = cloudManager.getProvider(provider.id);
+                    if (providerInstance && providerInstance.iconClass && providerInstance.iconName) {
+                        const logoContainer = providerElement.querySelector('.provider-logo');
+                        if (logoContainer) {
+                            // Rimuovi eventuali elementi esistenti
+                            logoContainer.innerHTML = '';
+                            
+                            // Crea l'icona
+                            const iconElement = document.createElement('span');
+                            iconElement.className = providerInstance.iconClass;
+                            iconElement.textContent = providerInstance.iconName;
+                            
+                            // Applica lo stile
+                            if (providerInstance.iconColor) {
+                                iconElement.style.color = providerInstance.iconColor;
+                            }
+                            iconElement.style.fontSize = '28px';
+                            
+                            // Aggiungi l'icona al container
+                            logoContainer.appendChild(iconElement);
+                        }
+                    }
                 }
             });
             
@@ -11552,10 +11593,18 @@ END:VCARD`;
                 button.id = `${selectedProvider}LoginBtn`;
                 button.className = `cloud-login-btn ${selectedProvider}-btn`;
                 
-                button.innerHTML = `
-                    <img src="${provider.logoUrl}" alt="${provider.name}">
-                    Accedi con ${provider.name}
-                `;
+               // Verifica se il provider ha proprietà iconClass e iconName
+                if (provider.iconClass && provider.iconName) {
+                    button.innerHTML = `
+                        <span class="${provider.iconClass}" style="color: ${provider.iconColor || '#4285F4'}; margin-right: 8px;">${provider.iconName}</span>
+                        Accedi con ${provider.name}
+                    `;
+                } else {
+                    button.innerHTML = `
+                        <span class="material-symbols-outlined" style="color: #4285F4; margin-right: 8px;">cloud</span>
+                         Accedi con ${provider.name}
+                    `;
+                }
                 
                 button.addEventListener('click', loginWithSelectedProvider);
                 
@@ -11581,11 +11630,20 @@ END:VCARD`;
                 
                 accountInfo.innerHTML = `
                     <div class="user-profile">
-                        ${userData.picture ? `<img src="${userData.picture}" alt="${userData.name}" class="user-avatar">` : ''}
+                        ${userData.picture ? 
+                            `<img src="${userData.picture}" alt="${userData.name}" class="user-avatar">` : 
+                            `<span class="material-symbols-outlined user-avatar-icon" style="color: #4285F4; font-size: 36px; background-color: #E8F0FE; border-radius: 50%; padding: 8px;">account_circle</span>`
+                        }
                         <div class="user-details">
                             <div class="user-name">${userData.name}</div>
                             <div class="user-email">${userData.email}</div>
-                            <div class="user-provider">Connesso con ${provider.name}</div>
+                            <div class="user-provider">
+                                ${provider.iconClass && provider.iconName ? 
+                                    `<span class="${provider.iconClass}" style="color: ${provider.iconColor || '#4285F4'}; margin-right: 4px; vertical-align: middle;">${provider.iconName}</span>` : 
+                                    `<span class="material-symbols-outlined" style="color: #4285F4; margin-right: 4px; vertical-align: middle;">cloud</span>`
+                                }
+                                Connesso con ${provider.name}
+                            </div>
                         </div>
                     </div>
                 `;
