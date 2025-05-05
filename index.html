@@ -5555,6 +5555,7 @@
                     if (holidayInfo.type === 'malattia') malattiaDays++;
                 } else if (entries.length > 0) {
                      let dayHasHours = false;
+                     let dayHasDescription = false;
                      entries.forEach(entry => {
                          totalHours += (typeof entry.totalHours === 'number' ? entry.totalHours : 0);
                          // Contiamo i giorni di trasferta, non le ore
@@ -5566,9 +5567,12 @@
                              }
                          }
                          totalNotturne += (typeof entry.notturne === 'number' ? entry.notturne : 0);
-                        if (typeof entry.totalHours === 'number' && entry.totalHours > 0) dayHasHours = true;
+                         // Verifica se ci sono ore o descrizione
+                         if (typeof entry.totalHours === 'number' && entry.totalHours > 0) dayHasHours = true;
+                         if (entry.description && entry.description.trim() !== '') dayHasDescription = true;
                     });
-                    if (dayHasHours) workDays++;
+                    // Conta come giorno lavorato se ci sono ore o descrizione
+                    if (dayHasHours || dayHasDescription) workDays++;
                 }
             }
 
@@ -6748,14 +6752,26 @@
                      if (dayData.holidayInfo.type === 'malattia') monthMalattiaDays++;
                  } else if (dayData.entries.length > 0) {
                       let dayHasHours = false;
+                      let dayHasTransferta = false;
+                      let dayHasDescription = false;
                      dayData.entries.forEach(e => {
                          monthTotalHours += (typeof e.totalHours === 'number' ? e.totalHours : 0);
-                         monthTotalTransferta += (typeof e.transferta === 'number' ? e.transferta : 0);
+                         // Verifica se questa voce ha trasferta (sia formato booleano che numerico)
+                         if (e.transferta === true || (typeof e.transferta === 'number' && e.transferta > 0)) {
+                             dayHasTransferta = true;
+                         }
                          monthTotalNotturne += (typeof e.notturne === 'number' ? e.notturne : 0);
                          monthTotalBreak += (typeof e.breakTime === 'number' ? e.breakTime : 0);
-                          if (typeof e.totalHours === 'number' && e.totalHours > 0) dayHasHours = true;
+                         // Verifica se ci sono ore o descrizione
+                         if (typeof e.totalHours === 'number' && e.totalHours > 0) dayHasHours = true;
+                         if (e.description && e.description.trim() !== '') dayHasDescription = true;
                      });
-                      if(dayHasHours) monthWorkDays++;
+                     // Incrementa il contatore dei giorni di trasferta solo una volta per giorno
+                     if (dayHasTransferta) {
+                         monthTotalTransferta += 1;
+                     }
+                     // Conta come giorno lavorato se ci sono ore o descrizione
+                     if (dayHasHours || dayHasDescription) monthWorkDays++;
                  }
               });
 
@@ -7416,6 +7432,7 @@
                 } else if (entries.length > 0) {
                     // --- Work Entry Rows ---
                     let dayHasWork = false;
+                    let dayHasDescription = false;
                     
                     entries.forEach(entry => {
                         const vehicleName = getVehicleNameById(entry.vehicle) || "";
@@ -7579,12 +7596,14 @@
                         }
                         
                         monthTotalHours += totalHoursNum;
-                        // Incrementa il contatore dei giorni di trasferta se questa voce ha trasferta
-                        if (transfertaValue === "TR") {
-                            monthTotalTransferta += 1; // Contiamo i giorni, non le ore
-                        }
+                        // Incrementiamo il contatore delle ore notturne
                         monthTotalNotturne += notturneNum;
+                        // Verifica se ci sono ore o descrizione
                         if (totalHoursNum > 0) dayHasWork = true;
+                        if (entry.description && entry.description.trim() !== '') dayHasDescription = true;
+                        
+                        // Nota: il conteggio dei giorni di trasferta viene fatto una sola volta per giorno
+                        // dopo aver processato tutte le voci del giorno
                         
                         rowsAddedForDay = true;
                         rowIndex++;
@@ -7592,7 +7611,14 @@
                     
                     // Nessuno sfondo speciale per la prossima riga
                     
-                    if (dayHasWork) monthWorkDays++;
+                    // Incrementa il contatore dei giorni di trasferta se almeno una voce del giorno ha trasferta
+                    if (entries.some(entry => entry.transferta === true || 
+                        (typeof entry.transferta === 'number' && entry.transferta > 0))) {
+                        monthTotalTransferta += 1; // Contiamo i giorni, non le ore
+                    }
+                    
+                    // Conta come giorno lavorato se ci sono ore o descrizione
+                    if (dayHasWork || dayHasDescription) monthWorkDays++;
                 }
                 
                 // Add a blank row after each day with data
