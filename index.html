@@ -2176,6 +2176,12 @@
             justify-self: center; /* Center horizontally in grid cell */
             align-self: center; /* Center vertically in grid cell */
         }
+        
+        /* Giorni festivi (sabato e domenica) in rosso */
+        .flatpickr-day.flatpickr-weekend {
+            color: #E53935 !important; /* Rosso */
+            font-weight: 500;
+        }
 
         .flatpickr-day:hover {
              background-color: var(--md-sys-color-surface-container-highest);
@@ -2209,26 +2215,120 @@
         }
         .flatpickr-day.today:hover {
              background-color: var(--md-sys-color-surface-container-highest);
-             color: inherit; /* Keep default color on hover */
-             border-color: var(--md-sys-color-outline); /* Keep border color */
+             color: var(--md-sys-color-on-surface);
+        }
+        
+        .flatpickr-day.today:hover::before {
+             border-color: var(--md-sys-color-primary);
+             border-width: 3px;
+             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
         }
 
         /* Selected Day Style */
         .flatpickr-day.selected {
-            background-color: var(--md-sys-color-surface-variant) !important; /* Gray background */
-            color: var(--md-sys-color-on-surface-variant) !important; /* Text on gray */
-            border: none !important; /* Remove any border */
-            font-weight: 500; /* Restore normal weight */
+            position: relative;
+            background-color: transparent !important;
+            color: var(--md-sys-color-on-surface) !important;
+            border: none !important;
+            font-weight: 700 !important;
+            z-index: 1;
+        }
+        
+        /* Animazione per il bordo tratteggiato */
+        @keyframes dash-animation {
+            0% {
+                stroke-dashoffset: 0;
+            }
+            100% {
+                stroke-dashoffset: 100;
+            }
+        }
+        
+        /* Cerchio tratteggiato attorno al giorno selezionato */
+        .flatpickr-day.selected::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 3px dashed var(--md-sys-color-primary);
+            z-index: -1;
+            background-color: rgba(0, 106, 106, 0.1); /* Colore primario con opacità */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            animation: pulse-selected 2s infinite ease-in-out;
+        }
+        
+        /* Animazione di pulsazione per il giorno selezionato */
+        @keyframes pulse-selected {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 106, 106, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 6px rgba(0, 106, 106, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 106, 106, 0);
+            }
+        }
+        
+        /* Hover sul giorno selezionato */
+        .flatpickr-day.selected:hover {
+            background-color: var(--md-sys-color-surface-container-highest) !important;
+        }
+        
+        .flatpickr-day.selected:hover::before {
+            border-width: 3px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
         }
 
         /* Today and Selected Style */
         .flatpickr-day.today.selected {
-             /* Combine selected background and today border */
-            background-color: var(--md-sys-color-surface-variant) !important;
-            color: var(--md-sys-color-on-surface-variant) !important;
-            border: 2px dotted var(--md-sys-color-outline) !important; /* Add dotted border */
-            font-weight: 500 !important;
-            box-shadow: none !important;
+            position: relative;
+            background-color: transparent !important;
+            color: var(--md-sys-color-on-surface) !important;
+            border: none !important;
+            font-weight: 700 !important;
+            z-index: 1;
+        }
+        
+        /* Cerchio speciale per giorno corrente selezionato (combinazione di cerchio solido e tratteggiato) */
+        .flatpickr-day.today.selected::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 4px solid var(--md-sys-color-primary);
+            background-color: rgba(0, 106, 106, 0.15); /* Colore primario con opacità media */
+            z-index: -1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Aggiunta di un secondo cerchio tratteggiato esterno */
+        .flatpickr-day.today.selected::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 44px; /* Più grande del cerchio interno */
+            height: 44px;
+            border-radius: 50%;
+            border: 2px dashed var(--md-sys-color-primary);
+            z-index: -2; /* Sotto il cerchio interno */
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Hover sul giorno corrente selezionato */
+        .flatpickr-day.today.selected:hover::before {
+            border-width: 4px;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
         }
 
         /* Dark Theme Overrides */
@@ -2260,6 +2360,12 @@
             .flatpickr-day {
                 color: var(--md-sys-color-on-surface-dark);
             }
+            
+            /* Giorni festivi (sabato e domenica) in rosso per tema scuro */
+            .flatpickr-day.flatpickr-weekend {
+                color: #FF5252 !important; /* Rosso più chiaro per tema scuro */
+                font-weight: 500;
+            }
             .flatpickr-day:hover {
                 background-color: var(--md-sys-color-surface-container-highest-dark);
             }
@@ -2276,26 +2382,104 @@
                 background-color: var(--md-sys-color-surface-container-highest-dark);
              }
             .flatpickr-day.today {
-                border: 2px dotted var(--md-sys-color-outline-dark);
-                color: inherit;
-                font-weight: normal;
-                background: transparent !important;
+                position: relative;
+                border: none;
+                color: var(--md-sys-color-on-surface-dark);
+                background-color: transparent !important;
+                font-weight: 700;
+                z-index: 1;
             }
-             .flatpickr-day.today:hover {
-                  background-color: var(--md-sys-color-surface-container-highest-dark);
-                  color: inherit;
-                  border-color: var(--md-sys-color-outline-dark);
+            
+            .flatpickr-day.today::before {
+                content: "";
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                border: 3px solid var(--md-sys-color-primary-dark);
+                background-color: rgba(129, 213, 212, 0.05); /* Colore primario dark con opacità bassa */
+                z-index: -1;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            }
+            
+            .flatpickr-day.today:hover {
+                background-color: var(--md-sys-color-surface-container-highest-dark) !important;
+                color: var(--md-sys-color-on-surface-dark);
+            }
+            
+            .flatpickr-day.today:hover::before {
+                border-color: var(--md-sys-color-primary-dark);
+                border-width: 3px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
              }
             .flatpickr-day.selected {
-                background-color: var(--md-sys-color-surface-variant-dark) !important;
-                color: var(--md-sys-color-on-surface-variant-dark) !important;
+                position: relative;
+                background-color: transparent !important;
+                color: var(--md-sys-color-on-surface-dark) !important;
                 border: none !important;
+                font-weight: 700 !important;
+                z-index: 1;
             }
+            
+            /* Cerchio tratteggiato attorno al giorno selezionato - tema scuro */
+            .flatpickr-day.selected::before {
+                border: 3px dashed var(--md-sys-color-primary-dark);
+                background-color: rgba(129, 213, 212, 0.1); /* Colore primario dark con opacità */
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+                animation: pulse-selected-dark 2s infinite ease-in-out;
+            }
+            
+            /* Animazione di pulsazione per il giorno selezionato - tema scuro */
+            @keyframes pulse-selected-dark {
+                0% {
+                    box-shadow: 0 0 0 0 rgba(129, 213, 212, 0.4);
+                }
+                70% {
+                    box-shadow: 0 0 0 6px rgba(129, 213, 212, 0);
+                }
+                100% {
+                    box-shadow: 0 0 0 0 rgba(129, 213, 212, 0);
+                }
+            }
+            
+            /* Hover sul giorno selezionato - tema scuro */
+            .flatpickr-day.selected:hover {
+                background-color: var(--md-sys-color-surface-container-highest-dark) !important;
+            }
+            
+            .flatpickr-day.selected:hover::before {
+                border-width: 3px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+            }
+            
             .flatpickr-day.today.selected {
-                background-color: var(--md-sys-color-surface-variant-dark) !important;
-                color: var(--md-sys-color-on-surface-variant-dark) !important;
-                border: 2px dotted var(--md-sys-color-outline-dark) !important;
-                font-weight: 500 !important;
+                position: relative;
+                background-color: transparent !important;
+                color: var(--md-sys-color-on-surface-dark) !important;
+                border: none !important;
+                font-weight: 700 !important;
+            }
+            
+            /* Cerchio speciale per giorno corrente selezionato - tema scuro */
+            .flatpickr-day.today.selected::before {
+                border: 4px solid var(--md-sys-color-primary-dark);
+                background-color: rgba(129, 213, 212, 0.15); /* Colore primario dark con opacità media */
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+            }
+            
+            /* Aggiunta di un secondo cerchio tratteggiato esterno - tema scuro */
+            .flatpickr-day.today.selected::after {
+                border: 2px dashed var(--md-sys-color-primary-dark);
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            }
+            
+            /* Hover sul giorno corrente selezionato - tema scuro */
+            .flatpickr-day.today.selected:hover::before {
+                border-width: 4px;
+                box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
             }
         }
 
@@ -3062,8 +3246,28 @@
              color: var(--md-sys-color-on-surface-variant);
         }
         .flatpickr-day.today {
-             border-color: var(--md-sys-color-primary);
-             color: var(--md-sys-color-primary);
+             position: relative;
+             border: none;
+             color: var(--md-sys-color-on-surface);
+             background-color: transparent;
+             font-weight: 700;
+             z-index: 1;
+        }
+        
+        /* Cerchio attorno al giorno corrente */
+        .flatpickr-day.today::before {
+             content: "";
+             position: absolute;
+             top: 50%;
+             left: 50%;
+             transform: translate(-50%, -50%);
+             width: 36px;
+             height: 36px;
+             border-radius: 50%;
+             border: 3px solid var(--md-sys-color-primary);
+             background-color: rgba(0, 106, 106, 0.05); /* Colore primario con opacità molto bassa */
+             z-index: -1;
+             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
         .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange,
         .flatpickr-day.selected:hover, .flatpickr-day.startRange:hover, .flatpickr-day.endRange:hover {
@@ -4336,7 +4540,10 @@
                 // Configure flatpickr
                 const fp = flatpickr(dateInput, {
                     dateFormat: "d/m/Y",
-                    locale: "it",
+                    locale: {
+                        ...flatpickr.l10ns.it, // Mantieni tutte le impostazioni italiane
+                        firstDayOfWeek: 1 // Inizia la settimana dal lunedì
+                    },
                     allowInput: false, // Disable direct input, use picker only
                     defaultDate: dateInput.value,
                     disableMobile: true, // Use custom mobile handling & style
@@ -4345,6 +4552,74 @@
                     dropdowns: {
                         month: true,
                         year: true
+                    },
+                    // Funzione per aggiungere la classe weekend ai giorni di sabato, domenica e festivi
+                    onDayCreate: function(dObj, dStr, fp, dayElem) {
+                        const date = dayElem.dateObj;
+                        const year = date.getFullYear();
+                        const month = date.getMonth(); // 0-11
+                        const day = date.getDate();
+                        
+                        // 0 = domenica, 6 = sabato
+                        if (date.getDay() === 0 || date.getDay() === 6) {
+                            dayElem.classList.add('flatpickr-weekend');
+                        }
+                        
+                        // Festività nazionali italiane (date fisse)
+                        const fixedHolidays = [
+                            { day: 1, month: 0 },    // Capodanno (1 Gennaio)
+                            { day: 6, month: 0 },    // Epifania (6 Gennaio)
+                            { day: 25, month: 3 },   // Festa della Liberazione (25 Aprile)
+                            { day: 1, month: 4 },    // Festa dei Lavoratori (1 Maggio)
+                            { day: 2, month: 5 },    // Festa della Repubblica (2 Giugno)
+                            { day: 15, month: 7 },   // Ferragosto (15 Agosto)
+                            { day: 1, month: 10 },   // Tutti i Santi (1 Novembre)
+                            { day: 8, month: 11 },   // Immacolata Concezione (8 Dicembre)
+                            { day: 25, month: 11 },  // Natale (25 Dicembre)
+                            { day: 26, month: 11 }   // Santo Stefano (26 Dicembre)
+                        ];
+                        
+                        // Controlla le festività a data fissa
+                        if (fixedHolidays.some(holiday => holiday.day === day && holiday.month === month)) {
+                            dayElem.classList.add('flatpickr-weekend');
+                        }
+                        
+                        // Calcolo della Pasqua e festività correlate (Lunedì dell'Angelo)
+                        // Algoritmo di Gauss per calcolare la Pasqua
+                        function getEasterDate(year) {
+                            const a = year % 19;
+                            const b = Math.floor(year / 100);
+                            const c = year % 100;
+                            const d = Math.floor(b / 4);
+                            const e = b % 4;
+                            const f = Math.floor((b + 8) / 25);
+                            const g = Math.floor((b - f + 1) / 3);
+                            const h = (19 * a + b - d - g + 15) % 30;
+                            const i = Math.floor(c / 4);
+                            const k = c % 4;
+                            const l = (32 + 2 * e + 2 * i - h - k) % 7;
+                            const m = Math.floor((a + 11 * h + 22 * l) / 451);
+                            const month = Math.floor((h + l - 7 * m + 114) / 31) - 1; // 0-11
+                            const day = ((h + l - 7 * m + 114) % 31) + 1;
+                            return { day, month };
+                        }
+                        
+                        // Calcola la Pasqua per l'anno corrente
+                        const easter = getEasterDate(year);
+                        
+                        // Controlla se è Pasqua
+                        if (day === easter.day && month === easter.month) {
+                            dayElem.classList.add('flatpickr-weekend');
+                        }
+                        
+                        // Calcola il Lunedì dell'Angelo (Pasquetta) - giorno dopo Pasqua
+                        const easterMonday = new Date(year, easter.month, easter.day);
+                        easterMonday.setDate(easterMonday.getDate() + 1);
+                        
+                        // Controlla se è Lunedì dell'Angelo
+                        if (day === easterMonday.getDate() && month === easterMonday.getMonth()) {
+                            dayElem.classList.add('flatpickr-weekend');
+                        }
                     },
                     // ++ End dropdowns ++
                     onChange: function(selectedDates, dateStr, instance) {
