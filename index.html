@@ -4474,8 +4474,8 @@
                      style="max-width: 90%; max-height: 90%; display: block; margin: auto;">
             </picture>
         </div>
-        <button class="close-btn" id="closeSuperhero" title="Chiudi" style="position: absolute; top: 20px; right: 20px; z-index: 10001; background-color: rgba(0, 0, 0, 0.5); color: white; border: none; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);">
-            <span class="material-symbols-outlined" style="font-size: 36px;">close</span>
+        <button class="close-btn" id="closeSuperhero" title="Chiudi" style="position: absolute; top: 20px; right: 20px; z-index: 10001; background-color: rgba(0, 0, 0, 0.5); color: white; border: none; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); -webkit-touch-callout: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
+            <span class="material-symbols-outlined" style="font-size: 36px; pointer-events: none; -webkit-touch-callout: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;">close</span>
         </button>
         
         <!-- Audio per lo scherzo del pulsante che scappa - Ottimizzato per iOS -->
@@ -9755,10 +9755,14 @@ END:VCARD`;
                      // Variabili per gestire la pressione prolungata
                      let pressTimer;
                      let isPressing = false;
+                     let wasLongPress = false; // Flag per tracciare se c'è stata una pressione prolungata
                      
                      // Funzione per chiudere direttamente l'overlay
                      function closeOverlayDirectly() {
                          console.log("Chiusura diretta dell'overlay dopo pressione prolungata");
+                         // Imposta il flag per indicare che c'è stata una pressione prolungata
+                         wasLongPress = true;
+                         
                          const overlay = document.getElementById('superheroOverlay');
                          if (overlay) {
                              // Forza la chiusura dell'overlay
@@ -9787,7 +9791,29 @@ END:VCARD`;
                              animation: longPressAnimation 1s infinite;
                              background-color: rgba(255, 0, 0, 0.7) !important;
                          }
+                         /* Previeni la selezione del testo su iOS */
+                         .close-btn, .close-btn * {
+                             -webkit-touch-callout: none !important;
+                             -webkit-user-select: none !important;
+                             -moz-user-select: none !important;
+                             -ms-user-select: none !important;
+                             user-select: none !important;
+                             touch-action: manipulation !important;
+                             -webkit-tap-highlight-color: transparent !important;
+                         }
                      `;
+                     
+                     // Aggiungiamo un listener globale per prevenire la selezione del testo sul pulsante
+                     document.addEventListener('selectionchange', function() {
+                         const selection = window.getSelection();
+                         if (selection.rangeCount > 0) {
+                             const range = selection.getRangeAt(0);
+                             const closeBtn = document.getElementById('closeSuperhero');
+                             if (closeBtn && closeBtn.contains(range.commonAncestorContainer)) {
+                                 selection.removeAllRanges();
+                             }
+                         }
+                     });
                      document.head.appendChild(style);
                      
                      // Gestione dell'evento mousedown/touchstart
@@ -9810,8 +9836,26 @@ END:VCARD`;
                          }, 3000); // 3 secondi di pressione
                      });
                      
+                     // Variabili per gestire i tap su dispositivi touch
+                     let touchStartTime = 0;
+                     let touchStartX = 0;
+                     let touchStartY = 0;
+                     
                      // Gestione dell'evento touchstart per dispositivi mobili
                      closeBtn.addEventListener('touchstart', function(e) {
+                         // Registra il tempo e la posizione del tocco iniziale
+                         touchStartTime = new Date().getTime();
+                         if (e.touches && e.touches[0]) {
+                             touchStartX = e.touches[0].clientX;
+                             touchStartY = e.touches[0].clientY;
+                         }
+                         
+                         // NON preveniamo il comportamento predefinito per permettere il click
+                         // Usiamo preventDefault solo per prevenire la selezione del testo
+                         if (e.touches && e.touches.length > 1) {
+                             e.preventDefault(); // Previeni solo per multi-touch
+                         }
+                         
                          isPressing = true;
                          
                          // Aggiungi l'animazione dopo un breve ritardo
@@ -9828,13 +9872,18 @@ END:VCARD`;
                                  isPressing = false;
                              }
                          }, 3000); // 3 secondi di pressione
-                     });
+                     }, { passive: false }); // Importante: passive: false permette di usare preventDefault
                      
                      // Cancella il timer se l'utente rilascia il pulsante prima dei 3 secondi
                      closeBtn.addEventListener('mouseup', function() {
                          clearTimeout(pressTimer);
                          isPressing = false;
                          this.classList.remove('long-press-active');
+                         // Resettiamo il flag wasLongPress dopo un breve ritardo
+                         // per permettere all'evento click di verificare il suo stato
+                         setTimeout(() => {
+                             wasLongPress = false;
+                         }, 100);
                      });
                      
                      closeBtn.addEventListener('mouseleave', function() {
@@ -9843,22 +9892,181 @@ END:VCARD`;
                          this.classList.remove('long-press-active');
                      });
                      
-                     closeBtn.addEventListener('touchend', function() {
+                     closeBtn.addEventListener('touchend', function(e) {
+                         // Calcola la durata del tocco
+                         const touchEndTime = new Date().getTime();
+                         const touchDuration = touchEndTime - touchStartTime;
+                         
+                         // Calcola la distanza del movimento
+                         let touchEndX = 0;
+                         let touchEndY = 0;
+                         if (e.changedTouches && e.changedTouches[0]) {
+                             touchEndX = e.changedTouches[0].clientX;
+                             touchEndY = e.changedTouches[0].clientY;
+                         }
+                         const touchDistance = Math.sqrt(
+                             Math.pow(touchEndX - touchStartX, 2) + 
+                             Math.pow(touchEndY - touchStartY, 2)
+                         );
+                         
+                         // Se è un tap rapido (meno di 300ms) e senza movimento significativo (meno di 10px)
+                         if (touchDuration < 300 && touchDistance < 10 && !wasLongPress) {
+                             console.log("Tap rapido rilevato, simuliamo un click");
+                             
+                             // Simula un click manualmente
+                             if (!isEscaping && !isAudioPlaying) {
+                                 // Ferma tutti gli audio prima di iniziare
+                                 stopAllAudio();
+                                 
+                                 // Log per debug
+                                 console.log("Attivazione comportamento troll da tap - clickCount:", clickCount);
+                                 
+                                 // Riproduci l'audio corrispondente
+                                 const audio = audioElements[clickCount];
+                                 if (audio) {
+                                     // Mostra il messaggio toast con priorità alta
+                                     const currentMessage = messages[clickCount];
+                                     console.log("Mostrando messaggio:", currentMessage);
+                                     
+                                     // Forziamo la visualizzazione del toast con stile inline
+                                     const container = document.getElementById('toast-container');
+                                     if (container) {
+                                         // Assicuriamoci che il container sia visibile
+                                         container.style.zIndex = "10000";
+                                     }
+                                     
+                                     // Mostra il toast con durata più lunga
+                                     showToast(currentMessage, 'warning', 5000);
+                                     
+                                     // Aggiungi la classe per l'animazione
+                                     this.classList.add('escaping');
+                                     isEscaping = true;
+                                     
+                                     // Riproduci l'audio
+                                     // Funzione per riprodurre l'audio (compatibile con iOS)
+                                     const playAudio = (audioElement) => {
+                                         // Ferma tutti gli altri audio prima di riprodurre quello nuovo
+                                         audioElements.forEach(audioEl => {
+                                             if (audioEl && audioEl !== audioElement) {
+                                                 try {
+                                                     audioEl.pause();
+                                                     audioEl.currentTime = 0;
+                                                 } catch (e) {
+                                                     console.error("Errore nel fermare l'audio:", e);
+                                                 }
+                                             }
+                                         });
+                                         
+                                         // Imposta il volume e riproduci l'audio
+                                         audioElement.volume = 1.0;
+                                         
+                                         try {
+                                             audioElement.currentTime = 0;
+                                         } catch (e) {
+                                             console.warn("Impossibile reimpostare currentTime:", e);
+                                         }
+                                         
+                                         // Avvia l'audio
+                                         const playPromise = audioElement.play();
+                                         
+                                         // Gestisci eventuali errori di riproduzione
+                                         if (playPromise !== undefined) {
+                                             playPromise.then(() => {
+                                                 console.log("Audio riprodotto con successo");
+                                             }).catch(error => {
+                                                 console.error("Audio playback failed:", error);
+                                             });
+                                         }
+                                     };
+                                     
+                                     playAudio(audio);
+                                     
+                                     // Fai scappare il pulsante
+                                     const escapeInterval = setInterval(() => {
+                                         escapeTo(this);
+                                     }, 300);
+                                     
+                                     // Imposta un flag per indicare che l'audio è in riproduzione
+                                     isAudioPlaying = true;
+                                     
+                                     // Durata fissa per ogni audio
+                                     const audioDurations = [3000, 3500, 6000, 5000];
+                                     const currentDuration = audioDurations[clickCount];
+                                     
+                                     // Ferma l'animazione dopo un tempo fisso
+                                     setTimeout(() => {
+                                         clearInterval(escapeInterval);
+                                         this.classList.remove('escaping');
+                                         this.style.animation = 'none';
+                                         this.style.transform = 'none';
+                                         this.style.transition = 'none';
+                                         
+                                         // Riposiziona il pulsante
+                                         const buttonRect = this.getBoundingClientRect();
+                                         this.style.position = 'fixed';
+                                         this.style.top = buttonRect.top + 'px';
+                                         this.style.left = buttonRect.left + 'px';
+                                         this.style.right = 'auto';
+                                         this.style.boxShadow = 'none';
+                                         
+                                         // Resetta i flag
+                                         isEscaping = false;
+                                         isAudioPlaying = false;
+                                         clickCount++;
+                                     }, currentDuration);
+                                 }
+                                 
+                                 // Previeni il comportamento predefinito per evitare doppi click
+                                 e.preventDefault();
+                                 e.stopPropagation();
+                             }
+                         }
+                         
+                         // Solo se è stata una pressione prolungata, preveniamo il click successivo
+                         if (wasLongPress) {
+                             e.preventDefault();
+                             e.stopPropagation();
+                         }
+                         
                          clearTimeout(pressTimer);
                          isPressing = false;
                          this.classList.remove('long-press-active');
-                     });
+                         
+                         // Resettiamo il flag wasLongPress dopo un breve ritardo
+                         setTimeout(() => {
+                             wasLongPress = false;
+                         }, 100);
+                     }, { passive: false });
                      
-                     closeBtn.addEventListener('touchcancel', function() {
+                     closeBtn.addEventListener('touchcancel', function(e) {
+                         // NON preveniamo il comportamento predefinito per permettere il click
                          clearTimeout(pressTimer);
                          isPressing = false;
                          this.classList.remove('long-press-active');
-                     });
+                         
+                         // Resettiamo il flag wasLongPress
+                         wasLongPress = false;
+                     }, { passive: false });
                      
                      // Funzione per gestire il click sul pulsante
                      closeBtn.addEventListener('click', function(e) {
+                         // Log per debug
+                         console.log("Evento click rilevato sul pulsante X");
+                         
+                         // Se c'è stata una pressione prolungata, ignora il click
+                         if (wasLongPress) {
+                             console.log("Click ignorato perché c'è stata una pressione prolungata");
+                             return;
+                         }
+                         
                          // Se il pulsante sta già scappando o un audio è in riproduzione, ignora il click
-                         if (isEscaping || isAudioPlaying) return;
+                         if (isEscaping || isAudioPlaying) {
+                             console.log("Click ignorato perché il pulsante sta già scappando o un audio è in riproduzione");
+                             return;
+                         }
+                         
+                         // Log per debug
+                         console.log("Attivazione comportamento troll - clickCount:", clickCount);
                          
                          // Ferma tutti gli audio prima di iniziare
                          stopAllAudio();
