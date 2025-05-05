@@ -9752,6 +9752,109 @@ END:VCARD`;
                          }, 5000);
                      }
                      
+                     // Variabili per gestire la pressione prolungata
+                     let pressTimer;
+                     let isPressing = false;
+                     
+                     // Funzione per chiudere direttamente l'overlay
+                     function closeOverlayDirectly() {
+                         console.log("Chiusura diretta dell'overlay dopo pressione prolungata");
+                         const overlay = document.getElementById('superheroOverlay');
+                         if (overlay) {
+                             // Forza la chiusura dell'overlay
+                             overlay.classList.remove('visible');
+                             overlay.style.opacity = "0";
+                             overlay.style.visibility = "hidden";
+                             overlay.style.display = "none";
+                             
+                             // Ripristina lo scroll della pagina
+                             document.body.style.overflow = '';
+                             
+                             // Mostra un messaggio di conferma
+                             showToast("Supiroman torna alla base!", "success", 2000);
+                         }
+                     }
+                     
+                     // Aggiungiamo uno stile per l'animazione di pressione prolungata
+                     const style = document.createElement('style');
+                     style.textContent = `
+                         @keyframes longPressAnimation {
+                             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+                             50% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+                             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+                         }
+                         .long-press-active {
+                             animation: longPressAnimation 1s infinite;
+                             background-color: rgba(255, 0, 0, 0.7) !important;
+                         }
+                     `;
+                     document.head.appendChild(style);
+                     
+                     // Gestione dell'evento mousedown/touchstart
+                     closeBtn.addEventListener('mousedown', function(e) {
+                         isPressing = true;
+                         
+                         // Aggiungi l'animazione dopo un breve ritardo
+                         setTimeout(() => {
+                             if (isPressing) {
+                                 this.classList.add('long-press-active');
+                             }
+                         }, 500); // Inizia l'animazione dopo 0.5 secondi
+                         
+                         pressTimer = setTimeout(() => {
+                             if (isPressing) {
+                                 this.classList.remove('long-press-active');
+                                 closeOverlayDirectly();
+                                 isPressing = false;
+                             }
+                         }, 3000); // 3 secondi di pressione
+                     });
+                     
+                     // Gestione dell'evento touchstart per dispositivi mobili
+                     closeBtn.addEventListener('touchstart', function(e) {
+                         isPressing = true;
+                         
+                         // Aggiungi l'animazione dopo un breve ritardo
+                         setTimeout(() => {
+                             if (isPressing) {
+                                 this.classList.add('long-press-active');
+                             }
+                         }, 500); // Inizia l'animazione dopo 0.5 secondi
+                         
+                         pressTimer = setTimeout(() => {
+                             if (isPressing) {
+                                 this.classList.remove('long-press-active');
+                                 closeOverlayDirectly();
+                                 isPressing = false;
+                             }
+                         }, 3000); // 3 secondi di pressione
+                     });
+                     
+                     // Cancella il timer se l'utente rilascia il pulsante prima dei 3 secondi
+                     closeBtn.addEventListener('mouseup', function() {
+                         clearTimeout(pressTimer);
+                         isPressing = false;
+                         this.classList.remove('long-press-active');
+                     });
+                     
+                     closeBtn.addEventListener('mouseleave', function() {
+                         clearTimeout(pressTimer);
+                         isPressing = false;
+                         this.classList.remove('long-press-active');
+                     });
+                     
+                     closeBtn.addEventListener('touchend', function() {
+                         clearTimeout(pressTimer);
+                         isPressing = false;
+                         this.classList.remove('long-press-active');
+                     });
+                     
+                     closeBtn.addEventListener('touchcancel', function() {
+                         clearTimeout(pressTimer);
+                         isPressing = false;
+                         this.classList.remove('long-press-active');
+                     });
+                     
                      // Funzione per gestire il click sul pulsante
                      closeBtn.addEventListener('click', function(e) {
                          // Se il pulsante sta già scappando o un audio è in riproduzione, ignora il click
