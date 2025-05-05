@@ -7290,7 +7290,7 @@
             // Aggiungiamo manualmente le intestazioni delle colonne
             const headerTitles = [
                 'Giorno', 'Data', 'Tipo', 'Mezzo', 'Ora Inizio', 'Pausa', 'Ora Fine',
-                'Ore Trasferte', 'Ore Notturne', 'Ore Totali'
+                'Trasferta', 'Ore Notturne', 'Ore Totali'
             ];
             
             // Aggiungiamo le intestazioni per le colonne di descrizione
@@ -7558,7 +7558,7 @@
                         }
                         
                         if (hasTransferHours) {
-                            const transferHoursCell = row.getCell(8); // Colonna ore trasferta
+                            const transferHoursCell = row.getCell(8); // Colonna trasferta
                             
                             // Se lo sfondo è grigio chiaro, usiamo un colore più scuro per il testo
                             if (bgColor === 'BDBDBD') {
