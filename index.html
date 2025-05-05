@@ -10433,7 +10433,7 @@ END:VCARD`;
                         window.googleAuthClient = google.accounts.oauth2.initTokenClient({
                             client_id: '927051615660-tfhk7s28v2ni4nsbmlbimaon5mg582o8.apps.googleusercontent.com',
                             scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file openid profile email',
-                            prompt: '',  // Non mostrare il consenso se possibile
+                            prompt: 'consent',  // Mostra sempre il consenso per garantire il refresh token
                             auto_select: true,  // Seleziona automaticamente l'account
                             // Richiedi un token con scadenza più lunga (massimo consentito)
                             access_type: 'offline',  // Richiedi un refresh token
@@ -10679,18 +10679,48 @@ END:VCARD`;
                 // Salva la data di scadenza in localStorage
                 localStorage.setItem('googleTokenExpiry', expiryTime.toString());
                 
-                // Calcola quando rinnovare il token (5 minuti prima della scadenza)
-                const refreshTime = (expiresIn - 300) * 1000; // Converti in millisecondi e sottrai 5 minuti
+                // Calcola quando rinnovare il token (15 minuti prima della scadenza)
+                // Aumentiamo il margine per essere sicuri di rinnovare in tempo
+                const refreshTime = (expiresIn - 900) * 1000; // Converti in millisecondi e sottrai 15 minuti
                 
-                console.log(`Token valido per ${expiresIn} secondi. Programmato rinnovo automatico tra ${refreshTime/1000} secondi.`);
+                // Assicurati che il tempo di refresh sia almeno 5 minuti (per evitare refresh troppo frequenti)
+                const minRefreshTime = 5 * 60 * 1000; // 5 minuti in millisecondi
+                const actualRefreshTime = Math.max(refreshTime, minRefreshTime);
+                
+                console.log(`Token valido per ${expiresIn} secondi. Programmato rinnovo automatico tra ${actualRefreshTime/1000} secondi.`);
                 console.log(`Token scadrà il: ${new Date(expiryTime).toLocaleString()}`);
                 
                 // Imposta il timer per rinnovare il token automaticamente
                 this.tokenRefreshTimer = setTimeout(async () => {
                     console.log('Rinnovo automatico del token in corso...');
                     try {
-                        await this.refreshToken();
-                        console.log('Token rinnovato automaticamente con successo');
+                        // Verifica se il documento è visibile (utente attivo sul sito)
+                        if (document.visibilityState === 'visible') {
+                            await this.refreshToken();
+                            console.log('Token rinnovato automaticamente con successo');
+                        } else {
+                            // Se il documento non è visibile, programma un nuovo tentativo quando l'utente torna
+                            console.log('Documento non visibile, programmazione refresh al ritorno dell\'utente');
+                            
+                            // Funzione per gestire il ritorno dell'utente
+                            const handleVisibilityChange = async () => {
+                                if (document.visibilityState === 'visible') {
+                                    // Rimuovi l'event listener per evitare chiamate multiple
+                                    document.removeEventListener('visibilitychange', handleVisibilityChange);
+                                    
+                                    console.log('Utente tornato, tentativo di refresh token...');
+                                    try {
+                                        await this.refreshToken();
+                                        console.log('Token rinnovato con successo al ritorno dell\'utente');
+                                    } catch (refreshError) {
+                                        console.warn('Errore nel refresh token al ritorno dell\'utente:', refreshError);
+                                    }
+                                }
+                            };
+                            
+                            // Aggiungi l'event listener per il cambio di visibilità
+                            document.addEventListener('visibilitychange', handleVisibilityChange);
+                        }
                     } catch (error) {
                         console.warn('Errore nel rinnovo automatico del token:', error);
                         
@@ -10703,14 +10733,21 @@ END:VCARD`;
                                 console.warn('Impossibile ripristinare la sessione dopo il fallimento del refresh');
                                 // Mostra un messaggio all'utente solo se è attivo sul sito
                                 if (document.visibilityState === 'visible') {
-                                    showToast('La sessione è scaduta. Effettua nuovamente l\'accesso per continuare a utilizzare il backup su cloud.', 'warning', 8000);
+                                    // Tenta un login completo prima di mostrare il messaggio
+                                    try {
+                                        await this.login(true);
+                                        console.log('Login completo riuscito dopo fallimento del refresh');
+                                    } catch (loginError) {
+                                        console.error('Anche il login completo è fallito:', loginError);
+                                        showToast('La sessione è scaduta. Effettua nuovamente l\'accesso per continuare a utilizzare il backup su cloud.', 'warning', 8000);
+                                    }
                                 }
                             }
                         } catch (e) {
                             console.error('Errore durante il tentativo di ripristino della sessione:', e);
                         }
                     }
-                }, refreshTime);
+                }, actualRefreshTime);
             }
             
             async login(manualTrigger = false) {
@@ -10736,7 +10773,7 @@ END:VCARD`;
                     window.googleAuthClient = google.accounts.oauth2.initTokenClient({
                         client_id: '927051615660-tfhk7s28v2ni4nsbmlbimaon5mg582o8.apps.googleusercontent.com',
                         scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file openid profile email',
-                        prompt: 'consent',  // Mostra sempre il consenso per evitare problemi
+                        prompt: 'consent',  // Mostra sempre il consenso per garantire il refresh token
                         auto_select: false,  // Lascia che l'utente scelga l'account
                         // Richiedi un token con scadenza più lunga (massimo consentito)
                         access_type: 'offline',  // Richiedi un refresh token
@@ -11042,6 +11079,18 @@ END:VCARD`;
                         }
                     }
                     
+                    // Verifica se il token è scaduto da più di 24 ore
+                    // In questo caso è meglio richiedere un nuovo token completo
+                    const tokenExpiry = localStorage.getItem('googleTokenExpiry');
+                    const isTokenExpiredLong = tokenExpiry && (Date.now() - parseInt(tokenExpiry)) > 24 * 60 * 60 * 1000;
+                    
+                    // Se il token è scaduto da molto tempo, richiedi un nuovo token completo
+                    if (isTokenExpiredLong) {
+                        console.log('Token scaduto da più di 24 ore, richiedo un nuovo token completo...');
+                        this.login(true).then(resolve).catch(reject);
+                        return;
+                    }
+                    
                     // Configura il callback per il refresh del token
                     const originalCallback = window.googleAuthClient.callback;
                     
@@ -11073,33 +11122,50 @@ END:VCARD`;
                         } else {
                             console.warn('Nessun token ricevuto durante il refresh');
                             
-                            // Se il refresh fallisce, torniamo al token precedente se disponibile
-                            if (currentToken && currentToken.access_token) {
-                                console.log('Ripristino del token precedente');
-                                gapi.client.setToken(currentToken);
-                                resolve(currentToken); // Continuiamo con il token precedente
-                            } else {
-                                // Se non abbiamo un token precedente, segnala l'errore
-                                this.handleRefreshFailure(currentToken, reject);
-                            }
+                            // Se il refresh fallisce, tentiamo un login completo
+                            console.log('Tentativo di login completo dopo fallimento del refresh...');
+                            this.login(true).then(resolve).catch(error => {
+                                console.error('Anche il login completo è fallito:', error);
+                                
+                                // Se anche il login completo fallisce, torniamo al token precedente se disponibile
+                                if (currentToken && currentToken.access_token) {
+                                    console.log('Ripristino del token precedente');
+                                    gapi.client.setToken(currentToken);
+                                    resolve(currentToken); // Continuiamo con il token precedente
+                                } else {
+                                    // Se non abbiamo un token precedente, segnala l'errore
+                                    this.handleRefreshFailure(currentToken, reject);
+                                }
+                            });
                         }
                     };
                     
                     // Tenta il refresh silenzioso del token
                     try {
-                        window.googleAuthClient.requestAccessToken({prompt: ''});
+                       // Richiedi un nuovo token con prompt vuoto per tentare un refresh silenzioso
+                        window.googleAuthClient.requestAccessToken({
+                            prompt: '',
+                            // Richiedi esplicitamente un refresh token
+                            access_type: 'offline'
+                        });
                     } catch (error) {
                         console.error('Errore durante la richiesta del token:', error);
                         
-                        // Se il refresh silenzioso fallisce, manteniamo la sessione attiva
-                        // e non mostriamo messaggi all'utente per non interrompere l'esperienza
-                        if (currentToken && currentToken.access_token) {
-                            console.log('Mantenimento del token corrente dopo errore di refresh');
-                            gapi.client.setToken(currentToken);
-                            resolve(currentToken);
-                        } else {
-                            this.handleRefreshFailure(currentToken, reject, error);
-                        }
+                        // Tenta un login completo
+                        console.log('Tentativo di login completo dopo errore di refresh...');
+                        this.login(true).then(resolve).catch(loginError => {
+                            console.error('Anche il login completo è fallito:', loginError);
+                            
+                             // Se il refresh silenzioso fallisce, manteniamo la sessione attiva
+                            // e non mostriamo messaggi all'utente per non interrompere l'esperienza
+                            if (currentToken && currentToken.access_token) {
+                                console.log('Mantenimento del token corrente dopo errore di refresh');
+                                gapi.client.setToken(currentToken);
+                                resolve(currentToken);
+                            } else {
+                                this.handleRefreshFailure(currentToken, reject, error);
+                            }
+                        });
                     }
                 });
             }
