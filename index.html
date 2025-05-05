@@ -3705,9 +3705,12 @@
                                 <input type="number" id="notturne" class="form-control compact-input" step="0.5" min="0">
                             </div>
 
-                            <div class="form-group checkbox-container">
-                                <input type="checkbox" id="transferta" class="form-checkbox">
-                                <label for="transferta">Trasferta</label>
+                            <div class="form-group">
+                                <label for="transferta">Trasferta:</label>
+                                <button type="button" id="transferta" class="trasferta-button">
+                                    <span class="material-symbols-outlined">local_shipping</span>
+                                    <span class="trasferta-text">Seleziona trasferta</span>
+                                </button>
                             </div>
 
                             <div class="form-group">
@@ -4712,6 +4715,27 @@
                      }
                  });
                  calculateTotalHours(); // Initial calculation
+                 
+                 // Gestione del pulsante di trasferta
+                 const trasfertaButton = document.getElementById('transferta');
+                 if (trasfertaButton) {
+                     trasfertaButton.addEventListener('click', function() {
+                         // Toggle della classe active
+                         this.classList.toggle('active');
+                         // Aggiungiamo un attributo data-active per tenere traccia dello stato
+                         const textElement = this.querySelector('.trasferta-text');
+                         
+                         if (this.classList.contains('active')) {
+                             this.setAttribute('data-active', 'true');
+                             if (textElement) textElement.textContent = 'Trasferta attiva';
+                         } else {
+                             this.setAttribute('data-active', 'false');
+                             if (textElement) textElement.textContent = 'Seleziona trasferta';
+                         }
+                     });
+                 } else {
+                     console.warn("Pulsante trasferta non trovato.");
+                 }
             } else {
                  console.warn("Form inserimento ore non trovato.");
             }
@@ -4907,7 +4931,8 @@
             const endTime = endTimeInput.value;
             const breakTime = parseFloat(breakTimeInput.value) || 0;
             const notturne = parseFloat(notturneInput.value) || 0;
-            const transferta = transfertaInput.checked ? true : false; // Ora è un booleano
+            // Verifica se il pulsante di trasferta è attivo
+            const transferta = transfertaInput.classList.contains('active') || transfertaInput.getAttribute('data-active') === 'true';
             const description = descriptionInput.value.trim();
             const totalHours = parseFloat(totalHoursInput.value) || 0;
             const selectedVehicle = vehicleSelect.value; // Get selected vehicle ID or name
@@ -5149,15 +5174,24 @@
                  form.elements.breakTime.value = entryToLoad.breakTime ?? 0.5; // Default to 0.5 if undefined
                  form.elements.notturne.value = entryToLoad.notturne || '';
                  
-                 // Gestione della casella di spunta per trasferta
-                 if (typeof entryToLoad.transferta === 'boolean') {
+                 // Gestione del pulsante di trasferta
+                 const trasfertaButton = form.elements.transferta;
+                 const textElement = trasfertaButton.querySelector('.trasferta-text');
+                 
+                 if (typeof entryToLoad.transferta === 'boolean' && entryToLoad.transferta) {
                      // Nuovo formato (boolean)
-                     form.elements.transferta.checked = entryToLoad.transferta;
+                     trasfertaButton.classList.add('active');
+                     trasfertaButton.setAttribute('data-active', 'true');
+                     if (textElement) textElement.textContent = 'Trasferta attiva';
                  } else if (typeof entryToLoad.transferta === 'number' && entryToLoad.transferta > 0) {
                      // Vecchio formato (numero di ore)
-                     form.elements.transferta.checked = true;
+                     trasfertaButton.classList.add('active');
+                     trasfertaButton.setAttribute('data-active', 'true');
+                     if (textElement) textElement.textContent = 'Trasferta attiva';
                  } else {
-                     form.elements.transferta.checked = false;
+                     trasfertaButton.classList.remove('active');
+                     trasfertaButton.setAttribute('data-active', 'false');
+                     if (textElement) textElement.textContent = 'Seleziona trasferta';
                  }
                  
                  form.elements.description.value = entryToLoad.description || '';
@@ -5209,15 +5243,24 @@
                  form.elements.breakTime.value = entry.breakTime ?? 0.5;
                  form.elements.notturne.value = entry.notturne || '';
                  
-                 // Gestione della casella di spunta per trasferta
-                 if (typeof entry.transferta === 'boolean') {
+                 // Gestione del pulsante di trasferta
+                 const trasfertaButton = form.elements.transferta;
+                 const textElement = trasfertaButton.querySelector('.trasferta-text');
+                 
+                 if (typeof entry.transferta === 'boolean' && entry.transferta) {
                      // Nuovo formato (boolean)
-                     form.elements.transferta.checked = entry.transferta;
+                     trasfertaButton.classList.add('active');
+                     trasfertaButton.setAttribute('data-active', 'true');
+                     if (textElement) textElement.textContent = 'Trasferta attiva';
                  } else if (typeof entry.transferta === 'number' && entry.transferta > 0) {
                      // Vecchio formato (numero di ore)
-                     form.elements.transferta.checked = true;
+                     trasfertaButton.classList.add('active');
+                     trasfertaButton.setAttribute('data-active', 'true');
+                     if (textElement) textElement.textContent = 'Trasferta attiva';
                  } else {
-                     form.elements.transferta.checked = false;
+                     trasfertaButton.classList.remove('active');
+                     trasfertaButton.setAttribute('data-active', 'false');
+                     if (textElement) textElement.textContent = 'Seleziona trasferta';
                  }
                  
                  form.elements.description.value = entry.description || '';
@@ -5307,7 +5350,16 @@
 
              // Explicitly clear fields that might not reset correctly or need specific handling
              if (document.getElementById('notturne')) document.getElementById('notturne').value = '';
-             if (document.getElementById('transferta')) document.getElementById('transferta').checked = false;
+             
+             // Reset trasferta button
+             const trasfertaButton = document.getElementById('transferta');
+             if (trasfertaButton) {
+                 trasfertaButton.classList.remove('active');
+                 trasfertaButton.setAttribute('data-active', 'false');
+                 const textElement = trasfertaButton.querySelector('.trasferta-text');
+                 if (textElement) textElement.textContent = 'Seleziona trasferta';
+             }
+             
              if (document.getElementById('description')) document.getElementById('description').value = '';
              if (document.getElementById('vehicleSelect')) document.getElementById('vehicleSelect').value = ''; // Reset vehicle select
              if (totalHoursInput) totalHoursInput.value = ''; // Clear calculated hours
@@ -12162,6 +12214,52 @@ END:VCARD`;
                         height: 200px;
                         opacity: 0;
                     }
+                }
+                
+                /* Stile per il pulsante di trasferta */
+                .trasferta-button {
+                    width: 100%;
+                    padding: 0.875rem 1rem;
+                    border: 1px solid var(--md-sys-color-outline);
+                    border-radius: var(--border-radius-small);
+                    background-color: var(--md-sys-color-surface);
+                    color: var(--md-sys-color-on-surface);
+                    font-size: 1rem;
+                    font-family: var(--body-font-family);
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 0.5rem;
+                    height: 48px; /* Stessa altezza degli altri input */
+                    text-transform: none;
+                    letter-spacing: normal;
+                    box-shadow: none;
+                }
+                
+                .trasferta-button .material-symbols-outlined {
+                    font-size: 1.2rem;
+                }
+                
+                .trasferta-button.active {
+                    background-color: var(--md-sys-color-primary);
+                    color: var(--md-sys-color-on-primary);
+                    border-color: var(--md-sys-color-primary);
+                    font-weight: 500;
+                    box-shadow: var(--elevation-2);
+                }
+                
+                /* Aggiungiamo un indicatore visivo per lo stato attivo */
+                .trasferta-button.active::before {
+                    content: "✓";
+                    margin-right: 5px;
+                    font-weight: bold;
+                }
+                
+                .trasferta-button:hover {
+                    border-color: var(--md-sys-color-primary);
+                    box-shadow: 0 0 0 1px var(--md-sys-color-primary-container);
                 }
             `;
             document.head.appendChild(style);
