@@ -4705,7 +4705,7 @@
         }
 
         // Function to show toast notification
-        function showToast(message, type = 'info', duration = 3000) {
+        function showToast(message, type = 'info', duration = 3000, actions = null) {
             const container = document.getElementById('toast-container');
             if (!container) {
                 console.error("Toast container non trovato!");
@@ -4715,7 +4715,7 @@
             // Verifica se esiste già un toast con lo stesso messaggio e tipo
             const existingToasts = Array.from(container.querySelectorAll('.toast'));
             const duplicateToast = existingToasts.find(t => 
-                t.textContent === message && 
+                t.querySelector('.toast-message')?.textContent === message && 
                 t.classList.contains(type)
             );
             
@@ -4730,7 +4730,12 @@
             
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
-            toast.textContent = message;
+            
+            // Creiamo un contenitore per il messaggio
+            const messageElement = document.createElement('div');
+            messageElement.className = 'toast-message';
+            messageElement.textContent = message;
+            toast.appendChild(messageElement);
             
             // Aggiungiamo stile inline per assicurarci che sia visibile
             toast.style.backgroundColor = type === 'warning' ? '#FFA726' : 
@@ -4741,6 +4746,86 @@
             toast.style.fontSize = '1rem';
             toast.style.border = '2px solid #FFFFFF';
             toast.style.zIndex = "10001"; // Assicuriamoci che sia sopra tutto
+            toast.style.display = 'flex';
+            toast.style.flexDirection = 'column';
+            
+            // Se ci sono azioni, aggiungiamo i pulsanti
+            if (actions && Array.isArray(actions) && actions.length > 0) {
+                const actionsContainer = document.createElement('div');
+                actionsContainer.className = 'toast-actions';
+                actionsContainer.style.display = 'flex';
+                actionsContainer.style.justifyContent = 'flex-end';
+                actionsContainer.style.marginTop = '10px';
+                actionsContainer.style.gap = '10px';
+                
+                actions.forEach(action => {
+                    if (action && action.text) {
+                        const button = document.createElement('button');
+                        button.textContent = action.text;
+                        button.className = 'toast-action-button';
+                        button.style.padding = '5px 10px';
+                        button.style.border = 'none';
+                        button.style.borderRadius = '4px';
+                        button.style.backgroundColor = '#FFFFFF';
+                        button.style.color = type === 'warning' ? '#FFA726' : 
+                                            type === 'error' ? '#EF5350' : 
+                                            type === 'success' ? '#66BB6A' : '#42A5F5';
+                        button.style.fontWeight = 'bold';
+                        button.style.cursor = 'pointer';
+                        
+                        // Aggiungiamo l'evento click
+                        button.addEventListener('click', () => {
+                            // Rimuoviamo il toast
+                            toast.classList.remove('show');
+                            
+                            // Eseguiamo l'azione
+                            if (typeof action.onClick === 'function') {
+                                action.onClick();
+                            }
+                            
+                            // Rimuoviamo il toast dal DOM dopo la transizione
+                            toast.addEventListener('transitionend', () => {
+                                if (toast.parentNode) {
+                                    toast.parentNode.removeChild(toast);
+                                }
+                            }, { once: true });
+                        });
+                        
+                        actionsContainer.appendChild(button);
+                    }
+                });
+                
+                toast.appendChild(actionsContainer);
+                
+                // Se ci sono azioni, il toast non scompare automaticamente
+                if (duration > 0) {
+                    // Aggiungiamo un pulsante per chiudere il toast
+                    const closeButton = document.createElement('button');
+                    closeButton.textContent = '×';
+                    closeButton.className = 'toast-close-button';
+                    closeButton.style.position = 'absolute';
+                    closeButton.style.top = '5px';
+                    closeButton.style.right = '5px';
+                    closeButton.style.backgroundColor = 'transparent';
+                    closeButton.style.border = 'none';
+                    closeButton.style.color = '#FFFFFF';
+                    closeButton.style.fontSize = '1.5rem';
+                    closeButton.style.cursor = 'pointer';
+                    closeButton.style.padding = '0';
+                    closeButton.style.lineHeight = '1';
+                    
+                    closeButton.addEventListener('click', () => {
+                        toast.classList.remove('show');
+                        toast.addEventListener('transitionend', () => {
+                            if (toast.parentNode) {
+                                toast.parentNode.removeChild(toast);
+                            }
+                        }, { once: true });
+                    });
+                    
+                    toast.appendChild(closeButton);
+                }
+            }
             
             container.appendChild(toast);
 
@@ -4755,19 +4840,21 @@
                 });
             });
 
-            // Remove toast after duration
-            setTimeout(() => {
-                toast.classList.remove('show');
-                console.log("Toast nascosto:", message); // Log per debug
-                // Remove from DOM after transition ends
-                toast.addEventListener('transitionend', () => {
-                    // Check if the element still has a parent before removing
-                    if (toast.parentNode) {
-                        toast.parentNode.removeChild(toast);
-                        console.log("Toast rimosso:", message); // Log per debug
-                    }
-                }, { once: true }); // Use {once: true} for cleaner event handling
-            }, duration);
+            // Remove toast after duration (only if duration > 0)
+            if (duration > 0) {
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    console.log("Toast nascosto:", message); // Log per debug
+                    // Remove from DOM after transition ends
+                    toast.addEventListener('transitionend', () => {
+                        // Check if the element still has a parent before removing
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                            console.log("Toast rimosso:", message); // Log per debug
+                        }
+                    }, { once: true }); // Use {once: true} for cleaner event handling
+                }, duration);
+            }
         }
 
         // Global DOMContentLoaded listener
@@ -10748,75 +10835,76 @@ END:VCARD`;
                 // Salva la data di scadenza in localStorage
                 localStorage.setItem('googleTokenExpiry', expiryTime.toString());
                 
-                // Calcola quando rinnovare il token (15 minuti prima della scadenza)
-                // Aumentiamo il margine per essere sicuri di rinnovare in tempo
-                const refreshTime = (expiresIn - 900) * 1000; // Converti in millisecondi e sottrai 15 minuti
+                // Calcola quando avvisare l'utente (15 minuti prima della scadenza)
+                const notifyTime = (expiresIn - 900) * 1000; // Converti in millisecondi e sottrai 15 minuti
                 
-                // Assicurati che il tempo di refresh sia almeno 5 minuti (per evitare refresh troppo frequenti)
-                const minRefreshTime = 5 * 60 * 1000; // 5 minuti in millisecondi
-                const actualRefreshTime = Math.max(refreshTime, minRefreshTime);
+                // Assicurati che il tempo di notifica sia almeno 5 minuti (per evitare notifiche troppo frequenti)
+                const minNotifyTime = 5 * 60 * 1000; // 5 minuti in millisecondi
+                const actualNotifyTime = Math.max(notifyTime, minNotifyTime);
                 
-                console.log(`Token valido per ${expiresIn} secondi. Programmato rinnovo automatico tra ${actualRefreshTime/1000} secondi.`);
+                console.log(`Token valido per ${expiresIn} secondi. Programmata notifica tra ${actualNotifyTime/1000} secondi.`);
                 console.log(`Token scadrà il: ${new Date(expiryTime).toLocaleString()}`);
                 
-                // Imposta il timer per rinnovare il token automaticamente
-                this.tokenRefreshTimer = setTimeout(async () => {
-                    console.log('Rinnovo automatico del token in corso...');
-                    try {
-                        // Verifica se il documento è visibile (utente attivo sul sito)
-                        if (document.visibilityState === 'visible') {
-                            await this.refreshToken();
-                            console.log('Token rinnovato automaticamente con successo');
-                        } else {
-                            // Se il documento non è visibile, programma un nuovo tentativo quando l'utente torna
-                            console.log('Documento non visibile, programmazione refresh al ritorno dell\'utente');
-                            
-                            // Funzione per gestire il ritorno dell'utente
-                            const handleVisibilityChange = async () => {
-                                if (document.visibilityState === 'visible') {
-                                    // Rimuovi l'event listener per evitare chiamate multiple
-                                    document.removeEventListener('visibilitychange', handleVisibilityChange);
-                                    
-                                    console.log('Utente tornato, tentativo di refresh token...');
-                                    try {
-                                        await this.refreshToken();
-                                        console.log('Token rinnovato con successo al ritorno dell\'utente');
-                                    } catch (refreshError) {
-                                        console.warn('Errore nel refresh token al ritorno dell\'utente:', refreshError);
-                                    }
-                                }
-                            };
-                            
-                            // Aggiungi l'event listener per il cambio di visibilità
-                            document.addEventListener('visibilitychange', handleVisibilityChange);
-                        }
-                    } catch (error) {
-                        console.warn('Errore nel rinnovo automatico del token:', error);
-                        
-                        // Se fallisce, prova a ripristinare la sessione in modo silenzioso
+                // Imposta il timer per notificare l'utente prima della scadenza del token
+                this.tokenRefreshTimer = setTimeout(() => {
+                    console.log('Token in scadenza, notifica all\'utente...');
+                    
+                    // Funzione per gestire il rinnovo del token
+                    const handleTokenRenewal = async () => {
                         try {
-                            const isLoggedIn = await this.checkAuthStatus();
-                            if (isLoggedIn) {
-                                console.log('Sessione ripristinata con successo dopo il fallimento del refresh');
-                            } else {
-                                console.warn('Impossibile ripristinare la sessione dopo il fallimento del refresh');
-                                // Mostra un messaggio all'utente solo se è attivo sul sito
-                                if (document.visibilityState === 'visible') {
-                                    // Tenta un login completo prima di mostrare il messaggio
-                                    try {
-                                        await this.login(true);
-                                        console.log('Login completo riuscito dopo fallimento del refresh');
-                                    } catch (loginError) {
-                                        console.error('Anche il login completo è fallito:', loginError);
-                                        showToast('La sessione è scaduta. Effettua nuovamente l\'accesso per continuare a utilizzare il backup su cloud.', 'warning', 8000);
-                                    }
+                            await this.refreshToken();
+                            showToast("Sessione Google rinnovata con successo", "success", 3000);
+                            console.log('Token rinnovato con successo');
+                        } catch (error) {
+                            console.error('Errore durante il rinnovo del token:', error);
+                            showToast("Impossibile rinnovare la sessione. Prova ad effettuare nuovamente l'accesso.", "error", 5000);
+                        }
+                    };
+                    
+                    // Verifica se il documento è visibile (utente attivo sul sito)
+                    if (document.visibilityState === 'visible') {
+                        // Mostra un messaggio all'utente per informarlo che il token sta per scadere
+                        showToast("La sessione Google sta per scadere. Clicca su 'Rinnova' per continuare a utilizzare le funzionalità di backup.", "warning", 0, [
+                            {
+                                text: "Rinnova",
+                                onClick: handleTokenRenewal
+                            },
+                            {
+                                text: "Ignora",
+                                onClick: () => {
+                                    showToast("La sessione scadrà a breve. Alcune funzionalità potrebbero non essere disponibili.", "info", 3000);
                                 }
                             }
-                        } catch (e) {
-                            console.error('Errore durante il tentativo di ripristino della sessione:', e);
-                        }
+                        ]);
+                    } else {
+                        // Se il documento non è visibile, programma una notifica quando l'utente torna
+                        console.log('Documento non visibile, programmazione notifica al ritorno dell\'utente');
+                        
+                        const handleVisibilityChange = () => {
+                            if (document.visibilityState === 'visible') {
+                                // Rimuovi l'event listener per evitare chiamate multiple
+                                document.removeEventListener('visibilitychange', handleVisibilityChange);
+                                
+                                // Mostra un messaggio all'utente per informarlo che il token sta per scadere
+                                showToast("La sessione Google sta per scadere o è già scaduta. Clicca su 'Rinnova' per continuare a utilizzare le funzionalità di backup.", "warning", 0, [
+                                    {
+                                        text: "Rinnova",
+                                        onClick: handleTokenRenewal
+                                    },
+                                    {
+                                        text: "Ignora",
+                                        onClick: () => {
+                                            showToast("La sessione potrebbe essere scaduta. Alcune funzionalità potrebbero non essere disponibili.", "info", 3000);
+                                        }
+                                    }
+                                ]);
+                            }
+                        };
+                        
+                        // Aggiungi l'event listener per il cambio di visibilità
+                        document.addEventListener('visibilitychange', handleVisibilityChange);
                     }
-                }, actualRefreshTime);
+                }, actualNotifyTime);
             }
             
             async login(manualTrigger = false) {
