@@ -1748,6 +1748,30 @@
              font-size: 1.1em;
              color: var(--md-sys-color-secondary);
         }
+        
+        /* Stile per l'icona info */
+        .info-icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            border-radius: 50%;
+            background-color: var(--md-sys-color-tertiary);
+            color: var(--md-sys-color-on-tertiary);
+            font-weight: bold;
+            font-style: italic;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            animation: pulse-info 2s infinite;
+        }
+        
+        @keyframes pulse-info {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
         .calendar-holiday-name {
             font-size: 0.75rem;
             color: var(--md-sys-color-error);
@@ -3681,9 +3705,9 @@
                                 <input type="number" id="notturne" class="form-control compact-input" step="0.5" min="0">
                             </div>
 
-                            <div class="form-group">
-                                <label for="transferta">Ore Trasferta:</label>
-                                <input type="number" id="transferta" class="form-control compact-input" step="0.5" min="0">
+                            <div class="form-group checkbox-container">
+                                <input type="checkbox" id="transferta" class="form-checkbox">
+                                <label for="transferta">Trasferta</label>
                             </div>
 
                             <div class="form-group">
@@ -4155,8 +4179,8 @@
                         <span class="day-summary-label">Ore Totali</span>
                     </div>
                     <div class="day-summary-item">
-                        <span class="day-summary-value" id="modalTransferta">0h</span>
-                        <span class="day-summary-label">Trasferta</span>
+                        <span class="day-summary-value" id="modalTransferta"></span>
+                        <span class="day-summary-label">Giorni di Trasferta</span>
                     </div>
                     <div class="day-summary-item">
                         <span class="day-summary-value" id="modalNotturne">0h</span>
@@ -4883,7 +4907,7 @@
             const endTime = endTimeInput.value;
             const breakTime = parseFloat(breakTimeInput.value) || 0;
             const notturne = parseFloat(notturneInput.value) || 0;
-            const transferta = parseFloat(transfertaInput.value) || 0;
+            const transferta = transfertaInput.checked ? true : false; // Ora è un booleano
             const description = descriptionInput.value.trim();
             const totalHours = parseFloat(totalHoursInput.value) || 0;
             const selectedVehicle = vehicleSelect.value; // Get selected vehicle ID or name
@@ -4909,8 +4933,8 @@
                  return;
              }
              
-             if (notturne < 0 || transferta < 0 || breakTime < 0) {
-                 showToast("Ore notturne, trasferta e pausa non possono essere negative.", "error");
+             if (notturne < 0 || breakTime < 0) {
+                 showToast("Ore notturne e pausa non possono essere negative.", "error");
                  return;
              }
 
@@ -5068,8 +5092,8 @@
 
              let detailsHtml = `<span><span class="material-symbols-outlined">schedule</span> ${startTimeText} - ${endTimeText}</span>
                               <span><span class="material-symbols-outlined">pause_circle</span> Pausa: ${breakTimeText}</span>`;
-             if (typeof entry.transferta === 'number' && entry.transferta > 0) {
-                 detailsHtml += `<span><span class="material-symbols-outlined">local_shipping</span> Trasferta: ${entry.transferta.toFixed(1)}h</span>`;
+             if (entry.transferta === true || (typeof entry.transferta === 'number' && entry.transferta > 0)) {
+                 detailsHtml += `<span><span class="material-symbols-outlined">local_shipping</span> Trasferta: TR</span>`;
              }
              if (typeof entry.notturne === 'number' && entry.notturne > 0) {
                  detailsHtml += `<span><span class="material-symbols-outlined">dark_mode</span> Notturne: ${entry.notturne.toFixed(1)}h</span>`;
@@ -5124,7 +5148,18 @@
                  form.elements.endTime.value = entryToLoad.endTime || '';
                  form.elements.breakTime.value = entryToLoad.breakTime ?? 0.5; // Default to 0.5 if undefined
                  form.elements.notturne.value = entryToLoad.notturne || '';
-                 form.elements.transferta.value = entryToLoad.transferta || '';
+                 
+                 // Gestione della casella di spunta per trasferta
+                 if (typeof entryToLoad.transferta === 'boolean') {
+                     // Nuovo formato (boolean)
+                     form.elements.transferta.checked = entryToLoad.transferta;
+                 } else if (typeof entryToLoad.transferta === 'number' && entryToLoad.transferta > 0) {
+                     // Vecchio formato (numero di ore)
+                     form.elements.transferta.checked = true;
+                 } else {
+                     form.elements.transferta.checked = false;
+                 }
+                 
                  form.elements.description.value = entryToLoad.description || '';
                  form.elements.totalHours.value = entryToLoad.totalHours || '';
                  form.elements.vehicleSelect.value = entryToLoad.vehicle || ""; // Set vehicle
@@ -5173,7 +5208,18 @@
                  form.elements.endTime.value = entry.endTime || '';
                  form.elements.breakTime.value = entry.breakTime ?? 0.5;
                  form.elements.notturne.value = entry.notturne || '';
-                 form.elements.transferta.value = entry.transferta || '';
+                 
+                 // Gestione della casella di spunta per trasferta
+                 if (typeof entry.transferta === 'boolean') {
+                     // Nuovo formato (boolean)
+                     form.elements.transferta.checked = entry.transferta;
+                 } else if (typeof entry.transferta === 'number' && entry.transferta > 0) {
+                     // Vecchio formato (numero di ore)
+                     form.elements.transferta.checked = true;
+                 } else {
+                     form.elements.transferta.checked = false;
+                 }
+                 
                  form.elements.description.value = entry.description || '';
                  form.elements.totalHours.value = entry.totalHours || '';
                  form.elements.vehicleSelect.value = entry.vehicle || "";
@@ -5261,7 +5307,7 @@
 
              // Explicitly clear fields that might not reset correctly or need specific handling
              if (document.getElementById('notturne')) document.getElementById('notturne').value = '';
-             if (document.getElementById('transferta')) document.getElementById('transferta').value = '';
+             if (document.getElementById('transferta')) document.getElementById('transferta').checked = false;
              if (document.getElementById('description')) document.getElementById('description').value = '';
              if (document.getElementById('vehicleSelect')) document.getElementById('vehicleSelect').value = ''; // Reset vehicle select
              if (totalHoursInput) totalHoursInput.value = ''; // Clear calculated hours
@@ -5447,15 +5493,16 @@
                       }
                   } else if (entries.length > 0) {
                      // Show work details
-                      if (totalHours > 0) { // Only show hours if positive
+                      if (totalHours > 0) { // Show hours if positive
                         html += `<span class="calendar-hours">${totalHours.toFixed(1)}h</span>`;
+                      } else {
+                        // Se non ci sono ore ma ci sono voci (solo descrizione), mostra una "i" di info
+                        html += `<span class="info-icon" title="Solo descrizione">i</span>`;
                       }
                      html += `<div class="calendar-icons">`;
                      if (hasTransferta) html += `<span class="material-symbols-outlined" title="Trasferta">local_shipping</span>`;
                      if (hasNotturne) html += `<span class="material-symbols-outlined" title="Notturne">dark_mode</span>`;
                      if (hasVehicle) html += `<span class="material-symbols-outlined" title="Mezzo utilizzato">directions_car</span>`;
-                      // Add placeholder if icons are empty but hours exist? Optional.
-                      // if (!hasTransferta && !hasNotturne && !hasVehicle && totalHours > 0) html += `<span>&nbsp;</span>`;
                      html += `</div>`;
                  } else if (isStdHoliday) {
                      // Show standard holiday name
@@ -5510,7 +5557,14 @@
                      let dayHasHours = false;
                      entries.forEach(entry => {
                          totalHours += (typeof entry.totalHours === 'number' ? entry.totalHours : 0);
-                         totalTransferta += (typeof entry.transferta === 'number' ? entry.transferta : 0);
+                         // Contiamo i giorni di trasferta, non le ore
+                         if (entry.transferta === true || (typeof entry.transferta === 'number' && entry.transferta > 0)) {
+                             // Incrementiamo solo se non abbiamo già contato questo giorno
+                             if (!entries.some((e, idx) => idx < entries.indexOf(entry) && 
+                                 (e.transferta === true || (typeof e.transferta === 'number' && e.transferta > 0)))) {
+                                 totalTransferta += 1;
+                             }
+                         }
                          totalNotturne += (typeof entry.notturne === 'number' ? entry.notturne : 0);
                         if (typeof entry.totalHours === 'number' && entry.totalHours > 0) dayHasHours = true;
                     });
@@ -5530,8 +5584,8 @@
                          <span class="monthly-stat-label">Giorni Lavorati</span>
                      </div>
                      <div class="monthly-stat-item" style="background-color: var(--md-sys-color-surface);">
-                         <span class="monthly-stat-value">${totalTransferta.toFixed(1)}h</span>
-                         <span class="monthly-stat-label">Ore Trasferta</span>
+                         <span class="monthly-stat-value">${totalTransferta}</span>
+                         <span class="monthly-stat-label">Giorni Trasferta</span>
                      </div>
                      <div class="monthly-stat-item" style="background-color: var(--md-sys-color-surface);">
                          <span class="monthly-stat-value">${totalNotturne.toFixed(1)}h</span>
@@ -5791,7 +5845,11 @@
                         totalHoursElement.textContent = `${totalHoursSummary.toFixed(2)}h`;
                     }
                     if (transfertaHoursElement) {
-                        transfertaHoursElement.textContent = `${totalTransferta.toFixed(1)}h`; // Use toFixed(1) like elsewhere
+                        // Verifica se c'è almeno una voce con trasferta
+                        const hasTransferta = entries.some(entry => 
+                            entry.transferta === true || (typeof entry.transferta === 'number' && entry.transferta > 0)
+                        );
+                        transfertaHoursElement.textContent = hasTransferta ? 'SI' : '';
                     }
                     if (notturneHoursElement) {
                         notturneHoursElement.textContent = `${totalNotturne.toFixed(1)}h`;   // Use toFixed(1) like elsewhere
@@ -6713,8 +6771,8 @@
                      </div>
 
                      <div class="monthly-stat-item" style="background-color: var(--md-sys-color-surface);">
-                         <span class="monthly-stat-value">${monthTotalTransferta.toFixed(1)}h</span>
-                         <span class="monthly-stat-label">Ore Trasferta</span>
+                         <span class="monthly-stat-value">${monthTotalTransferta}</span>
+                         <span class="monthly-stat-label">Giorni Trasferta</span>
                      </div>
                      <div class="monthly-stat-item" style="background-color: var(--md-sys-color-surface);">
                          <span class="monthly-stat-value">${monthTotalNotturne.toFixed(1)}h</span>
@@ -7367,12 +7425,15 @@
                         const breakTimeNum = typeof entry.breakTime === 'number' ? Number(entry.breakTime) : 0;
                         const totalHoursNum = typeof entry.totalHours === 'number' ? Number(entry.totalHours) : 0;
                         
-                        // Per trasferta e notturne, usiamo null invece di stringa vuota quando non ci sono ore
+                        // Per notturne, usiamo null invece di stringa vuota quando non ci sono ore
                         // Excel tratterà null come cella vuota ma senza errori di formattazione
-                        const transfertaNum = (typeof entry.transferta === 'number' && entry.transferta > 0) ? 
-                            Number(entry.transferta) : null;
                         const notturneNum = (typeof entry.notturne === 'number' && entry.notturne > 0) ? 
                             Number(entry.notturne) : null;
+                            
+                        // Per trasferta, usiamo "TR" se è spuntata, altrimenti stringa vuota
+                        const transfertaValue = entry.transferta === true || 
+                            (typeof entry.transferta === 'number' && entry.transferta > 0) ? 
+                            "TR" : "";
                         
                         const rowData = {
                             giorno: dayOfWeek,
@@ -7382,7 +7443,7 @@
                             oraInizio: entry.startTime || '',
                             pausa: breakTimeNum, // Manteniamo visibile lo 0 per le pause
                             oraFine: entry.endTime || '',
-                            oreTrasferte: transfertaNum,
+                            oreTrasferte: transfertaValue, // Ora è "TR" o stringa vuota
                             oreNotturne: notturneNum,
                             oreTotali: totalHoursNum
                         };
@@ -7401,7 +7462,7 @@
                         
                         // Determina se ci sono ore notturne o trasferte
                         const hasNightHours = notturneNum > 0;
-                        const hasTransferHours = transfertaNum > 0;
+                        const hasTransferHours = transfertaValue === "TR";
                         
                         // Scegli il colore di sfondo in base alle condizioni
                         let bgColor, fontColor = 'FFFFFF'; // Default: testo bianco
@@ -7518,7 +7579,10 @@
                         }
                         
                         monthTotalHours += totalHoursNum;
-                        monthTotalTransferta += transfertaNum;
+                        // Incrementa il contatore dei giorni di trasferta se questa voce ha trasferta
+                        if (transfertaValue === "TR") {
+                            monthTotalTransferta += 1; // Contiamo i giorni, non le ore
+                        }
                         monthTotalNotturne += notturneNum;
                         if (totalHoursNum > 0) dayHasWork = true;
                         
@@ -7655,7 +7719,7 @@
             
             addSummaryRow('Ore Lavorate:', monthTotalHours);
             addSummaryRow('Giorni Lavorati:', monthWorkDays, '0');
-            addSummaryRow('Ore Trasferta:', monthTotalTransferta);
+            addSummaryRow('Giorni Trasferta:', monthTotalTransferta, '0');
             addSummaryRow('Ore Notturne:', monthTotalNotturne);
             
             if (monthFerieDays > 0) {
