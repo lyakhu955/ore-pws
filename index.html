@@ -1707,13 +1707,12 @@
             color: var(--md-sys-color-inverse-on-surface);
         }
         .calendar-day.empty {
-            background-color: transparent !important;
-            opacity: 0.3;
+            background-color: var(--md-sys-color-surface-variant);
+            opacity: 0.5;
             cursor: default;
-            border: none !important;
         }
         .calendar-day.empty:hover {
-            background-color: transparent !important;
+            background-color: var(--md-sys-color-surface-variant);
         }
         .calendar-day.today {
              /* Use outline instead of border */
@@ -2086,8 +2085,10 @@
 
         /* --- Modern Flatpickr Styling (2025 Inspired) --- */
 
-        /* Stili per la trasparenza completa del calendario */
-        .flatpickr-calendar,
+        /* Stili per il calendario */
+        .flatpickr-calendar {
+            background: var(--md-sys-color-surface) !important;
+        }
         .flatpickr-months,
         .flatpickr-month,
         .flatpickr-weekdays,
@@ -2097,44 +2098,69 @@
         .flatpickr-innerContainer,
         .flatpickr-rContainer,
         .flatpickr-time {
-            background: transparent !important;
+            background: var(--md-sys-color-surface) !important;
         }
 
-        /* Assicurati che l'header del calendario sia trasparente - con alta specificità */
+        /* Stile per l'header del calendario - con alta specificità */
         html body .flatpickr-calendar .flatpickr-months .flatpickr-month {
-            background-color: transparent !important;
-            color: var(--md-sys-color-on-surface) !important;
-            fill: var(--md-sys-color-on-surface) !important;
+            background-color: var(--md-sys-color-primary-container) !important;
+            color: var(--md-sys-color-on-primary-container) !important;
+            fill: var(--md-sys-color-on-primary-container) !important;
         }
 
-        /* Assicurati che i pulsanti di navigazione siano trasparenti - con alta specificità */
+        /* Stile per i pulsanti di navigazione - con alta specificità */
         html body .flatpickr-calendar .flatpickr-months .flatpickr-prev-month, 
         html body .flatpickr-calendar .flatpickr-months .flatpickr-next-month {
-            background-color: transparent !important;
-            fill: var(--md-sys-color-on-surface) !important;
+            background-color: var(--md-sys-color-primary-container) !important;
+            fill: var(--md-sys-color-on-primary-container) !important;
+            position: relative !important;
+            padding: 8px !important;
+            height: auto !important;
+            width: auto !important;
+            border-radius: var(--border-radius-small) !important;
+            margin: 0 5px !important;
+            top: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            cursor: pointer !important;
+        }
+        
+        html body .flatpickr-calendar .flatpickr-months .flatpickr-prev-month:hover, 
+        html body .flatpickr-calendar .flatpickr-months .flatpickr-next-month:hover {
+            background-color: rgba(255, 255, 255, 0.2) !important;
+        }
+        
+        html body .flatpickr-calendar .flatpickr-months .flatpickr-prev-month svg, 
+        html body .flatpickr-calendar .flatpickr-months .flatpickr-next-month svg {
+            width: 20px !important;
+            height: 20px !important;
+            fill: var(--md-sys-color-on-primary-container) !important;
         }
 
-        /* Assicurati che i dropdown e gli input siano trasparenti - con alta specificità */
+        /* Stile per i dropdown e gli input - con alta specificità */
         html body .flatpickr-calendar .flatpickr-months .flatpickr-current-month .flatpickr-monthDropdown-months,
         html body .flatpickr-calendar .flatpickr-months .flatpickr-current-month input.cur-year {
-            background-color: transparent !important;
-            color: var(--md-sys-color-on-surface) !important;
+            background-color: var(--md-sys-color-primary-container) !important;
+            color: var(--md-sys-color-on-primary-container) !important;
         }
 
-        /* Assicurati che i giorni della settimana siano trasparenti - con alta specificità */
+        /* Stile per i giorni della settimana - con alta specificità */
         html body .flatpickr-calendar .flatpickr-weekdays {
-            background: transparent !important;
+            background: var(--md-sys-color-surface-variant) !important;
         }
 
         html body .flatpickr-calendar .flatpickr-weekday {
-            background: transparent !important;
-            color: var(--md-sys-color-on-surface) !important;
+            background: var(--md-sys-color-surface-variant) !important;
+            color: var(--md-sys-color-on-surface-variant) !important;
         }
 
         /* Stile per il dropdown dei mesi con alta specificità */
         html body .flatpickr-calendar .flatpickr-months .flatpickr-monthDropdown-month {
-            background-color: rgba(0, 0, 0, 0.2) !important;
-            color: var(--md-sys-color-on-surface) !important;
+            background-color: var(--md-sys-color-primary-container) !important;
+            color: var(--md-sys-color-on-primary-container) !important;
+            font-size: 1em !important;
+            padding: 8px 12px !important;
         }
 
         /* Stile per il tema scuro */
@@ -2155,12 +2181,12 @@
             color: var(--md-sys-color-on-surface) !important;
         }
 
-        /* Assicurati che il contenitore del tempo sia trasparente */
+        /* Stile per il contenitore del tempo */
         .flatpickr-time,
         .flatpickr-time input,
         .flatpickr-time .numInputWrapper,
         .flatpickr-time .flatpickr-am-pm {
-            background: transparent !important;
+            background: var(--md-sys-color-surface) !important;
             color: var(--md-sys-color-on-surface) !important;
         }
 
@@ -2170,9 +2196,9 @@
         }
 
         .flatpickr-calendar {
-            background: transparent !important; /* Sovrascrivi con trasparenza */
+            background: var(--md-sys-color-surface) !important; /* Sfondo solido */
             border-radius: var(--border-radius-large); /* More pronounced rounding */
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: var(--elevation-3);
             border: 1px solid var(--md-sys-color-outline-variant);
             padding: 10px; /* Overall padding */
             width: 320px; /* Slightly wider */
@@ -2182,60 +2208,46 @@
 
         /* Header (Month/Year/Arrows) */
         .flatpickr-months {
-            background: transparent; /* No separate background for header */
-            padding: 10px 0;
+            background: var(--md-sys-color-primary-container) !important;
+            padding: 10px;
+            border-radius: var(--border-radius-medium) var(--border-radius-medium) 0 0;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            position: relative;
         }
 
         .flatpickr-current-month {
-            color: var(--md-sys-color-on-surface);
+            color: var(--md-sys-color-on-primary-container);
             font-size: 1.1em;
             font-weight: 500;
             position: relative;
             flex-grow: 1; /* Allow month name to take space */
             text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        .flatpickr-current-month .flatpickr-monthDropdown-months,
-        .flatpickr-current-month .numInputWrapper {
+        .flatpickr-current-month .flatpickr-monthDropdown-months {
             border: none;
             background: transparent;
             color: inherit;
-            font-size: inherit;
-            font-weight: inherit;
-            padding: 0 5px;
-        }
-        .flatpickr-current-month .numInputWrapper { /* Style year input */
-            width: 7ch; /* Further increased width for year */
-        }
-        .flatpickr-current-month input.cur-year:hover {
-           background: var(--md-sys-color-surface-container-highest);
-        }
-
-        .flatpickr-prev-month,
-        .flatpickr-next-month {
-            color: var(--md-sys-color-on-surface-variant);
+            font-size: 1.1em;
+            font-weight: 500;
+            padding: 5px 15px;
+            border-radius: var(--border-radius-small);
             cursor: pointer;
-            padding: 5px;
-            border-radius: var(--border-radius-full);
             transition: background-color 0.2s;
-            position: static; /* Override default absolute positioning */
-            transform: none; /* Reset transforms */
-            height: auto;
-            width: auto;
         }
-        .flatpickr-prev-month:hover,
-        .flatpickr-next-month:hover {
-            background-color: var(--md-sys-color-surface-container-highest);
-            color: var(--md-sys-color-primary);
+        
+        .flatpickr-current-month .flatpickr-monthDropdown-months:hover {
+            background-color: rgba(255, 255, 255, 0.2);
         }
-        .flatpickr-prev-month svg,
-        .flatpickr-next-month svg {
-            width: 20px; /* Adjust size */
-            height: 20px;
-            fill: currentColor; /* Use the text color */
+        
+        /* Nascondi completamente il selettore dell'anno */
+        .flatpickr-current-month .numInputWrapper { 
+            display: none;
         }
 
         /* Weekdays (Mo, Tu...) */
@@ -2267,11 +2279,11 @@
             border: none;
             color: var(--md-sys-color-on-surface);
             font-size: 0.9em;
-            width: 38px; /* Fixed width */
-            height: 38px; /* Fixed height */
-            line-height: 38px; /* Center text vertically */
+            width: 36px; /* Fixed width */
+            height: 36px; /* Fixed height */
+            line-height: 36px; /* Center text vertically */
             text-align: center;
-            border-radius: var(--border-radius-full); /* Circular shape */
+            border-radius: 50%; /* Circular shape */
             margin: 0; /* Remove default margins */
             cursor: pointer;
             transition: background-color 0.2s, color 0.2s;
@@ -2318,12 +2330,6 @@
         .flatpickr-day.today:hover {
              background-color: var(--md-sys-color-surface-container-highest);
              color: var(--md-sys-color-on-surface);
-        }
-        
-        .flatpickr-day.today:hover::before {
-             border-color: var(--md-sys-color-primary);
-             border-width: 3px;
-             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
         }
 
         /* Selected Day Style */
@@ -2389,48 +2395,11 @@
         /* Today and Selected Style */
         .flatpickr-day.today.selected {
             position: relative;
-            background-color: transparent !important;
-            color: var(--md-sys-color-on-surface) !important;
+            background-color: var(--md-sys-color-primary) !important;
+            color: var(--md-sys-color-on-primary) !important;
             border: none !important;
-            font-weight: 700 !important;
+            font-weight: 500 !important;
             z-index: 1;
-        }
-        
-        /* Cerchio speciale per giorno corrente selezionato (combinazione di cerchio solido e tratteggiato) */
-        .flatpickr-day.today.selected::before {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border: 4px solid var(--md-sys-color-primary);
-            background-color: rgba(0, 106, 106, 0.15); /* Colore primario con opacità media */
-            z-index: -1;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-        }
-        
-        /* Aggiunta di un secondo cerchio tratteggiato esterno */
-        .flatpickr-day.today.selected::after {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 44px; /* Più grande del cerchio interno */
-            height: 44px;
-            border-radius: 50%;
-            border: 2px dashed var(--md-sys-color-primary);
-            z-index: -2; /* Sotto il cerchio interno */
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-        }
-        
-        /* Hover sul giorno corrente selezionato */
-        .flatpickr-day.today.selected:hover::before {
-            border-width: 4px;
-            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
         }
 
         /* Dark Theme Overrides */
@@ -2619,51 +2588,111 @@
         }
         /* --- End Calendar Summary Styles --- */
 
-        /* Toast / Message */
-         #toast-container {
-             position: fixed;
-             bottom: 90px; /* Above bottom nav */
-             left: 50%;
-             transform: translateX(-50%);
-             z-index: 10000; /* Aumentato per essere sopra l'overlay del supereroe */
-             display: flex;
-             flex-direction: column;
-             align-items: center;
-             gap: 0.5rem;
-             width: fit-content; /* Only as wide as needed */
-             max-width: 90%;
-             pointer-events: none; /* Permette di cliccare attraverso il container */
-         }
+        /* Toast / Message - Material Design 3 Style */
+        #toast-container {
+            position: fixed;
+            bottom: 90px; /* Above bottom nav */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000; /* Aumentato per essere sopra l'overlay del supereroe */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            width: 90%;
+            max-width: 400px;
+            pointer-events: none; /* Permette di cliccare attraverso il container */
+        }
         .message, .toast {
-            padding: 0.875rem 1.5rem;
-            border-radius: var(--border-radius-small);
-            color: var(--md-sys-color-on-primary); /* Default */
-            background-color: var(--md-sys-color-inverse-surface); /* Use inverse surface */
+            padding: 14px 16px;
+            border-radius: 4px;
+            background-color: var(--md-sys-color-inverse-surface);
             color: var(--md-sys-color-inverse-on-surface);
+            box-shadow: var(--elevation-3);
             opacity: 0;
             transform: translateY(20px);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bounce effect */
-            box-shadow: var(--elevation-3);
-            font-size: 0.9rem;
-            border: 2px solid var(--md-sys-color-primary); /* Bordo per maggiore visibilità */
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.875rem;
+            font-weight: 400;
+            line-height: 1.25rem;
+            letter-spacing: 0.0178571429em;
             pointer-events: auto; /* Permette interazione con il toast */
-             width: 100%;
-             text-align: center;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 48px;
+            box-sizing: border-box;
+            border-left: 4px solid transparent;
+            text-align: left;
         }
         .message.show, .toast.show {
             opacity: 1;
             transform: translateY(0);
         }
+        .toast-message {
+            flex: 1;
+            padding-right: 8px;
+        }
+        .toast-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .toast-action-button {
+            text-transform: uppercase;
+            font-weight: 500;
+            font-size: 0.75rem;
+            letter-spacing: 0.0892857143em;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: none;
+            background: transparent;
+            color: var(--md-sys-color-primary);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .toast-action-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .toast-close-button {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            color: var(--md-sys-color-inverse-on-surface);
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0;
+            margin-left: 8px;
+            transition: background-color 0.2s;
+        }
+        .toast-close-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        /* Toast types with left border */
         .message.success, .toast.success {
-            background-color: #388E3C; /* Green */
-            color: #FFFFFF;
+            border-left-color: var(--md-sys-color-tertiary);
         }
         .message.error, .toast.error {
-            background-color: var(--md-sys-color-error);
-            color: var(--md-sys-color-on-error);
+            border-left-color: var(--md-sys-color-error);
         }
-        .toast.warning { background-color: #FFA000; color: #000000;}
-        .toast.info { background-color: #1976D2; color: #FFFFFF;}
+        .toast.warning { 
+            border-left-color: #FFA000;
+            background-color: var(--md-sys-color-inverse-surface);
+            color: var(--md-sys-color-inverse-on-surface);
+        }
+        .toast.info { 
+            border-left-color: var(--md-sys-color-primary);
+            background-color: var(--md-sys-color-inverse-surface);
+            color: var(--md-sys-color-inverse-on-surface);
+        }
         
         /* Stili per la sezione Backup Cloud */
         .cloud-backup-container {
@@ -4659,10 +4688,10 @@
                     defaultDate: dateInput.value,
                     disableMobile: true, // Use custom mobile handling & style
                     appendTo: document.body, // Append to body to avoid layout issues
-                    // ++ Add dropdowns for month and year ++
+                    // ++ Add dropdown for month only ++
                     dropdowns: {
-                        month: true,
-                        year: true
+                        months: true,
+                        years: false
                     },
                     // Funzione per aggiungere la classe weekend ai giorni di sabato, domenica e festivi
                     onDayCreate: function(dObj, dStr, fp, dayElem) {
@@ -4815,7 +4844,7 @@
             }
         }
 
-        // Function to show toast notification
+        // Function to show toast notification - Material Design 3 Style
         function showToast(message, type = 'info', duration = 3000, actions = null) {
             const container = document.getElementById('toast-container');
             if (!container) {
@@ -4848,41 +4877,44 @@
             messageElement.textContent = message;
             toast.appendChild(messageElement);
             
-            // Aggiungiamo stile inline per assicurarci che sia visibile
-            toast.style.backgroundColor = type === 'warning' ? '#FFA726' : 
-                                         type === 'error' ? '#EF5350' : 
-                                         type === 'success' ? '#66BB6A' : '#42A5F5';
-            toast.style.color = '#FFFFFF';
-            toast.style.fontWeight = 'bold';
-            toast.style.fontSize = '1rem';
-            toast.style.border = '2px solid #FFFFFF';
-            toast.style.zIndex = "10001"; // Assicuriamoci che sia sopra tutto
-            toast.style.display = 'flex';
-            toast.style.flexDirection = 'column';
+            // Aggiungiamo icona in base al tipo di toast
+            let icon = '';
+            switch(type) {
+                case 'success':
+                    icon = 'check_circle';
+                    break;
+                case 'error':
+                    icon = 'error';
+                    break;
+                case 'warning':
+                    icon = 'warning';
+                    break;
+                case 'info':
+                default:
+                    icon = 'info';
+                    break;
+            }
+            
+            // Inseriamo l'icona prima del messaggio
+            if (icon) {
+                const iconElement = document.createElement('span');
+                iconElement.className = 'material-symbols-outlined';
+                iconElement.textContent = icon;
+                iconElement.style.marginRight = '12px';
+                iconElement.style.fontSize = '20px';
+                toast.insertBefore(iconElement, messageElement);
+            }
             
             // Se ci sono azioni, aggiungiamo i pulsanti
             if (actions && Array.isArray(actions) && actions.length > 0) {
                 const actionsContainer = document.createElement('div');
                 actionsContainer.className = 'toast-actions';
-                actionsContainer.style.display = 'flex';
-                actionsContainer.style.justifyContent = 'flex-end';
-                actionsContainer.style.marginTop = '10px';
-                actionsContainer.style.gap = '10px';
                 
                 actions.forEach(action => {
                     if (action && action.text) {
                         const button = document.createElement('button');
-                        button.textContent = action.text;
+                        button.textContent = action.text.toUpperCase(); // Material Design usa testo maiuscolo
                         button.className = 'toast-action-button';
-                        button.style.padding = '5px 10px';
-                        button.style.border = 'none';
-                        button.style.borderRadius = '4px';
-                        button.style.backgroundColor = '#FFFFFF';
-                        button.style.color = type === 'warning' ? '#FFA726' : 
-                                            type === 'error' ? '#EF5350' : 
-                                            type === 'success' ? '#66BB6A' : '#42A5F5';
-                        button.style.fontWeight = 'bold';
-                        button.style.cursor = 'pointer';
                         
                         // Aggiungiamo l'evento click
                         button.addEventListener('click', () => {
@@ -4907,35 +4939,25 @@
                 });
                 
                 toast.appendChild(actionsContainer);
+            }
+            
+            // Aggiungiamo un pulsante per chiudere il toast
+            if (duration > 0) {
+                const closeButton = document.createElement('button');
+                closeButton.innerHTML = '&times;';
+                closeButton.className = 'toast-close-button';
+                closeButton.setAttribute('aria-label', 'Chiudi notifica');
                 
-                // Se ci sono azioni, il toast non scompare automaticamente
-                if (duration > 0) {
-                    // Aggiungiamo un pulsante per chiudere il toast
-                    const closeButton = document.createElement('button');
-                    closeButton.textContent = '×';
-                    closeButton.className = 'toast-close-button';
-                    closeButton.style.position = 'absolute';
-                    closeButton.style.top = '5px';
-                    closeButton.style.right = '5px';
-                    closeButton.style.backgroundColor = 'transparent';
-                    closeButton.style.border = 'none';
-                    closeButton.style.color = '#FFFFFF';
-                    closeButton.style.fontSize = '1.5rem';
-                    closeButton.style.cursor = 'pointer';
-                    closeButton.style.padding = '0';
-                    closeButton.style.lineHeight = '1';
-                    
-                    closeButton.addEventListener('click', () => {
-                        toast.classList.remove('show');
-                        toast.addEventListener('transitionend', () => {
-                            if (toast.parentNode) {
-                                toast.parentNode.removeChild(toast);
-                            }
-                        }, { once: true });
-                    });
-                    
-                    toast.appendChild(closeButton);
-                }
+                closeButton.addEventListener('click', () => {
+                    toast.classList.remove('show');
+                    toast.addEventListener('transitionend', () => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                    }, { once: true });
+                });
+                
+                toast.appendChild(closeButton);
             }
             
             container.appendChild(toast);
@@ -14615,9 +14637,8 @@ END:VCARD`;
             // Applica stili specifici solo per i giorni vuoti del calendario
             var emptyDays = document.querySelectorAll('.calendar-day.empty');
             emptyDays.forEach(function(el) {
-                el.style.backgroundColor = 'transparent';
-                el.style.opacity = '0.3';
-                el.style.border = 'none';
+                el.style.backgroundColor = 'var(--md-sys-color-surface-variant)';
+                el.style.opacity = '0.5';
             });
         }
         
