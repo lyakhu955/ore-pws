@@ -4226,6 +4226,13 @@
                             </button>
                         </div>
                         
+                        <div class="setting-item">
+                            <span class="setting-label">Aggiorna App</span>
+                            <button id="forceUpdate">
+                                <span class="material-symbols-outlined">refresh</span> Forza Aggiornamento
+                            </button>
+                        </div>
+                        
                         <div class="setting-item" style="flex-direction: column; align-items: stretch;">
                             <span class="setting-label">Installa App</span>
                             
@@ -13674,6 +13681,49 @@ END:VCARD`;
                             if (settingsSection.classList.contains('active')) {
                                 // Inizializza senza verificare l'autenticazione automaticamente
                                 initCloudBackup(true);
+                                
+                                // Inizializza il pulsante di aggiornamento forzato
+                                const forceUpdateBtn = document.getElementById('forceUpdate');
+                                if (forceUpdateBtn) {
+                                    // Rimuovi eventuali listener precedenti
+                                    forceUpdateBtn.replaceWith(forceUpdateBtn.cloneNode(true));
+                                    const newForceUpdateBtn = document.getElementById('forceUpdate');
+                                    
+                                    newForceUpdateBtn.addEventListener('click', function() {
+                                        showToast('Aggiornamento in corso...', 'info');
+                                        
+                                        // Forza l'aggiornamento del service worker
+                                        if ('serviceWorker' in navigator) {
+                                            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                                                for (let registration of registrations) {
+                                                    registration.unregister().then(function() {
+                                                        console.log('Service Worker rimosso con successo');
+                                                    });
+                                                }
+                                                
+                                                // Svuota la cache
+                                                caches.keys().then(function(cacheNames) {
+                                                    return Promise.all(
+                                                        cacheNames.map(function(cacheName) {
+                                                            console.log('Eliminazione cache:', cacheName);
+                                                            return caches.delete(cacheName);
+                                                        })
+                                                    );
+                                                }).then(function() {
+                                                    console.log('Cache svuotata con successo');
+                                                    showToast('Aggiornamento completato! Ricarico la pagina...', 'success');
+                                                    
+                                                    // Ricarica la pagina dopo un breve ritardo
+                                                    setTimeout(function() {
+                                                        window.location.reload(true);
+                                                    }, 1500);
+                                                });
+                                            });
+                                        } else {
+                                            showToast('Service Worker non supportato', 'error');
+                                        }
+                                    });
+                                }
                             }
                         }
                     });
@@ -15517,15 +15567,34 @@ END:VCARD`;
                         : '/' + REPO_NAME + '/';
                     
                     console.log('Percorso base:', basePath);
-                    console.log('Percorso service worker:', getPath('service-worker.js'));
+                    
+                    // Aggiungi un timestamp per forzare l'aggiornamento del service worker
+                    const swPath = getPath('service-worker.js') + '?v=' + new Date().getTime();
+                    console.log('Percorso service worker:', swPath);
                     console.log('Browser:', navigator.userAgent);
                     console.log('PWA supportata:', 'BeforeInstallPromptEvent' in window);
                     
-                    navigator.serviceWorker.register(getPath('service-worker.js'), {
-                        scope: basePath
+                    // Prima controlla se c'è un service worker attivo e forzane l'aggiornamento
+                    if (navigator.serviceWorker.controller) {
+                        console.log('Service Worker attivo trovato, forzo aggiornamento...');
+                        navigator.serviceWorker.getRegistration().then(function(reg) {
+                            if (reg) {
+                                reg.update().then(function() {
+                                    console.log('Service Worker aggiornato con successo');
+                                });
+                            }
+                        });
+                    }
+                    
+                    navigator.serviceWorker.register(swPath, {
+                        scope: basePath,
+                        updateViaCache: 'none' // Non usare la cache per il service worker
                     })
                     .then(function(registration) {
                         console.log('Service Worker registrato con successo:', registration.scope);
+                        
+                        // Forza l'aggiornamento del service worker
+                        registration.update();
                         
                         // Verifica se l'app è già installata
                         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
