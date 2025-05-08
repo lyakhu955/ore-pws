@@ -1,0 +1,48 @@
+<!-- PWA Meta Tags -->
+<meta name="description" content="Applicazione per la gestione delle ore di lavoro">
+<meta name="theme-color" content="#006A6A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ore PWS">
+
+<!-- PWA Manifest - Il percorso verrà gestito dinamicamente dal JavaScript -->
+<script>
+    // Aggiungi il manifest con il percorso corretto
+    const manifestLink = document.createElement('link');
+    manifestLink.rel = 'manifest';
+    
+    // Usa lo stesso metodo getPath definito nel file principale
+    const repoName = 'ore-pws';
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const manifestPath = isLocalhost ? './manifest.json' : '/' + repoName + '/manifest.json';
+    
+    manifestLink.href = manifestPath;
+    document.head.appendChild(manifestLink);
+    
+    // Aggiungi le icone con i percorsi corretti
+    const iconPath = isLocalhost ? './icons/' : '/' + repoName + '/icons/';
+    
+    const favicon = document.createElement('link');
+    favicon.rel = 'icon';
+    favicon.type = 'image/png';
+    favicon.sizes = '192x192';
+    favicon.href = iconPath + 'icon-192x192.png';
+    document.head.appendChild(favicon);
+    
+    const appleIcon = document.createElement('link');
+    appleIcon.rel = 'apple-touch-icon';
+    appleIcon.href = iconPath + 'icon-192x192.png';
+    document.head.appendChild(appleIcon);
+</script><!-- PWA Meta Tags -->
+<meta name="description" content="Applicazione per la gestione delle ore di lavoro">
+<meta name="theme-color" content="#006A6A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ore PWS">
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="manifest.json">
+
+<!-- PWA Icons -->
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+<link rel="apple-touch-icon" href="icons/icon-192x192.png">
