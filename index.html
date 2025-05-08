@@ -1564,6 +1564,44 @@
             flex-shrink: 0;
         }
         
+        /* Stili per i controlli di tempo con frecce */
+        .time-input-container {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .time-control-btn {
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: var(--border-radius-small);
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            flex-shrink: 0;
+        }
+        
+        .time-control-btn:hover {
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+        }
+        
+        .time-control-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .time-input-container input {
+            flex: 1;
+            margin: 0 5px;
+            text-align: center;
+        }
+        
         /* Stili per i promemoria */
         .day-checkbox {
             display: inline-flex;
@@ -4062,17 +4100,41 @@
                             <div class="time-row">
                                 <div class="form-group">
                                     <label for="startTime">Ora Inizio:</label>
-                                    <input type="text" id="startTime" class="form-control time-input" placeholder="Es. 7">
+                                    <div class="time-input-container">
+                                        <button type="button" class="time-control-btn" data-action="decrease" data-target="startTime">
+                                            <span class="material-symbols-outlined">arrow_left</span>
+                                        </button>
+                                        <input type="text" id="startTime" class="form-control time-input" placeholder="Es. 7" value="7">
+                                        <button type="button" class="time-control-btn" data-action="increase" data-target="startTime">
+                                            <span class="material-symbols-outlined">arrow_right</span>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="endTime">Ora Fine:</label>
-                                    <input type="text" id="endTime" class="form-control time-input" placeholder="Es. 17">
+                                    <div class="time-input-container">
+                                        <button type="button" class="time-control-btn" data-action="decrease" data-target="endTime">
+                                            <span class="material-symbols-outlined">arrow_left</span>
+                                        </button>
+                                        <input type="text" id="endTime" class="form-control time-input" placeholder="Es. 16.5" value="16.5">
+                                        <button type="button" class="time-control-btn" data-action="increase" data-target="endTime">
+                                            <span class="material-symbols-outlined">arrow_right</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label for="breakTime">Pausa (ore):</label>
-                                <input type="number" id="breakTime" class="form-control compact-input" step="0.5" min="0" value="0.5">
+                                <div class="time-input-container">
+                                    <button type="button" class="time-control-btn" data-action="decrease" data-target="breakTime">
+                                        <span class="material-symbols-outlined">arrow_left</span>
+                                    </button>
+                                    <input type="text" id="breakTime" class="form-control compact-input" value="0.5">
+                                    <button type="button" class="time-control-btn" data-action="increase" data-target="breakTime">
+                                        <span class="material-symbols-outlined">arrow_right</span>
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="form-group">
@@ -5121,6 +5183,12 @@
         document.addEventListener('DOMContentLoaded', () => {
             console.log('DOM completamente caricato e analizzato');
 
+            // Inizializza i controlli orari
+            if (typeof initTimeControls === 'function') {
+                initTimeControls();
+                console.log('Controlli orari inizializzati');
+            }
+            
             // Inizializza i promemoria all'avvio dell'applicazione
             const savedSettings = JSON.parse(localStorage.getItem('reminderSettings'));
             if (savedSettings && savedSettings.enabled) {
@@ -5311,6 +5379,10 @@
                                             console.log("Inizializzazione home dopo attivazione...");
                                             loadTimeEntries();
                                             populateVehicleDropdown();
+                                            // Inizializza i controlli orari quando si attiva la sezione home
+                                            if (typeof initTimeControls === 'function') {
+                                                initTimeControls();
+                                            }
                                         } else if (targetSectionId === 'calendar-section') {
                                             console.log("Inizializzazione calendario dopo attivazione...");
                                             loadCalendarData();
@@ -6062,6 +6134,11 @@
              const currentDateValue = dateInput ? dateInput.value : null;
 
              form.reset(); // Resets native form elements to default values (e.g., breakTime to 0.5)
+             
+             // Imposta i valori predefiniti per ora inizio e ora fine
+             if (document.getElementById('startTime')) document.getElementById('startTime').value = '7';
+             if (document.getElementById('endTime')) document.getElementById('endTime').value = '16.5';
+             if (document.getElementById('breakTime')) document.getElementById('breakTime').value = '0.5';
 
              // Explicitly clear fields that might not reset correctly or need specific handling
              if (document.getElementById('notturne')) document.getElementById('notturne').value = '';
@@ -6116,6 +6193,11 @@
              const startTimeInput = document.getElementById('startTime');
              if (startTimeInput) {
                  // startTimeInput.focus(); // Focus might be annoying, comment out for now
+             }
+             
+             // Reinizializza i controlli orari dopo il reset
+             if (typeof initTimeControls === 'function') {
+                 initTimeControls();
              }
 
              console.log("Form resettato.");
@@ -9512,6 +9594,39 @@
         }
 
 
+        /**
+         * Inizializza i controlli per incrementare/decrementare i campi orari
+         */
+        function initTimeControls() {
+            console.log("Inizializzazione controlli orari...");
+            const timeControlButtons = document.querySelectorAll('.time-control-btn');
+            
+            timeControlButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const action = this.getAttribute('data-action');
+                    const targetId = this.getAttribute('data-target');
+                    const targetInput = document.getElementById(targetId);
+                    
+                    if (!targetInput) return;
+                    
+                    let currentValue = parseFloat(targetInput.value.replace(',', '.')) || 0;
+                    
+                    if (action === 'increase') {
+                        currentValue += 0.5;
+                    } else if (action === 'decrease') {
+                        currentValue -= 0.5;
+                        if (currentValue < 0) currentValue = 0;
+                    }
+                    
+                    // Formatta il valore per mostrare .5 invece di .0
+                    targetInput.value = currentValue % 1 === 0 ? currentValue.toString() : currentValue.toFixed(1);
+                    
+                    // Ricalcola le ore totali
+                    calculateTotalHours();
+                });
+            });
+        }
+        
         /**
          * Calculates total work hours based on start, end, and break times.
          * Handles overnight shifts.
