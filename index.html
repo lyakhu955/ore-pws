@@ -4143,12 +4143,25 @@
                             
                             <!-- Pulsante per Android e desktop -->
                             <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                                <button id="installPwa" style="display: none; margin-right: 10px;">
+                                <button id="installPwa" class="install-button" style="display: none; margin-right: 10px; background-color: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); font-weight: bold; padding: 12px 20px;">
                                     <span class="material-symbols-outlined">download_for_offline</span> Installa App
                                 </button>
                                 <span id="pwaStatus" style="font-size: 0.9rem; color: var(--md-sys-color-on-surface-variant);">
                                     Verifica disponibilità...
                                 </span>
+                            </div>
+                            
+                            <!-- Pulsante di installazione alternativo (più visibile) -->
+                            <div class="card" style="margin-top: 15px; background-color: var(--md-sys-color-primary-container); display: none;" id="installCardPrompt">
+                                <div style="display: flex; align-items: center; justify-content: space-between;">
+                                    <div>
+                                        <h3 style="color: var(--md-sys-color-on-primary-container); margin-bottom: 5px;">Installa l'app Ore PWS</h3>
+                                        <p style="color: var(--md-sys-color-on-primary-container); margin-bottom: 0;">Usa l'app anche offline e accedi più velocemente!</p>
+                                    </div>
+                                    <button class="install-button" style="background-color: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); font-weight: bold;">
+                                        <span class="material-symbols-outlined">download_for_offline</span> Installa
+                                    </button>
+                                </div>
                             </div>
                             
                             <!-- Istruzioni per iOS (inizialmente nascoste) -->
@@ -14913,10 +14926,17 @@ END:VCARD`;
         
         // Gestione dell'evento beforeinstallprompt (non supportato su iOS)
         window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('BeforeInstallPrompt è stato attivato!');
             // Impedisci al browser di mostrare automaticamente il prompt
             e.preventDefault();
             // Salva l'evento per poterlo attivare più tardi
             deferredPrompt = e;
+            // Mostra il pulsante di installazione se il prompt è disponibile
+            const installButtons = document.querySelectorAll('.install-button');
+            installButtons.forEach(button => {
+                button.style.display = 'flex';
+                button.disabled = false;
+            });
             
             // Aggiorna l'interfaccia utente per mostrare il pulsante di installazione
             if (installButton && pwaStatus) {
@@ -14954,42 +14974,78 @@ END:VCARD`;
         
         // Aggiungi l'event listener al pulsante di installazione
         document.addEventListener('DOMContentLoaded', () => {
+            // Gestione del pulsante principale di installazione
             const installBtn = document.getElementById('installPwa');
-            if (installBtn) {
-                installBtn.addEventListener('click', async () => {
-                    if (!deferredPrompt) {
-                        // Se non c'è un prompt di installazione disponibile
-                        console.log('Nessun prompt di installazione disponibile');
-                        return;
-                    }
-                    
-                    // Mostra il prompt di installazione
-                    deferredPrompt.prompt();
-                    
+            const installCardPrompt = document.getElementById('installCardPrompt');
+            
+            // Funzione per mostrare il prompt di installazione
+            const showInstallPrompt = async () => {
+                if (!deferredPrompt) {
+                    // Se non c'è un prompt di installazione disponibile
+                    console.log('Nessun prompt di installazione disponibile');
+                    return;
+                }
+                
+                // Mostra il prompt di installazione
+                deferredPrompt.prompt();
+                
+                try {
                     // Attendi che l'utente risponda al prompt
                     const { outcome } = await deferredPrompt.userChoice;
                     
                     // Registra il risultato
                     console.log(`Scelta dell'utente: ${outcome}`);
                     
-                    // Pulisci la variabile deferredPrompt
-                    deferredPrompt = null;
-                    
-                    // Aggiorna l'interfaccia utente in base alla scelta dell'utente
                     if (outcome === 'accepted') {
+                        // L'utente ha accettato l'installazione
+                        console.log('Utente ha accettato l\'installazione');
+                        
+                        // Nascondi tutti i pulsanti di installazione
+                        const allInstallButtons = document.querySelectorAll('.install-button');
+                        allInstallButtons.forEach(button => {
+                            button.style.display = 'none';
+                        });
+                        
+                        // Nascondi il card prompt
+                        if (installCardPrompt) {
+                            installCardPrompt.style.display = 'none';
+                        }
+                        
+                        // Aggiorna lo stato
                         if (pwaStatus) {
-                            pwaStatus.textContent = 'Installazione in corso...';
+                            pwaStatus.textContent = 'App in fase di installazione...';
                         }
                     } else {
+                       // L'utente ha rifiutato l'installazione
+                        console.log('Utente ha rifiutato l\'installazione');
                         if (pwaStatus) {
-                            pwaStatus.textContent = 'Installazione annullata';
-                            // Dopo 3 secondi, ripristina il messaggio
-                            setTimeout(() => {
-                                pwaStatus.textContent = 'L\'app è pronta per essere installata';
-                            }, 3000);
+                            pwaStatus.textContent = 'Installazione rifiutata. Riprova più tardi.';
                         }
                     }
-                });
+                    
+                    // Pulisci la variabile deferredPrompt
+                    deferredPrompt = null;
+                } catch (error) {
+                    console.error('Errore durante l\'installazione:', error);
+                }
+            };
+            
+            // Aggiungi event listener al pulsante principale
+            if (installBtn) {
+                installBtn.addEventListener('click', showInstallPrompt);
+            }
+            
+             // Aggiungi event listener a tutti i pulsanti con classe install-button
+            const allInstallButtons = document.querySelectorAll('.install-button');
+            allInstallButtons.forEach(button => {
+                button.addEventListener('click', showInstallPrompt);
+            });
+            
+            // Mostra il card prompt se disponibile
+            if (installCardPrompt && deferredPrompt) {
+                setTimeout(() => {
+                    installCardPrompt.style.display = 'block';
+                }, 3000); // Mostra dopo 3 secondi
             }
             
             // Gestione specifica per iOS
@@ -15062,17 +15118,35 @@ END:VCARD`;
                         ? '/'
                         : '/' + REPO_NAME + '/';
                     
+                    console.log('Percorso base:', basePath);
+                    console.log('Percorso service worker:', getPath('service-worker.js'));
+                    console.log('Browser:', navigator.userAgent);
+                    console.log('PWA supportata:', 'BeforeInstallPromptEvent' in window);
+                    
                     navigator.serviceWorker.register(getPath('service-worker.js'), {
                         scope: basePath
                     })
                     .then(function(registration) {
                         console.log('Service Worker registrato con successo:', registration.scope);
                         
+                        // Verifica se l'app è già installata
+                        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                                            window.navigator.standalone === true;
+                        
+                        console.log('App in modalità standalone:', isStandalone);
+                        console.log('deferredPrompt disponibile:', !!deferredPrompt);
+                        
                         // Aggiorna lo stato della PWA
-                        if (pwaStatus && !deferredPrompt && 
-                            !(window.matchMedia('(display-mode: standalone)').matches || 
-                              window.navigator.standalone === true)) {
-                            pwaStatus.textContent = 'Visita il sito in un browser compatibile per installare l\'app';
+                        if (pwaStatus) {
+                            if (isStandalone) {
+                                pwaStatus.textContent = 'App già installata';
+                            } else if (deferredPrompt) {
+                                pwaStatus.textContent = 'L\'app è pronta per essere installata';
+                            } else if (isIOS()) {
+                                pwaStatus.textContent = 'Usa "Aggiungi alla schermata Home" per installare l\'app';
+                            } else {
+                                pwaStatus.textContent = 'Visita il sito in un browser compatibile per installare l\'app';
+                            }
                         }
                     })
                     .catch(function(error) {
