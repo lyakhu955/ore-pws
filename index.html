@@ -4247,6 +4247,16 @@
                         </div>
                         
                         <div class="setting-item">
+                            <span class="setting-label">Installa App PWA</span>
+                            <button id="installPwa" style="display: none;">
+                                <span class="material-symbols-outlined">download_for_offline</span> Installa App
+                            </button>
+                            <div id="pwaStatus" style="font-size: 0.9rem; color: var(--md-sys-color-on-surface-variant); margin-top: 5px;">
+                                Verifica disponibilità...
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
                             <span class="setting-label">Cancella Dati</span>
                             <button id="clearData" class="delete-btn">
                                 <span class="material-symbols-outlined">delete_forever</span> Cancella Tutto
@@ -14662,6 +14672,103 @@ END:VCARD`;
         
         observer.observe(document.body, { childList: true, subtree: true });
     });
+    </script>
+
+    <!-- PWA Support Script -->
+    <script>
+    // Variabile per memorizzare l'evento di installazione
+    let deferredPrompt;
+    
+    // Registrazione del Service Worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            // Percorso relativo al service worker
+            const swPath = '/ore-pws/sw.js';
+            
+            navigator.serviceWorker.register(swPath)
+                .then(function(registration) {
+                    console.log('Service Worker registrato con successo:', registration.scope);
+                    updatePwaStatus('PWA disponibile per l\'installazione');
+                })
+                .catch(function(error) {
+                    console.error('Errore durante la registrazione del Service Worker:', error);
+                    updatePwaStatus('Impossibile abilitare la PWA: ' + error.message);
+                });
+        });
+    } else {
+        console.warn('Service Worker non supportato dal browser');
+        updatePwaStatus('Il tuo browser non supporta le PWA');
+    }
+    
+    // Intercetta l'evento di installazione
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Previeni il popup automatico di installazione
+        e.preventDefault();
+        // Salva l'evento per usarlo più tardi
+        deferredPrompt = e;
+        // Mostra il pulsante di installazione
+        const installButton = document.getElementById('installPwa');
+        if (installButton) {
+            installButton.style.display = 'flex';
+            updatePwaStatus('App pronta per l\'installazione');
+        }
+    });
+    
+    // Gestisci il click sul pulsante di installazione
+    document.addEventListener('DOMContentLoaded', function() {
+        const installButton = document.getElementById('installPwa');
+        if (installButton) {
+            installButton.addEventListener('click', async () => {
+                if (!deferredPrompt) {
+                    updatePwaStatus('L\'app è già installata o non può essere installata in questo momento');
+                    return;
+                }
+                
+                // Mostra il prompt di installazione
+                deferredPrompt.prompt();
+                
+                // Attendi la scelta dell'utente
+                const { outcome } = await deferredPrompt.userChoice;
+                
+                // Aggiorna lo stato in base alla scelta
+                if (outcome === 'accepted') {
+                    updatePwaStatus('Grazie per aver installato la nostra app!');
+                    installButton.style.display = 'none';
+                } else {
+                    updatePwaStatus('Installazione annullata. Puoi riprovare in qualsiasi momento.');
+                }
+                
+                // Pulisci la variabile deferredPrompt
+                deferredPrompt = null;
+            });
+        }
+    });
+    
+    // Rileva se l'app è già installata
+    window.addEventListener('appinstalled', (evt) => {
+        updatePwaStatus('App installata con successo!');
+        const installButton = document.getElementById('installPwa');
+        if (installButton) {
+            installButton.style.display = 'none';
+        }
+    });
+    
+    // Funzione per aggiornare lo stato della PWA
+    function updatePwaStatus(message) {
+        const statusElement = document.getElementById('pwaStatus');
+        if (statusElement) {
+            statusElement.textContent = message;
+        }
+    }
+    
+    // Controlla se l'app è già in modalità standalone (già installata)
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+        updatePwaStatus('App già installata');
+        const installButton = document.getElementById('installPwa');
+        if (installButton) {
+            installButton.style.display = 'none';
+        }
+    }
     </script>
 
 </body>
