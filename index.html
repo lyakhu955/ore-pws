@@ -1563,6 +1563,32 @@
             height: var(--switch-height);
             flex-shrink: 0;
         }
+        
+        /* Stili per i promemoria */
+        .day-checkbox {
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--md-sys-color-surface);
+            padding: 6px 10px;
+            border-radius: var(--border-radius-small);
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: 1px solid var(--md-sys-color-outline-variant);
+            transition: all 0.2s ease;
+        }
+        
+        .day-checkbox:hover {
+            background-color: var(--md-sys-color-primary-container);
+        }
+        
+        .day-checkbox input {
+            margin-right: 5px;
+        }
+        
+        .day-checkbox input:checked + span {
+            color: var(--md-sys-color-primary);
+            font-weight: 500;
+        }
         .toggle-switch input {
             opacity: 0;
             width: 0;
@@ -4199,6 +4225,67 @@
                             </div>
                         </div>
 
+                        <!-- Sezione Promemoria -->
+                        <div class="setting-item" style="flex-direction: column; align-items: stretch;">
+                            <span class="setting-label" style="margin-bottom: 1rem;">Promemoria Ore</span>
+                            <div class="reminder-manager">
+                                <div class="form-group">
+                                    <label for="reminderEnabled">Attiva promemoria</label>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="reminderEnabled">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="reminder-settings" id="reminderSettings" style="margin-top: 15px; padding: 15px; background-color: var(--md-sys-color-surface-variant); border-radius: var(--border-radius-medium);">
+                                    <div class="form-group">
+                                        <label for="reminderTime">Orario promemoria (formato 24h)</label>
+                                        <input type="time" id="reminderTime" class="settings-input" value="20:00" step="60">
+                                    </div>
+                                    
+                                    <div class="form-group" style="margin-top: 15px;">
+                                        <label for="reminderDays">Giorni della settimana</label>
+                                        <div class="day-selector" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+                                            <label class="day-checkbox">
+                                                <input type="checkbox" value="1" checked> Lun
+                                            </label>
+                                            <label class="day-checkbox">
+                                                <input type="checkbox" value="2" checked> Mar
+                                            </label>
+                                            <label class="day-checkbox">
+                                                <input type="checkbox" value="3" checked> Mer
+                                            </label>
+                                            <label class="day-checkbox">
+                                                <input type="checkbox" value="4" checked> Gio
+                                            </label>
+                                            <label class="day-checkbox">
+                                                <input type="checkbox" value="5" checked> Ven
+                                            </label>
+                                            <label class="day-checkbox">
+                                                <input type="checkbox" value="6"> Sab
+                                            </label>
+                                            <label class="day-checkbox">
+                                                <input type="checkbox" value="0"> Dom
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group" style="margin-top: 15px;">
+                                        <label for="reminderText">Testo del promemoria</label>
+                                        <textarea id="reminderText" class="settings-input" style="min-height: 80px;">We allora le segnamo ste ore???</textarea>
+                                    </div>
+                                    
+                                    <button id="saveReminder" style="margin-top: 15px; width: 100%;">
+                                        <span class="material-symbols-outlined">notifications_active</span> Salva Promemoria
+                                    </button>
+                                    
+                                    <div style="font-size: 0.8rem; color: var(--md-sys-color-on-surface-variant); margin-top: 10px;">
+                                        Nota: il promemoria apparirà come notifica solo se l'app è installata e hai concesso i permessi per le notifiche.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Sezione Backup Cloud -->
                         <div class="setting-item" style="flex-direction: column; align-items: stretch;">
                             <span class="setting-label" style="margin-bottom: 1rem;">Backup Cloud</span>
@@ -5034,6 +5121,13 @@
         document.addEventListener('DOMContentLoaded', () => {
             console.log('DOM completamente caricato e analizzato');
 
+            // Inizializza i promemoria all'avvio dell'applicazione
+            const savedSettings = JSON.parse(localStorage.getItem('reminderSettings'));
+            if (savedSettings && savedSettings.enabled) {
+                requestNotificationPermission();
+                scheduleReminder(savedSettings);
+            }
+
              // --- Theme Initialization (Ottimizzato) ---
              const darkThemeToggle = document.getElementById('darkTheme');
              if(darkThemeToggle) {
@@ -5233,6 +5327,7 @@
                                         } else if (targetSectionId === 'settings-section') {
                                             console.log("Inizializzazione impostazioni dopo attivazione...");
                                             populateVehicleSettingsList(); // Carica la lista dei veicoli nelle impostazioni
+                                            initReminderSettings(); // Inizializza le impostazioni dei promemoria
                                             
                                             // Gestione PWA per iOS quando la sezione impostazioni è attiva
                                             const checkIOSPWA = function() {
@@ -7845,6 +7940,194 @@
                 console.log("Lista dei file Excel aggiornata");
             } catch (error) {
                 console.error("Errore nell'aggiornamento della lista dei file Excel:", error);
+            }
+        }
+        
+        // Inizializza le impostazioni dei promemoria
+        function initReminderSettings() {
+            console.log("Inizializzazione impostazioni promemoria...");
+            
+            // Elementi DOM
+            const reminderEnabled = document.getElementById('reminderEnabled');
+            const reminderSettings = document.getElementById('reminderSettings');
+            const reminderTime = document.getElementById('reminderTime');
+            const reminderText = document.getElementById('reminderText');
+            const saveReminderBtn = document.getElementById('saveReminder');
+            const dayCheckboxes = document.querySelectorAll('.day-checkbox input[type="checkbox"]');
+            
+            // Carica le impostazioni salvate
+            const savedSettings = JSON.parse(localStorage.getItem('reminderSettings')) || {
+                enabled: false,
+                time: '20:00',
+                days: [1, 2, 3, 4, 5], // Lun-Ven
+                text: 'We allora le segnamo ste ore???'
+            };
+            
+            // Applica le impostazioni salvate
+            reminderEnabled.checked = savedSettings.enabled;
+            reminderTime.value = savedSettings.time;
+            reminderText.value = savedSettings.text;
+            
+            // Imposta i giorni della settimana
+            dayCheckboxes.forEach(checkbox => {
+                checkbox.checked = savedSettings.days.includes(parseInt(checkbox.value));
+            });
+            
+            // Mostra/nascondi le impostazioni in base allo stato
+            reminderSettings.style.display = savedSettings.enabled ? 'block' : 'none';
+            
+            // Event listener per il toggle di attivazione
+            reminderEnabled.addEventListener('change', function() {
+                reminderSettings.style.display = this.checked ? 'block' : 'none';
+                
+                // Aggiorna le impostazioni
+                savedSettings.enabled = this.checked;
+                localStorage.setItem('reminderSettings', JSON.stringify(savedSettings));
+                
+                // Gestisci le notifiche
+                if (this.checked) {
+                    requestNotificationPermission();
+                    scheduleReminder(savedSettings);
+                } else {
+                    cancelReminder();
+                }
+            });
+            
+            // Event listener per il pulsante di salvataggio
+            saveReminderBtn.addEventListener('click', function() {
+                // Raccogli i giorni selezionati
+                const selectedDays = [];
+                dayCheckboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        selectedDays.push(parseInt(checkbox.value));
+                    }
+                });
+                
+                // Aggiorna le impostazioni
+                savedSettings.time = reminderTime.value;
+                savedSettings.text = reminderText.value;
+                savedSettings.days = selectedDays;
+                
+                // Salva le impostazioni
+                localStorage.setItem('reminderSettings', JSON.stringify(savedSettings));
+                
+                // Aggiorna il promemoria se attivo
+                if (savedSettings.enabled) {
+                    scheduleReminder(savedSettings);
+                }
+                
+                // Feedback all'utente
+                const giorni = selectedDays.map(day => {
+                    const giorni = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+                    return giorni[day];
+                }).join(', ');
+                
+                showToast(`Promemoria impostato per le ore ${reminderTime.value} nei giorni: ${giorni}`);
+            });
+            
+            // Se il promemoria è attivo, pianificalo
+            if (savedSettings.enabled) {
+                requestNotificationPermission();
+                scheduleReminder(savedSettings);
+            }
+        }
+        
+        // Richiedi il permesso per le notifiche
+        function requestNotificationPermission() {
+            if (!('Notification' in window)) {
+                showToast('Questo browser non supporta le notifiche desktop', 'error');
+                return;
+            }
+            
+            if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        showToast('Notifiche attivate!');
+                    } else {
+                        showToast('Permesso per le notifiche negato', 'warning');
+                    }
+                });
+            }
+        }
+        
+        // Pianifica il promemoria
+        function scheduleReminder(settings) {
+            // Cancella eventuali promemoria esistenti
+            cancelReminder();
+            
+            // Verifica se le notifiche sono supportate e permesse
+            if (!('Notification' in window) || Notification.permission !== 'granted') {
+                console.log('Notifiche non supportate o permesso non concesso');
+                return;
+            }
+            
+            console.log('Pianificazione promemoria:', settings);
+            
+            // Funzione per controllare se oggi è un giorno in cui mostrare il promemoria
+            const shouldShowToday = () => {
+                const today = new Date().getDay(); // 0 = Domenica, 1 = Lunedì, ecc.
+                return settings.days.includes(today);
+            };
+            
+            // Funzione per mostrare la notifica
+            const showNotification = () => {
+                if (shouldShowToday()) {
+                    const notification = new Notification('Ore PWS', {
+                        body: settings.text,
+                        icon: '/ore-pws/icons/icon-192x192.png'
+                    });
+                    
+                    notification.onclick = function() {
+                        window.focus();
+                        this.close();
+                    };
+                }
+                
+                // Pianifica la notifica per il giorno successivo
+                scheduleNextReminder();
+            };
+            
+            // Funzione per pianificare il prossimo promemoria
+            const scheduleNextReminder = () => {
+                const now = new Date();
+                const [hours, minutes] = settings.time.split(':').map(Number);
+                
+                // Imposta l'orario per oggi
+                const reminderTime = new Date();
+                reminderTime.setHours(hours, minutes, 0, 0);
+                
+                // Se l'orario è già passato, pianifica per domani
+                if (reminderTime <= now) {
+                    reminderTime.setDate(reminderTime.getDate() + 1);
+                }
+                
+                // Calcola il tempo di attesa in millisecondi
+                const timeToWait = reminderTime.getTime() - now.getTime();
+                
+                // Salva l'ID del timeout per poterlo cancellare in seguito
+                window.reminderTimeoutId = setTimeout(showNotification, timeToWait);
+                
+                console.log(`Promemoria pianificato per ${reminderTime.toLocaleString('it-IT', {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                })}`);
+            };
+            
+            // Pianifica il primo promemoria
+            scheduleNextReminder();
+        }
+        
+        // Cancella il promemoria pianificato
+        function cancelReminder() {
+            if (window.reminderTimeoutId) {
+                clearTimeout(window.reminderTimeoutId);
+                window.reminderTimeoutId = null;
+                console.log('Promemoria cancellato');
             }
         }
         
@@ -15016,7 +15299,7 @@ END:VCARD`;
                             pwaStatus.textContent = 'App in fase di installazione...';
                         }
                     } else {
-                       // L'utente ha rifiutato l'installazione
+                        // L'utente ha rifiutato l'installazione
                         console.log('Utente ha rifiutato l\'installazione');
                         if (pwaStatus) {
                             pwaStatus.textContent = 'Installazione rifiutata. Riprova più tardi.';
@@ -15035,7 +15318,7 @@ END:VCARD`;
                 installBtn.addEventListener('click', showInstallPrompt);
             }
             
-             // Aggiungi event listener a tutti i pulsanti con classe install-button
+            // Aggiungi event listener a tutti i pulsanti con classe install-button
             const allInstallButtons = document.querySelectorAll('.install-button');
             allInstallButtons.forEach(button => {
                 button.addEventListener('click', showInstallPrompt);
