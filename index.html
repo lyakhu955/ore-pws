@@ -14772,17 +14772,14 @@ END:VCARD`;
             return '/' + REPO_NAME + '/' + path;
         }
         
-        // Aggiungi i meta tag PWA all'head
-        fetch(getPath('pwa-head.html'))
-            .then(response => response.text())
-            .then(html => {
-                const headContent = document.createRange().createContextualFragment(html);
-                document.head.appendChild(headContent);
-                console.log('Meta tag PWA aggiunti con successo');
-            })
-            .catch(error => {
-                console.error('Errore nel caricamento dei meta tag PWA:', error);
-            });
+        // I meta tag PWA sono stati aggiunti direttamente nell'head
+        console.log('Meta tag PWA aggiunti direttamente nell\'head');
+        
+        // Aggiungi il manifest con il percorso corretto
+        const manifestLink = document.createElement('link');
+        manifestLink.rel = 'manifest';
+        manifestLink.href = getPath('manifest.json');
+        document.head.appendChild(manifestLink);
 
         // Variabili per l'installazione della PWA
         let deferredPrompt;
@@ -14944,33 +14941,36 @@ END:VCARD`;
         // Registra il service worker con percorso adatto a GitHub Pages
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
-                // Ottieni il percorso base del sito
-                const basePath = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-                    ? '/'
-                    : '/' + REPO_NAME + '/';
-                
-                navigator.serviceWorker.register(getPath('service-worker.js'), {
-                    scope: basePath
-                })
-                .then(function(registration) {
-                    console.log('Service Worker registrato con successo:', registration.scope);
+                // Attendi un po' prima di registrare il service worker
+                setTimeout(function() {
+                    // Ottieni il percorso base del sito
+                    const basePath = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                        ? '/'
+                        : '/' + REPO_NAME + '/';
                     
-                    // Aggiorna lo stato della PWA
-                    if (pwaStatus && !deferredPrompt && 
-                        !(window.matchMedia('(display-mode: standalone)').matches || 
-                          window.navigator.standalone === true)) {
-                        pwaStatus.textContent = 'Visita il sito in un browser compatibile per installare l\'app';
-                    }
-                })
-                .catch(function(error) {
-                    console.log('Registrazione Service Worker fallita:', error);
-                    
-                    // Aggiorna lo stato della PWA in caso di errore
-                    if (pwaStatus) {
-                        pwaStatus.textContent = 'Errore nella configurazione PWA';
-                        pwaStatus.style.color = 'var(--md-sys-color-error)';
-                    }
-                });
+                    navigator.serviceWorker.register(getPath('service-worker.js'), {
+                        scope: basePath
+                    })
+                    .then(function(registration) {
+                        console.log('Service Worker registrato con successo:', registration.scope);
+                        
+                        // Aggiorna lo stato della PWA
+                        if (pwaStatus && !deferredPrompt && 
+                            !(window.matchMedia('(display-mode: standalone)').matches || 
+                              window.navigator.standalone === true)) {
+                            pwaStatus.textContent = 'Visita il sito in un browser compatibile per installare l\'app';
+                        }
+                    })
+                    .catch(function(error) {
+                        console.log('Registrazione Service Worker fallita:', error);
+                        
+                        // Aggiorna lo stato della PWA in caso di errore
+                        if (pwaStatus) {
+                            pwaStatus.textContent = 'Errore nella configurazione PWA';
+                            pwaStatus.style.color = 'var(--md-sys-color-error)';
+                        }
+                    });
+                }, 1000); // Ritardo di 1 secondo
             });
         } else {
             // Service Worker non supportato
