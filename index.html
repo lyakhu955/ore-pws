@@ -4137,6 +4137,33 @@
                                 <span class="material-symbols-outlined">upload</span> Importa Dati
                             </button>
                         </div>
+                        
+                        <div class="setting-item" style="flex-direction: column; align-items: stretch;">
+                            <span class="setting-label">Installa App</span>
+                            
+                            <!-- Pulsante per Android e desktop -->
+                            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                                <button id="installPwa" style="display: none; margin-right: 10px;">
+                                    <span class="material-symbols-outlined">download_for_offline</span> Installa App
+                                </button>
+                                <span id="pwaStatus" style="font-size: 0.9rem; color: var(--md-sys-color-on-surface-variant);">
+                                    Verifica disponibilità...
+                                </span>
+                            </div>
+                            
+                            <!-- Istruzioni per iOS (inizialmente nascoste) -->
+                            <div id="iosInstructions" style="display: none; margin-top: 10px; padding: 15px; background-color: var(--md-sys-color-surface-variant); border-radius: var(--border-radius-medium);">
+                                <h3 style="margin-top: 0; color: var(--md-sys-color-primary); font-size: 1rem; margin-bottom: 10px;">
+                                    Istruzioni per iOS:
+                                </h3>
+                                <ol style="margin: 0; padding-left: 20px; font-size: 0.9rem;">
+                                    <li>Apri questa pagina in <strong>Safari</strong></li>
+                                    <li>Tocca l'icona di condivisione <span style="display: inline-block; background-color: var(--md-sys-color-primary); color: white; width: 20px; height: 20px; text-align: center; border-radius: 4px; font-size: 14px;">↑</span></li>
+                                    <li>Scorri verso il basso e tocca <strong>"Aggiungi alla schermata Home"</strong></li>
+                                    <li>Conferma toccando <strong>"Aggiungi"</strong></li>
+                                </ol>
+                            </div>
+                        </div>
 
                         <div class="setting-item" style="flex-direction: column; align-items: stretch;">
                              <span class="setting-label" style="margin-bottom: 1rem;">Gestione Mezzi</span>
@@ -5193,6 +5220,64 @@
                                         } else if (targetSectionId === 'settings-section') {
                                             console.log("Inizializzazione impostazioni dopo attivazione...");
                                             populateVehicleSettingsList(); // Carica la lista dei veicoli nelle impostazioni
+                                            
+                                            // Gestione PWA per iOS quando la sezione impostazioni è attiva
+                                            const checkIOSPWA = function() {
+                                                const iosInstructions = document.getElementById('iosInstructions');
+                                                const pwaStatus = document.getElementById('pwaStatus');
+                                                const installButton = document.getElementById('installPwa');
+                                                
+                                                // Funzione per rilevare iOS
+                                                const isIOS = function() {
+                                                    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                                                };
+                                                
+                                                // Funzione per rilevare Safari su iOS
+                                                const isIOSSafari = function() {
+                                                    return isIOS() && /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+                                                };
+                                                
+                                                if (isIOS()) {
+                                                    console.log('Dispositivo iOS rilevato nella sezione impostazioni');
+                                                    
+                                                    // Controlla se l'app è già installata su iOS
+                                                    if (window.navigator.standalone === true) {
+                                                        // L'app è già installata come PWA su iOS
+                                                        if (pwaStatus) {
+                                                            pwaStatus.textContent = 'App già installata';
+                                                            pwaStatus.style.color = 'var(--md-sys-color-primary)';
+                                                        }
+                                                        
+                                                        // Nascondi le istruzioni per iOS
+                                                        if (iosInstructions) {
+                                                            iosInstructions.style.display = 'none';
+                                                        }
+                                                    } else {
+                                                        // L'app non è installata su iOS
+                                                        if (pwaStatus) {
+                                                            if (isIOSSafari()) {
+                                                                pwaStatus.textContent = 'Segui le istruzioni sotto per installare l\'app';
+                                                                pwaStatus.style.color = 'var(--md-sys-color-primary)';
+                                                            } else {
+                                                                pwaStatus.textContent = 'Apri questa pagina in Safari per installare l\'app';
+                                                            }
+                                                        }
+                                                        
+                                                        // Mostra le istruzioni per iOS
+                                                        if (iosInstructions) {
+                                                            iosInstructions.style.display = 'block';
+                                                        }
+                                                        
+                                                        // Nascondi il pulsante di installazione (non funziona su iOS)
+                                                        if (installButton) {
+                                                            installButton.style.display = 'none';
+                                                        }
+                                                    }
+                                                }
+                                            };
+                                            
+                                            // Esegui il controllo dopo un breve ritardo per assicurarsi che tutti gli elementi siano caricati
+                                            setTimeout(checkIOSPWA, 200);
                                         }
                                     }, 100); // Piccolo ritardo per assicurarsi che la sezione sia completamente attivata
                                 }
@@ -14662,6 +14747,237 @@ END:VCARD`;
         
         observer.observe(document.body, { childList: true, subtree: true });
     });
+    </script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        // Configurazione specifica per GitHub Pages
+        const REPO_NAME = 'ore-pws';
+        
+        // Funzione per ottenere il percorso corretto in base all'ambiente
+        function getPath(path) {
+            // Rimuovi il punto iniziale se presente
+            if (path.startsWith('./')) {
+                path = path.substring(2);
+            } else if (path.startsWith('/')) {
+                path = path.substring(1);
+            }
+            
+            // In ambiente di sviluppo locale
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                return './' + path;
+            }
+            
+            // In GitHub Pages
+            return '/' + REPO_NAME + '/' + path;
+        }
+        
+        // Aggiungi i meta tag PWA all'head
+        fetch(getPath('pwa-head.html'))
+            .then(response => response.text())
+            .then(html => {
+                const headContent = document.createRange().createContextualFragment(html);
+                document.head.appendChild(headContent);
+                console.log('Meta tag PWA aggiunti con successo');
+            })
+            .catch(error => {
+                console.error('Errore nel caricamento dei meta tag PWA:', error);
+            });
+
+        // Variabili per l'installazione della PWA
+        let deferredPrompt;
+        const installButton = document.getElementById('installPwa');
+        const pwaStatus = document.getElementById('pwaStatus');
+        const iosInstructions = document.getElementById('iosInstructions');
+        
+        // Funzione per rilevare iOS
+        function isIOS() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        }
+        
+        // Funzione per rilevare Safari su iOS
+        function isIOSSafari() {
+            return isIOS() && /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+        }
+        
+        // Gestione dell'evento beforeinstallprompt (non supportato su iOS)
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Impedisci al browser di mostrare automaticamente il prompt
+            e.preventDefault();
+            // Salva l'evento per poterlo attivare più tardi
+            deferredPrompt = e;
+            
+            // Aggiorna l'interfaccia utente per mostrare il pulsante di installazione
+            if (installButton && pwaStatus) {
+                installButton.style.display = 'inline-flex';
+                pwaStatus.textContent = 'L\'app è pronta per essere installata';
+                pwaStatus.style.color = 'var(--md-sys-color-primary)';
+            }
+            
+            // Nascondi le istruzioni per iOS
+            if (iosInstructions) {
+                iosInstructions.style.display = 'none';
+            }
+        });
+        
+        // Gestione dell'evento appinstalled
+        window.addEventListener('appinstalled', () => {
+            // L'app è stata installata con successo
+            if (installButton && pwaStatus) {
+                installButton.style.display = 'none';
+                pwaStatus.textContent = 'App installata con successo!';
+                pwaStatus.style.color = 'var(--md-sys-color-primary)';
+            }
+            
+            // Nascondi le istruzioni per iOS
+            if (iosInstructions) {
+                iosInstructions.style.display = 'none';
+            }
+            
+            // Pulisci la variabile deferredPrompt
+            deferredPrompt = null;
+            
+            // Registra l'evento di installazione
+            console.log('PWA installata con successo');
+        });
+        
+        // Aggiungi l'event listener al pulsante di installazione
+        document.addEventListener('DOMContentLoaded', () => {
+            const installBtn = document.getElementById('installPwa');
+            if (installBtn) {
+                installBtn.addEventListener('click', async () => {
+                    if (!deferredPrompt) {
+                        // Se non c'è un prompt di installazione disponibile
+                        console.log('Nessun prompt di installazione disponibile');
+                        return;
+                    }
+                    
+                    // Mostra il prompt di installazione
+                    deferredPrompt.prompt();
+                    
+                    // Attendi che l'utente risponda al prompt
+                    const { outcome } = await deferredPrompt.userChoice;
+                    
+                    // Registra il risultato
+                    console.log(`Scelta dell'utente: ${outcome}`);
+                    
+                    // Pulisci la variabile deferredPrompt
+                    deferredPrompt = null;
+                    
+                    // Aggiorna l'interfaccia utente in base alla scelta dell'utente
+                    if (outcome === 'accepted') {
+                        if (pwaStatus) {
+                            pwaStatus.textContent = 'Installazione in corso...';
+                        }
+                    } else {
+                        if (pwaStatus) {
+                            pwaStatus.textContent = 'Installazione annullata';
+                            // Dopo 3 secondi, ripristina il messaggio
+                            setTimeout(() => {
+                                pwaStatus.textContent = 'L\'app è pronta per essere installata';
+                            }, 3000);
+                        }
+                    }
+                });
+            }
+            
+            // Gestione specifica per iOS
+            if (isIOS()) {
+                console.log('Dispositivo iOS rilevato');
+                
+                // Controlla se l'app è già installata su iOS
+                if (window.navigator.standalone === true) {
+                    // L'app è già installata come PWA su iOS
+                    if (pwaStatus) {
+                        pwaStatus.textContent = 'App già installata';
+                        pwaStatus.style.color = 'var(--md-sys-color-primary)';
+                    }
+                    
+                    // Nascondi le istruzioni per iOS
+                    if (iosInstructions) {
+                        iosInstructions.style.display = 'none';
+                    }
+                } else {
+                    // L'app non è installata su iOS
+                    if (pwaStatus) {
+                        if (isIOSSafari()) {
+                            pwaStatus.textContent = 'Segui le istruzioni sotto per installare l\'app';
+                            pwaStatus.style.color = 'var(--md-sys-color-primary)';
+                        } else {
+                            pwaStatus.textContent = 'Apri questa pagina in Safari per installare l\'app';
+                        }
+                    }
+                    
+                    // Mostra le istruzioni per iOS
+                    if (iosInstructions) {
+                        iosInstructions.style.display = 'block';
+                    }
+                    
+                    // Nascondi il pulsante di installazione (non funziona su iOS)
+                    if (installButton) {
+                        installButton.style.display = 'none';
+                    }
+                }
+            } else {
+                // Non è iOS, controlla se l'app è già installata
+                if (window.matchMedia('(display-mode: standalone)').matches) {
+                    // L'app è già installata
+                    if (installButton && pwaStatus) {
+                        installButton.style.display = 'none';
+                        pwaStatus.textContent = 'App già installata';
+                        pwaStatus.style.color = 'var(--md-sys-color-primary)';
+                    }
+                } else {
+                    // L'app non è installata, ma potrebbe non essere disponibile per l'installazione
+                    if (pwaStatus && !deferredPrompt) {
+                        pwaStatus.textContent = 'Installazione non disponibile in questo momento';
+                    }
+                }
+                
+                // Nascondi le istruzioni per iOS su dispositivi non iOS
+                if (iosInstructions) {
+                    iosInstructions.style.display = 'none';
+                }
+            }
+        });
+
+        // Registra il service worker con percorso adatto a GitHub Pages
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                // Ottieni il percorso base del sito
+                const basePath = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                    ? '/'
+                    : '/' + REPO_NAME + '/';
+                
+                navigator.serviceWorker.register(getPath('service-worker.js'), {
+                    scope: basePath
+                })
+                .then(function(registration) {
+                    console.log('Service Worker registrato con successo:', registration.scope);
+                    
+                    // Aggiorna lo stato della PWA
+                    if (pwaStatus && !deferredPrompt && 
+                        !(window.matchMedia('(display-mode: standalone)').matches || 
+                          window.navigator.standalone === true)) {
+                        pwaStatus.textContent = 'Visita il sito in un browser compatibile per installare l\'app';
+                    }
+                })
+                .catch(function(error) {
+                    console.log('Registrazione Service Worker fallita:', error);
+                    
+                    // Aggiorna lo stato della PWA in caso di errore
+                    if (pwaStatus) {
+                        pwaStatus.textContent = 'Errore nella configurazione PWA';
+                        pwaStatus.style.color = 'var(--md-sys-color-error)';
+                    }
+                });
+            });
+        } else {
+            // Service Worker non supportato
+            if (pwaStatus) {
+                pwaStatus.textContent = 'Il tuo browser non supporta l\'installazione dell\'app';
+            }
+        }
     </script>
 
 </body>
