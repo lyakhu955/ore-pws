@@ -14780,6 +14780,106 @@ END:VCARD`;
         manifestLink.rel = 'manifest';
         manifestLink.href = getPath('manifest.json');
         document.head.appendChild(manifestLink);
+        
+        // Aggiungi le icone appropriate in base al dispositivo
+        function addDeviceSpecificIcons() {
+            // Rimuovi eventuali icone esistenti per evitare duplicazioni
+            document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"], link[rel="shortcut icon"]').forEach(el => el.remove());
+            
+            // Percorso base per le icone
+            const iconBasePath = getPath('icons/');
+            
+            // Rileva il tipo di dispositivo
+            const isAndroid = /Android/.test(navigator.userAgent);
+            const isIOSDevice = isIOS();
+            
+            console.log('Rilevamento dispositivo:', isAndroid ? 'Android' : (isIOSDevice ? 'iOS' : 'Desktop/Altro'));
+            
+            // Favicon standard per tutti i browser
+            const favicon = document.createElement('link');
+            favicon.rel = 'icon';
+            favicon.type = 'image/png';
+            favicon.sizes = '32x32';
+            favicon.href = iconBasePath + 'icon-72x72.png'; // Usiamo l'icona più piccola per il favicon
+            document.head.appendChild(favicon);
+            
+            // Favicon piccola per la barra dei preferiti
+            const smallFavicon = document.createElement('link');
+            smallFavicon.rel = 'shortcut icon';
+            smallFavicon.type = 'image/png';
+            smallFavicon.href = iconBasePath + 'icon-72x72.png';
+            document.head.appendChild(smallFavicon);
+            
+            // Per Android, aggiungiamo icone specifiche
+            if (isAndroid) {
+                console.log('Dispositivo Android rilevato, aggiungendo icone specifiche');
+                
+                // Icone per Android con dimensioni specifiche
+                const androidSizes = ['192x192', '512x512'];
+                
+                androidSizes.forEach(size => {
+                    const androidIcon = document.createElement('link');
+                    androidIcon.rel = 'icon';
+                    androidIcon.type = 'image/png';
+                    androidIcon.sizes = size;
+                    androidIcon.href = iconBasePath + 'icon-' + size + '.png';
+                    document.head.appendChild(androidIcon);
+                });
+                
+                // Aggiungi meta tag per il tema
+                const themeMeta = document.createElement('meta');
+                themeMeta.name = 'theme-color';
+                themeMeta.content = '#006A6A'; // Colore primario dell'app
+                document.head.appendChild(themeMeta);
+            }
+            
+            // Icone per iOS con dimensioni specifiche
+            if (isIOSDevice) {
+                console.log('Dispositivo iOS rilevato, aggiungendo icone specifiche');
+                
+                // Icona principale per iOS (utilizzata nella schermata home)
+                const appleIcon = document.createElement('link');
+                appleIcon.rel = 'apple-touch-icon';
+                appleIcon.href = iconBasePath + 'icon-192x192.png';
+                document.head.appendChild(appleIcon);
+                
+                // Icone specifiche per diversi dispositivi iOS
+                const appleSizes = [
+                    { size: '152x152', device: 'iPad', icon: 'icon-152x152.png' },
+                    { size: '167x167', device: 'iPad Pro', icon: 'icon-152x152.png' },
+                    { size: '180x180', device: 'iPhone Retina', icon: 'icon-192x192.png' }
+                ];
+                
+                appleSizes.forEach(item => {
+                    const sizeIcon = document.createElement('link');
+                    sizeIcon.rel = 'apple-touch-icon';
+                    sizeIcon.sizes = item.size;
+                    sizeIcon.href = iconBasePath + item.icon;
+                    document.head.appendChild(sizeIcon);
+                });
+                
+                // Aggiungi meta tag per prevenire lo scaling automatico
+                const viewportMeta = document.querySelector('meta[name="viewport"]');
+                if (viewportMeta) {
+                    viewportMeta.content = 'width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no';
+                }
+                
+                // Aggiungi meta tag per la modalità standalone
+                const appleMobileWebAppCapable = document.createElement('meta');
+                appleMobileWebAppCapable.name = 'apple-mobile-web-app-capable';
+                appleMobileWebAppCapable.content = 'yes';
+                document.head.appendChild(appleMobileWebAppCapable);
+                
+                // Aggiungi meta tag per la barra di stato
+                const statusBarStyle = document.createElement('meta');
+                statusBarStyle.name = 'apple-mobile-web-app-status-bar-style';
+                statusBarStyle.content = 'black-translucent';
+                document.head.appendChild(statusBarStyle);
+            }
+        }
+        
+        // Esegui la funzione per aggiungere le icone
+        addDeviceSpecificIcons();
 
         // Variabili per l'installazione della PWA
         let deferredPrompt;
@@ -14790,6 +14890,20 @@ END:VCARD`;
         // Funzione per rilevare iOS
         function isIOS() {
             return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        }
+        
+        // Aggiungi meta tag specifico per iOS per prevenire lo scaling automatico
+        if (isIOS()) {
+            const viewportFitMeta = document.createElement('meta');
+            viewportFitMeta.name = 'viewport';
+            viewportFitMeta.content = 'width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no';
+            document.head.appendChild(viewportFitMeta);
+            
+            // Aggiungi meta tag per la modalità standalone
+            const mobileWebAppMeta = document.createElement('meta');
+            mobileWebAppMeta.name = 'mobile-web-app-capable';
+            mobileWebAppMeta.content = 'yes';
+            document.head.appendChild(mobileWebAppMeta);
         }
         
         // Funzione per rilevare Safari su iOS
