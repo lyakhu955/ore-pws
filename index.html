@@ -9690,7 +9690,15 @@
             console.log("Inizializzazione controlli orari...");
             const timeControlButtons = document.querySelectorAll('.time-control-btn');
             
+            // Prima rimuoviamo tutti gli event listener esistenti
             timeControlButtons.forEach(button => {
+                // Clona e sostituisci il pulsante per rimuovere tutti gli event listener
+                const newButton = button.cloneNode(true);
+                button.parentNode.replaceChild(newButton, button);
+            });
+            
+            // Ora aggiungiamo i nuovi event listener
+            document.querySelectorAll('.time-control-btn').forEach(button => {
                 button.addEventListener('click', function() {
                     const action = this.getAttribute('data-action');
                     const targetId = this.getAttribute('data-target');
