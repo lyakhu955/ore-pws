@@ -2161,6 +2161,117 @@
             border-bottom: 1px solid var(--md-sys-color-outline-variant);
             padding-bottom: 0.5rem;
         }
+        
+        /* Stili per l'aggiunta di contatti */
+        .add-contact-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+        
+        #addContactBtn {
+            background-color: var(--md-sys-color-secondary);
+            color: var(--md-sys-color-on-secondary);
+            transition: all 0.3s ease;
+        }
+        
+        #addContactBtn:hover {
+            background-color: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+            transform: translateY(-2px);
+        }
+        
+        /* Stili per il modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1050;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .modal.show {
+            display: block;
+            opacity: 1;
+        }
+        
+        .modal-content {
+            background-color: var(--md-sys-color-surface);
+            margin: 10% auto;
+            width: 90%;
+            max-width: 500px;
+            border-radius: var(--border-radius-large);
+            box-shadow: var(--elevation-3);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+            border: 1px solid var(--md-sys-color-outline-variant);
+        }
+        
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+        
+        .modal-header h3 {
+            color: var(--md-sys-color-primary);
+            margin: 0;
+        }
+        
+        .close-modal {
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        
+        .close-modal:hover {
+            color: var(--md-sys-color-error);
+        }
+        
+        .modal-body {
+            padding: 1rem;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .btn-secondary {
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius-full);
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: background-color 0.2s ease;
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--md-sys-color-outline);
+        }
         .contact-card {
             background-color: var(--md-sys-color-surface);
             border-radius: var(--border-radius-medium);
@@ -4643,6 +4754,47 @@
                             </div>
                         </div>
                         <!-- Add other contacts similarly -->
+                        
+                        <!-- Pulsante per aggiungere nuovi contatti -->
+                        <div class="add-contact-container">
+                            <button id="addContactBtn" class="btn">
+                                <span class="material-symbols-outlined">person_add</span> Aggiungi Contatto
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Modal per aggiungere un nuovo contatto -->
+                    <div id="addContactModal" class="modal">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3>Aggiungi Nuovo Contatto</h3>
+                                <span class="close-modal" id="closeContactModal">&times;</span>
+                            </div>
+                            <div class="modal-body">
+                                <form id="addContactForm">
+                                    <div class="form-group">
+                                        <label for="contactDepartment">Reparto/Ruolo</label>
+                                        <input type="text" id="contactDepartment" required placeholder="Es. Ufficio Acquisti">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="contactName">Nome e Cognome</label>
+                                        <input type="text" id="contactName" required placeholder="Es. Mario Rossi">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="contactEmail">Email</label>
+                                        <input type="email" id="contactEmail" required placeholder="Es. m.rossi@pwsdecoart.it">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="contactPhone">Telefono (opzionale)</label>
+                                        <input type="tel" id="contactPhone" placeholder="Es. +39.333.1234567">
+                                    </div>
+                                    <div class="form-actions">
+                                        <button type="button" id="cancelAddContact" class="btn-secondary">Annulla</button>
+                                        <button type="submit" id="saveContactBtn">Salva Contatto</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -15943,6 +16095,180 @@ END:VCARD`;
             if (pwaStatus) {
                 pwaStatus.textContent = 'Il tuo browser non supporta l\'installazione dell\'app';
             }
+        }
+    </script>
+
+    <!-- Script per la gestione dei contatti -->
+    <script>
+        // Funzione per inizializzare la gestione dei contatti
+        function initContactsManager() {
+            // Elementi DOM
+            const addContactBtn = document.getElementById('addContactBtn');
+            const addContactModal = document.getElementById('addContactModal');
+            const closeContactModal = document.getElementById('closeContactModal');
+            const cancelAddContact = document.getElementById('cancelAddContact');
+            const addContactForm = document.getElementById('addContactForm');
+            const contactsContainer = document.querySelector('.contacts-container');
+            
+            // Verifica se gli elementi esistono
+            if (!addContactBtn || !addContactModal || !closeContactModal || !addContactForm || !contactsContainer) {
+                console.error('Elementi DOM per la gestione contatti non trovati');
+                return;
+            }
+            
+            // Funzione per aprire il modal
+            function openModal() {
+                addContactModal.classList.add('show');
+                setTimeout(() => {
+                    document.getElementById('contactDepartment').focus();
+                }, 300);
+            }
+            
+            // Funzione per chiudere il modal
+            function closeModal() {
+                addContactModal.classList.remove('show');
+                addContactForm.reset();
+            }
+            
+            // Funzione per creare un nuovo contatto
+            function createContact(department, name, email, phone) {
+                // Crea un nuovo gruppo di contatti se non esiste già
+                let contactGroup = Array.from(contactsContainer.querySelectorAll('.contact-group')).find(
+                    group => group.querySelector('h3').textContent.trim() === department
+                );
+                
+                if (!contactGroup) {
+                    contactGroup = document.createElement('div');
+                    contactGroup.className = 'contact-group';
+                    contactGroup.innerHTML = `<h3>${department}</h3>`;
+                    
+                    // Inserisci il nuovo gruppo prima del pulsante "Aggiungi Contatto"
+                    const addContactContainer = contactsContainer.querySelector('.add-contact-container');
+                    contactsContainer.insertBefore(contactGroup, addContactContainer);
+                }
+                
+                // Crea la card del contatto
+                const contactCard = document.createElement('div');
+                contactCard.className = 'contact-card';
+                
+                // Costruisci l'HTML della card
+                let contactHTML = `
+                    <div class="contact-name">${name}</div>
+                    <div class="contact-info">
+                `;
+                
+                // Aggiungi email (obbligatoria)
+                contactHTML += `
+                    <div class="contact-item">
+                        <span class="material-symbols-outlined">mail</span>
+                        <a href="mailto:${email}">${email}</a>
+                    </div>
+                `;
+                
+                // Aggiungi telefono (se presente)
+                if (phone && phone.trim() !== '') {
+                    contactHTML += `
+                        <div class="contact-item">
+                            <span class="material-symbols-outlined">call</span>
+                            <a href="tel:${phone}">${phone}</a>
+                        </div>
+                    `;
+                }
+                
+                contactHTML += `</div>`;
+                contactCard.innerHTML = contactHTML;
+                
+                // Aggiungi la card al gruppo
+                contactGroup.appendChild(contactCard);
+                
+                // Mostra un messaggio di conferma
+                showToast(`Contatto ${name} aggiunto con successo`, 'success');
+                
+                // Salva i contatti nel localStorage
+                saveContacts();
+            }
+            
+            // Funzione per salvare i contatti nel localStorage
+            function saveContacts() {
+                const contacts = [];
+                const contactGroups = contactsContainer.querySelectorAll('.contact-group');
+                
+                contactGroups.forEach(group => {
+                    const department = group.querySelector('h3').textContent.trim();
+                    const cards = group.querySelectorAll('.contact-card');
+                    
+                    cards.forEach(card => {
+                        const name = card.querySelector('.contact-name').textContent.trim();
+                        const emailElement = card.querySelector('.contact-item a[href^="mailto:"]');
+                        const phoneElement = card.querySelector('.contact-item a[href^="tel:"]');
+                        
+                        const email = emailElement ? emailElement.textContent.trim() : '';
+                        const phone = phoneElement ? phoneElement.textContent.trim() : '';
+                        
+                        contacts.push({ department, name, email, phone });
+                    });
+                });
+                
+                localStorage.setItem('pwsContacts', JSON.stringify(contacts));
+            }
+            
+            // Funzione per caricare i contatti dal localStorage
+            function loadContacts() {
+                const savedContacts = localStorage.getItem('pwsContacts');
+                if (!savedContacts) return;
+                
+                try {
+                    const contacts = JSON.parse(savedContacts);
+                    contacts.forEach(contact => {
+                        createContact(contact.department, contact.name, contact.email, contact.phone);
+                    });
+                } catch (error) {
+                    console.error('Errore nel caricamento dei contatti:', error);
+                }
+            }
+            
+            // Event listeners
+            addContactBtn.addEventListener('click', openModal);
+            closeContactModal.addEventListener('click', closeModal);
+            cancelAddContact.addEventListener('click', closeModal);
+            
+            // Chiudi il modal se si clicca fuori dal contenuto
+            addContactModal.addEventListener('click', function(event) {
+                if (event.target === addContactModal) {
+                    closeModal();
+                }
+            });
+            
+            // Gestisci l'invio del form
+            addContactForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                const department = document.getElementById('contactDepartment').value.trim();
+                const name = document.getElementById('contactName').value.trim();
+                const email = document.getElementById('contactEmail').value.trim();
+                const phone = document.getElementById('contactPhone').value.trim();
+                
+                createContact(department, name, email, phone);
+                closeModal();
+            });
+            
+            // Funzione per mostrare un toast di notifica
+            function showToast(message, type = 'info') {
+                // Verifica se esiste già una funzione showToast globale
+                if (window.showToast && typeof window.showToast === 'function') {
+                    window.showToast(message, type);
+                } else {
+                    // Implementazione semplice di fallback
+                    alert(message);
+                }
+            }
+        }
+        
+        // Inizializza il gestore contatti quando il DOM è pronto
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initContactsManager);
+        } else {
+            initContactsManager();
         }
     </script>
 
