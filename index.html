@@ -1507,6 +1507,60 @@
             color: var(--md-sys-color-on-surface-variant);
             margin-top: 0.25rem;
         }
+        
+        /* Stili per le righe di lavoro multiple */
+        #work-descriptions-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .work-description-row {
+            display: flex;
+            align-items: center;
+        }
+        
+        .work-description-input {
+            flex: 1;
+        }
+        
+        .btn-remove-work {
+            background: none;
+            border: none;
+            color: var(--md-sys-color-error);
+            cursor: pointer;
+            padding: 4px;
+            margin-left: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-remove-work:hover {
+            background-color: rgba(186, 26, 26, 0.1);
+        }
+        
+        .btn-add-work {
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-primary);
+            border: 1px dashed var(--md-sys-color-outline);
+            padding: 8px 16px;
+            border-radius: var(--border-radius-small);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .btn-add-work:hover {
+            background-color: var(--md-sys-color-primary-container);
+        }
         .entry-buttons {
             display: flex;
             gap: 0.5rem;
@@ -4156,8 +4210,15 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="description">Descrizione:</label>
-                                <input type="text" id="description" class="form-control" placeholder="Inserisci una descrizione">
+                                <label for="work-descriptions">Lavoro:</label>
+                                <div id="work-descriptions-container">
+                                    <div class="work-description-row">
+                                        <input type="text" id="description" class="form-control work-description-input" placeholder="Inserisci un lavoro" data-row="0">
+                                    </div>
+                                </div>
+                                <button type="button" id="add-work-row" class="btn-add-work">
+                                    <span class="material-symbols-outlined">add</span> Aggiungi riga
+                                </button>
                             </div>
 
                             <div class="form-group" style="margin-top: 20px; text-align: right;">
@@ -5196,6 +5257,12 @@
                 console.log('Controlli orari inizializzati');
             }
             
+            // Inizializza le righe di lavoro multiple
+            if (typeof initWorkRows === 'function') {
+                initWorkRows();
+                console.log('Righe di lavoro multiple inizializzate');
+            }
+            
             // Inizializza i promemoria all'avvio dell'applicazione
             const savedSettings = JSON.parse(localStorage.getItem('reminderSettings'));
             if (savedSettings && savedSettings.enabled) {
@@ -5698,6 +5765,84 @@
 
         // --- Time Entry Functions ---
 
+        // Funzione per inizializzare le righe di lavoro multiple
+        function initWorkRows() {
+            console.log("Inizializzazione righe di lavoro multiple...");
+            
+            // Aggiungi event listener al pulsante "Aggiungi riga"
+            const addWorkRowBtn = document.getElementById('add-work-row');
+            if (addWorkRowBtn) {
+                addWorkRowBtn.addEventListener('click', addWorkRow);
+            }
+            
+            // Aggiungi event listener alla prima riga di lavoro
+            setupWorkRowListeners(document.querySelector('.work-description-input'));
+        }
+        
+        // Funzione per aggiungere una nuova riga di lavoro
+        function addWorkRow() {
+            const container = document.getElementById('work-descriptions-container');
+            if (!container) return;
+            
+            // Conta le righe esistenti per assegnare un indice univoco
+            const rowIndex = container.querySelectorAll('.work-description-row').length;
+            
+            // Crea una nuova riga
+            const newRow = document.createElement('div');
+            newRow.className = 'work-description-row';
+            newRow.innerHTML = `
+                <input type="text" class="form-control work-description-input" placeholder="Inserisci un lavoro" data-row="${rowIndex}">
+                <button type="button" class="btn-remove-work" data-row="${rowIndex}">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            `;
+            
+            // Aggiungi la nuova riga al container
+            container.appendChild(newRow);
+            
+            // Aggiungi event listener alla nuova riga
+            setupWorkRowListeners(newRow.querySelector('.work-description-input'));
+            
+            // Aggiungi event listener al pulsante di rimozione
+            const removeBtn = newRow.querySelector('.btn-remove-work');
+            if (removeBtn) {
+                removeBtn.addEventListener('click', function() {
+                    newRow.remove();
+                });
+            }
+            
+            // Focus sulla nuova riga
+            newRow.querySelector('.work-description-input').focus();
+        }
+        
+        // Funzione per configurare gli event listener per una riga di lavoro
+        function setupWorkRowListeners(inputElement) {
+            if (!inputElement) return;
+            
+            // Event listener per il tasto "Invio"
+            inputElement.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault(); // Previeni l'invio del form
+                    addWorkRow(); // Aggiungi una nuova riga
+                }
+            });
+        }
+        
+        // Funzione per raccogliere tutte le descrizioni di lavoro
+        function getAllWorkDescriptions() {
+            const inputs = document.querySelectorAll('.work-description-input');
+            const descriptions = [];
+            
+            inputs.forEach(input => {
+                const value = input.value.trim();
+                if (value) {
+                    descriptions.push(value);
+                }
+            });
+            
+            return descriptions.join(', ');
+        }
+
         function saveTimeEntry(event) {
             event.preventDefault();
             console.log("Tentativo di salvataggio voce...");
@@ -5708,13 +5853,12 @@
             const breakTimeInput = document.getElementById('breakTime');
             const notturneInput = document.getElementById('notturne');
             const transfertaInput = document.getElementById('transferta');
-            const descriptionInput = document.getElementById('description');
             const totalHoursInput = document.getElementById('totalHours');
             const vehicleSelect = document.getElementById('vehicleSelect');
             const form = document.getElementById('timeEntryForm');
 
             // Validate elements exist
-             if (!dateInput || !startTimeInput || !endTimeInput || !breakTimeInput || !notturneInput || !transfertaInput || !descriptionInput || !totalHoursInput || !vehicleSelect || !form) {
+             if (!dateInput || !startTimeInput || !endTimeInput || !breakTimeInput || !notturneInput || !transfertaInput || !totalHoursInput || !vehicleSelect || !form) {
                  console.error("Uno o più elementi del form non trovati!");
                  showToast("Errore interno: Elementi del form mancanti.", "error");
                  return;
@@ -5727,7 +5871,8 @@
             const notturne = parseFloat(notturneInput.value) || 0;
             // Verifica se il pulsante di trasferta è attivo
             const transferta = transfertaInput.classList.contains('active') || transfertaInput.getAttribute('data-active') === 'true';
-            const description = descriptionInput.value.trim();
+            // Raccogli tutte le descrizioni di lavoro
+            const description = getAllWorkDescriptions();
             const totalHours = parseFloat(totalHoursInput.value) || 0;
             const selectedVehicle = vehicleSelect.value; // Get selected vehicle ID or name
 
@@ -5988,7 +6133,66 @@
                      if (textElement) textElement.textContent = 'Seleziona trasferta';
                  }
                  
-                 form.elements.description.value = entryToLoad.description || '';
+                 // Gestione delle righe di lavoro multiple
+                 const description = entryToLoad.description || '';
+                 
+                 // Pulisci le righe di lavoro esistenti tranne la prima
+                 const container = document.getElementById('work-descriptions-container');
+                 if (container) {
+                     const rows = container.querySelectorAll('.work-description-row');
+                     // Mantieni solo la prima riga
+                     for (let i = 1; i < rows.length; i++) {
+                         rows[i].remove();
+                     }
+                     
+                     // Imposta il valore della prima riga
+                     const firstInput = container.querySelector('.work-description-input');
+                     if (firstInput) {
+                         firstInput.value = '';
+                     }
+                     
+                     // Se ci sono descrizioni multiple separate da virgole, crea righe aggiuntive
+                     if (description) {
+                         const descriptions = description.split(',').map(d => d.trim()).filter(d => d);
+                         
+                         // Imposta la prima descrizione nella riga esistente
+                         if (descriptions.length > 0 && firstInput) {
+                             firstInput.value = descriptions[0];
+                         }
+                         
+                         // Crea righe aggiuntive per le altre descrizioni
+                         for (let i = 1; i < descriptions.length; i++) {
+                             const rowIndex = i;
+                             const newRow = document.createElement('div');
+                             newRow.className = 'work-description-row';
+                             newRow.innerHTML = `
+                                 <input type="text" class="form-control work-description-input" placeholder="Inserisci un lavoro" data-row="${rowIndex}" value="${descriptions[i]}">
+                                 <button type="button" class="btn-remove-work" data-row="${rowIndex}">
+                                     <span class="material-symbols-outlined">close</span>
+                                 </button>
+                             `;
+                             container.appendChild(newRow);
+                             
+                             // Aggiungi event listener alla nuova riga
+                             setupWorkRowListeners(newRow.querySelector('.work-description-input'));
+                             
+                             // Aggiungi event listener al pulsante di rimozione
+                             const removeBtn = newRow.querySelector('.btn-remove-work');
+                             if (removeBtn) {
+                                 removeBtn.addEventListener('click', function() {
+                                     newRow.remove();
+                                 });
+                             }
+                         }
+                     }
+                 } else {
+                     // Fallback se il container non esiste
+                     const descInput = document.getElementById('description');
+                     if (descInput) {
+                         descInput.value = description;
+                     }
+                 }
+                 
                  form.elements.totalHours.value = entryToLoad.totalHours || '';
                  form.elements.vehicleSelect.value = entryToLoad.vehicle || ""; // Set vehicle
 
@@ -6159,7 +6363,24 @@
                  if (textElement) textElement.textContent = 'Seleziona trasferta';
              }
              
-             if (document.getElementById('description')) document.getElementById('description').value = '';
+             // Reset delle righe di lavoro multiple
+             const container = document.getElementById('work-descriptions-container');
+             if (container) {
+                 // Rimuovi tutte le righe tranne la prima
+                 const rows = container.querySelectorAll('.work-description-row');
+                 for (let i = 1; i < rows.length; i++) {
+                     rows[i].remove();
+                 }
+                 
+                 // Resetta il valore della prima riga
+                 const firstInput = container.querySelector('.work-description-input');
+                 if (firstInput) {
+                     firstInput.value = '';
+                 }
+             } else if (document.getElementById('description')) {
+                 // Fallback per il vecchio campo descrizione
+                 document.getElementById('description').value = '';
+             }
              if (document.getElementById('vehicleSelect')) document.getElementById('vehicleSelect').value = ''; // Reset vehicle select
              if (totalHoursInput) totalHoursInput.value = ''; // Clear calculated hours
 
