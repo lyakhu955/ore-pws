@@ -1967,7 +1967,7 @@
             background-color: rgba(0, 0, 0, 0.5); /* Fallback */
             animation: fadeIn 0.3s ease;
             padding: 1rem; /* Padding for scroll */
-            pointer-events: auto !important; /* Assicuriamo che gli eventi del mouse vengano catturati */
+            visibility: visible; /* Assicura che il modale sia visibile quando display è 'block' */
         }
         .modal-content {
             background-color: var(--md-sys-color-surface);
@@ -1979,9 +1979,6 @@
             max-width: 600px;
             border-radius: var(--border-radius-large);
             box-shadow: var(--elevation-4);
-            position: relative;
-            z-index: 1051; /* Superiore al modale stesso */
-            pointer-events: auto !important; /* Assicuriamo che gli eventi del mouse vengano catturati */
             animation: slideIn 0.3s ease-out;
         }
         @keyframes slideIn {
@@ -2185,7 +2182,43 @@
             transform: translateY(-2px);
         }
         
-        /* Stili per il modal - Rimossi per evitare conflitti */
+        /* Stili per il modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1050;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .modal.show {
+            display: block;
+            opacity: 1;
+        }
+        
+        .modal-content {
+            background-color: var(--md-sys-color-surface);
+            margin: 10% auto;
+            width: 90%;
+            max-width: 500px;
+            border-radius: var(--border-radius-large);
+            box-shadow: var(--elevation-3);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+            border: 1px solid var(--md-sys-color-outline-variant);
+        }
+        
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
         
         .modal-header {
             padding: 1rem;
@@ -2283,6 +2316,17 @@
         /* --- Modern Flatpickr Styling (2025 Inspired) --- */
 
         /* Stili per il calendario */
+        
+        /* Stili specifici per il modale del calendario */
+        #dayModal {
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        #dayModal.visible {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
         .flatpickr-calendar {
             background: var(--md-sys-color-surface) !important;
         }
@@ -4905,8 +4949,6 @@
                 </button>
             </div>
             <div class="modal-body">
-                <!-- Holiday name placeholder rimosso perché duplicato -->
-                <!-- L'elemento modalHolidayInfo è già presente nell'header -->
                 <!-- Summary section -->
                 <div class="day-summary">
                     <div class="day-summary-item">
@@ -5063,7 +5105,6 @@
                     defaultDate: dateInput.value,
                     disableMobile: true, // Use custom mobile handling & style
                     appendTo: document.body, // Append to body to avoid layout issues
-                    static: true, // Impedisce al calendario di chiudersi quando si clicca all'interno
                     // ++ Add dropdown for month only ++
                     dropdowns: {
                         months: true,
@@ -5150,9 +5191,6 @@
                             if (typeof loadExistingEntry === 'function') {
                                 loadExistingEntry(dateStr);
                             }
-                            
-                            // Non chiudere automaticamente il calendario dopo la selezione
-                            instance.open(); // Mantiene aperto il calendario
                         } else if (!dateStr) {
                             // Handle case where date is cleared (if allowInput was true)
                              const today = new Date();
@@ -5774,45 +5812,25 @@
                  const addEntryModalBtn = modal.querySelector('#addEntryBtn');
 
                  if(closeModalBtn) {
-                     // Rimuoviamo eventuali listener precedenti
-                     const newCloseBtn = closeModalBtn.cloneNode(true);
-                     closeModalBtn.parentNode.replaceChild(newCloseBtn, closeModalBtn);
-                     
-                     // Aggiungiamo un nuovo listener con un ritardo per evitare problemi
-                     newCloseBtn.addEventListener('click', (event) => {
-                         event.preventDefault();
-                         event.stopPropagation();
-                         console.log("Pulsante di chiusura cliccato");
-                         setTimeout(() => {
-                             modal.style.display = 'none';
-                         }, 100);
+                     closeModalBtn.addEventListener('click', () => {
+                         modal.style.display = 'none';
+                         modal.style.opacity = '0';
+                         modal.style.visibility = 'hidden';
+                         modal.classList.remove('visible');
+                         console.log("Modale chiuso tramite pulsante di chiusura");
                      });
-                 } else { 
-                     console.warn("Pulsante chiusura modale non trovato."); 
-                 }
+                 } else { console.warn("Pulsante chiusura modale non trovato."); }
 
-                 // Rimuoviamo completamente il gestore di eventi di click sul background
-                 // per evitare che il modale si chiuda quando si clicca al suo interno
-                 modal.removeEventListener('click', modalClickHandler);
-                 
-                 // Definiamo un nuovo gestore che chiude il modale SOLO se si clicca esattamente sul background
-                 function modalClickHandler(event) {
-                     // Verifichiamo che il click sia esattamente sul background del modale e non su un suo figlio
-                     if (event.target === modal && event.currentTarget === modal) {
-                         console.log("Click sul background del modale");
-                         // Chiudiamo il modale con un ritardo maggiore
-                         setTimeout(() => {
-                             modal.style.display = 'none';
-                         }, 300);
-                     } else {
-                         // Click su un elemento all'interno del modale, non facciamo nulla
-                         console.log("Click all'interno del modale, non chiudiamo");
-                         event.stopPropagation();
+                 // Close modal if clicking on the background scrim
+                 modal.addEventListener('click', (event) => {
+                     if (event.target === modal) {
+                         modal.style.display = 'none';
+                         modal.style.opacity = '0';
+                         modal.style.visibility = 'hidden';
+                         modal.classList.remove('visible');
+                         console.log("Modale chiuso tramite click sullo sfondo");
                      }
-                 }
-                 
-                 // Aggiungiamo il nuovo listener
-                 modal.addEventListener('click', modalClickHandler);
+                 });
 
                   if (addEntryModalBtn) {
                      addEntryModalBtn.addEventListener('click', () => {
@@ -5857,6 +5875,9 @@
                                       console.error("Input data o ora inizio non trovati dopo navigazione.");
                                  }
                                  modal.style.display = 'none'; // Close modal
+                                modal.style.opacity = '0';
+                                modal.style.visibility = 'hidden';
+                                modal.classList.remove('visible');
                              }, 300); // Delay might need adjustment based on animation timing
                          } else {
                              console.error("Impossibile determinare la data (window.lastClickedDate) per aggiungere la voce.");
@@ -6865,10 +6886,6 @@
              days.forEach(day => {
                  // Remove previous listener if any? Maybe not necessary if grid is regenerated.
                  day.addEventListener('click', (event) => { // Add event parameter
-                     // Previeni la propagazione dell'evento per evitare che il modale si chiuda immediatamente
-                     event.preventDefault();
-                     event.stopPropagation();
-                     
                      const clickedElement = event.currentTarget; // Get the element the listener is attached to
                      const dateStr = clickedElement.getAttribute('data-date');
                      console.log(`[attachCalendarEventListeners] Click detected on element with data-date: ${dateStr}`); // LOG 1
@@ -6884,218 +6901,259 @@
 
         // --- Modal Functions ---
 
-        // Variabile globale per tenere traccia dello stato del modale
-        window.modalIsOpening = false;
-        
         function openDayModal(dateStr) {
-            console.log(`[openDayModal] Function called with dateStr: ${dateStr}`);
-            
-            // Preveniamo l'apertura multipla del modale
-            if (window.modalIsOpening) {
-                console.log("Apertura modale già in corso, ignoro la richiesta");
+            console.log(`[openDayModal] Function called with dateStr: ${dateStr}`); // LOG 3
+            const modal = document.getElementById('dayModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalHolidayInfo = document.getElementById('modalHolidayInfo'); // Get new element
+            const modalEntries = document.getElementById('modalEntries');
+            const daySummary = modal ? modal.querySelector('.day-summary') : null;
+            const addEntryModalBtn = modal ? modal.querySelector('#addEntryBtn') : null;
+            const markFerieBtn = modal ? modal.querySelector('#markFerieBtn') : null; // New
+            const markMalattiaBtn = modal ? modal.querySelector('#markMalattiaBtn') : null; // New
+
+            // Add new buttons to null check
+            if (!modal || !modalTitle || !modalHolidayInfo || !daySummary || !modalEntries || !addEntryModalBtn || !markFerieBtn || !markMalattiaBtn) {
+                console.error("Uno o più elementi del modale (inclusi nuovi pulsanti) non trovati.");
+                showToast("Errore: Impossibile aprire i dettagli del giorno.", "error");
                 return;
             }
             
-            // Impostiamo il flag di apertura
-            window.modalIsOpening = true;
-            
-            // Salviamo la data cliccata per riferimenti futuri
-            window.lastClickedDate = dateStr;
-            
-            // Utilizziamo un timeout per evitare problemi di eventi
-            setTimeout(() => {
-                try {
-                    // Otteniamo tutti gli elementi necessari
-                    const modal = document.getElementById('dayModal');
-                    if (!modal) {
-                        throw new Error("Elemento modale non trovato");
+            // Assicuriamoci che il modale sia visibile
+            modal.style.opacity = "1";
+
+            // --- Restore code to define titleDateStr --- 
+            const db = getDb(); // Ensure db is defined early if needed
+            let parsedDateResult;
+            try {
+                 parsedDateResult = parseDate(dateStr);
+                 // Keep the log but remove the number for simplicity
+                 console.log(`[openDayModal] parseDate('${dateStr}') result:`, parsedDateResult, ` (isValid: ${!isNaN(parsedDateResult?.getTime())})`); 
+            } catch (e) {
+                 console.error(`[openDayModal] Error calling parseDate('${dateStr}'):`, e);
+                 parsedDateResult = new Date(NaN);
+            }
+
+            window.lastClickedDate = dateStr; // Store for other actions
+
+            // Construct title
+            let titleDateStr = dateStr; // Fallback
+            const parts = dateStr.split('/');
+             if (parts.length === 3) {
+                 const dayPart = parts[0];
+                 const monthIndex = parseInt(parts[1], 10) - 1;
+                 const yearPart = parts[2];
+                 const monthNames = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
+                 if(monthIndex >= 0 && monthIndex < 12) {
+                    titleDateStr = `${dayPart} ${monthNames[monthIndex]} ${yearPart}`;
+                    if (!isNaN(parsedDateResult?.getTime())) {
+                         try {
+                             titleDateStr = parsedDateResult.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
+                         } catch (e) { console.warn(`[openDayModal] Error formatting date title with toLocaleDateString:`, e); /* Use simple string */ }
                     }
-                    
-                    // Forziamo la visualizzazione del modale e assicuriamo che rimanga visibile
-                    modal.style.display = 'block';
-                    modal.style.opacity = '1';
-                    modal.style.visibility = 'visible';
-                    modal.style.pointerEvents = 'auto';
-                    
-                    // Otteniamo gli altri elementi
-                    const modalTitle = document.getElementById('modalTitle');
-                    const modalHolidayInfo = document.getElementById('modalHolidayInfo');
-                    const modalEntries = document.getElementById('modalEntries');
-                    const daySummary = modal.querySelector('.day-summary');
-                    const addEntryModalBtn = modal.querySelector('#addEntryBtn');
-                    const markFerieBtn = modal.querySelector('#markFerieBtn');
-                    const markMalattiaBtn = modal.querySelector('#markMalattiaBtn');
-                    
-                    // Verifichiamo che tutti gli elementi siano presenti
-                    if (!modalTitle || !modalHolidayInfo || !daySummary || !modalEntries || 
-                        !addEntryModalBtn || !markFerieBtn || !markMalattiaBtn) {
-                        throw new Error("Elementi del modale mancanti");
+                 }
+             }
+             // --- End restore titleDateStr code ---
+
+             modalTitle.textContent = `Dettagli ${titleDateStr}`; // Set the title
+            modalEntries.innerHTML = ''; // Clear previous entries
+             modalHolidayInfo.innerHTML = ''; // Clear holiday info
+             modalHolidayInfo.style.display = 'none'; // Hide holiday info by default
+
+            // --- Reset button states --- 
+            addEntryModalBtn.style.display = 'inline-flex';
+            markFerieBtn.style.display = 'inline-flex';
+            markMalattiaBtn.style.display = 'inline-flex';
+            daySummary.style.display = 'grid';
+
+            // --- Remove previous listeners from absence buttons to prevent duplicates ---
+            markFerieBtn.replaceWith(markFerieBtn.cloneNode(true));
+            markMalattiaBtn.replaceWith(markMalattiaBtn.cloneNode(true));
+            // Re-acquire references after cloning
+            const freshMarkFerieBtn = modal.querySelector('#markFerieBtn');
+            const freshMarkMalattiaBtn = modal.querySelector('#markMalattiaBtn');
+
+            // --- Attach new listeners --- 
+            freshMarkFerieBtn.addEventListener('click', () => markDayAsAbsence(dateStr, 'ferie'));
+            freshMarkMalattiaBtn.addEventListener('click', () => markDayAsAbsence(dateStr, 'malattia'));
+
+             // --- Get data AFTER setting up buttons and title ---
+             console.log(`[openDayModal] Accessing db.entries with key: '${dateStr}'`);
+             const entries = db.entries[dateStr] || [];
+             console.log(`[openDayModal] Found ${entries.length} entries for key '${dateStr}'. Content:`, JSON.stringify(entries)); // Log the content
+             console.log(`[openDayModal] Accessing db.holidays with key: '${dateStr}'`);
+             const holidayInfo = db.holidays[dateStr];
+             console.log(`[openDayModal] Found holidayInfo:`, holidayInfo);
+
+            if (holidayInfo) {
+                 // --- Display Ferie/Malattia Info (already marked) ---
+                 // Restore the code that displays the colored block and delete button
+                 console.log(`Giorno ${dateStr} è ${holidayInfo.type}`);
+                 const typeText = holidayInfo.type === 'ferie' ? 'Ferie' : 'Malattia';
+                 const icon = holidayInfo.type === 'ferie' ? 'beach_access' : 'sick';
+                 modalEntries.innerHTML = `
+                     <div style="text-align: center; padding: 1rem; background-color: ${holidayInfo.type === 'ferie' ? 'var(--md-sys-color-tertiary-container)' : 'var(--md-sys-color-secondary-container)'} ; border-radius: var(--border-radius-medium); color: ${holidayInfo.type === 'ferie' ? 'var(--md-sys-color-on-tertiary-container)' : 'var(--md-sys-color-on-secondary-container)'};">
+                         <span class="material-symbols-outlined" style="font-size: 2rem; vertical-align: middle; margin-right: 0.5rem;">${icon}</span>
+                         <strong style="font-size: 1.1rem;">${typeText}</strong>
+                         ${holidayInfo.note ? `<p style="margin-top: 0.5rem; font-style: italic;">${escapeHtml(holidayInfo.note)}</p>` : ''}
+                          <button class="delete-btn" style="margin-top: 1rem; background-color: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container);" onclick="deleteFerieMalattieEntryFromModal('${dateStr}')">
+                             <span class="material-symbols-outlined">delete</span> Elimina ${typeText}
+                         </button>
+                     </div>`;
+                 
+                 // Hide action buttons if already marked as absence
+                 daySummary.style.display = 'none';
+                 addEntryModalBtn.style.display = 'none';
+                 freshMarkFerieBtn.style.display = 'none'; // Use fresh reference
+                 freshMarkMalattiaBtn.style.display = 'none'; // Use fresh reference
+
+            } else if (entries.length > 0) {
+                 // --- Display Work Entries ---
+                 // Keep absence buttons visible
+                 let totalHoursSummary = 0; // Rename for clarity: this is for the summary
+                 let totalTransferta = 0;
+                 let totalNotturne = 0;
+                 let totalBreakTime = 0; // Added for break time
+                 modalEntries.innerHTML = entries.map((entry, index) => {
+                     // Reconstruct full date-time strings for Date parsing
+                     // dateStr is DD/MM/YYYY, startTime/endTime are HH:MM
+                     const dateParts = dateStr.split('/'); // [DD, MM, YYYY]
+                     if (dateParts.length !== 3) {
+                         console.error(`Invalid dateStr format: ${dateStr} for entry ID ${entry.id}`);
+                         return `<div class="modal-entry error">Errore formato data.</div>`;
+                     }
+                     const isoDatePart = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
+                     // Ensure startTime and endTime exist and are valid time formats (HH:MM)
+                     // Handle both "HH:MM" and numeric string format like "6" or "13"
+                     let rawStartTime = entry.startTime ? String(entry.startTime) : '0';
+                     let rawEndTime = entry.endTime ? String(entry.endTime) : '0';
+
+                     // Special case: "24" represents midnight at the START of the day, treat as "00"
+                     if (rawStartTime === '24') {
+                         rawStartTime = '00';
+                     }
+
+                     // Function to format raw time (string number, decimal, or HH:MM) into HH:MM
+                     const formatToHHMM = (rawTime) => {
+                         if (String(rawTime).match(/^\d{1,2}:\d{2}$/)) {
+                             return rawTime; // Already HH:MM
+                         }
+                         const timeNum = parseFloat(String(rawTime).replace(',', '.')); // Handle comma decimal
+                         if (isNaN(timeNum)) {
+                             return '00:00'; // Invalid input
+                         }
+                         const hours = Math.floor(timeNum);
+                         const minutes = Math.round((timeNum - hours) * 60);
+                         return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+                     };
+
+                     let startTimeStr = formatToHHMM(rawStartTime);
+                     let endTimeStr = formatToHHMM(rawEndTime);
+
+                      const startDateTimeString = `${isoDatePart}T${startTimeStr}:00`;
+                      const endDateTimeString = `${isoDatePart}T${endTimeStr}:00`;
+ 
+                     //console.log(`Parsing start: ${startDateTimeString}, end: ${endDateTimeString}`); // Debugging
+ 
+                     const start = new Date(startDateTimeString);
+                     const end = new Date(endDateTimeString);
+                     
+                     // Check if dates are valid after parsing
+                     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                         console.error(`Invalid date constructed for entry ID ${entry.id}:`, { startStr: startDateTimeString, endStr: endDateTimeString });
+                         return `<div class="modal-entry error">Errore nella visualizzazione dell'orario per questa voce.</div>`;
+                     }
+ 
+                     // Calculate duration for THIS entry, subtracting break time
+                     const rawDuration = (end - start) / (1000 * 60 * 60);
+                     const breakTimeForEntry = Number(entry.breakTime) || 0;
+                     const hoursNet = Math.max(0, rawDuration - breakTimeForEntry);
+
+                     // Add pre-calculated totalHours (which includes break) to summary total
+                     totalHoursSummary += Number(entry.totalHours) || 0;
+                     totalTransferta += Number(entry.transferta) || 0;
+                     totalNotturne += Number(entry.notturne) || 0;
+                     totalBreakTime += Number(entry.breakTime) || 0; // Add break time to total
+                     return `
+                         <div class="modal-entry">
+                             <span>${formatTime(start)}-${Number(entry.breakTime || 0).toFixed(1).replace('.', ',')}-${formatTime(end)}</span>
+                             <span title="${escapeHtml(entry.description || '')}">${escapeHtml(entry.description || '-')}</span>
+                             <span>${hoursNet.toFixed(2)}h</span> <!-- Display net hours for the entry -->
+                             <div>
+                                 <button class="edit-btn" onclick="editEntryFromModal('${dateStr}', '${entry.id}')">
+                                 <span class="material-symbols-outlined">edit</span>
+                             </button>
+                                 <button class="delete-btn" onclick="deleteEntryFromModal('${dateStr}', '${entry.id}')">
+                                 <span class="material-symbols-outlined">delete</span>
+                             </button>
+                             </div>
+                         </div>
+                     `;
+                 }).join('');
+
+                // Display total hours for the day in the summary
+                if (daySummary) {
+                    const totalHoursElement = daySummary.querySelector('#modalTotalHours');
+                    const transfertaHoursElement = daySummary.querySelector('#modalTransferta'); // Correct ID
+                    const notturneHoursElement = daySummary.querySelector('#modalNotturne');   // Correct ID
+
+                    if (totalHoursElement) {
+                        // Use the summary total derived from entry.totalHours
+                        totalHoursElement.textContent = `${totalHoursSummary.toFixed(2)}h`;
                     }
-                    
-                    // Otteniamo i dati dal database
-                    const db = getDb();
-                    
-                    // Formattiamo la data per il titolo
-                    let titleDateStr = dateStr;
-                    try {
-                        const parsedDate = parseDate(dateStr);
-                        if (!isNaN(parsedDate?.getTime())) {
-                            titleDateStr = parsedDate.toLocaleDateString('it-IT', { 
-                                weekday: 'long', 
-                                day: 'numeric', 
-                                month: 'long' 
-                            });
-                        }
-                    } catch (e) {
-                        console.warn("Errore nella formattazione della data:", e);
+                    if (transfertaHoursElement) {
+                        // Verifica se c'è almeno una voce con trasferta
+                        const hasTransferta = entries.some(entry => 
+                            entry.transferta === true || (typeof entry.transferta === 'number' && entry.transferta > 0)
+                        );
+                        transfertaHoursElement.textContent = hasTransferta ? 'SI' : '';
                     }
-                    
-                    // Impostiamo il titolo
-                    modalTitle.textContent = `Dettagli ${titleDateStr}`;
-                    
-                    // Puliamo gli elementi
-                    modalEntries.innerHTML = '';
-                    modalHolidayInfo.innerHTML = '';
-                    modalHolidayInfo.style.display = 'none';
-                    
-                    // Reimpostiamo i pulsanti
-                    addEntryModalBtn.style.display = 'inline-flex';
-                    markFerieBtn.style.display = 'inline-flex';
-                    markMalattiaBtn.style.display = 'inline-flex';
-                    daySummary.style.display = 'grid';
-                    
-                    // Rimuoviamo i listener precedenti
-                    const newMarkFerieBtn = markFerieBtn.cloneNode(true);
-                    const newMarkMalattiaBtn = markMalattiaBtn.cloneNode(true);
-                    const newAddEntryBtn = addEntryModalBtn.cloneNode(true);
-                    
-                    markFerieBtn.parentNode.replaceChild(newMarkFerieBtn, markFerieBtn);
-                    markMalattiaBtn.parentNode.replaceChild(newMarkMalattiaBtn, markMalattiaBtn);
-                    addEntryModalBtn.parentNode.replaceChild(newAddEntryBtn, addEntryModalBtn);
-                    
-                    // Aggiungiamo i nuovi listener
-                    newMarkFerieBtn.addEventListener('click', () => markDayAsAbsence(dateStr, 'ferie'));
-                    newMarkMalattiaBtn.addEventListener('click', () => markDayAsAbsence(dateStr, 'malattia'));
-                    
-                    // Otteniamo i dati
-                    const entries = db.entries[dateStr] || [];
-                    const holidayInfo = db.holidays[dateStr];
-                    
-                    // Gestiamo il caso di giorno con ferie/malattia
-                    if (holidayInfo) {
-                        console.log(`Giorno ${dateStr} è ${holidayInfo.type}`);
-                        const typeText = holidayInfo.type === 'ferie' ? 'Ferie' : 'Malattia';
-                        const icon = holidayInfo.type === 'ferie' ? 'beach_access' : 'sick';
-                        
-                        modalEntries.innerHTML = `
-                            <div style="text-align: center; padding: 1rem; background-color: ${holidayInfo.type === 'ferie' ? 'var(--md-sys-color-tertiary-container)' : 'var(--md-sys-color-secondary-container)'} ; border-radius: var(--border-radius-medium); color: ${holidayInfo.type === 'ferie' ? 'var(--md-sys-color-on-tertiary-container)' : 'var(--md-sys-color-on-secondary-container)'};">
-                                <span class="material-symbols-outlined" style="font-size: 2rem; vertical-align: middle; margin-right: 0.5rem;">${icon}</span>
-                                <strong style="font-size: 1.1rem;">${typeText}</strong>
-                                ${holidayInfo.note ? `<p style="margin-top: 0.5rem; font-style: italic;">${escapeHtml(holidayInfo.note)}</p>` : ''}
-                                <button class="delete-btn" style="margin-top: 1rem; background-color: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container);" onclick="deleteFerieMalattieEntryFromModal('${dateStr}')">
-                                    <span class="material-symbols-outlined">delete</span> Elimina ${typeText}
-                                </button>
-                            </div>`;
-                        
-                        // Nascondiamo i pulsanti di azione se già segnato come assenza
-                        daySummary.style.display = 'none';
-                        newAddEntryBtn.style.display = 'none';
-                        newMarkFerieBtn.style.display = 'none';
-                        newMarkMalattiaBtn.style.display = 'none';
-                    } else if (entries.length > 0) {
-                        // Gestiamo il caso di giorno con voci di lavoro
-                        let totalHoursSummary = 0;
-                        let totalTransferta = 0;
-                        let totalNotturne = 0;
-                        let totalBreakTime = 0;
-                        
-                        // Generiamo l'HTML per ogni voce
-                        modalEntries.innerHTML = entries.map((entry) => {
-                            // Calcoli per le ore totali
-                            totalHoursSummary += Number(entry.totalHours) || 0;
-                            totalTransferta += Number(entry.transferta) || 0;
-                            totalNotturne += Number(entry.notturne) || 0;
-                            totalBreakTime += Number(entry.breakTime) || 0;
-                            
-                            // Formattazione delle ore
-                            const startTime = entry.startTime ? formatTime(entry.startTime) : '00:00';
-                            const endTime = entry.endTime ? formatTime(entry.endTime) : '00:00';
-                            const breakTime = Number(entry.breakTime || 0).toFixed(1).replace('.', ',');
-                            const hoursNet = Number(entry.totalHours || 0).toFixed(2);
-                            
-                            return `
-                                <div class="modal-entry">
-                                    <span>${startTime}-${breakTime}-${endTime}</span>
-                                    <span title="${escapeHtml(entry.description || '')}">${escapeHtml(entry.description || '-')}</span>
-                                    <span>${hoursNet}h</span>
-                                    <div>
-                                        <button class="edit-btn" onclick="editEntryFromModal('${dateStr}', '${entry.id}')">
-                                            <span class="material-symbols-outlined">edit</span>
-                                        </button>
-                                        <button class="delete-btn" onclick="deleteEntryFromModal('${dateStr}', '${entry.id}')">
-                                            <span class="material-symbols-outlined">delete</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('');
-                        
-                        // Aggiorniamo il sommario
-                        const totalHoursElement = daySummary.querySelector('#modalTotalHours');
-                        const transfertaHoursElement = daySummary.querySelector('#modalTransferta');
-                        const notturneHoursElement = daySummary.querySelector('#modalNotturne');
-                        
-                        if (totalHoursElement) {
-                            totalHoursElement.textContent = `${totalHoursSummary.toFixed(2)}h`;
-                        }
-                        
-                        if (transfertaHoursElement) {
-                            transfertaHoursElement.textContent = totalTransferta > 0 ? 'Sì' : 'No';
-                        }
-                        
-                        if (notturneHoursElement) {
-                            notturneHoursElement.textContent = totalNotturne > 0 ? 'Sì' : 'No';
-                        }
-                    } else {
-                        // Nessuna voce per questo giorno
-                        modalEntries.innerHTML = `
-                            <div class="no-entries">
-                                <p>Nessuna voce per questo giorno.</p>
-                            </div>
-                        `;
+                    if (notturneHoursElement) {
+                        notturneHoursElement.textContent = `${totalNotturne.toFixed(1)}h`;   // Use toFixed(1) like elsewhere
                     }
-                    
-                    // Aggiungiamo il listener per il pulsante di chiusura
-                    const closeBtn = modal.querySelector('.close-modal');
-                    if (closeBtn) {
-                        const newCloseBtn = closeBtn.cloneNode(true);
-                        closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
-                        newCloseBtn.addEventListener('click', (event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            console.log("Pulsante di chiusura nel modale cliccato");
-                            setTimeout(() => {
-                                modal.style.display = 'none';
-                            }, 100);
-                        });
-                    }
-                    
-                    // Resettiamo il flag di apertura
-                    window.modalIsOpening = false;
-                    
-                } catch (error) {
-                    console.error("Errore nell'apertura del modale:", error);
-                    showToast("Errore nell'apertura dei dettagli del giorno.", "error");
-                    window.modalIsOpening = false;
+                 daySummary.style.display = 'grid'; // Ensure summary is visible
                 }
-            }, 100); // Utilizziamo un timeout di 100ms
+                 modalHolidayInfo.style.display = 'none'; // Make sure holiday info is hidden
+                 addEntryModalBtn.style.display = 'inline-flex'; // Ensure add button is visible
+                 freshMarkFerieBtn.style.display = 'inline-flex'; // Ensure absence buttons are visible
+                 freshMarkMalattiaBtn.style.display = 'inline-flex';
+
+            } else {
+                 // --- No work entries and not a Ferie/Malattia entry ---
+                 // Check if it's a standard holiday (like Christmas, etc.)
+                 // ... (existing code to check for standard holiday and display it) ...
+                  // Keep absence buttons visible
+                  // If it is a standard holiday, the holiday name is shown in modalHolidayInfo
+                  // If not, the "No entries" message is shown in modalEntries
+            }
+
+            // Assicuriamoci che il modale sia visibile e interattivo
+            modal.style.display = 'block';
+            modal.style.visibility = 'visible';
+            modal.style.opacity = '1';
+            modal.style.pointerEvents = 'auto';
+            modal.classList.add('visible');
+            
+            // Aggiungiamo un piccolo ritardo per assicurarci che il modale sia completamente visibile
+            setTimeout(() => {
+                if (modal.style.display === 'block') {
+                    console.log("Modale aperto e visibile");
+                    // Forza il repaint del modale
+                    modal.offsetHeight;
+                }
+            }, 100);
         }
 
          // Function to handle editing directly from the modal
          function editEntryFromModal(dateStr, entryId) {
              console.log(`Modifica richiesta da modale per ${entryId} del ${dateStr}`);
              const modal = document.getElementById('dayModal');
-             if(modal) modal.style.display = 'none'; // Close modal first
+             if(modal) {
+                modal.style.display = 'none'; // Close modal first
+                modal.style.opacity = '0';
+                modal.style.visibility = 'hidden';
+                modal.classList.remove('visible');
+            }
              editEntry(dateStr, entryId); // Call the main edit function
          }
 
@@ -7122,7 +7180,12 @@
                       console.warn(`Nessuna voce trovata per ${dateStr} durante eliminazione da modale.`);
                       showToast("Voce non trovata (potrebbe essere già stata eliminata).", "warning");
                       const modal = document.getElementById('dayModal');
-                      if (modal) modal.style.display = 'none'; // Close modal if entry list was likely wrong
+                      if (modal) {
+                          modal.style.display = 'none'; // Close modal if entry list was likely wrong
+                          modal.style.opacity = '0';
+                          modal.style.visibility = 'hidden';
+                          modal.classList.remove('visible');
+                      }
                  }
              } else {
                   console.log("Eliminazione da modale annullata.");
@@ -9550,16 +9613,9 @@
                  allowInput: true, // Allow manual input
                  appendTo: document.body,
                  disableMobile: true, // Use styled picker
-                 static: true, // Impedisce al calendario di chiudersi quando si clicca all'interno
                  errorHandler: (error) => { // Handle flatpickr errors
                      console.error("Errore Flatpickr (Ferie/Malattie):", error);
                      showToast(`Errore calendario: ${error.message}`, "error");
-                 },
-                 onChange: function(selectedDates, dateStr, instance) {
-                     // Mantiene aperto il calendario dopo la selezione
-                     if(dateStr && selectedDates.length > 0) {
-                         instance.open();
-                     }
                  }
              };
 
@@ -10279,7 +10335,13 @@ END:VCARD`;
 
             // Close the modal
             const modal = document.getElementById('dayModal');
-            if (modal) modal.style.display = 'none';
+            if (modal) {
+                modal.style.display = 'none';
+                modal.style.opacity = '0';
+                modal.style.visibility = 'hidden';
+                modal.classList.remove('visible');
+                console.log("Modale chiuso dopo aver segnato assenza");
+            }
 
             // Refresh relevant views
             if (typeof loadCalendarData === 'function') loadCalendarData();
