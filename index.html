@@ -15556,77 +15556,77 @@ END:VCARD`;
             }
         });
 
-        // Registra il service worker con percorso adatto a GitHub Pages
+        // Disabilita il service worker per lo sviluppo
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                // Attendi un po' prima di registrare il service worker
-                setTimeout(function() {
-                    // Ottieni il percorso base del sito
-                    const basePath = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-                        ? '/'
-                        : '/' + REPO_NAME + '/';
-                    
-                    console.log('Percorso base:', basePath);
-                    
-                    // Aggiungi un timestamp per forzare l'aggiornamento del service worker
-                    const swPath = getPath('service-worker.js') + '?v=' + new Date().getTime();
-                    console.log('Percorso service worker:', swPath);
-                    console.log('Browser:', navigator.userAgent);
-                    console.log('PWA supportata:', 'BeforeInstallPromptEvent' in window);
-                    
-                    // Prima controlla se c'è un service worker attivo e forzane l'aggiornamento
-                    if (navigator.serviceWorker.controller) {
-                        console.log('Service Worker attivo trovato, forzo aggiornamento...');
-                        navigator.serviceWorker.getRegistration().then(function(reg) {
-                            if (reg) {
-                                reg.update().then(function() {
-                                    console.log('Service Worker aggiornato con successo');
-                                });
-                            }
-                        });
-                    }
-                    
-                    navigator.serviceWorker.register(swPath, {
-                        scope: basePath,
-                        updateViaCache: 'none' // Non usare la cache per il service worker
-                    })
-                    .then(function(registration) {
-                        console.log('Service Worker registrato con successo:', registration.scope);
-                        
-                        // Forza l'aggiornamento del service worker
-                        registration.update();
-                        
-                        // Verifica se l'app è già installata
-                        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                                            window.navigator.standalone === true;
-                        
-                        console.log('App in modalità standalone:', isStandalone);
-                        console.log('deferredPrompt disponibile:', !!deferredPrompt);
-                        
-                        // Aggiorna lo stato della PWA
-                        if (pwaStatus) {
-                            if (isStandalone) {
-                                pwaStatus.textContent = 'App già installata';
-                            } else if (deferredPrompt) {
-                                pwaStatus.textContent = 'L\'app è pronta per essere installata';
-                            } else if (isIOS()) {
-                                pwaStatus.textContent = 'Usa "Aggiungi alla schermata Home" per installare l\'app';
-                            } else {
-                                pwaStatus.textContent = 'Visita il sito in un browser compatibile per installare l\'app';
-                            }
-                        }
-                    })
-                    .catch(function(error) {
-                        console.log('Registrazione Service Worker fallita:', error);
-                        
-                        // Aggiorna lo stato della PWA in caso di errore
-                        if (pwaStatus) {
-                            pwaStatus.textContent = 'Errore nella configurazione PWA';
-                            pwaStatus.style.color = 'var(--md-sys-color-error)';
-                        }
+            // Rimuovi tutti i service worker esistenti
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for (let registration of registrations) {
+                    registration.unregister().then(function() {
+                        console.log('Service Worker rimosso con successo');
                     });
-                }, 1000); // Ritardo di 1 secondo
+                }
             });
+            
+            // Svuota tutte le cache
+            if ('caches' in window) {
+                caches.keys().then(function(cacheNames) {
+                    return Promise.all(
+                        cacheNames.map(function(cacheName) {
+                            console.log('Eliminazione cache:', cacheName);
+                            return caches.delete(cacheName);
+                        })
+                    );
+                }).then(function() {
+                    console.log('Tutte le cache sono state eliminate');
+                });
+            }
+            
+            console.log('Service Worker disabilitato per lo sviluppo');
+            
+            // Aggiungi un listener per il reload della pagina
+            window.addEventListener('focus', function() {
+                // Controlla se la pagina è stata modificata
+                fetch('index.html', {
+                    method: 'HEAD',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                }).then(function(response) {
+                    const lastModified = response.headers.get('Last-Modified');
+                    const cachedLastModified = localStorage.getItem('lastModified');
+                    
+                    if (lastModified && cachedLastModified && lastModified !== cachedLastModified) {
+                        console.log('Pagina modificata, ricarico...');
+                        localStorage.setItem('lastModified', lastModified);
+                        window.location.reload(true);
+                    } else if (lastModified) {
+                        localStorage.setItem('lastModified', lastModified);
+                    }
+                }).catch(function(error) {
+                    console.error('Errore durante il controllo degli aggiornamenti:', error);
+                });
+            });
+            
+            // Verifica se l'app è già installata
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                                window.navigator.standalone === true;
+            
+            console.log('App in modalità standalone:', isStandalone);
+            console.log('deferredPrompt disponibile:', !!deferredPrompt);
+            
+            // Aggiorna lo stato della PWA
+            if (pwaStatus) {
+                if (isStandalone) {
+                    pwaStatus.textContent = 'App già installata';
+                } else if (deferredPrompt) {
+                    pwaStatus.textContent = 'L\'app è pronta per essere installata';
+                } else if (isIOS()) {
+                    pwaStatus.textContent = 'Usa "Aggiungi alla schermata Home" per installare l\'app';
+                } else {
+                    pwaStatus.textContent = 'Visita il sito in un browser compatibile per installare l\'app';
+                }
+            }
         } else {
             // Service Worker non supportato
             if (pwaStatus) {
