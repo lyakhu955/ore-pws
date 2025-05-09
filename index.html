@@ -8132,14 +8132,64 @@
                 Notification.requestPermission().then(permission => {
                     if (permission === 'granted') {
                         showToast('Notifiche attivate!');
+                        
+                        // Mostra una notifica di test per verificare che tutto funzioni
+                        if (window.swRegistration) {
+                            window.swRegistration.showNotification('Ore PWS', {
+                                body: 'Le notifiche sono state attivate con successo!',
+                                icon: '/ore-pws/icons/icon-192x192.png',
+                                tag: 'test-notification'
+                            });
+                        } else {
+                            // Fallback alla notifica standard
+                            const notification = new Notification('Ore PWS', {
+                                body: 'Le notifiche sono state attivate con successo!',
+                                icon: '/ore-pws/icons/icon-192x192.png'
+                            });
+                        }
                     } else {
                         showToast('Permesso per le notifiche negato', 'warning');
                     }
                 });
+            } else if (Notification.permission === 'granted') {
+                // Se il permesso è già stato concesso, verifica che il Service Worker sia registrato
+                if ('serviceWorker' in navigator && !window.swRegistration) {
+                    navigator.serviceWorker.getRegistration().then(registration => {
+                        if (registration) {
+                            window.swRegistration = registration;
+                            console.log('Service Worker recuperato:', registration.scope);
+                        } else {
+                            console.log('Nessun Service Worker registrato, tentativo di registrazione...');
+                            navigator.serviceWorker.register('/ore-pws/service-worker.js')
+                                .then(reg => {
+                                    window.swRegistration = reg;
+                                    console.log('Service Worker registrato con successo:', reg.scope);
+                                })
+                                .catch(error => {
+                                    console.error('Errore nella registrazione del Service Worker:', error);
+                                });
+                        }
+                    });
+                }
             }
         }
         
         // Pianifica il promemoria
+        // Registrazione del Service Worker per le notifiche
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/ore-pws/service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registrato con successo:', registration.scope);
+                        // Salva il riferimento alla registrazione per usarlo nelle notifiche
+                        window.swRegistration = registration;
+                    })
+                    .catch(error => {
+                        console.error('Errore nella registrazione del Service Worker:', error);
+                    });
+            });
+        }
+
         function scheduleReminder(settings) {
             // Cancella eventuali promemoria esistenti
             cancelReminder();
@@ -8161,19 +8211,33 @@
             // Funzione per mostrare la notifica
             const showNotification = () => {
                 if (shouldShowToday()) {
-                    const notification = new Notification('Ore PWS', {
+                    // Opzioni della notifica
+                    const options = {
                         body: settings.text,
-                        icon: '/ore-pws/icons/icon-192x192.png'
-                    });
-                    
-                    notification.onclick = function() {
-                        window.focus();
-                        this.close();
+                        icon: '/ore-pws/icons/icon-192x192.png',
+                        tag: 'ore-pws-reminder',
+                        requireInteraction: true // La notifica rimane visibile finché l'utente non interagisce
                     };
+                    
+                    // Verifica se il Service Worker è disponibile
+                    if (window.swRegistration) {
+                        // Usa il Service Worker per mostrare la notifica
+                        window.swRegistration.showNotification('Ore PWS', options);
+                    } else {
+                        // Fallback alla notifica standard
+                        const notification = new Notification('Ore PWS', options);
+                        notification.onclick = function() {
+                            window.focus();
+                            this.close();
+                        };
+                    }
                 }
                 
                 // Pianifica la notifica per il giorno successivo
                 scheduleNextReminder();
+                
+                // Salva la data dell'ultima notifica mostrata
+                localStorage.setItem('lastNotificationShown', new Date().toISOString());
             };
             
             // Funzione per pianificare il prossimo promemoria
@@ -8196,6 +8260,9 @@
                 // Salva l'ID del timeout per poterlo cancellare in seguito
                 window.reminderTimeoutId = setTimeout(showNotification, timeToWait);
                 
+                // Salva la data e l'ora del prossimo promemoria
+                localStorage.setItem('nextReminderTime', reminderTime.toISOString());
+                
                 console.log(`Promemoria pianificato per ${reminderTime.toLocaleString('it-IT', {
                     weekday: 'long',
                     day: 'numeric',
@@ -8205,6 +8272,21 @@
                     minute: '2-digit',
                     hour12: false
                 })}`);
+                
+                // Se il Service Worker è disponibile, invia un messaggio per pianificare la notifica anche lì
+                if (window.swRegistration && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({
+                        type: 'SCHEDULE_NOTIFICATION',
+                        title: 'Ore PWS',
+                        options: {
+                            body: settings.text,
+                            icon: '/ore-pws/icons/icon-192x192.png',
+                            tag: 'ore-pws-reminder',
+                            requireInteraction: true
+                        },
+                        timestamp: reminderTime.getTime()
+                    });
+                }
             };
             
             // Pianifica il primo promemoria
