@@ -9050,64 +9050,79 @@
                     console.log("Invio pianificazione al Service Worker");
                     
                     // Funzione per inviare il messaggio al Service Worker
-                    const sendToServiceWorker = (registration) => {
-                        if (registration.active) {
-                            registration.active.postMessage({
-                                type: 'SCHEDULE_NOTIFICATION',
-                                title: 'Ore PWS',
-                                options: {
-                                    body: settings.text,
-                                    icon: './icons/icon-192x192.png',
-                                    badge: './icons/icon-72x72.png',
-                                    tag: 'ore-pws-reminder',
-                                    requireInteraction: true,
-                                    vibrate: [100, 50, 100, 50, 100],
-                                    actions: [
-                                        {
-                                            action: 'open-app',
-                                            title: 'Apri App'
-                                        },
-                                        {
-                                            action: 'dismiss',
-                                            title: 'Chiudi'
-                                        }
-                                    ],
-                                    data: {
-                                        url: './',
-                                        days: settings.days
-                                    }
-                                },
-                                days: settings.days,
-                                timestamp: reminderTime.getTime()
-                            });
-                            console.log("Messaggio inviato al Service Worker");
-                        } else {
-                            console.warn("Service Worker non attivo");
+                    const sendMessage = (message) => {
+                        try {
+                            // Se il controller è disponibile, invia direttamente a lui
+                            if (navigator.serviceWorker.controller) {
+                                console.log("Invio messaggio al controller del Service Worker");
+                                navigator.serviceWorker.controller.postMessage(message);
+                                return true;
+                            }
+                            
+                            // Altrimenti, prova a inviare tramite la registrazione
+                            if (window.swRegistration && window.swRegistration.active) {
+                                console.log("Invio messaggio tramite registrazione del Service Worker");
+                                window.swRegistration.active.postMessage(message);
+                                return true;
+                            }
+                            
+                            return false;
+                        } catch (error) {
+                            console.error("Errore nell'invio del messaggio al Service Worker:", error);
+                            return false;
                         }
                     };
                     
-                    // Se il controller è già disponibile, usa quello
-                    if (navigator.serviceWorker.controller) {
-                        sendToServiceWorker(navigator.serviceWorker.controller.registration || window.swRegistration);
-                    } 
-                    // Altrimenti ottieni la registrazione
-                    else if (window.swRegistration) {
-                        sendToServiceWorker(window.swRegistration);
-                    } 
-                    // Se non c'è una registrazione, registra il Service Worker
-                    else {
+                    // Prepara il messaggio
+                    const message = {
+                        type: 'SCHEDULE_NOTIFICATION',
+                        title: 'Ore PWS',
+                        options: {
+                            body: settings.text,
+                            icon: './icons/icon-192x192.png',
+                            badge: './icons/icon-72x72.png',
+                            tag: 'ore-pws-reminder',
+                            requireInteraction: true,
+                            vibrate: [100, 50, 100, 50, 100],
+                            actions: [
+                                {
+                                    action: 'open-app',
+                                    title: 'Apri App'
+                                },
+                                {
+                                    action: 'dismiss',
+                                    title: 'Chiudi'
+                                }
+                            ],
+                            data: {
+                                url: './',
+                                days: settings.days
+                            }
+                        },
+                        days: settings.days,
+                        timestamp: reminderTime.getTime()
+                    };
+                    
+                    // Prova a inviare il messaggio
+                    if (!sendMessage(message)) {
+                        // Se non è stato possibile inviare il messaggio, registra il Service Worker
+                        console.log("Nessun Service Worker attivo, tentativo di registrazione...");
+                        
                         navigator.serviceWorker.register('./service-worker.js')
                             .then(registration => {
                                 window.swRegistration = registration;
-                                console.log("Service Worker registrato, invio messaggio...");
+                                console.log("Service Worker registrato");
                                 
                                 // Attendi che il Service Worker sia attivo
                                 if (registration.active) {
-                                    sendToServiceWorker(registration);
+                                    console.log("Service Worker già attivo, invio messaggio");
+                                    registration.active.postMessage(message);
                                 } else if (registration.installing) {
+                                    console.log("Service Worker in fase di installazione, attendo l'attivazione");
                                     registration.installing.addEventListener('statechange', function() {
                                         if (this.state === 'activated') {
-                                            sendToServiceWorker(registration);
+                                            console.log("Service Worker attivato, invio messaggio");
+                                            registration.active.postMessage(message);
                                         }
                                     });
                                 }
@@ -9191,33 +9206,44 @@
             localStorage.removeItem('iosNotifications');
             
             // Funzione per inviare il messaggio di cancellazione al Service Worker
-            const sendCancelMessage = (registration) => {
-                if (registration && registration.active) {
-                    registration.active.postMessage({
-                        type: 'CANCEL_NOTIFICATIONS'
-                    });
-                    console.log('Richiesta cancellazione notifiche inviata al Service Worker');
+            const sendCancelMessage = () => {
+                const message = { type: 'CANCEL_NOTIFICATIONS' };
+                let messageSent = false;
+                
+                try {
+                    // Se il controller è disponibile, invia direttamente a lui
+                    if (navigator.serviceWorker.controller) {
+                        console.log("Invio messaggio di cancellazione al controller del Service Worker");
+                        navigator.serviceWorker.controller.postMessage(message);
+                        messageSent = true;
+                    }
+                    
+                    // Prova anche con la registrazione se disponibile
+                    if (window.swRegistration && window.swRegistration.active) {
+                        console.log("Invio messaggio di cancellazione tramite registrazione del Service Worker");
+                        window.swRegistration.active.postMessage(message);
+                        messageSent = true;
+                    }
+                    
+                    // Se non è stato possibile inviare il messaggio, prova a ottenere tutte le registrazioni
+                    if (!messageSent && 'getRegistrations' in navigator.serviceWorker) {
+                        navigator.serviceWorker.getRegistrations().then(registrations => {
+                            registrations.forEach(registration => {
+                                if (registration.active) {
+                                    registration.active.postMessage(message);
+                                    console.log('Richiesta cancellazione notifiche inviata a una registrazione del Service Worker');
+                                }
+                            });
+                        });
+                    }
+                } catch (error) {
+                    console.error("Errore nell'invio del messaggio di cancellazione:", error);
                 }
             };
             
-            // Se il Service Worker è attivo, invia un messaggio per cancellare le notifiche programmate
+            // Invia il messaggio di cancellazione
             if (navigator.serviceWorker) {
-                // Prova con il controller
-                if (navigator.serviceWorker.controller) {
-                    sendCancelMessage(navigator.serviceWorker.controller.registration || window.swRegistration);
-                } 
-                // Altrimenti prova con la registrazione
-                else if (window.swRegistration) {
-                    sendCancelMessage(window.swRegistration);
-                }
-                // Se non c'è una registrazione, ottieni tutte le registrazioni
-                else {
-                    navigator.serviceWorker.getRegistrations().then(registrations => {
-                        registrations.forEach(registration => {
-                            sendCancelMessage(registration);
-                        });
-                    });
-                }
+                sendCancelMessage();
             }
             
             // Cancella anche le notifiche visibili
@@ -9272,6 +9298,82 @@
         
         // Controlla le notifiche iOS ogni minuto
         setInterval(checkIOSNotifications, 60000);
+        
+        // Funzione per testare le notifiche
+        function testNotification() {
+            console.log("Test notifica...");
+            
+            // Funzione per inviare il messaggio di test al Service Worker
+            const sendTestMessage = () => {
+                const message = { type: 'TEST_NOTIFICATION' };
+                let messageSent = false;
+                
+                try {
+                    // Se il controller è disponibile, invia direttamente a lui
+                    if (navigator.serviceWorker.controller) {
+                        console.log("Invio messaggio di test al controller del Service Worker");
+                        navigator.serviceWorker.controller.postMessage(message);
+                        messageSent = true;
+                    }
+                    
+                    // Prova anche con la registrazione se disponibile
+                    if (window.swRegistration && window.swRegistration.active) {
+                        console.log("Invio messaggio di test tramite registrazione del Service Worker");
+                        window.swRegistration.active.postMessage(message);
+                        messageSent = true;
+                    }
+                    
+                    return messageSent;
+                } catch (error) {
+                    console.error("Errore nell'invio del messaggio di test:", error);
+                    return false;
+                }
+            };
+            
+            // Prova a inviare il messaggio di test
+            if (navigator.serviceWorker) {
+                if (!sendTestMessage()) {
+                    // Se non è stato possibile inviare il messaggio, mostra una notifica standard
+                    console.log("Nessun Service Worker attivo, utilizzo notifica standard");
+                    
+                    if ('Notification' in window && Notification.permission === 'granted') {
+                        const notification = new Notification('Test Notifica Ore PWS', {
+                            body: 'Questa è una notifica di test. Se la vedi, le notifiche funzionano correttamente!',
+                            icon: './icons/icon-192x192.png',
+                            badge: './icons/icon-72x72.png',
+                            requireInteraction: true,
+                            vibrate: [100, 50, 100]
+                        });
+                        
+                        notification.onclick = function() {
+                            window.focus();
+                            this.close();
+                        };
+                    } else {
+                        console.warn("Notifiche non supportate o permesso non concesso");
+                        showToast("Per testare le notifiche, devi prima concedere il permesso", "warning");
+                    }
+                }
+            } else {
+                console.warn("Service Worker non supportato");
+                
+                // Fallback per browser che non supportano i Service Worker
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    const notification = new Notification('Test Notifica Ore PWS', {
+                        body: 'Questa è una notifica di test. Se la vedi, le notifiche funzionano correttamente!',
+                        icon: './icons/icon-192x192.png'
+                    });
+                    
+                    notification.onclick = function() {
+                        window.focus();
+                        this.close();
+                    };
+                } else {
+                    console.warn("Notifiche non supportate o permesso non concesso");
+                    showToast("Per testare le notifiche, devi prima concedere il permesso", "warning");
+                }
+            }
+        }
         
         // Funzioni di utilità per la conversione tra ArrayBuffer e Base64
         function arrayBufferToBase64(buffer) {
