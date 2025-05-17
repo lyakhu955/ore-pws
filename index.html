@@ -9169,6 +9169,10 @@
                     // Su iOS, possiamo anche provare a usare l'API di notifica standard come backup
                     try {
                         if ('Notification' in window && Notification.permission === 'granted') {
+                            // Ottieni il percorso base
+                            const basePath = getBasePath();
+                            const iconPath = basePath + 'icons/icon-192x192.png';
+                            
                             // Imposta un timeout per mostrare la notifica al momento giusto
                             const timeToWait = reminderTime.getTime() - Date.now();
                             if (timeToWait > 0) {
@@ -9176,7 +9180,7 @@
                                     if (shouldShowToday()) {
                                         new Notification('Ore PWS', {
                                             body: settings.text,
-                                            icon: './icons/icon-192x192.png'
+                                            icon: iconPath
                                         });
                                     }
                                 }, timeToWait);
@@ -9280,9 +9284,13 @@
                         if (notification.days.includes(today)) {
                             // Mostra la notifica
                             if ('Notification' in window && Notification.permission === 'granted') {
+                                // Ottieni il percorso base
+                                const basePath = getBasePath();
+                                const iconPath = basePath + 'icons/icon-192x192.png';
+                                
                                 new Notification(notification.title, {
                                     body: notification.body,
-                                    icon: './icons/icon-192x192.png'
+                                    icon: iconPath
                                 });
                                 console.log("Notifica iOS mostrata");
                             }
@@ -9299,9 +9307,29 @@
         // Controlla le notifiche iOS ogni minuto
         setInterval(checkIOSNotifications, 60000);
         
+        // Funzione per ottenere il percorso base per GitHub Pages
+        function getBasePath() {
+            // Ottieni il percorso base dalla location corrente
+            const path = window.location.pathname;
+            // Se termina con un file (es. index.html), rimuovilo
+            if (path.endsWith('.html')) {
+                return path.substring(0, path.lastIndexOf('/') + 1);
+            }
+            // Se non termina con uno slash, aggiungi uno slash
+            if (!path.endsWith('/')) {
+                return path + '/';
+            }
+            return path;
+        }
+        
         // Funzione per testare le notifiche
         function testNotification() {
             console.log("Test notifica...");
+            
+            // Ottieni il percorso base
+            const basePath = getBasePath();
+            const iconPath = basePath + 'icons/icon-192x192.png';
+            const badgePath = basePath + 'icons/icon-72x72.png';
             
             // Funzione per inviare il messaggio di test al Service Worker
             const sendTestMessage = () => {
@@ -9339,8 +9367,8 @@
                     if ('Notification' in window && Notification.permission === 'granted') {
                         const notification = new Notification('Test Notifica Ore PWS', {
                             body: 'Questa è una notifica di test. Se la vedi, le notifiche funzionano correttamente!',
-                            icon: './icons/icon-192x192.png',
-                            badge: './icons/icon-72x72.png',
+                            icon: iconPath,
+                            badge: badgePath,
                             requireInteraction: true,
                             vibrate: [100, 50, 100]
                         });
@@ -9361,7 +9389,7 @@
                 if ('Notification' in window && Notification.permission === 'granted') {
                     const notification = new Notification('Test Notifica Ore PWS', {
                         body: 'Questa è una notifica di test. Se la vedi, le notifiche funzionano correttamente!',
-                        icon: './icons/icon-192x192.png'
+                        icon: iconPath
                     });
                     
                     notification.onclick = function() {
