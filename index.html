@@ -1657,12 +1657,20 @@
             text-align: center;
         }
         
-        /* Stili per i promemoria */
+        /* Stili per i promemoria - Versione migliorata */
+        .day-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
         .day-checkbox {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             background-color: var(--md-sys-color-surface);
-            padding: 6px 10px;
+            padding: 8px 12px;
             border-radius: var(--border-radius-small);
             font-size: 0.9rem;
             cursor: pointer;
@@ -1670,32 +1678,36 @@
             transition: all 0.2s ease;
             user-select: none; /* Impedisce la selezione del testo */
             position: relative;
+            min-width: 40px;
+            text-align: center;
         }
         
         .day-checkbox:hover {
             background-color: var(--md-sys-color-primary-container);
-        }
-        
-        .day-checkbox input {
-            margin-right: 5px;
-            cursor: pointer;
-            position: relative;
-            z-index: 2;
-        }
-        
-        .day-checkbox input:checked {
-            accent-color: var(--md-sys-color-primary);
-        }
-        
-        .day-checkbox input:checked + span {
-            color: var(--md-sys-color-primary);
-            font-weight: 500;
-        }
-        
-        /* Stile per i checkbox selezionati */
-        .day-checkbox input:checked ~ .day-checkbox {
-            background-color: var(--md-sys-color-primary-container);
             border-color: var(--md-sys-color-primary);
+        }
+        
+        /* Nascondi il checkbox reale */
+        .day-checkbox input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+        
+        /* Stile per i giorni selezionati */
+        .day-checkbox.selected {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            border-color: var(--md-sys-color-primary);
+            font-weight: 500;
+            box-shadow: var(--elevation-1);
+        }
+        
+        /* Effetto al click */
+        .day-checkbox:active {
+            transform: scale(0.95);
         }
         .toggle-switch input {
             opacity: 0;
@@ -4648,28 +4660,35 @@
                                     </div>
                                     
                                     <div class="form-group" style="margin-top: 15px;">
-                                        <label for="reminderDays">Giorni della settimana</label>
-                                        <div class="day-selector" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
-                                            <label class="day-checkbox">
-                                                <input type="checkbox" value="1" checked> <span>Lun</span>
+                                        <label for="reminderDays">Giorni della settimana <small style="font-weight: normal; opacity: 0.8;">(seleziona i giorni in cui ricevere il promemoria)</small></label>
+                                        <div class="day-selector">
+                                            <label class="day-checkbox" id="day-1">
+                                                <input type="checkbox" value="1" checked>
+                                                <span>Lun</span>
                                             </label>
-                                            <label class="day-checkbox">
-                                                <input type="checkbox" value="2" checked> <span>Mar</span>
+                                            <label class="day-checkbox" id="day-2">
+                                                <input type="checkbox" value="2" checked>
+                                                <span>Mar</span>
                                             </label>
-                                            <label class="day-checkbox">
-                                                <input type="checkbox" value="3" checked> <span>Mer</span>
+                                            <label class="day-checkbox" id="day-3">
+                                                <input type="checkbox" value="3" checked>
+                                                <span>Mer</span>
                                             </label>
-                                            <label class="day-checkbox">
-                                                <input type="checkbox" value="4" checked> <span>Gio</span>
+                                            <label class="day-checkbox" id="day-4">
+                                                <input type="checkbox" value="4" checked>
+                                                <span>Gio</span>
                                             </label>
-                                            <label class="day-checkbox">
-                                                <input type="checkbox" value="5" checked> <span>Ven</span>
+                                            <label class="day-checkbox" id="day-5">
+                                                <input type="checkbox" value="5" checked>
+                                                <span>Ven</span>
                                             </label>
-                                            <label class="day-checkbox">
-                                                <input type="checkbox" value="6"> <span>Sab</span>
+                                            <label class="day-checkbox" id="day-6">
+                                                <input type="checkbox" value="6">
+                                                <span>Sab</span>
                                             </label>
-                                            <label class="day-checkbox">
-                                                <input type="checkbox" value="0"> <span>Dom</span>
+                                            <label class="day-checkbox" id="day-0">
+                                                <input type="checkbox" value="0">
+                                                <span>Dom</span>
                                             </label>
                                         </div>
                                     </div>
@@ -8623,22 +8642,32 @@
             const testNotificationBtn = document.getElementById('testNotification');
             const dayCheckboxes = document.querySelectorAll('.day-checkbox input[type="checkbox"]');
             
-            // Assicurati che i checkbox dei giorni funzionino correttamente
-            dayCheckboxes.forEach(checkbox => {
-                checkbox.addEventListener('click', function(e) {
-                    // Previeni la propagazione dell'evento per evitare conflitti
-                    e.stopPropagation();
+            // Funzione per aggiornare la visualizzazione dei giorni selezionati
+            function updateDaySelection() {
+                dayCheckboxes.forEach(checkbox => {
+                    const dayLabel = checkbox.closest('.day-checkbox');
+                    if (checkbox.checked) {
+                        dayLabel.classList.add('selected');
+                    } else {
+                        dayLabel.classList.remove('selected');
+                    }
                 });
-            });
+            }
+            
+            // Inizializza la visualizzazione dei giorni selezionati
+            updateDaySelection();
             
             // Aggiungi event listener per i label dei giorni
             document.querySelectorAll('.day-checkbox').forEach(label => {
                 label.addEventListener('click', function(e) {
                     // Trova il checkbox all'interno del label
                     const checkbox = this.querySelector('input[type="checkbox"]');
-                    if (checkbox && e.target !== checkbox) {
+                    if (checkbox) {
                         // Inverti lo stato del checkbox
                         checkbox.checked = !checkbox.checked;
+                        
+                        // Aggiorna la visualizzazione
+                        updateDaySelection();
                     }
                 });
             });
@@ -8660,6 +8689,9 @@
             dayCheckboxes.forEach(checkbox => {
                 checkbox.checked = savedSettings.days.includes(parseInt(checkbox.value));
             });
+            
+            // Aggiorna la visualizzazione dei giorni selezionati
+            updateDaySelection();
             
             // Mostra/nascondi le impostazioni in base allo stato
             reminderSettings.style.display = savedSettings.enabled ? 'block' : 'none';
