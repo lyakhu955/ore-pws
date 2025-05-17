@@ -2,12 +2,32 @@
   "name": "Ore PWS Group",
   "short_name": "Ore PWS",
   "description": "Applicazione per la gestione delle ore di lavoro",
-  "id": "/ore-pws/",
-  "start_url": "/ore-pws/index.html",
+  "id": "/",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#FAFDFC",
   "theme_color": "#006A6A",
   "orientation": "portrait-primary",
+  "permissions": ["notifications"],
+  "gcm_sender_id": "103953800507",
+  "scope": "./",
+  "categories": ["productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Aggiungi Ore",
+      "short_name": "Aggiungi",
+      "description": "Aggiungi nuove ore di lavoro",
+      "url": "./index.html#home-section",
+      "icons": [{ "src": "./icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Calendario",
+      "short_name": "Calendario",
+      "description": "Visualizza il calendario",
+      "url": "./index.html#calendar-section",
+      "icons": [{ "src": "./icons/icon-96x96.png", "sizes": "96x96" }]
+    }
+  ],
   "icons": [
     {
       "src": "/ore-pws/icons/icon-72x72.png",
