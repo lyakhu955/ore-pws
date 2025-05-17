@@ -1,5 +1,5 @@
 // Service Worker per Ore PWS - Versione migliorata per iOS e Android
-const CACHE_NAME = 'ore-pws-cache-v2';
+const CACHE_NAME = 'ore-pws-cache-v3';
 const urlsToCache = [
   './',
   './index.html',
@@ -13,6 +13,79 @@ const urlsToCache = [
   './icons/icon-384x384.png',
   './icons/icon-512x512.png'
 ];
+
+// Variabile globale per memorizzare le notifiche programmate
+let scheduledNotifications = [];
+
+// Funzione per salvare le notifiche programmate in IndexedDB
+function saveScheduledNotifications() {
+  if (self.indexedDB) {
+    const request = self.indexedDB.open('OreNotifications', 1);
+    
+    request.onupgradeneeded = function(event) {
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains('notifications')) {
+        db.createObjectStore('notifications', { keyPath: 'id' });
+      }
+    };
+    
+    request.onsuccess = function(event) {
+      const db = event.target.result;
+      const transaction = db.transaction(['notifications'], 'readwrite');
+      const store = transaction.objectStore('notifications');
+      
+      // Cancella tutte le notifiche esistenti
+      store.clear();
+      
+      // Salva le nuove notifiche
+      scheduledNotifications.forEach((notification, index) => {
+        notification.id = index;
+        store.add(notification);
+      });
+      
+      console.log('Service Worker: Notifiche salvate in IndexedDB', scheduledNotifications.length);
+    };
+    
+    request.onerror = function(event) {
+      console.error('Service Worker: Errore nell\'apertura di IndexedDB', event.target.error);
+    };
+  }
+}
+
+// Funzione per caricare le notifiche programmate da IndexedDB
+function loadScheduledNotifications() {
+  if (self.indexedDB) {
+    const request = self.indexedDB.open('OreNotifications', 1);
+    
+    request.onupgradeneeded = function(event) {
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains('notifications')) {
+        db.createObjectStore('notifications', { keyPath: 'id' });
+      }
+    };
+    
+    request.onsuccess = function(event) {
+      const db = event.target.result;
+      const transaction = db.transaction(['notifications'], 'readonly');
+      const store = transaction.objectStore('notifications');
+      const getAllRequest = store.getAll();
+      
+      getAllRequest.onsuccess = function() {
+        scheduledNotifications = getAllRequest.result || [];
+        console.log('Service Worker: Notifiche caricate da IndexedDB', scheduledNotifications.length);
+        
+        // Riprogramma le notifiche
+        scheduledNotifications.forEach(notification => {
+          scheduleNotification(notification.title, notification.options, notification.timestamp);
+        });
+      };
+    };
+    
+    request.onerror = function(event) {
+      console.error('Service Worker: Errore nell\'apertura di IndexedDB', event.target.error);
+    };
+  }
+}
 
 // Installazione del Service Worker
 self.addEventListener('install', (event) => {
@@ -29,6 +102,38 @@ self.addEventListener('install', (event) => {
       })
   );
 });
+
+// Funzione per verificare periodicamente le notifiche programmate
+function checkScheduledNotifications() {
+  console.log('Service Worker: Verifica notifiche programmate', new Date().toLocaleString());
+  
+  const now = Date.now();
+  
+  // Filtra le notifiche scadute
+  const expiredNotifications = scheduledNotifications.filter(n => n.timestamp <= now);
+  
+  // Mostra le notifiche scadute
+  expiredNotifications.forEach(notification => {
+    // Verifica se è un giorno valido (se specificato nelle opzioni)
+    let shouldShow = true;
+    if (notification.options.data && notification.options.data.days) {
+      const today = new Date().getDay();
+      shouldShow = notification.options.data.days.includes(today);
+    }
+    
+    if (shouldShow) {
+      console.log('Service Worker: Invio notifica programmata (verifica periodica)');
+      self.registration.showNotification(notification.title, notification.options)
+        .catch(error => {
+          console.error('Service Worker: Errore nell\'invio della notifica', error);
+        });
+    }
+  });
+  
+  // Rimuovi le notifiche scadute
+  scheduledNotifications = scheduledNotifications.filter(n => n.timestamp > now);
+  saveScheduledNotifications();
+}
 
 // Attivazione del Service Worker
 self.addEventListener('activate', (event) => {
@@ -47,6 +152,16 @@ self.addEventListener('activate', (event) => {
     })
     .then(() => {
       console.log('Service Worker: Attivazione completata');
+      
+      // Carica le notifiche programmate
+      loadScheduledNotifications();
+      
+      // Avvia il controllo periodico delle notifiche (ogni 5 minuti)
+      setInterval(checkScheduledNotifications, 5 * 60 * 1000);
+      
+      // Esegui un controllo immediato
+      setTimeout(checkScheduledNotifications, 5000);
+      
       return self.clients.claim(); // Prendi il controllo di tutti i client
     })
   );
@@ -160,30 +275,48 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
-// Gestione delle notifiche programmate
-self.addEventListener('message', (event) => {
-  console.log('Service Worker: Messaggio ricevuto', event.data);
+// Funzione per programmare una notifica
+function scheduleNotification(title, options, timestamp) {
+  // Calcola il tempo di attesa
+  const now = Date.now();
+  const timeToWait = Math.max(0, timestamp - now);
   
-  if (event.data && event.data.type === 'SCHEDULE_NOTIFICATION') {
-    const { title, options, timestamp } = event.data;
+  console.log(`Service Worker: Programmazione notifica per ${new Date(timestamp).toLocaleString('it-IT')}, attesa di ${Math.round(timeToWait / 1000 / 60)} minuti`);
+  
+  // Se il tempo è già passato, mostra subito la notifica
+  if (timeToWait <= 0) {
+    self.registration.showNotification(title, options);
+    return;
+  }
+  
+  // Aggiungi la notifica all'elenco delle notifiche programmate
+  scheduledNotifications.push({
+    title,
+    options,
+    timestamp
+  });
+  
+  // Salva le notifiche programmate
+  saveScheduledNotifications();
+  
+  // Pianifica la notifica
+  const notificationId = setTimeout(() => {
+    console.log('Service Worker: Invio notifica programmata');
     
-    // Calcola il tempo di attesa
-    const now = Date.now();
-    const timeToWait = Math.max(0, timestamp - now);
-    
-    console.log(`Service Worker: Programmazione notifica per ${new Date(timestamp).toLocaleString('it-IT')}, attesa di ${timeToWait}ms`);
-    
-    // Se il tempo è già passato, mostra subito la notifica
-    if (timeToWait <= 0) {
-      self.registration.showNotification(title, options);
-      return;
+    // Verifica se è un giorno valido (se specificato nelle opzioni)
+    let shouldShow = true;
+    if (options.data && options.data.days) {
+      const today = new Date().getDay();
+      shouldShow = options.data.days.includes(today);
     }
     
-    // Altrimenti pianifica la notifica
-    setTimeout(() => {
-      console.log('Service Worker: Invio notifica programmata');
+    if (shouldShow) {
       self.registration.showNotification(title, options)
         .then(() => {
+          // Rimuovi la notifica dall'elenco
+          scheduledNotifications = scheduledNotifications.filter(n => n.timestamp !== timestamp);
+          saveScheduledNotifications();
+          
           // Invia un messaggio a tutti i client per confermare l'invio della notifica
           self.clients.matchAll().then(clients => {
             clients.forEach(client => {
@@ -197,13 +330,53 @@ self.addEventListener('message', (event) => {
         .catch(error => {
           console.error('Service Worker: Errore nell\'invio della notifica', error);
         });
-    }, timeToWait);
+    } else {
+      console.log('Service Worker: Notifica non mostrata perché oggi non è un giorno valido');
+    }
+  }, timeToWait);
+  
+  return notificationId;
+}
+
+// Gestione delle notifiche programmate
+self.addEventListener('message', (event) => {
+  console.log('Service Worker: Messaggio ricevuto', event.data);
+  
+  if (event.data && event.data.type === 'SCHEDULE_NOTIFICATION') {
+    const { title, options, timestamp } = event.data;
+    
+    // Aggiungi i giorni della settimana alle opzioni se presenti
+    if (event.data.days) {
+      options.data = options.data || {};
+      options.data.days = event.data.days;
+    }
+    
+    // Programma la notifica
+    scheduleNotification(title, options, timestamp);
     
     // Conferma la ricezione del messaggio
-    event.source.postMessage({
-      type: 'NOTIFICATION_SCHEDULED',
-      timestamp: timestamp
-    });
+    if (event.source) {
+      event.source.postMessage({
+        type: 'NOTIFICATION_SCHEDULED',
+        timestamp: timestamp
+      });
+    }
+  }
+  
+  // Gestione della cancellazione delle notifiche
+  if (event.data && event.data.type === 'CANCEL_NOTIFICATIONS') {
+    console.log('Service Worker: Cancellazione notifiche richiesta');
+    
+    // Cancella tutte le notifiche programmate
+    scheduledNotifications = [];
+    saveScheduledNotifications();
+    
+    // Conferma la cancellazione
+    if (event.source) {
+      event.source.postMessage({
+        type: 'NOTIFICATIONS_CANCELLED'
+      });
+    }
   }
   
   // Gestione della richiesta di test delle notifiche
@@ -216,23 +389,37 @@ self.addEventListener('message', (event) => {
       badge: './icons/icon-72x72.png',
       tag: 'ore-pws-test',
       requireInteraction: true,
-      vibrate: [100, 50, 100]
+      vibrate: [100, 50, 100],
+      actions: [
+        {
+          action: 'open-app',
+          title: 'Apri App'
+        },
+        {
+          action: 'dismiss',
+          title: 'Chiudi'
+        }
+      ]
     };
     
     self.registration.showNotification('Test Notifica Ore PWS', options)
       .then(() => {
-        event.source.postMessage({
-          type: 'TEST_NOTIFICATION_SENT',
-          success: true
-        });
+        if (event.source) {
+          event.source.postMessage({
+            type: 'TEST_NOTIFICATION_SENT',
+            success: true
+          });
+        }
       })
       .catch(error => {
         console.error('Service Worker: Errore nel test della notifica', error);
-        event.source.postMessage({
-          type: 'TEST_NOTIFICATION_SENT',
-          success: false,
-          error: error.message
-        });
+        if (event.source) {
+          event.source.postMessage({
+            type: 'TEST_NOTIFICATION_SENT',
+            success: false,
+            error: error.message
+          });
+        }
       });
   }
 });
