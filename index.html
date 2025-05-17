@@ -10383,18 +10383,8 @@ END:VCARD`;
              
              const logo = document.getElementById('pws-logo');
              if (logo) {
-                 // Variabili per gestire la pressione prolungata
-                 let pressTimer;
-                 let isLongPress = false;
-                 
                  // Quando l'utente clicca sul logo, aggiungiamo un'animazione più vivace
                  logo.addEventListener('click', function(e) {
-                     // Se è una pressione prolungata, non eseguiamo l'animazione normale
-                     if (isLongPress) {
-                         isLongPress = false;
-                         return;
-                     }
-                     
                      // Rimuoviamo temporaneamente la classe per resettare l'animazione
                      this.classList.remove('bouncing-logo');
                      
@@ -10412,53 +10402,6 @@ END:VCARD`;
                      
                      // Mostriamo un messaggio divertente
                      showToast('Ciao! 👋 Sono il logo PWS!', 'success');
-                 });
-                 
-                 // Gestione della pressione prolungata (3 secondi)
-                 logo.addEventListener('mousedown', function(e) {
-                     pressTimer = setTimeout(() => {
-                         isLongPress = true;
-                         showSuperheroOverlayDirect(); // Utilizziamo la nuova funzione senza notifiche
-                     }, 3000); // 3 secondi di pressione
-                 });
-                 
-                 // Supporto per dispositivi touch
-                 logo.addEventListener('touchstart', function(e) {
-                     // Previeni lo scroll durante la pressione prolungata
-                     e.preventDefault();
-                     
-                     // Mostra un feedback visivo durante la pressione
-                     this.style.filter = 'brightness(1.2) drop-shadow(0 0 10px var(--md-sys-color-primary))';
-                     
-                     // Avvia il timer per la pressione prolungata
-                     pressTimer = setTimeout(() => {
-                         isLongPress = true;
-                         showSuperheroOverlayDirect(); // Utilizziamo la nuova funzione senza notifiche
-                         
-                         // Disabilitiamo la vibrazione per evitare errori di intervento del browser
-                         console.log("Supereroe attivato senza vibrazione");
-                     }, 3000); // 3 secondi di pressione
-                 }, { passive: false }); // Aggiungiamo passive: false per evitare warning
-                 
-                 // Cancella il timer se l'utente rilascia prima dei 3 secondi
-                 logo.addEventListener('mouseup', function() {
-                     clearTimeout(pressTimer);
-                     this.style.filter = '';
-                 });
-                 
-                 logo.addEventListener('mouseleave', function() {
-                     clearTimeout(pressTimer);
-                     this.style.filter = '';
-                 });
-                 
-                 logo.addEventListener('touchend', function() {
-                     clearTimeout(pressTimer);
-                     this.style.filter = '';
-                 });
-                 
-                 logo.addEventListener('touchcancel', function() {
-                     clearTimeout(pressTimer);
-                     this.style.filter = '';
                  });
                  
                  // Funzione per inizializzare il Gratta e Vinci
@@ -10648,47 +10591,7 @@ END:VCARD`;
                      };
                  }
                  
-                 // Nuova funzione per mostrare l'overlay del supereroe direttamente
-                 function showSuperheroOverlayDirect() {
-                     console.log("Attivazione diretta overlay supereroe");
-                     
-                     // Ottieni l'overlay (senza mostrare notifiche di caricamento)
-                     const overlay = document.getElementById('superheroOverlay');
-                     if (!overlay) {
-                         console.error("Overlay del supereroe non trovato!");
-                         return;
-                     }
-                     
-                     // Mostra immediatamente l'overlay
-                     overlay.style.opacity = "1";
-                     overlay.style.visibility = "visible";
-                     overlay.style.display = "flex";
-                     overlay.classList.add('visible');
-                     
-                     // Blocca lo scroll della pagina
-                     document.body.style.overflow = 'hidden';
-                     
-                     // Trova il contenitore dell'immagine
-                     const container = overlay.querySelector('.superhero-container');
-                     if (!container) {
-                         console.error("Contenitore del supereroe non trovato!");
-                         return;
-                     }
-                     
-                     // Sostituisci il contenuto con una GIF a schermo intero ottimizzata per tutti i dispositivi
-                     container.innerHTML = `
-                         <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: black;">
-                             <img src="https://raw.githubusercontent.com/lyakhu955/ore-pws/main/freepik__wide-shot-a-stylized-cartoon-superhero-stands-tall__79694.gif?t=${new Date().getTime()}" 
-                                  alt="Supereroe PWS" 
-                                  style="min-width: 100%; min-height: 100%; width: auto; height: auto; object-fit: cover; object-position: center; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                         </div>
-                     `;
-                     
-                     // Non mostriamo più messaggi di successo
-                     setTimeout(() => {
-                         console.log('Supereroe PWS sbloccato senza notifiche');
-                     }, 500);
-                 }
+                 // La funzione showSuperheroOverlayDirect è stata rimossa
                  
                  // Gestione del pulsante di chiusura con scherzo
                  const closeBtn = document.getElementById('closeSuperhero');
