@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -4091,14 +4092,149 @@
             user-select: none;
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/it.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Librerie esterne ottimizzate con attributi defer per migliorare il caricamento -->
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/it.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+    
+    <!-- Ottimizzazioni CSS per Safari iOS -->
+    <style>
+        /* Ottimizzazioni per Safari iOS e cross-browser */
+        * {
+            -webkit-tap-highlight-color: transparent !important;
+            -webkit-overflow-scrolling: touch !important;
+        }
+        
+        /* Forza hardware acceleration per animazioni fluide */
+        .bouncing-logo,
+        .nav-item.active,
+        .modal,
+        .bottom-nav,
+        .card,
+        button,
+        .btn {
+            -webkit-transform: translate3d(0, 0, 0);
+            transform: translate3d(0, 0, 0);
+        }
+        
+        /* Disabilita temporaneamente le animazioni durante lo scroll */
+        .disable-animations * {
+            -webkit-transition: none !important;
+            transition: none !important;
+            -webkit-animation: none !important;
+            animation: none !important;
+        }
+        
+        /* Ottimizzazioni per il rendering */
+        .card, 
+        .modal-content,
+        .bottom-nav,
+        header {
+            backface-visibility: hidden;
+            perspective: 1000px;
+        }
+        
+        /* Ottimizzazioni per input e form */
+        input, 
+        select, 
+        textarea {
+            -webkit-appearance: none;
+            appearance: none;
+            border-radius: 0;
+        }
+        
+        /* Previeni zoom involontario su input */
+        input[type="text"],
+        input[type="number"],
+        input[type="email"],
+        input[type="tel"],
+        textarea,
+        select {
+            font-size: 16px !important;
+        }
+        
+        /* Migliora la reattività dei pulsanti */
+        button, .btn {
+            touch-action: manipulation;
+        }
+        
+        /* Ottimizzazioni per il rendering delle liste */
+        .time-entries-list > div,
+        .monthly-report-item,
+        .vehicle-item {
+            will-change: transform, opacity;
+            transform: translateZ(0);
+        }
+        
+        /* Ottimizzazioni per il calendario */
+        .calendar-day {
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+        }
+        
+        /* Ottimizzazioni per le transizioni */
+        .section.active {
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+        }
+        
+        /* Ottimizzazioni per il modal */
+        .modal {
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+        }
+        
+        /* Ottimizzazioni per il toast */
+        .toast {
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+        }
+        
+        /* Ottimizzazioni per le animazioni di fade */
+        @media (-webkit-min-device-pixel-ratio: 2) {
+            @keyframes fadeIn {
+                0% { opacity: 0; transform: translateY(0); }
+                100% { opacity: 1; transform: translateY(0); }
+            }
+            
+            @keyframes fadeOut {
+                0% { opacity: 1; transform: translateY(0); }
+                100% { opacity: 0; transform: translateY(0); }
+            }
+            
+            /* Semplifica le animazioni su dispositivi iOS */
+            @keyframes bounce-horizontal {
+                0%, 100% {
+                    transform: translateX(0);
+                }
+                50% {
+                    transform: translateX(10px);
+                }
+            }
+            
+            @keyframes bounce-excited {
+                0%, 100% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.2);
+                }
+            }
+            
+            .bouncing-logo {
+                animation-duration: 3s !important;
+            }
+            
+            .bouncing-logo-excited {
+                animation-duration: 1.5s !important;
+            }
+        }
+    </style>
     <!-- Custom Navigation Styles (inline) -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -8544,54 +8680,125 @@
         
         // Richiedi il permesso per le notifiche
         function requestNotificationPermission() {
+            console.log("Richiesta permesso notifiche...");
+            
+            // Verifica se le notifiche sono supportate
             if (!('Notification' in window)) {
-                showToast('Questo browser non supporta le notifiche desktop', 'error');
-                return;
+                showToast('Questo browser non supporta le notifiche', 'error');
+                return Promise.reject(new Error('Notifiche non supportate'));
             }
             
+            // Verifica se il Service Worker è supportato
+            if (!('serviceWorker' in navigator)) {
+                showToast('Service Worker non supportato, le notifiche potrebbero non funzionare correttamente', 'warning');
+                console.warn('Service Worker non supportato');
+            }
+            
+            // Richiedi il permesso per le notifiche
             if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
-                Notification.requestPermission().then(permission => {
-                    if (permission === 'granted') {
-                        showToast('Notifiche attivate!');
-                        
-                        // Mostra una notifica di test per verificare che tutto funzioni
-                        if (window.swRegistration) {
-                            window.swRegistration.showNotification('Ore PWS', {
-                                body: 'Le notifiche sono state attivate con successo!',
-                                icon: '/ore-pws/icons/icon-192x192.png',
-                                tag: 'test-notification'
-                            });
+                return Notification.requestPermission()
+                    .then(permission => {
+                        if (permission === 'granted') {
+                            showToast('Notifiche attivate!', 'success');
+                            
+                            // Registra il Service Worker se non è già registrato
+                            if ('serviceWorker' in navigator && !window.swRegistration) {
+                                return navigator.serviceWorker.register('./service-worker.js')
+                                    .then(registration => {
+                                        console.log('Service Worker registrato con successo:', registration);
+                                        window.swRegistration = registration;
+                                        
+                                        // Mostra una notifica di test
+                                        setTimeout(() => {
+                                            testNotification();
+                                        }, 1000);
+                                        
+                                        return permission;
+                                    })
+                                    .catch(error => {
+                                        console.error('Errore nella registrazione del Service Worker:', error);
+                                        // Fallback alla notifica standard
+                                        testNotification();
+                                        return permission;
+                                    });
+                            } else {
+                                // Mostra una notifica di test
+                                testNotification();
+                                return permission;
+                            }
                         } else {
-                            // Fallback alla notifica standard
-                            const notification = new Notification('Ore PWS', {
-                                body: 'Le notifiche sono state attivate con successo!',
-                                icon: '/ore-pws/icons/icon-192x192.png'
-                            });
+                            showToast('Permesso per le notifiche negato. Le notifiche di promemoria non funzioneranno.', 'warning', 5000);
+                            return permission;
                         }
-                    } else {
-                        showToast('Permesso per le notifiche negato', 'warning');
-                    }
-                });
+                    });
             } else if (Notification.permission === 'granted') {
                 // Se il permesso è già stato concesso, verifica che il Service Worker sia registrato
                 if ('serviceWorker' in navigator && !window.swRegistration) {
-                    navigator.serviceWorker.getRegistration().then(registration => {
-                        if (registration) {
-                            window.swRegistration = registration;
-                            console.log('Service Worker recuperato:', registration.scope);
-                        } else {
-                            console.log('Nessun Service Worker registrato, tentativo di registrazione...');
-                            navigator.serviceWorker.register('/ore-pws/service-worker.js')
-                                .then(reg => {
-                                    window.swRegistration = reg;
-                                    console.log('Service Worker registrato con successo:', reg.scope);
-                                })
-                                .catch(error => {
-                                    console.error('Errore nella registrazione del Service Worker:', error);
-                                });
-                        }
-                    });
+                    return navigator.serviceWorker.getRegistration()
+                        .then(registration => {
+                            if (registration) {
+                                window.swRegistration = registration;
+                                console.log('Service Worker recuperato:', registration.scope);
+                            } else {
+                                console.log('Nessun Service Worker registrato, tentativo di registrazione...');
+                                return navigator.serviceWorker.register('./service-worker.js')
+                                    .then(reg => {
+                                        window.swRegistration = reg;
+                                        console.log('Service Worker registrato con successo:', reg.scope);
+                                        return 'granted';
+                                    });
+                            }
+                            return 'granted';
+                        });
                 }
+                return Promise.resolve('granted');
+            } else {
+                // Permesso negato
+                showToast('Le notifiche sono bloccate. Abilita le notifiche nelle impostazioni del browser.', 'warning', 5000);
+                return Promise.resolve('denied');
+            }
+        }
+        
+        // Funzione per testare le notifiche
+        function testNotification() {
+            console.log("Test notifica...");
+            
+            // Se il Service Worker è registrato e attivo, usa quello
+            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({
+                    type: 'TEST_NOTIFICATION'
+                });
+                return;
+            }
+            
+            // Se il Service Worker è registrato ma non attivo
+            if (window.swRegistration) {
+                window.swRegistration.showNotification('Test Notifica Ore PWS', {
+                    body: 'Questa è una notifica di test. Se la vedi, le notifiche funzionano correttamente!',
+                    icon: './icons/icon-192x192.png',
+                    tag: 'ore-pws-test',
+                    requireInteraction: true
+                });
+                return;
+            }
+            
+            // Altrimenti usa l'API Notification standard
+            if (Notification.permission === 'granted') {
+                const options = {
+                    body: 'Questa è una notifica di test. Se la vedi, le notifiche funzionano correttamente!',
+                    icon: './icons/icon-192x192.png',
+                    tag: 'ore-pws-test',
+                    requireInteraction: true
+                };
+                
+                try {
+                    new Notification('Test Notifica Ore PWS', options);
+                } catch (error) {
+                    console.error('Errore nel test della notifica:', error);
+                    showToast('Errore nel test della notifica: ' + error.message, 'error');
+                }
+            } else {
+                showToast('Permesso notifiche non concesso', 'warning');
             }
         }
         
@@ -8599,70 +8806,125 @@
         // Registrazione del Service Worker per le notifiche
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/ore-pws/service-worker.js')
+                navigator.serviceWorker.register('./service-worker.js')
                     .then(registration => {
                         console.log('Service Worker registrato con successo:', registration.scope);
                         // Salva il riferimento alla registrazione per usarlo nelle notifiche
                         window.swRegistration = registration;
+                        
+                        // Aggiungi un listener per i messaggi dal Service Worker
+                        navigator.serviceWorker.addEventListener('message', (event) => {
+                            console.log('Messaggio dal Service Worker:', event.data);
+                            
+                            if (event.data && event.data.type === 'NOTIFICATION_SENT') {
+                                console.log('Notifica inviata dal Service Worker:', new Date(event.data.timestamp).toLocaleString());
+                            }
+                            
+                            if (event.data && event.data.type === 'TEST_NOTIFICATION_SENT') {
+                                if (event.data.success) {
+                                    showToast('Notifica di test inviata con successo!', 'success');
+                                } else {
+                                    showToast('Errore nell\'invio della notifica di test: ' + event.data.error, 'error');
+                                }
+                            }
+                        });
                     })
                     .catch(error => {
                         console.error('Errore nella registrazione del Service Worker:', error);
+                        showToast('Errore nella registrazione del Service Worker. Le notifiche potrebbero non funzionare correttamente.', 'error');
                     });
             });
         }
 
         function scheduleReminder(settings) {
+            console.log("Pianificazione promemoria con impostazioni:", settings);
+            
             // Cancella eventuali promemoria esistenti
             cancelReminder();
             
             // Verifica se le notifiche sono supportate e permesse
             if (!('Notification' in window) || Notification.permission !== 'granted') {
                 console.log('Notifiche non supportate o permesso non concesso');
+                showToast('Per utilizzare i promemoria, devi attivare le notifiche', 'warning');
                 return;
             }
             
-            console.log('Pianificazione promemoria:', settings);
-            
-            // Funzione per controllare se oggi è un giorno in cui mostrare il promemoria
+            // Funzione per verificare se oggi è un giorno in cui mostrare il promemoria
             const shouldShowToday = () => {
-                const today = new Date().getDay(); // 0 = Domenica, 1 = Lunedì, ecc.
+                const today = new Date().getDay(); // 0 = Domenica, 1 = Lunedì, ...
                 return settings.days.includes(today);
             };
             
             // Funzione per mostrare la notifica
             const showNotification = () => {
+                console.log("Esecuzione promemoria...");
+                
+                // Verifica se è un giorno in cui mostrare il promemoria
                 if (shouldShowToday()) {
+                    console.log("Oggi è un giorno valido per il promemoria");
+                    
                     // Opzioni della notifica
                     const options = {
                         body: settings.text,
-                        icon: '/ore-pws/icons/icon-192x192.png',
+                        icon: './icons/icon-192x192.png',
+                        badge: './icons/icon-72x72.png',
                         tag: 'ore-pws-reminder',
-                        requireInteraction: true // La notifica rimane visibile finché l'utente non interagisce
+                        requireInteraction: true, // La notifica rimane visibile finché l'utente non interagisce
+                        vibrate: [100, 50, 100, 50, 100], // Pattern di vibrazione per attirare l'attenzione
+                        actions: [
+                            {
+                                action: 'open-app',
+                                title: 'Apri App'
+                            },
+                            {
+                                action: 'dismiss',
+                                title: 'Chiudi'
+                            }
+                        ]
                     };
                     
-                    // Verifica se il Service Worker è disponibile
-                    if (window.swRegistration) {
-                        // Usa il Service Worker per mostrare la notifica
-                        window.swRegistration.showNotification('Ore PWS', options);
-                    } else {
-                        // Fallback alla notifica standard
-                        const notification = new Notification('Ore PWS', options);
-                        notification.onclick = function() {
-                            window.focus();
-                            this.close();
-                        };
+                    try {
+                        // Verifica se il Service Worker è disponibile e attivo
+                        if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                            console.log("Invio notifica tramite Service Worker");
+                            navigator.serviceWorker.controller.postMessage({
+                                type: 'SCHEDULE_NOTIFICATION',
+                                title: 'Ore PWS',
+                                options: options,
+                                timestamp: Date.now() // Mostra immediatamente
+                            });
+                        } else if (window.swRegistration) {
+                            console.log("Invio notifica tramite registrazione Service Worker");
+                            window.swRegistration.showNotification('Ore PWS', options);
+                        } else {
+                            // Fallback alla Notification API standard
+                            console.log("Invio notifica tramite API standard");
+                            const notification = new Notification('Ore PWS', options);
+                            notification.onclick = function() {
+                                window.focus();
+                                this.close();
+                            };
+                        }
+                        
+                        // Salva la data dell'ultima notifica mostrata
+                        localStorage.setItem('lastNotificationShown', new Date().toISOString());
+                        console.log("Notifica inviata e timestamp salvato");
+                    } catch (error) {
+                        console.error("Errore nell'invio della notifica:", error);
+                        showToast("Errore nell'invio della notifica: " + error.message, 'error');
                     }
+                } else {
+                    console.log("Oggi non è un giorno valido per il promemoria");
                 }
                 
-                // Pianifica la notifica per il giorno successivo
+                // Pianifica il prossimo promemoria
                 scheduleNextReminder();
-                
-                // Salva la data dell'ultima notifica mostrata
-                localStorage.setItem('lastNotificationShown', new Date().toISOString());
             };
             
             // Funzione per pianificare il prossimo promemoria
             const scheduleNextReminder = () => {
+                console.log("Pianificazione prossimo promemoria...");
+                
                 const now = new Date();
                 const [hours, minutes] = settings.time.split(':').map(Number);
                 
@@ -8673,18 +8935,13 @@
                 // Se l'orario è già passato, pianifica per domani
                 if (reminderTime <= now) {
                     reminderTime.setDate(reminderTime.getDate() + 1);
+                    console.log("Orario già passato, pianificazione per domani");
                 }
                 
                 // Calcola il tempo di attesa in millisecondi
                 const timeToWait = reminderTime.getTime() - now.getTime();
                 
-                // Salva l'ID del timeout per poterlo cancellare in seguito
-                window.reminderTimeoutId = setTimeout(showNotification, timeToWait);
-                
-                // Salva la data e l'ora del prossimo promemoria
-                localStorage.setItem('nextReminderTime', reminderTime.toISOString());
-                
-                console.log(`Promemoria pianificato per ${reminderTime.toLocaleString('it-IT', {
+                console.log(`Prossimo promemoria pianificato per ${reminderTime.toLocaleString('it-IT', {
                     weekday: 'long',
                     day: 'numeric',
                     month: 'long',
@@ -8692,21 +8949,96 @@
                     hour: '2-digit',
                     minute: '2-digit',
                     hour12: false
-                })}`);
+                })}, attesa di ${Math.round(timeToWait / 1000 / 60)} minuti`);
                 
-                // Se il Service Worker è disponibile, invia un messaggio per pianificare la notifica anche lì
-                if (window.swRegistration && navigator.serviceWorker.controller) {
+                // Salva l'ID del timeout per poterlo cancellare in seguito
+                window.reminderTimeoutId = setTimeout(showNotification, timeToWait);
+                
+                // Salva la data e l'ora del prossimo promemoria
+                localStorage.setItem('nextReminderTime', reminderTime.toISOString());
+                
+                // Se il Service Worker è registrato e attivo, invia un messaggio per pianificare la notifica
+                // Questo è un backup nel caso in cui l'app venga chiusa
+                if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                    console.log("Invio pianificazione al Service Worker");
+                    
                     navigator.serviceWorker.controller.postMessage({
                         type: 'SCHEDULE_NOTIFICATION',
                         title: 'Ore PWS',
                         options: {
                             body: settings.text,
-                            icon: '/ore-pws/icons/icon-192x192.png',
+                            icon: './icons/icon-192x192.png',
+                            badge: './icons/icon-72x72.png',
                             tag: 'ore-pws-reminder',
-                            requireInteraction: true
+                            requireInteraction: true,
+                            vibrate: [100, 50, 100, 50, 100],
+                            actions: [
+                                {
+                                    action: 'open-app',
+                                    title: 'Apri App'
+                                },
+                                {
+                                    action: 'dismiss',
+                                    title: 'Chiudi'
+                                }
+                            ]
                         },
                         timestamp: reminderTime.getTime()
                     });
+                }
+                
+                // Per iOS, pianifica anche una notifica locale come backup
+                scheduleIOSNotification(settings, reminderTime);
+            };
+            
+            // Funzione specifica per iOS per pianificare notifiche locali
+            const scheduleIOSNotification = (settings, reminderTime) => {
+                // Verifica se siamo su iOS
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                
+                if (isIOS) {
+                    console.log("Rilevato iOS, pianificazione notifica specifica");
+                    
+                    // Su iOS, possiamo usare un approccio alternativo per le notifiche
+                    // Salviamo i dati della notifica in localStorage
+                    const iosNotifications = JSON.parse(localStorage.getItem('iosNotifications') || '[]');
+                    
+                    // Aggiungi la nuova notifica
+                    iosNotifications.push({
+                        title: 'Ore PWS',
+                        body: settings.text,
+                        timestamp: reminderTime.getTime(),
+                        days: settings.days
+                    });
+                    
+                    // Rimuovi notifiche vecchie
+                    const now = Date.now();
+                    const filteredNotifications = iosNotifications.filter(n => n.timestamp > now);
+                    
+                    // Salva le notifiche aggiornate
+                    localStorage.setItem('iosNotifications', JSON.stringify(filteredNotifications));
+                    
+                    console.log(`Notifica iOS pianificata per ${new Date(reminderTime).toLocaleString()}`);
+                    
+                    // Su iOS, possiamo anche provare a usare l'API di notifica standard come backup
+                    try {
+                        if ('Notification' in window && Notification.permission === 'granted') {
+                            // Imposta un timeout per mostrare la notifica al momento giusto
+                            const timeToWait = reminderTime.getTime() - Date.now();
+                            if (timeToWait > 0) {
+                                setTimeout(() => {
+                                    if (shouldShowToday()) {
+                                        new Notification('Ore PWS', {
+                                            body: settings.text,
+                                            icon: './icons/icon-192x192.png'
+                                        });
+                                    }
+                                }, timeToWait);
+                            }
+                        }
+                    } catch (error) {
+                        console.error("Errore nella pianificazione della notifica iOS:", error);
+                    }
                 }
             };
             
@@ -8716,12 +9048,63 @@
         
         // Cancella il promemoria pianificato
         function cancelReminder() {
+            console.log("Cancellazione promemoria...");
+            
             if (window.reminderTimeoutId) {
                 clearTimeout(window.reminderTimeoutId);
                 window.reminderTimeoutId = null;
-                console.log('Promemoria cancellato');
+                console.log('Timeout promemoria cancellato');
+            }
+            
+            // Cancella anche le notifiche iOS
+            localStorage.removeItem('iosNotifications');
+            
+            // Se il Service Worker è attivo, invia un messaggio per cancellare le notifiche programmate
+            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({
+                    type: 'CANCEL_NOTIFICATIONS'
+                });
+                console.log('Richiesta cancellazione notifiche inviata al Service Worker');
             }
         }
+        
+        // Funzione per verificare periodicamente le notifiche iOS
+        function checkIOSNotifications() {
+            // Verifica se siamo su iOS
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            
+            if (isIOS) {
+                console.log("Controllo notifiche iOS...");
+                
+                const iosNotifications = JSON.parse(localStorage.getItem('iosNotifications') || '[]');
+                const now = Date.now();
+                
+                // Verifica se ci sono notifiche da mostrare
+                iosNotifications.forEach(notification => {
+                    if (notification.timestamp <= now) {
+                        // Verifica se oggi è un giorno valido
+                        const today = new Date().getDay();
+                        if (notification.days.includes(today)) {
+                            // Mostra la notifica
+                            if ('Notification' in window && Notification.permission === 'granted') {
+                                new Notification(notification.title, {
+                                    body: notification.body,
+                                    icon: './icons/icon-192x192.png'
+                                });
+                                console.log("Notifica iOS mostrata");
+                            }
+                        }
+                    }
+                });
+                
+                // Rimuovi le notifiche mostrate
+                const updatedNotifications = iosNotifications.filter(n => n.timestamp > now);
+                localStorage.setItem('iosNotifications', JSON.stringify(updatedNotifications));
+            }
+        }
+        
+        // Controlla le notifiche iOS ogni minuto
+        setInterval(checkIOSNotifications, 60000);
         
         // Funzioni di utilità per la conversione tra ArrayBuffer e Base64
         function arrayBufferToBase64(buffer) {
@@ -16324,6 +16707,225 @@ END:VCARD`;
         } else {
             initContactsManager();
         }
+    </script>
+
+    <!-- Script di ottimizzazione per Safari iOS e altri browser -->
+    <script>
+    (function() {
+        // Verifica se il browser è Safari su iOS
+        const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && 
+                            !window.MSStream && 
+                            /WebKit/.test(navigator.userAgent) &&
+                            !/Chrome/.test(navigator.userAgent);
+        
+        if (isIOSSafari) {
+            console.log("Rilevato Safari su iOS: applicazione ottimizzazioni...");
+            
+            // 1. Ottimizzazione delle animazioni
+            document.documentElement.classList.add('ios-safari');
+            
+            // 2. Limitazione delle animazioni per migliorare le prestazioni
+            const limitAnimations = function() {
+                // Aggiungi will-change solo agli elementi che ne hanno bisogno
+                const animatedElements = document.querySelectorAll('.bouncing-logo, .nav-item.active');
+                animatedElements.forEach(el => {
+                    el.style.willChange = 'transform';
+                });
+                
+                // Rimuovi will-change dagli elementi che non sono più visibili
+                const cleanup = function() {
+                    document.querySelectorAll('[style*="will-change"]').forEach(el => {
+                        if (!isElementInViewport(el)) {
+                            el.style.willChange = 'auto';
+                        }
+                    });
+                };
+                
+                // Controlla se un elemento è nel viewport
+                function isElementInViewport(el) {
+                    const rect = el.getBoundingClientRect();
+                    return (
+                        rect.top >= 0 &&
+                        rect.left >= 0 &&
+                        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                        rect.left <= (window.innerWidth || document.documentElement.clientWidth)
+                    );
+                }
+                
+                // Esegui cleanup periodicamente
+                setInterval(cleanup, 2000);
+            };
+            
+            // 3. Ottimizzazione localStorage
+            const optimizeStorage = function() {
+                // Funzione per comprimere i dati prima di salvarli
+                const originalSetItem = localStorage.setItem;
+                localStorage.setItem = function(key, value) {
+                    // Non comprimere valori piccoli
+                    if (typeof value === 'string' && value.length > 1000) {
+                        try {
+                            // Rimuovi spazi bianchi non necessari per JSON
+                            const parsedValue = JSON.parse(value);
+                            const compressedValue = JSON.stringify(parsedValue);
+                            originalSetItem.call(localStorage, key, compressedValue);
+                        } catch (e) {
+                            // Se non è JSON valido, salva normalmente
+                            originalSetItem.call(localStorage, key, value);
+                        }
+                    } else {
+                        originalSetItem.call(localStorage, key, value);
+                    }
+                };
+                
+                // Gestione errori di quota
+                window.addEventListener('error', function(e) {
+                    if (e.message && e.message.includes('QuotaExceededError')) {
+                        console.warn('Quota localStorage superata, pulizia cache...');
+                        // Rimuovi dati meno importanti
+                        const keysToPreserve = ['timeTrackerData', 'userName'];
+                        for (let i = 0; i < localStorage.length; i++) {
+                            const key = localStorage.key(i);
+                            if (!keysToPreserve.includes(key)) {
+                                localStorage.removeItem(key);
+                            }
+                        }
+                    }
+                });
+            };
+            
+            // 4. Prevenzione memory leak
+            const preventMemoryLeaks = function() {
+                // Rimuovi i listener non necessari quando gli elementi vengono rimossi
+                const originalRemoveChild = Element.prototype.removeChild;
+                Element.prototype.removeChild = function(child) {
+                    if (child.nodeName !== '#text') {
+                        // Clona e sostituisci per rimuovere event listeners
+                        const clone = child.cloneNode(true);
+                        this.replaceChild(clone, child);
+                        return clone;
+                    }
+                    return originalRemoveChild.call(this, child);
+                };
+                
+                // Limita il numero di elementi nel DOM
+                const checkDOMSize = function() {
+                    const domSize = document.querySelectorAll('*').length;
+                    if (domSize > 2000) {
+                        console.warn('DOM troppo grande:', domSize, 'elementi');
+                    }
+                };
+                
+                // Controlla periodicamente
+                setInterval(checkDOMSize, 10000);
+            };
+            
+            // 5. Ottimizzazione scroll
+            const optimizeScroll = function() {
+                // Usa passive listeners per migliorare lo scrolling
+                document.addEventListener('touchstart', function(){}, {passive: true});
+                document.addEventListener('touchmove', function(){}, {passive: true});
+                
+                // Disabilita temporaneamente le animazioni durante lo scroll
+                let scrollTimeout;
+                window.addEventListener('scroll', function() {
+                    document.body.classList.add('disable-animations');
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(function() {
+                        document.body.classList.remove('disable-animations');
+                    }, 200);
+                }, {passive: true});
+            };
+            
+            // 6. Gestione eventi touch migliorata
+            const optimizeTouchEvents = function() {
+                // Rimuovi il delay di 300ms sui click
+                document.documentElement.style.touchAction = 'manipulation';
+                
+                // Previeni zoom involontario su doppio tap
+                let lastTouchEnd = 0;
+                document.addEventListener('touchend', function(e) {
+                    const now = Date.now();
+                    if (now - lastTouchEnd < 300) {
+                        e.preventDefault();
+                    }
+                    lastTouchEnd = now;
+                }, false);
+            };
+            
+            // Esegui tutte le ottimizzazioni quando il DOM è pronto
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    limitAnimations();
+                    optimizeStorage();
+                    preventMemoryLeaks();
+                    optimizeScroll();
+                    optimizeTouchEvents();
+                    console.log("Ottimizzazioni Safari iOS applicate");
+                });
+            } else {
+                limitAnimations();
+                optimizeStorage();
+                preventMemoryLeaks();
+                optimizeScroll();
+                optimizeTouchEvents();
+                console.log("Ottimizzazioni Safari iOS applicate");
+            }
+        }
+        
+        // Ottimizzazioni generali per tutti i browser
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. Ottimizzazione delle immagini
+            const lazyLoadImages = function() {
+                const images = document.querySelectorAll('img[data-src]');
+                if (images.length > 0) {
+                    const imageObserver = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                const img = entry.target;
+                                img.src = img.dataset.src;
+                                img.removeAttribute('data-src');
+                                imageObserver.unobserve(img);
+                            }
+                        });
+                    });
+                    
+                    images.forEach(img => imageObserver.observe(img));
+                }
+            };
+            
+            // 2. Ottimizzazione degli event listener
+            const optimizeEventListeners = function() {
+                // Usa la delegazione degli eventi per ridurre il numero di listener
+                document.body.addEventListener('click', function(e) {
+                    // Gestisci i click sui pulsanti
+                    if (e.target.matches('button, .btn, [role="button"]') || 
+                        e.target.closest('button, .btn, [role="button"]')) {
+                        // Aggiungi feedback tattile
+                        if ('vibrate' in navigator) {
+                            navigator.vibrate(5);
+                        }
+                    }
+                });
+            };
+            
+            // 3. Ottimizzazione del rendering
+            const optimizeRendering = function() {
+                // Riduci il reflow e repaint
+                const heavyElements = document.querySelectorAll('.time-entries-list, .monthly-report-container');
+                heavyElements.forEach(el => {
+                    el.style.willChange = 'transform';
+                    el.style.transform = 'translateZ(0)';
+                });
+            };
+            
+            // Esegui le ottimizzazioni
+            lazyLoadImages();
+            optimizeEventListeners();
+            optimizeRendering();
+            
+            console.log("Ottimizzazioni generali applicate");
+        });
+    })();
     </script>
 
 </body>
