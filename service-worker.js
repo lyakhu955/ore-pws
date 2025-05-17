@@ -1,17 +1,24 @@
 // Service Worker per Ore PWS - Versione migliorata per iOS e Android
 const CACHE_NAME = 'ore-pws-cache-v3';
+
+// Ottieni il percorso base per GitHub Pages
+const getBasePath = () => {
+  return self.location.pathname.replace(/\/[^\/]*$/, '/');
+};
+
+// Crea URL relativi al percorso base
 const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icons/icon-72x72.png',
-  './icons/icon-96x96.png',
-  './icons/icon-128x128.png',
-  './icons/icon-144x144.png',
-  './icons/icon-152x152.png',
-  './icons/icon-192x192.png',
-  './icons/icon-384x384.png',
-  './icons/icon-512x512.png'
+  getBasePath(),
+  getBasePath() + 'index.html',
+  getBasePath() + 'manifest.json',
+  getBasePath() + 'icons/icon-72x72.png',
+  getBasePath() + 'icons/icon-96x96.png',
+  getBasePath() + 'icons/icon-128x128.png',
+  getBasePath() + 'icons/icon-144x144.png',
+  getBasePath() + 'icons/icon-152x152.png',
+  getBasePath() + 'icons/icon-192x192.png',
+  getBasePath() + 'icons/icon-384x384.png',
+  getBasePath() + 'icons/icon-512x512.png'
 ];
 
 // Variabile globale per memorizzare le notifiche programmate
@@ -203,6 +210,11 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('push', (event) => {
   console.log('Service Worker: Notifica push ricevuta');
   
+  // Ottieni il percorso base per le icone
+  const basePath = getBasePath();
+  const iconPath = basePath + 'icons/icon-192x192.png';
+  const badgePath = basePath + 'icons/icon-72x72.png';
+  
   let notificationData = {};
   if (event.data) {
     try {
@@ -211,23 +223,23 @@ self.addEventListener('push', (event) => {
       notificationData = {
         title: 'Ore PWS',
         body: event.data.text(),
-        icon: './icons/icon-192x192.png'
+        icon: iconPath
       };
     }
   } else {
     notificationData = {
       title: 'Ore PWS',
       body: 'Ricordati di segnare le ore di oggi!',
-      icon: './icons/icon-192x192.png'
+      icon: iconPath
     };
   }
   
   const options = {
     body: notificationData.body || 'Ricordati di segnare le ore di oggi!',
-    icon: notificationData.icon || './icons/icon-192x192.png',
-    badge: './icons/icon-72x72.png',
+    icon: notificationData.icon || iconPath,
+    badge: badgePath,
     tag: notificationData.tag || 'ore-pws-reminder',
-    data: notificationData.data || {},
+    data: notificationData.data || { url: basePath },
     requireInteraction: true,
     actions: [
       {
@@ -257,6 +269,15 @@ self.addEventListener('notificationclick', (event) => {
     return;
   }
   
+  // Ottieni l'URL da aprire
+  const basePath = getBasePath();
+  let urlToOpen = basePath;
+  
+  // Se la notifica contiene un URL specifico, usalo
+  if (event.notification.data && event.notification.data.url) {
+    urlToOpen = event.notification.data.url;
+  }
+  
   // Apri l'app quando l'utente clicca sulla notifica
   event.waitUntil(
     clients.matchAll({ type: 'window' })
@@ -269,7 +290,8 @@ self.addEventListener('notificationclick', (event) => {
         }
         // Altrimenti apri una nuova finestra
         if (clients.openWindow) {
-          return clients.openWindow('./');
+          console.log('Service Worker: Apertura nuova finestra con URL:', urlToOpen);
+          return clients.openWindow(urlToOpen);
         }
       })
   );
@@ -345,11 +367,26 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SCHEDULE_NOTIFICATION') {
     const { title, options, timestamp } = event.data;
     
+    // Ottieni il percorso base per le icone
+    const basePath = getBasePath();
+    
+    // Aggiorna i percorsi delle icone per GitHub Pages
+    if (options.icon && options.icon.startsWith('./')) {
+      options.icon = basePath + options.icon.substring(2);
+    }
+    if (options.badge && options.badge.startsWith('./')) {
+      options.badge = basePath + options.badge.substring(2);
+    }
+    
     // Aggiungi i giorni della settimana alle opzioni se presenti
     if (event.data.days) {
       options.data = options.data || {};
       options.data.days = event.data.days;
     }
+    
+    // Aggiungi l'URL base alle opzioni
+    options.data = options.data || {};
+    options.data.url = basePath;
     
     // Programma la notifica
     scheduleNotification(title, options, timestamp);
@@ -383,13 +420,22 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'TEST_NOTIFICATION') {
     console.log('Service Worker: Test notifica richiesto');
     
+    // Ottieni il percorso base per le icone
+    const basePath = getBasePath();
+    const iconPath = basePath + 'icons/icon-192x192.png';
+    const badgePath = basePath + 'icons/icon-72x72.png';
+    
     const options = {
       body: 'Questa è una notifica di test. Se la vedi, le notifiche funzionano correttamente!',
-      icon: './icons/icon-192x192.png',
-      badge: './icons/icon-72x72.png',
+      icon: iconPath,
+      badge: badgePath,
       tag: 'ore-pws-test',
       requireInteraction: true,
       vibrate: [100, 50, 100],
+      data: {
+        url: basePath,
+        test: true
+      },
       actions: [
         {
           action: 'open-app',
