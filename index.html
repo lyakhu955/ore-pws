@@ -1668,6 +1668,8 @@
             cursor: pointer;
             border: 1px solid var(--md-sys-color-outline-variant);
             transition: all 0.2s ease;
+            user-select: none; /* Impedisce la selezione del testo */
+            position: relative;
         }
         
         .day-checkbox:hover {
@@ -1676,11 +1678,24 @@
         
         .day-checkbox input {
             margin-right: 5px;
+            cursor: pointer;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .day-checkbox input:checked {
+            accent-color: var(--md-sys-color-primary);
         }
         
         .day-checkbox input:checked + span {
             color: var(--md-sys-color-primary);
             font-weight: 500;
+        }
+        
+        /* Stile per i checkbox selezionati */
+        .day-checkbox input:checked ~ .day-checkbox {
+            background-color: var(--md-sys-color-primary-container);
+            border-color: var(--md-sys-color-primary);
         }
         .toggle-switch input {
             opacity: 0;
@@ -4636,25 +4651,25 @@
                                         <label for="reminderDays">Giorni della settimana</label>
                                         <div class="day-selector" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
                                             <label class="day-checkbox">
-                                                <input type="checkbox" value="1" checked> Lun
+                                                <input type="checkbox" value="1" checked> <span>Lun</span>
                                             </label>
                                             <label class="day-checkbox">
-                                                <input type="checkbox" value="2" checked> Mar
+                                                <input type="checkbox" value="2" checked> <span>Mar</span>
                                             </label>
                                             <label class="day-checkbox">
-                                                <input type="checkbox" value="3" checked> Mer
+                                                <input type="checkbox" value="3" checked> <span>Mer</span>
                                             </label>
                                             <label class="day-checkbox">
-                                                <input type="checkbox" value="4" checked> Gio
+                                                <input type="checkbox" value="4" checked> <span>Gio</span>
                                             </label>
                                             <label class="day-checkbox">
-                                                <input type="checkbox" value="5" checked> Ven
+                                                <input type="checkbox" value="5" checked> <span>Ven</span>
                                             </label>
                                             <label class="day-checkbox">
-                                                <input type="checkbox" value="6"> Sab
+                                                <input type="checkbox" value="6"> <span>Sab</span>
                                             </label>
                                             <label class="day-checkbox">
-                                                <input type="checkbox" value="0"> Dom
+                                                <input type="checkbox" value="0"> <span>Dom</span>
                                             </label>
                                         </div>
                                     </div>
@@ -4664,9 +4679,15 @@
                                         <textarea id="reminderText" class="settings-input" style="min-height: 80px;">We allora le segnamo ste ore???</textarea>
                                     </div>
                                     
-                                    <button id="saveReminder" style="margin-top: 15px; width: 100%;">
-                                        <span class="material-symbols-outlined">notifications_active</span> Salva Promemoria
-                                    </button>
+                                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                        <button id="saveReminder" style="flex: 1;">
+                                            <span class="material-symbols-outlined">notifications_active</span> Salva Promemoria
+                                        </button>
+                                        
+                                        <button id="testNotification" style="background-color: var(--md-sys-color-secondary); color: var(--md-sys-color-on-secondary);">
+                                            <span class="material-symbols-outlined">notifications_none</span> Test
+                                        </button>
+                                    </div>
                                     
                                     <div style="font-size: 0.8rem; color: var(--md-sys-color-on-surface-variant); margin-top: 10px;">
                                         Nota: il promemoria apparirà come notifica solo se l'app è installata e hai concesso i permessi per le notifiche.
@@ -8599,7 +8620,28 @@
             const reminderTime = document.getElementById('reminderTime');
             const reminderText = document.getElementById('reminderText');
             const saveReminderBtn = document.getElementById('saveReminder');
+            const testNotificationBtn = document.getElementById('testNotification');
             const dayCheckboxes = document.querySelectorAll('.day-checkbox input[type="checkbox"]');
+            
+            // Assicurati che i checkbox dei giorni funzionino correttamente
+            dayCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('click', function(e) {
+                    // Previeni la propagazione dell'evento per evitare conflitti
+                    e.stopPropagation();
+                });
+            });
+            
+            // Aggiungi event listener per i label dei giorni
+            document.querySelectorAll('.day-checkbox').forEach(label => {
+                label.addEventListener('click', function(e) {
+                    // Trova il checkbox all'interno del label
+                    const checkbox = this.querySelector('input[type="checkbox"]');
+                    if (checkbox && e.target !== checkbox) {
+                        // Inverti lo stato del checkbox
+                        checkbox.checked = !checkbox.checked;
+                    }
+                });
+            });
             
             // Carica le impostazioni salvate
             const savedSettings = JSON.parse(localStorage.getItem('reminderSettings')) || {
@@ -8669,6 +8711,19 @@
                 }).join(', ');
                 
                 showToast(`Promemoria impostato per le ore ${reminderTime.value} nei giorni: ${giorni}`);
+            });
+            
+            // Event listener per il pulsante di test delle notifiche
+            testNotificationBtn.addEventListener('click', function() {
+                // Richiedi il permesso per le notifiche se non è già stato concesso
+                requestNotificationPermission().then(() => {
+                    // Testa la notifica
+                    testNotification();
+                    showToast('Invio notifica di test...', 'info');
+                }).catch(error => {
+                    console.error('Errore nel test della notifica:', error);
+                    showToast('Per testare le notifiche, devi prima concedere il permesso', 'warning');
+                });
             });
             
             // Se il promemoria è attivo, pianificalo
