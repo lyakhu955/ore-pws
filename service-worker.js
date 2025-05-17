@@ -1,5 +1,5 @@
-// Service Worker per Ore PWS - Versione migliorata per GitHub Pages con supporto notifiche in background
-const CACHE_NAME = 'ore-pws-cache-v4';
+// Service Worker per Ore PWS - Versione base per GitHub Pages
+const CACHE_NAME = 'ore-pws-cache-v1';
 
 // Ottieni il percorso base per GitHub Pages
 const getBasePath = () => {
@@ -21,131 +21,7 @@ const urlsToCache = [
   getBasePath() + 'icons/icon-512x512.png'
 ];
 
-// Variabile globale per memorizzare le notifiche programmate
-let scheduledNotifications = [];
 
-// Funzione per salvare le notifiche programmate in IndexedDB
-function saveScheduledNotifications() {
-  return new Promise((resolve, reject) => {
-    if (!self.indexedDB) {
-      console.error('Service Worker: IndexedDB non supportato');
-      return reject(new Error('IndexedDB non supportato'));
-    }
-    
-    const request = self.indexedDB.open('OreNotifications', 1);
-    
-    request.onupgradeneeded = function(event) {
-      const db = event.target.result;
-      if (!db.objectStoreNames.contains('notifications')) {
-        db.createObjectStore('notifications', { keyPath: 'id' });
-      }
-    };
-    
-    request.onsuccess = function(event) {
-      const db = event.target.result;
-      const transaction = db.transaction(['notifications'], 'readwrite');
-      const store = transaction.objectStore('notifications');
-      
-      // Cancella tutte le notifiche esistenti
-      const clearRequest = store.clear();
-      
-      clearRequest.onsuccess = function() {
-        // Salva le nuove notifiche
-        let savedCount = 0;
-        
-        if (scheduledNotifications.length === 0) {
-          console.log('Service Worker: Nessuna notifica da salvare');
-          transaction.oncomplete = function() {
-            resolve();
-          };
-          return;
-        }
-        
-        scheduledNotifications.forEach((notification, index) => {
-          notification.id = index;
-          const addRequest = store.add(notification);
-          
-          addRequest.onsuccess = function() {
-            savedCount++;
-            if (savedCount === scheduledNotifications.length) {
-              console.log('Service Worker: Notifiche salvate in IndexedDB', scheduledNotifications.length);
-            }
-          };
-          
-          addRequest.onerror = function(event) {
-            console.error('Service Worker: Errore nel salvataggio della notifica', event.target.error);
-          };
-        });
-        
-        transaction.oncomplete = function() {
-          resolve();
-        };
-        
-        transaction.onerror = function(event) {
-          console.error('Service Worker: Errore nella transazione', event.target.error);
-          reject(event.target.error);
-        };
-      };
-      
-      clearRequest.onerror = function(event) {
-        console.error('Service Worker: Errore nella cancellazione delle notifiche', event.target.error);
-        reject(event.target.error);
-      };
-    };
-    
-    request.onerror = function(event) {
-      console.error('Service Worker: Errore nell\'apertura di IndexedDB', event.target.error);
-      reject(event.target.error);
-    };
-  });
-}
-
-// Funzione per caricare le notifiche programmate da IndexedDB
-function loadScheduledNotifications() {
-  return new Promise((resolve, reject) => {
-    if (!self.indexedDB) {
-      console.error('Service Worker: IndexedDB non supportato');
-      return reject(new Error('IndexedDB non supportato'));
-    }
-    
-    const request = self.indexedDB.open('OreNotifications', 1);
-    
-    request.onupgradeneeded = function(event) {
-      const db = event.target.result;
-      if (!db.objectStoreNames.contains('notifications')) {
-        db.createObjectStore('notifications', { keyPath: 'id' });
-      }
-    };
-    
-    request.onsuccess = function(event) {
-      const db = event.target.result;
-      const transaction = db.transaction(['notifications'], 'readonly');
-      const store = transaction.objectStore('notifications');
-      const getAllRequest = store.getAll();
-      
-      getAllRequest.onsuccess = function() {
-        scheduledNotifications = getAllRequest.result || [];
-        console.log('Service Worker: Notifiche caricate da IndexedDB', scheduledNotifications.length);
-        resolve(scheduledNotifications);
-      };
-      
-      getAllRequest.onerror = function(event) {
-        console.error('Service Worker: Errore nel caricamento delle notifiche', event.target.error);
-        reject(event.target.error);
-      };
-      
-      transaction.onerror = function(event) {
-        console.error('Service Worker: Errore nella transazione', event.target.error);
-        reject(event.target.error);
-      };
-    };
-    
-    request.onerror = function(event) {
-      console.error('Service Worker: Errore nell\'apertura di IndexedDB', event.target.error);
-      reject(event.target.error);
-    };
-  });
-}
 
 // Installazione del Service Worker
 self.addEventListener('install', (event) => {
