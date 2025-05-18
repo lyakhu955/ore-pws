@@ -4115,6 +4115,102 @@
             perspective: 1000px;
         }
         
+        /* Stili per la sezione Cash */
+        .cash-settings-container {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+        
+        .cash-results-container {
+            margin-top: 1.5rem;
+        }
+        
+        .cash-results {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+        
+        .cash-result-item {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            background-color: var(--md-sys-color-surface);
+            border-radius: var(--border-radius-medium);
+            align-items: center;
+            transition: background-color 0.2s ease;
+        }
+        
+        .cash-result-item:hover {
+            background-color: var(--md-sys-color-surface-variant);
+        }
+        
+        .cash-result-label {
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+        }
+        
+        .cash-result-hours {
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: var(--md-sys-color-on-surface-variant);
+            text-align: right;
+        }
+        
+        .cash-result-amount {
+            font-family: monospace;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--md-sys-color-primary);
+            text-align: right;
+            min-width: 80px;
+        }
+        
+        .cash-result-total {
+            margin-top: 0.5rem;
+            background-color: var(--md-sys-color-primary-container);
+            border-left: 3px solid var(--md-sys-color-primary);
+        }
+        
+        .cash-result-total .cash-result-label {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--md-sys-color-on-primary-container);
+        }
+        
+        .cash-result-total .cash-result-amount {
+            font-size: 1.3rem;
+            color: var(--md-sys-color-on-primary-container);
+        }
+        
+        @media (max-width: 600px) {
+            .cash-result-item {
+                padding: 0.5rem 0.75rem;
+                gap: 0.5rem;
+            }
+            
+            .cash-result-label {
+                font-size: 0.9rem;
+            }
+            
+            .cash-result-hours {
+                font-size: 0.8rem;
+            }
+            
+            .cash-result-amount {
+                font-size: 1rem;
+                min-width: 70px;
+            }
+            
+            .cash-result-total .cash-result-label,
+            .cash-result-total .cash-result-amount {
+                font-size: 1.1rem;
+            }
+        }
+        
         /* Ottimizzazioni per input e form */
         input, 
         select, 
@@ -4529,6 +4625,19 @@
                             </button>
                         </div>
                         
+                        <div class="setting-item">
+                            <span class="setting-label">PIN Admin</span>
+                            <div style="display: flex; gap: 10px; flex-grow: 1;">
+                                <input type="password" id="adminPin" class="settings-input" placeholder="Inserisci PIN Admin" maxlength="4">
+                                <button id="unlockAdminFeatures">
+                                    <span class="material-symbols-outlined">lock_open</span> Sblocca
+                                </button>
+                                <button id="lockAdminFeatures" style="display: none;">
+                                    <span class="material-symbols-outlined">lock</span> Blocca
+                                </button>
+                            </div>
+                        </div>
+                        
                         <div class="setting-item" style="flex-direction: column; align-items: stretch;">
                             <span class="setting-label">Installa App</span>
                             
@@ -4903,6 +5012,110 @@
                 </div>
             </div>
 
+            <!-- Sezione Cash -->
+            <div id="cash-section" class="section">
+                <div class="card">
+                    <div class="section-header">
+                        <h2>Calcolo Busta Paga</h2>
+                        <div class="section-actions">
+                            <select id="cashMonthSelect" class="month-select">
+                                <!-- Options will be populated by JS -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="cash-settings-container">
+                        <h3>Impostazioni Tariffe</h3>
+                        <div class="form-row">
+                            <div class="form-group-inline">
+                                <label for="normalHourRate">Tariffa Ore Normali (€/h)</label>
+                                <input type="number" id="normalHourRate" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                            <div class="form-group-inline">
+                                <label for="nightHourRate">Tariffa Ore Notturne (€/h)</label>
+                                <input type="number" id="nightHourRate" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group-inline">
+                                <label for="transferDayRate">Tariffa Giorno Trasferta (€/giorno)</label>
+                                <input type="number" id="transferDayRate" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                            <div class="form-group-inline">
+                                <label for="sickDayRate">Tariffa Giorno Malattia (€/giorno)</label>
+                                <input type="number" id="sickDayRate" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group-inline">
+                                <label for="vacationDayRate">Tariffa Giorno Ferie (€/giorno)</label>
+                                <input type="number" id="vacationDayRate" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                            <div class="form-group-inline">
+                                <label for="igpBresciaRate">Tariffa IGP Brescia (€/giorno)</label>
+                                <input type="number" id="igpBresciaRate" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group-inline">
+                                <label for="holidayHourRate">Tariffa Ore Festive (€/h)</label>
+                                <input type="number" id="holidayHourRate" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                        </div>
+                        <button id="saveRatesBtn" class="btn">
+                            <span class="material-symbols-outlined">save</span>
+                            Salva Tariffe
+                        </button>
+                    </div>
+                    
+                    <div class="cash-results-container">
+                        <h3>Calcolo Busta Paga</h3>
+                        <div class="cash-results">
+                            <div class="cash-result-item">
+                                <div class="cash-result-label">Ore Normali</div>
+                                <div class="cash-result-hours" id="normalHours">0h</div>
+                                <div class="cash-result-amount" id="normalAmount">€0.00</div>
+                            </div>
+                            <div class="cash-result-item">
+                                <div class="cash-result-label">Ore Notturne</div>
+                                <div class="cash-result-hours" id="nightHours">0h</div>
+                                <div class="cash-result-amount" id="nightAmount">€0.00</div>
+                            </div>
+                            <div class="cash-result-item">
+                                <div class="cash-result-label">Ore Festive</div>
+                                <div class="cash-result-hours" id="holidayHours">0h</div>
+                                <div class="cash-result-amount" id="holidayAmount">€0.00</div>
+                            </div>
+                            <div class="cash-result-item">
+                                <div class="cash-result-label">Giorni Trasferta</div>
+                                <div class="cash-result-hours" id="transferDays">0g</div>
+                                <div class="cash-result-amount" id="transferAmount">€0.00</div>
+                            </div>
+                            <div class="cash-result-item">
+                                <div class="cash-result-label">Giorni Malattia</div>
+                                <div class="cash-result-hours" id="sickDays">0g</div>
+                                <div class="cash-result-amount" id="sickAmount">€0.00</div>
+                            </div>
+                            <div class="cash-result-item">
+                                <div class="cash-result-label">Giorni Ferie</div>
+                                <div class="cash-result-hours" id="vacationDays">0g</div>
+                                <div class="cash-result-amount" id="vacationAmount">€0.00</div>
+                            </div>
+                            <div class="cash-result-item">
+                                <div class="cash-result-label">IGP Brescia</div>
+                                <div class="cash-result-hours" id="igpBresciaDays">0g</div>
+                                <div class="cash-result-amount" id="igpBresciaAmount">€0.00</div>
+                            </div>
+                            <div class="cash-result-item cash-result-total">
+                                <div class="cash-result-label">TOTALE</div>
+                                <div class="cash-result-hours"></div>
+                                <div class="cash-result-amount" id="totalAmount">€0.00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
              <!-- Sezione Ferie/malattie -->
             <div id="ferie-malattie-section" class="section">
                 <div class="card">
@@ -4973,6 +5186,10 @@
         <a href="#" class="nav-item" data-section="monthly-report-section">
              <span class="material-symbols-outlined">summarize</span>
             <span>Riepilogo</span>
+        </a>
+        <a href="#" class="nav-item" data-section="cash-section" style="display: none;" id="cash-nav-item">
+            <span class="material-symbols-outlined">payments</span>
+            <span>Cash</span>
         </a>
         <a href="#" class="nav-item" data-section="ferie-malattie-section">
             <span class="material-symbols-outlined">hotel_class</span> <!-- or event_busy / medical_services -->
@@ -5463,6 +5680,23 @@
         // Global DOMContentLoaded listener
         document.addEventListener('DOMContentLoaded', () => {
             console.log('DOM completamente caricato e analizzato');
+            
+            // Controlla se il PIN Admin è già stato inserito correttamente
+            const isAdminUnlocked = localStorage.getItem('adminUnlocked') === 'true';
+            const cashNavItem = document.getElementById('cash-nav-item');
+            const unlockAdminBtn = document.getElementById('unlockAdminFeatures');
+            const lockAdminBtn = document.getElementById('lockAdminFeatures');
+            
+            if (isAdminUnlocked) {
+                if (cashNavItem) cashNavItem.style.display = 'flex';
+                if (lockAdminBtn) lockAdminBtn.style.display = 'block';
+                if (unlockAdminBtn) unlockAdminBtn.style.display = 'none';
+                console.log('Funzionalità admin sbloccate (da localStorage)');
+            } else {
+                if (cashNavItem) cashNavItem.style.display = 'none';
+                if (lockAdminBtn) lockAdminBtn.style.display = 'none';
+                if (unlockAdminBtn) unlockAdminBtn.style.display = 'block';
+            }
 
             // Inizializza i controlli orari
             if (typeof initTimeControls === 'function') {
@@ -5671,6 +5905,9 @@
                                         } else if (targetSectionId === 'monthly-report-section') {
                                             console.log("Inizializzazione report mensile dopo attivazione...");
                                             initMonthlyReport();
+                                        } else if (targetSectionId === 'cash-section') {
+                                            console.log("Inizializzazione sezione Cash dopo attivazione...");
+                                            initCashSection();
                                         } else if (targetSectionId === 'ferie-malattie-section') {
                                             console.log("Inizializzazione ferie/malattie dopo attivazione...");
                                             initFerieMalattieSection();
@@ -5952,7 +6189,21 @@
             try {
                 const data = localStorage.getItem('timeTrackerData');
                 // Ensure structure consistency on load
-                const defaultDb = { entries: {}, settings: {}, holidays: {}, vehicles: [] };
+                const defaultDb = { 
+                    entries: {}, 
+                    settings: {}, 
+                    holidays: {}, 
+                    vehicles: [],
+                    rates: {
+                        normalHour: 0,
+                        nightHour: 0,
+                        transferDay: 0,
+                        sickDay: 0,
+                        vacationDay: 0,
+                        igpBrescia: 0
+                    }
+                };
+                
                 if (!data) return defaultDb;
 
                 const parsedData = JSON.parse(data);
@@ -5961,18 +6212,35 @@
                     entries: parsedData.entries || {},
                     settings: parsedData.settings || {},
                     holidays: parsedData.holidays || {},
-                    vehicles: Array.isArray(parsedData.vehicles) ? parsedData.vehicles : []
+                    vehicles: Array.isArray(parsedData.vehicles) ? parsedData.vehicles : [],
+                    rates: parsedData.rates || defaultDb.rates
                 };
             } catch (e) {
                 console.error("Error reading from localStorage:", e);
                 showToast("Errore nel caricamento dei dati. Prova a cancellare i dati.", "error", 5000);
-                return { entries: {}, settings: {}, holidays: {}, vehicles: [] }; // Return default structure on error
+                return { 
+                    entries: {}, 
+                    settings: {}, 
+                    holidays: {}, 
+                    vehicles: [],
+                    rates: {
+                        normalHour: 0,
+                        nightHour: 0,
+                        transferDay: 0,
+                        sickDay: 0,
+                        vacationDay: 0,
+                        igpBrescia: 0
+                    }
+                }; // Return default structure on error
             }
         }
 
         function saveDb(db) {
              try {
                 localStorage.setItem('timeTrackerData', JSON.stringify(db));
+                
+                // Aggiorna la sezione Cash se attiva
+                updateCashSectionIfActive();
              } catch (e) {
                   console.error("Error saving to localStorage:", e);
                   // Check for QuotaExceededError specifically
@@ -5982,6 +6250,66 @@
                       showToast("Errore nel salvataggio dei dati.", "error", 5000);
                   }
              }
+        }
+        
+        // Funzione per aggiornare la sezione Cash se attiva
+        function updateCashSectionIfActive() {
+            if (document.getElementById('cash-section')?.classList.contains('active')) {
+                const cashMonthSelect = document.getElementById('cashMonthSelect');
+                if (cashMonthSelect && cashMonthSelect.value) {
+                    calculatePayForMonth(cashMonthSelect.value);
+                }
+            }
+        }
+        
+        // Funzione per ottenere i mesi disponibili nel database
+        function getAvailableMonths(db) {
+            const months = new Set();
+            
+            // Aggiungi solo i mesi per cui ci sono voci nel database
+            if (db && db.entries) {
+                Object.keys(db.entries).forEach(dateStr => {
+                    if (dateStr && dateStr.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                        const parts = dateStr.split('/');
+                        const year = parts[2];
+                        const month = parts[1];
+                        months.add(`${year}-${month}`);
+                    }
+                });
+            }
+            
+            // Aggiungi anche i mesi per cui ci sono ferie o malattie
+            if (db && db.holidays) {
+                Object.keys(db.holidays).forEach(dateStr => {
+                    if (dateStr && dateStr.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                        const parts = dateStr.split('/');
+                        const year = parts[2];
+                        const month = parts[1];
+                        months.add(`${year}-${month}`);
+                    }
+                });
+            }
+            
+            // Se non ci sono mesi nel database, aggiungi il mese corrente
+            if (months.size === 0) {
+                const currentDate = new Date();
+                const currentYear = currentDate.getFullYear();
+                const currentMonth = currentDate.getMonth() + 1;
+                months.add(`${currentYear}-${String(currentMonth).padStart(2, '0')}`);
+            }
+            
+            // Converti in array e ordina (dal più recente al più vecchio)
+            return Array.from(months)
+                .sort((a, b) => b.localeCompare(a)) // Ordine decrescente
+                .map(monthStr => {
+                    const [year, month] = monthStr.split('-');
+                    const date = new Date(parseInt(year), parseInt(month) - 1, 1);
+                    const monthName = date.toLocaleString('it-IT', { month: 'long' });
+                    return {
+                        value: monthStr,
+                        label: `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} ${year}`
+                    };
+                });
         }
 
         // --- Time Entry Functions ---
@@ -6855,16 +7183,54 @@
                      let dayHasHours = false;
                      let dayHasDescription = false;
                      entries.forEach(entry => {
-                         totalHours += (typeof entry.totalHours === 'number' ? entry.totalHours : 0);
-                         // Contiamo i giorni di trasferta, non le ore
-                         if (entry.transferta === true || (typeof entry.transferta === 'number' && entry.transferta > 0)) {
-                             // Incrementiamo solo se non abbiamo già contato questo giorno
-                             if (!entries.some((e, idx) => idx < entries.indexOf(entry) && 
-                                 (e.transferta === true || (typeof e.transferta === 'number' && e.transferta > 0)))) {
-                                 totalTransferta += 1;
+                         // Usa totalHours se disponibile, altrimenti calcola dalle ore di inizio e fine
+                         if (typeof entry.totalHours === 'number' && entry.totalHours > 0) {
+                             totalHours += entry.totalHours;
+                             console.log(`Riepilogo mensile: Aggiunte ${entry.totalHours} ore dal campo totalHours`);
+                         } else if (entry.startTime && entry.endTime) {
+                             const startTime = parseTimeString(entry.startTime);
+                             const endTime = parseTimeString(entry.endTime);
+                             
+                             if (startTime && endTime) {
+                                 let entryHours = calculateHoursBetween(startTime, endTime);
+                                 
+                                 // Sottrai la pausa se presente
+                                 if (entry.breakTime && !isNaN(parseFloat(entry.breakTime))) {
+                                     entryHours -= parseFloat(entry.breakTime);
+                                 }
+                                 
+                                 totalHours += entryHours;
+                                 console.log(`Riepilogo mensile: Calcolate e aggiunte ${entryHours} ore da ${entry.startTime} a ${entry.endTime}`);
                              }
                          }
-                         totalNotturne += (typeof entry.notturne === 'number' ? entry.notturne : 0);
+                         
+                         // Contiamo i giorni di trasferta, non le ore
+                         if (entry.transferta === true || entry.isTransfer === true || 
+                             (typeof entry.transferta === 'boolean' && entry.transferta) ||
+                             (typeof entry.transferta === 'string' && entry.transferta === 'true')) {
+                             // Incrementiamo solo se non abbiamo già contato questo giorno
+                             if (!entries.some((e, idx) => idx < entries.indexOf(entry) && 
+                                 (e.transferta === true || e.isTransfer === true || 
+                                  (typeof e.transferta === 'boolean' && e.transferta) ||
+                                  (typeof e.transferta === 'string' && e.transferta === 'true')))) {
+                                 totalTransferta += 1;
+                                 console.log(`Riepilogo mensile: Aggiunto giorno di trasferta`);
+                             }
+                         }
+                         
+                         // Calcola le ore notturne
+                         if (entry.isNightShift || entry.notturne === 'true' || entry.notturne === true) {
+                             // Se è un turno notturno, tutte le ore sono notturne
+                             if (typeof entry.totalHours === 'number' && entry.totalHours > 0) {
+                                 totalNotturne += entry.totalHours;
+                                 console.log(`Riepilogo mensile: Aggiunte ${entry.totalHours} ore notturne (turno notturno)`);
+                             }
+                         } else if (typeof entry.notturne === 'number' && entry.notturne > 0) {
+                             // Se ci sono ore notturne specificate come numero
+                             totalNotturne += entry.notturne;
+                             console.log(`Riepilogo mensile: Aggiunte ${entry.notturne} ore notturne`);
+                         }
+                         
                          // Verifica se ci sono ore o descrizione
                          if (typeof entry.totalHours === 'number' && entry.totalHours > 0) dayHasHours = true;
                          if (entry.description && entry.description.trim() !== '') dayHasDescription = true;
@@ -6873,6 +7239,12 @@
                     if (dayHasHours || dayHasDescription) workDays++;
                 }
             }
+
+            // Arrotonda le ore a una cifra decimale (per gestire le mezze ore)
+            totalHours = Math.round(totalHours * 10) / 10;
+            totalNotturne = Math.round(totalNotturne * 10) / 10;
+            
+            console.log(`Riepilogo mensile finale: Ore totali: ${totalHours}, Ore notturne: ${totalNotturne}, Trasferte: ${totalTransferta}, Giorni lavorati: ${workDays}, Ferie: ${ferieDays}, Malattia: ${malattiaDays}`);
 
             // Generate the HTML string (copied structure and styles from displayMonthlyReport's statsHtml)
             const statsHtml = `
@@ -7544,6 +7916,418 @@
          function generateId() {
              // Simple UUID v4-like generator that creates a random ID
              return 'id_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
+         }
+         
+         // Funzione globale per calcolare la busta paga per un mese specifico
+         function calculatePayForMonth(monthValue) {
+             console.log(`Calcolo busta paga per il mese: ${monthValue}`);
+             
+             // Verifica che il valore del mese sia valido
+             if (!monthValue) {
+                 console.warn("Nessun mese selezionato per il calcolo della busta paga");
+                 return;
+             }
+             
+             const db = getDb();
+             
+             // Debug: stampa la struttura del database per capire come sono salvati i dati
+             console.log("Struttura del database:", JSON.stringify(db, null, 2));
+             
+             // Assicuriamoci che le tariffe siano numeri validi
+             const rates = {
+                 normalHour: parseFloat(db.rates?.normalHour) || 0,
+                 nightHour: parseFloat(db.rates?.nightHour) || 0,
+                 holidayHour: parseFloat(db.rates?.holidayHour) || 0,
+                 transferDay: parseFloat(db.rates?.transferDay) || 0,
+                 sickDay: parseFloat(db.rates?.sickDay) || 0,
+                 vacationDay: parseFloat(db.rates?.vacationDay) || 0,
+                 igpBrescia: parseFloat(db.rates?.igpBrescia) || 0
+             };
+             
+             console.log("Tariffe utilizzate:", rates);
+             
+             // Estrai anno e mese dal valore selezionato (formato: YYYY-MM)
+             const [year, month] = monthValue.split('-').map(Number);
+             
+             // Inizializza i contatori
+             let normalHours = 0;
+             let nightHours = 0;
+             let holidayHours = 0;
+             let transferDays = new Set(); // Usa un Set per contare giorni unici
+             let sickDays = 0;
+             let vacationDays = 0;
+             let igpBresciaDays = new Set(); // Usa un Set per contare giorni unici
+             
+             // Calcola il primo e l'ultimo giorno del mese
+             const firstDay = new Date(year, month - 1, 1);
+             const lastDay = new Date(year, month, 0);
+             
+             // Formatta il mese per il confronto (MM/YYYY)
+             const monthYearStr = `${month.toString().padStart(2, '0')}/${year}`;
+             
+             // Debug
+             console.log(`Calcolo per il mese: ${monthYearStr}, giorni: ${lastDay.getDate()}`);
+             
+             // Itera su tutti i giorni del mese
+             for (let day = 1; day <= lastDay.getDate(); day++) {
+                 const currentDate = new Date(year, month - 1, day);
+                 const dateStr = formatDate(currentDate);
+                 
+                 // Verifica che la data sia effettivamente nel mese selezionato
+                 const dateParts = dateStr.split('/');
+                 const dateMonthYear = `${dateParts[1]}/${dateParts[2]}`;
+                 
+                 if (dateMonthYear !== monthYearStr) {
+                     console.warn(`Data ${dateStr} non appartiene al mese ${monthYearStr}, salto...`);
+                     continue;
+                 }
+                 
+                 // Debug
+                 if (db.entries && db.entries[dateStr]) {
+                     console.log(`Trovate voci per ${dateStr}: ${db.entries[dateStr].length}`);
+                 }
+                 
+                 // Controlla se ci sono voci per questa data
+                 if (db.entries && db.entries[dateStr]) {
+                     // Debug: stampa tutte le voci per questa data
+                     console.log(`Voci per ${dateStr}:`, JSON.stringify(db.entries[dateStr], null, 2));
+                     
+                     // Itera su tutte le voci della data
+                     db.entries[dateStr].forEach(entry => {
+                         // Debug
+                         console.log(`Voce: ${JSON.stringify(entry)}`);
+                         
+                         // Calcola le ore normali e notturne
+                         if (entry.totalHours && typeof entry.totalHours === 'number' && entry.totalHours > 0) {
+                             // Se abbiamo già il totale delle ore, usiamo quello direttamente
+                             const totalHours = parseFloat(entry.totalHours);
+                             
+                             console.log(`Usando ore totali già calcolate: ${totalHours}`);
+                             
+                             // Controlla se è un giorno festivo
+                             console.log(`Controllo se ${dateStr} è festivo, giorno della settimana: ${currentDate.getDay()} (0=domenica, 6=sabato)`);
+                             const isHoliday = isHolidayDate(currentDate);
+                             console.log(`Risultato controllo festività per ${dateStr}: ${isHoliday}`);
+                             
+                             if (isHoliday) {
+                                 // Se è un giorno festivo, tutte le ore sono festive
+                                 holidayHours += totalHours;
+                                 console.log(`Aggiunto ${totalHours} ore festive (giorno festivo: ${dateStr})`);
+                             } else if (entry.isNightShift || entry.notturne === 'true' || entry.notturne === true) {
+                                 // Se è un turno notturno, tutte le ore sono notturne
+                                 nightHours += totalHours;
+                                 console.log(`Aggiunto ${totalHours} ore notturne (turno notturno)`);
+                             } else if (entry.notturne && typeof entry.notturne === 'number' && entry.notturne > 0) {
+                                 // Se ci sono ore notturne specificate come numero
+                                 const notturneHours = parseFloat(entry.notturne);
+                                 nightHours += notturneHours;
+                                 normalHours += (totalHours - notturneHours);
+                                 console.log(`Aggiunto ${notturneHours} ore notturne e ${totalHours - notturneHours} ore normali`);
+                             } else {
+                                 // Altrimenti, tutte le ore sono normali
+                                 normalHours += totalHours;
+                                 console.log(`Aggiunto ${totalHours} ore normali`);
+                             }
+                         } else if (entry.startTime && entry.endTime) {
+                             // Altrimenti, calcoliamo le ore dai tempi di inizio e fine
+                             const startTime = parseTimeString(entry.startTime);
+                             const endTime = parseTimeString(entry.endTime);
+                             
+                             if (startTime && endTime) {
+                                 // Calcola le ore totali considerando la pausa
+                                 let totalHours = calculateHoursBetween(startTime, endTime);
+                                 
+                                 // Sottrai la pausa se presente
+                                 if (entry.breakTime && !isNaN(parseFloat(entry.breakTime))) {
+                                     totalHours -= parseFloat(entry.breakTime);
+                                 }
+                                 
+                                 // Debug
+                                 console.log(`Ore calcolate: ${totalHours} (${entry.startTime}-${entry.endTime})`);
+                                 
+                                 // Controlla se è un giorno festivo
+                                 console.log(`Controllo se ${dateStr} è festivo, giorno della settimana: ${currentDate.getDay()} (0=domenica, 6=sabato)`);
+                                 const isHoliday = isHolidayDate(currentDate);
+                                 console.log(`Risultato controllo festività per ${dateStr}: ${isHoliday}`);
+                                 
+                                 if (isHoliday) {
+                                     // Se è un giorno festivo, tutte le ore sono festive
+                                     holidayHours += totalHours;
+                                     console.log(`Aggiunto ${totalHours} ore festive (giorno festivo: ${dateStr})`);
+                                 } else if (entry.isNightShift || entry.notturne === 'true' || entry.notturne === true) {
+                                     // Se è un turno notturno, tutte le ore sono notturne
+                                     nightHours += totalHours;
+                                     console.log(`Aggiunto ${totalHours} ore notturne (turno notturno)`);
+                                 } else if (entry.notturne && typeof entry.notturne === 'number' && entry.notturne > 0) {
+                                     // Se ci sono ore notturne specificate come numero
+                                     const notturneHours = parseFloat(entry.notturne);
+                                     nightHours += notturneHours;
+                                     normalHours += (totalHours - notturneHours);
+                                     console.log(`Aggiunto ${notturneHours} ore notturne e ${totalHours - notturneHours} ore normali`);
+                                 } else {
+                                     // Altrimenti, tutte le ore sono normali
+                                     normalHours += totalHours;
+                                     console.log(`Aggiunto ${totalHours} ore normali`);
+                                 }
+                             }
+                         }
+                         
+                         // Controlla se è una trasferta
+                         if (entry.isTransfer || entry.transferta === 'true' || entry.transferta === true || 
+                             (typeof entry.transferta === 'boolean' && entry.transferta)) {
+                             transferDays.add(dateStr); // Aggiungi la data al set per contare giorni unici
+                             console.log(`Aggiunto giorno di trasferta: ${dateStr}`);
+                         }
+                         
+                         // Controlla se è IGP Brescia
+                         const description = entry.description || entry.note || '';
+                         console.log(`Controllo IGP Brescia per ${dateStr}, descrizione: "${description}"`);
+                         
+                         // Verifica se è IGP Brescia (deve contenere entrambe le parole o la frase esatta)
+                         const descLower = description.toLowerCase();
+                         if (descLower.includes('igp brescia') || 
+                             (descLower.includes('igp') && descLower.includes('brescia'))) {
+                             igpBresciaDays.add(dateStr); // Aggiungi la data al set per contare giorni unici
+                             console.log(`Aggiunto giorno IGP Brescia: ${dateStr}`);
+                         }
+                     });
+                 }
+                 
+                 // Controlla se ci sono ferie o malattie per questa data
+                 if (db.holidays && db.holidays[dateStr]) {
+                     const holiday = db.holidays[dateStr];
+                     if (holiday.type === 'ferie') {
+                         vacationDays++;
+                         console.log(`Aggiunto giorno di ferie: ${dateStr}`);
+                     } else if (holiday.type === 'malattia') {
+                         sickDays++;
+                         console.log(`Aggiunto giorno di malattia: ${dateStr}`);
+                     }
+                 }
+             }
+             
+             // Converti i Set in conteggi
+             const transferDaysCount = transferDays.size;
+             const igpBresciaDaysCount = igpBresciaDays.size;
+             
+             // Arrotonda le ore a una cifra decimale (per gestire le mezze ore)
+             normalHours = Math.round(normalHours * 10) / 10;
+             nightHours = Math.round(nightHours * 10) / 10;
+             holidayHours = Math.round(holidayHours * 10) / 10;
+             
+             // Riepilogo
+             console.log(`Riepilogo: Ore normali: ${normalHours}, Ore notturne: ${nightHours}, Ore festive: ${holidayHours}, Trasferte: ${transferDaysCount}, Malattie: ${sickDays}, Ferie: ${vacationDays}, IGP Brescia: ${igpBresciaDaysCount}`);
+             
+             // Assicurati che le tariffe siano numeri
+             const normalHourRate = parseFloat(rates.normalHour) || 0;
+             const nightHourRate = parseFloat(rates.nightHour) || 0;
+             const holidayHourRate = parseFloat(rates.holidayHour) || 0;
+             const transferDayRate = parseFloat(rates.transferDay) || 0;
+             const sickDayRate = parseFloat(rates.sickDay) || 0;
+             const vacationDayRate = parseFloat(rates.vacationDay) || 0;
+             const igpBresciaRate = parseFloat(rates.igpBrescia) || 0;
+             
+             // Calcola gli importi
+             const normalAmount = normalHours * normalHourRate;
+             const nightAmount = nightHours * nightHourRate;
+             const holidayAmount = holidayHours * holidayHourRate;
+             const transferAmount = transferDaysCount * transferDayRate;
+             const sickAmount = sickDays * sickDayRate;
+             const vacationAmount = vacationDays * vacationDayRate;
+             const igpBresciaAmount = igpBresciaDaysCount * igpBresciaRate;
+             const totalAmount = normalAmount + nightAmount + holidayAmount + transferAmount + sickAmount + vacationAmount + igpBresciaAmount;
+             
+             console.log(`Tariffe: Normale: €${normalHourRate}, Notturno: €${nightHourRate}, Festivo: €${holidayHourRate}, Trasferta: €${transferDayRate}, Malattia: €${sickDayRate}, Ferie: €${vacationDayRate}, IGP Brescia: €${igpBresciaRate}`);
+             console.log(`Importi: Normale: €${normalAmount.toFixed(2)}, Notturno: €${nightAmount.toFixed(2)}, Festivo: €${holidayAmount.toFixed(2)}, Trasferta: €${transferAmount.toFixed(2)}, Malattia: €${sickAmount.toFixed(2)}, Ferie: €${vacationAmount.toFixed(2)}, IGP Brescia: €${igpBresciaAmount.toFixed(2)}, Totale: €${totalAmount.toFixed(2)}`);
+             
+             // Aggiorna l'interfaccia
+             document.getElementById('normalHours').textContent = `${normalHours.toFixed(1)}h`;
+             document.getElementById('nightHours').textContent = `${nightHours.toFixed(1)}h`;
+             document.getElementById('holidayHours').textContent = `${holidayHours.toFixed(1)}h`;
+             document.getElementById('transferDays').textContent = `${transferDaysCount}g`;
+             document.getElementById('sickDays').textContent = `${sickDays}g`;
+             document.getElementById('vacationDays').textContent = `${vacationDays}g`;
+             document.getElementById('igpBresciaDays').textContent = `${igpBresciaDaysCount}g`;
+             
+             document.getElementById('normalAmount').textContent = `€${normalAmount.toFixed(2)}`;
+             document.getElementById('nightAmount').textContent = `€${nightAmount.toFixed(2)}`;
+             document.getElementById('holidayAmount').textContent = `€${holidayAmount.toFixed(2)}`;
+             document.getElementById('transferAmount').textContent = `€${transferAmount.toFixed(2)}`;
+             document.getElementById('sickAmount').textContent = `€${sickAmount.toFixed(2)}`;
+             document.getElementById('vacationAmount').textContent = `€${vacationAmount.toFixed(2)}`;
+             document.getElementById('igpBresciaAmount').textContent = `€${igpBresciaAmount.toFixed(2)}`;
+             document.getElementById('totalAmount').textContent = `€${totalAmount.toFixed(2)}`;
+         }
+         
+         // Funzione per formattare una data nel formato DD/MM/YYYY
+         function formatDate(date) {
+             if (!date) return '';
+             
+             // Se è già una stringa nel formato corretto, la restituiamo
+             if (typeof date === 'string' && date.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                 return date;
+             }
+             
+             // Altrimenti, convertiamo l'oggetto Date in una stringa formattata
+             try {
+                 const d = new Date(date);
+                 if (isNaN(d.getTime())) {
+                     console.warn("Data non valida:", date);
+                     return '';
+                 }
+                 
+                 const day = String(d.getDate()).padStart(2, '0');
+                 const month = String(d.getMonth() + 1).padStart(2, '0');
+                 const year = d.getFullYear();
+                 
+                 return `${day}/${month}/${year}`;
+             } catch (error) {
+                 console.error("Errore durante la formattazione della data:", error);
+                 return '';
+             }
+         }
+         
+         // Funzione per calcolare la data della Pasqua per un dato anno
+         function getEasterDate(year) {
+             // Algoritmo di Gauss per calcolare la Pasqua
+             const a = year % 19;
+             const b = Math.floor(year / 100);
+             const c = year % 100;
+             const d = Math.floor(b / 4);
+             const e = b % 4;
+             const f = Math.floor((b + 8) / 25);
+             const g = Math.floor((b - f + 1) / 3);
+             const h = (19 * a + b - d - g + 15) % 30;
+             const i = Math.floor(c / 4);
+             const k = c % 4;
+             const l = (32 + 2 * e + 2 * i - h - k) % 7;
+             const m = Math.floor((a + 11 * h + 22 * l) / 451);
+             const month = Math.floor((h + l - 7 * m + 114) / 31) - 1; // 0-based (0 = gennaio)
+             const day = ((h + l - 7 * m + 114) % 31) + 1;
+             
+             return new Date(year, month, day);
+         }
+         
+         // Funzione per verificare se una data è festiva (sabato, domenica o festività)
+         function isHolidayDate(date) {
+             // Verifica che la data sia un oggetto Date valido
+             if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+                 console.warn("Data non valida per il controllo festività:", date);
+                 return false;
+             }
+             
+             // Verifica se è sabato (6) o domenica (0)
+             const dayOfWeek = date.getDay();
+             if (dayOfWeek === 0 || dayOfWeek === 6) {
+                 console.log(`${formatDate(date)} è un giorno festivo (weekend)`);
+                 return true;
+             }
+             
+             // Verifica se è una festività italiana
+             const day = date.getDate();
+             const month = date.getMonth() + 1; // getMonth() restituisce 0-11
+             const year = date.getFullYear();
+             
+             // Festività fisse
+             const fixedHolidays = [
+                 { day: 1, month: 1 },    // Capodanno
+                 { day: 6, month: 1 },    // Epifania
+                 { day: 25, month: 4 },   // Festa della Liberazione
+                 { day: 1, month: 5 },    // Festa del Lavoro
+                 { day: 2, month: 6 },    // Festa della Repubblica
+                 { day: 15, month: 8 },   // Ferragosto
+                 { day: 1, month: 11 },   // Tutti i Santi
+                 { day: 8, month: 12 },   // Immacolata Concezione
+                 { day: 25, month: 12 },  // Natale
+                 { day: 26, month: 12 }   // Santo Stefano
+             ];
+             
+             // Verifica festività fisse
+             for (const holiday of fixedHolidays) {
+                 if (day === holiday.day && month === holiday.month) {
+                     console.log(`${formatDate(date)} è un giorno festivo (festività fissa)`);
+                     return true;
+                 }
+             }
+             
+             // Calcola la Pasqua (festività mobile)
+             const easterDate = getEasterDate(year);
+             if (easterDate) {
+                 // Pasqua
+                 if (date.getTime() === easterDate.getTime()) {
+                     console.log(`${formatDate(date)} è un giorno festivo (Pasqua)`);
+                     return true;
+                 }
+                 
+                 // Lunedì dell'Angelo (Pasquetta)
+                 const easterMonday = new Date(easterDate);
+                 easterMonday.setDate(easterDate.getDate() + 1);
+                 if (date.getTime() === easterMonday.getTime()) {
+                     console.log(`${formatDate(date)} è un giorno festivo (Pasquetta)`);
+                     return true;
+                 }
+             }
+             
+             return false;
+         }
+         
+         // Funzione per calcolare le ore tra due orari
+         function calculateHoursBetween(startTime, endTime) {
+             console.log(`Calcolo ore tra ${startTime.getHours()}:${startTime.getMinutes()} e ${endTime.getHours()}:${endTime.getMinutes()}`);
+             
+             // Se l'ora di fine è minore dell'ora di inizio, assumiamo che sia il giorno successivo
+             if (endTime < startTime) {
+                 console.log("L'ora di fine è minore dell'ora di inizio, assumiamo che sia il giorno successivo");
+                 endTime = new Date(endTime.getTime() + 24 * 60 * 60 * 1000);
+             }
+             
+             // Calcola la differenza in millisecondi e converti in ore
+             const diffMs = endTime - startTime;
+             const hours = diffMs / (1000 * 60 * 60);
+             
+             console.log(`Ore calcolate: ${hours}`);
+             
+             return hours;
+         }
+         
+         // Funzione per convertire una stringa oraria in un oggetto Date
+         function parseTimeString(timeStr) {
+             if (!timeStr) return null;
+             
+             console.log(`Parsing time string: "${timeStr}"`);
+             
+             // Gestisci diversi formati di orario
+             let hours, minutes;
+             
+             // Formato HH:MM
+             if (timeStr.includes(':')) {
+                 [hours, minutes] = timeStr.split(':').map(Number);
+             } 
+             // Formato HH.MM
+             else if (timeStr.includes('.')) {
+                 [hours, minutes] = timeStr.split('.').map(Number);
+             }
+             // Formato numerico (es. "8" per le 8:00)
+             else if (!isNaN(timeStr)) {
+                 hours = parseInt(timeStr);
+                 minutes = 0;
+             }
+             // Formato non riconosciuto
+             else {
+                 console.warn(`Formato orario non riconosciuto: ${timeStr}`);
+                 return null;
+             }
+             
+             if (isNaN(hours) || isNaN(minutes)) {
+                 console.warn(`Valori orari non validi: ore=${hours}, minuti=${minutes}`);
+                 return null;
+             }
+             
+             console.log(`Parsed time: ${hours}:${minutes}`);
+             
+             const date = new Date();
+             date.setHours(hours, minutes, 0, 0);
+             return date;
          }
 
          // Function to handle the custom format provided by the user
@@ -9537,6 +10321,216 @@
             }
         }
 
+
+        // --- Cash Functions ---
+        
+        function initCashSection() {
+            console.log("Inizializzazione sezione Cash...");
+            
+            // Elementi DOM
+            const cashMonthSelect = document.getElementById('cashMonthSelect');
+            const saveRatesBtn = document.getElementById('saveRatesBtn');
+            
+            // Input tariffe
+            const normalHourRateInput = document.getElementById('normalHourRate');
+            const nightHourRateInput = document.getElementById('nightHourRate');
+            const holidayHourRateInput = document.getElementById('holidayHourRate');
+            const transferDayRateInput = document.getElementById('transferDayRate');
+            const sickDayRateInput = document.getElementById('sickDayRate');
+            const vacationDayRateInput = document.getElementById('vacationDayRate');
+            const igpBresciaRateInput = document.getElementById('igpBresciaRate');
+            
+            // Verifica che tutti gli elementi esistano
+            if (!cashMonthSelect || !saveRatesBtn || !normalHourRateInput || !nightHourRateInput || 
+                !holidayHourRateInput || !transferDayRateInput || !sickDayRateInput || 
+                !vacationDayRateInput || !igpBresciaRateInput) {
+                console.warn("Elementi Cash mancanti. Skip inizializzazione.");
+                return;
+            }
+            
+            // Popola il selettore dei mesi
+            populateMonthSelect(cashMonthSelect);
+            
+            // Carica le tariffe salvate
+            loadSavedRates();
+            
+            // Calcola la busta paga per il mese selezionato (se c'è un valore)
+            if (cashMonthSelect.value) {
+                calculatePayForMonth(cashMonthSelect.value);
+            } else {
+                // Se non ci sono mesi disponibili, mostra un messaggio
+                showToast("Non ci sono dati disponibili per calcolare la busta paga", "info");
+            }
+            
+            // Event listeners
+            cashMonthSelect.addEventListener('change', function() {
+                calculatePayForMonth(this.value);
+            });
+            
+            saveRatesBtn.addEventListener('click', function() {
+                saveRates();
+                calculatePayForMonth(cashMonthSelect.value);
+                showToast('Tariffe salvate con successo', 'success');
+            });
+            
+            // Funzione per popolare il selettore dei mesi
+            function populateMonthSelect(selectElement) {
+                if (!selectElement) return;
+                
+                // Svuota il selettore
+                selectElement.innerHTML = '';
+                
+                const db = getDb();
+                const months = getAvailableMonths(db);
+                
+                console.log(`Mesi disponibili: ${months.length}`);
+                
+                if (months.length === 0) {
+                    // Se non ci sono mesi disponibili, aggiungi un'opzione vuota
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = '-- Nessun mese disponibile --';
+                    selectElement.appendChild(option);
+                    return;
+                }
+                
+                // Aggiungi un'opzione vuota all'inizio
+                const emptyOption = document.createElement('option');
+                emptyOption.value = '';
+                emptyOption.textContent = '-- Seleziona un mese --';
+                selectElement.appendChild(emptyOption);
+                
+                // Aggiungi le opzioni al selettore
+                months.forEach(month => {
+                    const option = document.createElement('option');
+                    option.value = month.value;
+                    option.textContent = month.label;
+                    selectElement.appendChild(option);
+                });
+                
+                // Seleziona il mese più recente (il primo nell'elenco, dato che sono ordinati in ordine decrescente)
+                if (selectElement.options.length > 1) {
+                    selectElement.selectedIndex = 1; // Seleziona il primo mese (dopo l'opzione vuota)
+                }
+                
+                console.log(`Mese selezionato: ${selectElement.value}`);
+            }
+            
+            // Funzione per caricare le tariffe salvate
+            function loadSavedRates() {
+                const db = getDb();
+                
+                console.log("Database prima del caricamento delle tariffe:", JSON.stringify(db, null, 2));
+                
+                // Se non esiste la sezione rates nel db, la creiamo
+                if (!db.rates) {
+                    db.rates = {
+                        normalHour: 0,
+                        nightHour: 0,
+                        holidayHour: 0,
+                        transferDay: 0,
+                        sickDay: 0,
+                        vacationDay: 0,
+                        igpBrescia: 0
+                    };
+                    saveDb(db);
+                }
+                
+                // Assicuriamoci che tutte le proprietà esistano e siano numeri validi
+                const rates = {
+                    normalHour: parseFloat(db.rates.normalHour) || 0,
+                    nightHour: parseFloat(db.rates.nightHour) || 0,
+                    holidayHour: parseFloat(db.rates.holidayHour) || 0,
+                    transferDay: parseFloat(db.rates.transferDay) || 0,
+                    sickDay: parseFloat(db.rates.sickDay) || 0,
+                    vacationDay: parseFloat(db.rates.vacationDay) || 0,
+                    igpBrescia: parseFloat(db.rates.igpBrescia) || 0
+                };
+                
+                // Aggiorniamo il db con i valori convertiti
+                if (!db.rates) {
+                    db.rates = {};
+                }
+                
+                // Assegniamo ogni proprietà individualmente per assicurarci che vengano salvate correttamente
+                db.rates.normalHour = rates.normalHour;
+                db.rates.nightHour = rates.nightHour;
+                db.rates.holidayHour = rates.holidayHour;
+                db.rates.transferDay = rates.transferDay;
+                db.rates.sickDay = rates.sickDay;
+                db.rates.vacationDay = rates.vacationDay;
+                db.rates.igpBrescia = rates.igpBrescia;
+                
+                // Salviamo il database
+                saveDb(db);
+                
+                // Impostiamo i valori nei campi input
+                normalHourRateInput.value = rates.normalHour;
+                nightHourRateInput.value = rates.nightHour;
+                holidayHourRateInput.value = rates.holidayHour;
+                transferDayRateInput.value = rates.transferDay;
+                sickDayRateInput.value = rates.sickDay;
+                vacationDayRateInput.value = rates.vacationDay;
+                igpBresciaRateInput.value = rates.igpBrescia;
+                
+                console.log("Tariffe caricate:", rates);
+            }
+            
+            // Funzione per salvare le tariffe
+            function saveRates() {
+                const db = getDb();
+                
+                // Aggiorniamo le tariffe nel db, assicurandoci che siano numeri validi
+                const rates = {
+                    normalHour: parseFloat(normalHourRateInput.value) || 0,
+                    nightHour: parseFloat(nightHourRateInput.value) || 0,
+                    holidayHour: parseFloat(holidayHourRateInput.value) || 0,
+                    transferDay: parseFloat(transferDayRateInput.value) || 0,
+                    sickDay: parseFloat(sickDayRateInput.value) || 0,
+                    vacationDay: parseFloat(vacationDayRateInput.value) || 0,
+                    igpBrescia: parseFloat(igpBresciaRateInput.value) || 0
+                };
+                
+                // Aggiorniamo i valori nei campi input per mostrare i valori effettivamente salvati
+                normalHourRateInput.value = rates.normalHour;
+                nightHourRateInput.value = rates.nightHour;
+                holidayHourRateInput.value = rates.holidayHour;
+                transferDayRateInput.value = rates.transferDay;
+                sickDayRateInput.value = rates.sickDay;
+                vacationDayRateInput.value = rates.vacationDay;
+                igpBresciaRateInput.value = rates.igpBrescia;
+                
+                // Salviamo le tariffe nel db
+                if (!db.rates) {
+                    db.rates = {};
+                }
+                
+                // Assegniamo ogni proprietà individualmente per assicurarci che vengano salvate correttamente
+                db.rates.normalHour = rates.normalHour;
+                db.rates.nightHour = rates.nightHour;
+                db.rates.holidayHour = rates.holidayHour;
+                db.rates.transferDay = rates.transferDay;
+                db.rates.sickDay = rates.sickDay;
+                db.rates.vacationDay = rates.vacationDay;
+                db.rates.igpBrescia = rates.igpBrescia;
+                
+                // Salviamo il database
+                saveDb(db);
+                
+                // Verifichiamo che le tariffe siano state salvate correttamente
+                const dbAfterSave = getDb();
+                console.log("Tariffe salvate:", dbAfterSave.rates);
+                
+                // Ricalcoliamo la busta paga con le nuove tariffe
+                if (cashMonthSelect.value) {
+                    console.log("Ricalcolo busta paga dopo il salvataggio delle tariffe");
+                    calculatePayForMonth(cashMonthSelect.value);
+                }
+            }
+            
+            // Utilizziamo la funzione globale calculatePayForMonth
+            // che è stata definita a livello globale per poter essere utilizzata anche da altre parti dell'applicazione
+        }
 
         // --- Ferie/Malattie Functions ---
 
@@ -14095,6 +15089,93 @@ END:VCARD`;
                                 // Inizializza senza verificare l'autenticazione automaticamente
                                 initCloudBackup(true);
                                 
+                                // Gestione del PIN Admin
+                                const adminPinInput = document.getElementById('adminPin');
+                                const unlockAdminBtn = document.getElementById('unlockAdminFeatures');
+                                const cashNavItem = document.getElementById('cash-nav-item');
+                                
+                                // PIN Admin corretto (puoi cambiarlo con quello che preferisci)
+                                const CORRECT_PIN = "1235789";
+                                
+                                // Controlla se il PIN è già stato inserito correttamente in precedenza
+                                const isAdminUnlocked = localStorage.getItem('adminUnlocked') === 'true';
+                                const lockAdminBtn = document.getElementById('lockAdminFeatures');
+                                
+                                if (isAdminUnlocked && cashNavItem) {
+                                    cashNavItem.style.display = 'flex';
+                                    if (lockAdminBtn) lockAdminBtn.style.display = 'block';
+                                    if (unlockAdminBtn) unlockAdminBtn.style.display = 'none';
+                                } else {
+                                    if (lockAdminBtn) lockAdminBtn.style.display = 'none';
+                                    if (unlockAdminBtn) unlockAdminBtn.style.display = 'block';
+                                }
+                                
+                                if (unlockAdminBtn && adminPinInput) {
+                                    // Rimuovi eventuali listener precedenti
+                                    unlockAdminBtn.replaceWith(unlockAdminBtn.cloneNode(true));
+                                    const newUnlockBtn = document.getElementById('unlockAdminFeatures');
+                                    
+                                    newUnlockBtn.addEventListener('click', function() {
+                                        const enteredPin = adminPinInput.value;
+                                        
+                                        if (enteredPin === CORRECT_PIN) {
+                                            // PIN corretto
+                                            showToast('Funzionalità admin sbloccate!', 'success', 3000);
+                                            
+                                            // Mostra la sezione Cash nella barra di navigazione
+                                            if (cashNavItem) {
+                                                cashNavItem.style.display = 'flex';
+                                            }
+                                            
+                                            // Salva lo stato di sblocco
+                                            localStorage.setItem('adminUnlocked', 'true');
+                                            
+                                            // Pulisci il campo PIN
+                                            adminPinInput.value = '';
+                                        } else {
+                                            // PIN errato
+                                            showToast('PIN non valido!', 'error', 3000);
+                                            
+                                            // Effetto di vibrazione per feedback tattile
+                                            if ('vibrate' in navigator) {
+                                                navigator.vibrate(200);
+                                            }
+                                            
+                                            // Pulisci il campo PIN
+                                            adminPinInput.value = '';
+                                            
+                                            // Mostra il pulsante di blocco e nascondi quello di sblocco
+                                            if (lockAdminBtn) lockAdminBtn.style.display = 'block';
+                                            newUnlockBtn.style.display = 'none';
+                                        }
+                                    });
+                                }
+                                
+                                // Gestione del pulsante di blocco
+                                if (lockAdminBtn) {
+                                    // Rimuovi eventuali listener precedenti
+                                    lockAdminBtn.replaceWith(lockAdminBtn.cloneNode(true));
+                                    const newLockBtn = document.getElementById('lockAdminFeatures');
+                                    
+                                    newLockBtn.addEventListener('click', function() {
+                                        // Nascondi la sezione Cash
+                                        if (cashNavItem) {
+                                            cashNavItem.style.display = 'none';
+                                        }
+                                        
+                                        // Rimuovi lo stato di sblocco
+                                        localStorage.removeItem('adminUnlocked');
+                                        
+                                        // Mostra il pulsante di sblocco e nascondi quello di blocco
+                                        const unlockBtn = document.getElementById('unlockAdminFeatures');
+                                        if (unlockBtn) unlockBtn.style.display = 'block';
+                                        newLockBtn.style.display = 'none';
+                                        
+                                        // Notifica l'utente
+                                        showToast('Funzionalità admin bloccate!', 'info', 3000);
+                                    });
+                                }
+                                
                                 // Inizializza il pulsante di aggiornamento forzato
                                 const forceUpdateBtn = document.getElementById('forceUpdate');
                                 if (forceUpdateBtn) {
@@ -16439,6 +17520,104 @@ END:VCARD`;
             console.log("Ottimizzazioni generali applicate");
         });
     })();
+    </script>
+
+    <!-- Script per gestire il PIN Admin -->
+    <script>
+        // Funzione per gestire il PIN Admin
+        function initAdminPin() {
+            console.log("Inizializzazione PIN Admin...");
+            
+            // Elementi DOM
+            const adminPinInput = document.getElementById('adminPin');
+            const unlockAdminBtn = document.getElementById('unlockAdminFeatures');
+            const lockAdminBtn = document.getElementById('lockAdminFeatures');
+            const cashNavItem = document.getElementById('cash-nav-item');
+            
+            // PIN Admin corretto
+            const CORRECT_PIN = "1234";
+            
+            // Controlla se il PIN è già stato inserito correttamente
+            const isAdminUnlocked = localStorage.getItem('adminUnlocked') === 'true';
+            
+            // Aggiorna l'interfaccia in base allo stato
+            if (isAdminUnlocked && cashNavItem) {
+                cashNavItem.style.display = 'flex';
+                if (lockAdminBtn) lockAdminBtn.style.display = 'block';
+                if (unlockAdminBtn) unlockAdminBtn.style.display = 'none';
+                console.log("Funzionalità admin già sbloccate");
+            } else {
+                if (cashNavItem) cashNavItem.style.display = 'none';
+                if (lockAdminBtn) lockAdminBtn.style.display = 'none';
+                if (unlockAdminBtn) unlockAdminBtn.style.display = 'block';
+                console.log("Funzionalità admin bloccate");
+            }
+            
+            // Gestione del pulsante di sblocco
+            if (unlockAdminBtn && adminPinInput) {
+                unlockAdminBtn.onclick = function() {
+                    console.log("Pulsante sblocco cliccato");
+                    const enteredPin = adminPinInput.value;
+                    
+                    if (enteredPin === CORRECT_PIN) {
+                        console.log("PIN corretto!");
+                        // PIN corretto
+                        showToast('Funzionalità admin sbloccate!', 'success', 3000);
+                        
+                        // Mostra la sezione Cash nella barra di navigazione
+                        if (cashNavItem) {
+                            cashNavItem.style.display = 'flex';
+                        }
+                        
+                        // Salva lo stato di sblocco
+                        localStorage.setItem('adminUnlocked', 'true');
+                        
+                        // Pulisci il campo PIN
+                        adminPinInput.value = '';
+                        
+                        // Mostra il pulsante di blocco e nascondi quello di sblocco
+                        if (lockAdminBtn) lockAdminBtn.style.display = 'block';
+                        unlockAdminBtn.style.display = 'none';
+                    } else {
+                        console.log("PIN errato!");
+                        // PIN errato
+                        showToast('PIN non valido!', 'error', 3000);
+                        
+                        // Effetto di vibrazione per feedback tattile
+                        if ('vibrate' in navigator) {
+                            navigator.vibrate(200);
+                        }
+                        
+                        // Pulisci il campo PIN
+                        adminPinInput.value = '';
+                    }
+                };
+            }
+            
+            // Gestione del pulsante di blocco
+            if (lockAdminBtn) {
+                lockAdminBtn.onclick = function() {
+                    console.log("Pulsante blocco cliccato");
+                    // Nascondi la sezione Cash
+                    if (cashNavItem) {
+                        cashNavItem.style.display = 'none';
+                    }
+                    
+                    // Rimuovi lo stato di sblocco
+                    localStorage.removeItem('adminUnlocked');
+                    
+                    // Mostra il pulsante di sblocco e nascondi quello di blocco
+                    if (unlockAdminBtn) unlockAdminBtn.style.display = 'block';
+                    lockAdminBtn.style.display = 'none';
+                    
+                    // Notifica l'utente
+                    showToast('Funzionalità admin bloccate!', 'info', 3000);
+                };
+            }
+        }
+        
+        // Inizializza il PIN Admin quando il documento è pronto
+        document.addEventListener('DOMContentLoaded', initAdminPin);
     </script>
 
 </body>
