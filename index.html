@@ -4628,7 +4628,7 @@
                         <div class="setting-item">
                             <span class="setting-label">PIN Admin</span>
                             <div style="display: flex; gap: 10px; flex-grow: 1;">
-                                <input type="password" id="adminPin" class="settings-input" placeholder="Inserisci PIN Admin" maxlength="4">
+                                <input type="password" id="adminPin" class="settings-input" placeholder="Inserisci PIN Admin" maxlength="7">
                                 <button id="unlockAdminFeatures">
                                     <span class="material-symbols-outlined">lock_open</span> Sblocca
                                 </button>
@@ -15095,7 +15095,7 @@ END:VCARD`;
                                 const cashNavItem = document.getElementById('cash-nav-item');
                                 
                                 // PIN Admin corretto (puoi cambiarlo con quello che preferisci)
-                                const CORRECT_PIN = "1235789";
+                                const CORRECT_PIN = "1234";
                                 
                                 // Controlla se il PIN è già stato inserito correttamente in precedenza
                                 const isAdminUnlocked = localStorage.getItem('adminUnlocked') === 'true';
@@ -17535,7 +17535,7 @@ END:VCARD`;
             const cashNavItem = document.getElementById('cash-nav-item');
             
             // PIN Admin corretto
-            const CORRECT_PIN = "1234";
+            const CORRECT_PIN = "1235789";
             
             // Controlla se il PIN è già stato inserito correttamente
             const isAdminUnlocked = localStorage.getItem('adminUnlocked') === 'true';
