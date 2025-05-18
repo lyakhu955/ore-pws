@@ -15089,26 +15089,7 @@ END:VCARD`;
                                 // Inizializza senza verificare l'autenticazione automaticamente
                                 initCloudBackup(true);
                                 
-                                // Gestione del PIN Admin
-                                const adminPinInput = document.getElementById('adminPin');
-                                const unlockAdminBtn = document.getElementById('unlockAdminFeatures');
-                                const cashNavItem = document.getElementById('cash-nav-item');
-                                
-                                // PIN Admin corretto (puoi cambiarlo con quello che preferisci)
-                                const CORRECT_PIN = "1235789";
-                                
-                                // Controlla se il PIN è già stato inserito correttamente in precedenza
-                                const isAdminUnlocked = localStorage.getItem('adminUnlocked') === 'true';
-                                const lockAdminBtn = document.getElementById('lockAdminFeatures');
-                                
-                                if (isAdminUnlocked && cashNavItem) {
-                                    cashNavItem.style.display = 'flex';
-                                    if (lockAdminBtn) lockAdminBtn.style.display = 'block';
-                                    if (unlockAdminBtn) unlockAdminBtn.style.display = 'none';
-                                } else {
-                                    if (lockAdminBtn) lockAdminBtn.style.display = 'none';
-                                    if (unlockAdminBtn) unlockAdminBtn.style.display = 'block';
-                                }
+                                // La gestione del PIN Admin è stata spostata in uno script separato alla fine del file
                                 
                                 if (unlockAdminBtn && adminPinInput) {
                                     // Rimuovi eventuali listener precedenti
@@ -17534,8 +17515,9 @@ END:VCARD`;
             const lockAdminBtn = document.getElementById('lockAdminFeatures');
             const cashNavItem = document.getElementById('cash-nav-item');
             
-            // PIN Admin corretto
+            // PIN Admin corretto (hardcoded per funzionare anche con GitHub Pages)
             const CORRECT_PIN = "1235789";
+            console.log("PIN configurato:", CORRECT_PIN);
             
             // Controlla se il PIN è già stato inserito correttamente
             const isAdminUnlocked = localStorage.getItem('adminUnlocked') === 'true';
@@ -17559,7 +17541,15 @@ END:VCARD`;
                     console.log("Pulsante sblocco cliccato");
                     const enteredPin = adminPinInput.value;
                     
-                    if (enteredPin === CORRECT_PIN) {
+                    console.log("PIN inserito:", enteredPin);
+                    console.log("PIN corretto:", CORRECT_PIN);
+                    console.log("Confronto:", enteredPin === CORRECT_PIN);
+                    
+                    // Confronto più flessibile per evitare problemi con spazi o caratteri invisibili
+                    // Accetta solo il PIN "1235789" (con o senza spazi)
+                    if (enteredPin.trim() === CORRECT_PIN || 
+                        enteredPin === "1235789" || 
+                        enteredPin.trim() === "1235789") {
                         console.log("PIN corretto!");
                         // PIN corretto
                         showToast('Funzionalità admin sbloccate!', 'success', 3000);
