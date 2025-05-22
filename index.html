@@ -13203,76 +13203,195 @@ END:VCARD`;
                 // Salva la data di scadenza in localStorage
                 localStorage.setItem('googleTokenExpiry', expiryTime.toString());
                 
-                // Calcola quando avvisare l'utente (15 minuti prima della scadenza)
-                const notifyTime = (expiresIn - 900) * 1000; // Converti in millisecondi e sottrai 15 minuti
+                // Calcola quando tentare il rinnovo automatico (10 minuti prima della scadenza)
+                const refreshTime = (expiresIn - 600) * 1000; // Converti in millisecondi e sottrai 10 minuti
                 
-                // Assicurati che il tempo di notifica sia almeno 5 minuti (per evitare notifiche troppo frequenti)
-                const minNotifyTime = 5 * 60 * 1000; // 5 minuti in millisecondi
-                const actualNotifyTime = Math.max(notifyTime, minNotifyTime);
+                // Assicurati che il tempo di rinnovo sia almeno 5 minuti (per evitare rinnovi troppo frequenti)
+                const minRefreshTime = 5 * 60 * 1000; // 5 minuti in millisecondi
+                const actualRefreshTime = Math.max(refreshTime, minRefreshTime);
                 
-                console.log(`Token valido per ${expiresIn} secondi. Programmata notifica tra ${actualNotifyTime/1000} secondi.`);
+                console.log(`Token valido per ${expiresIn} secondi. Programmato rinnovo automatico tra ${actualRefreshTime/1000} secondi.`);
                 console.log(`Token scadrà il: ${new Date(expiryTime).toLocaleString()}`);
                 
-                // Imposta il timer per notificare l'utente prima della scadenza del token
-                this.tokenRefreshTimer = setTimeout(() => {
-                    console.log('Token in scadenza, notifica all\'utente...');
+                // Imposta il timer per il rinnovo automatico del token
+                this.tokenRefreshTimer = setTimeout(async () => {
+                    console.log('Token in scadenza, tentativo di rinnovo automatico...');
                     
-                    // Funzione per gestire il rinnovo del token
-                    const handleTokenRenewal = async () => {
-                        try {
-                            await this.refreshToken();
-                            showToast("Sessione Google rinnovata con successo", "success", 3000);
-                            console.log('Token rinnovato con successo');
-                        } catch (error) {
-                            console.error('Errore durante il rinnovo del token:', error);
-                            showToast("Impossibile rinnovare la sessione. Prova ad effettuare nuovamente l'accesso.", "error", 5000);
+                    try {
+                        // Tenta il rinnovo silenzioso del token
+                        await this.silentRefreshToken();
+                        console.log('Token rinnovato automaticamente con successo');
+                        
+                        // Mostra un messaggio solo se l'utente è attivo sulla pagina
+                        if (document.visibilityState === 'visible') {
+                            showToast("Sessione Google rinnovata automaticamente", "success", 2000);
+                        }
+                    } catch (error) {
+                        console.error('Errore durante il rinnovo automatico del token:', error);
+                        
+                        // Se il rinnovo silenzioso fallisce, mostra un messaggio all'utente solo se è attivo sulla pagina
+                        if (document.visibilityState === 'visible') {
+                            // Funzione per gestire il rinnovo manuale del token
+                            const handleManualTokenRenewal = async () => {
+                                try {
+                                    await this.refreshToken();
+                                    showToast("Sessione Google rinnovata con successo", "success", 3000);
+                                    console.log('Token rinnovato con successo');
+                                } catch (refreshError) {
+                                    console.error('Errore durante il rinnovo manuale del token:', refreshError);
+                                    showToast("Impossibile rinnovare la sessione. Prova ad effettuare nuovamente l'accesso.", "error", 5000);
+                                }
+                            };
+                            
+                            showToast("Impossibile rinnovare automaticamente la sessione Google. Clicca su 'Rinnova' per continuare a utilizzare le funzionalità di backup.", "warning", 0, [
+                                {
+                                    text: "Rinnova",
+                                    onClick: handleManualTokenRenewal
+                                },
+                                {
+                                    text: "Ignora",
+                                    onClick: () => {
+                                        showToast("La sessione scadrà a breve. Alcune funzionalità potrebbero non essere disponibili.", "info", 3000);
+                                    }
+                                }
+                            ]);
+                        }
+                    }
+                }, actualRefreshTime);
+            }
+            
+            // Metodo per il rinnovo silenzioso del token senza interazione dell'utente
+            async silentRefreshToken() {
+                return new Promise((resolve, reject) => {
+                    console.log('Avvio procedura di rinnovo silenzioso del token...');
+                    
+                    // Salva il token corrente prima di tentare il refresh
+                    const currentToken = gapi.client.getToken();
+                    
+                    // Verifica se abbiamo un client di autenticazione Google
+                    if (!window.googleAuthClient) {
+                        console.error('Client di autenticazione Google non disponibile per il rinnovo silenzioso');
+                        reject(new Error('Client di autenticazione Google non disponibile'));
+                        return;
+                    }
+                    
+                    // Configura il callback per il refresh del token
+                    const originalCallback = window.googleAuthClient.callback;
+                    
+                    // Imposta un timeout più breve per il rinnovo silenzioso (10 secondi)
+                    let timeoutId = setTimeout(() => {
+                        console.warn('Timeout durante il rinnovo silenzioso del token');
+                        
+                        // Ripristina il callback originale
+                        window.googleAuthClient.callback = originalCallback;
+                        
+                        // Se il rinnovo silenzioso fallisce, manteniamo il token corrente
+                        if (currentToken && currentToken.access_token) {
+                            console.log('Mantenimento del token corrente dopo timeout del rinnovo silenzioso');
+                            gapi.client.setToken(currentToken);
+                            resolve(currentToken); // Continuiamo con il token precedente
+                        } else {
+                            reject(new Error('Timeout durante il rinnovo silenzioso del token'));
+                        }
+                    }, 10000); // 10 secondi di timeout
+                    
+                    // Configura il callback temporaneo
+                    window.googleAuthClient.callback = (tokenResponse) => {
+                        // Cancella il timeout
+                        clearTimeout(timeoutId);
+                        
+                        // Ripristina il callback originale
+                        window.googleAuthClient.callback = originalCallback;
+                        
+                        if (tokenResponse && tokenResponse.access_token) {
+                            console.log('Token rinnovato silenziosamente con successo');
+                            
+                            // Imposta il nuovo token
+                            gapi.client.setToken(tokenResponse);
+                            
+                            // Salva il token in localStorage
+                            localStorage.setItem('googleAuthToken', JSON.stringify(tokenResponse));
+                            
+                            // Salva la data di scadenza del token
+                            const expiresIn = tokenResponse.expires_in || 3600;
+                            const expiryTime = Date.now() + (expiresIn * 1000);
+                            localStorage.setItem('googleTokenExpiry', expiryTime.toString());
+                            
+                            // Imposta il timer per il prossimo rinnovo automatico
+                            this.setupTokenRefresh(tokenResponse);
+                            
+                            // Mantieni lo stato di login attivo
+                            this.isLoggedIn = true;
+                            
+                            resolve(tokenResponse);
+                        } else {
+                            console.warn('Nessun token ricevuto durante il rinnovo silenzioso');
+                            
+                            // Se il rinnovo silenzioso fallisce, manteniamo il token corrente
+                            if (currentToken && currentToken.access_token) {
+                                console.log('Mantenimento del token corrente dopo fallimento del rinnovo silenzioso');
+                                gapi.client.setToken(currentToken);
+                                resolve(currentToken); // Continuiamo con il token precedente
+                            } else {
+                                reject(new Error('Rinnovo silenzioso fallito: nessun token ricevuto'));
+                            }
                         }
                     };
                     
-                    // Verifica se il documento è visibile (utente attivo sul sito)
-                    if (document.visibilityState === 'visible') {
-                        // Mostra un messaggio all'utente per informarlo che il token sta per scadere
-                        showToast("La sessione Google sta per scadere. Clicca su 'Rinnova' per continuare a utilizzare le funzionalità di backup.", "warning", 0, [
-                            {
-                                text: "Rinnova",
-                                onClick: handleTokenRenewal
-                            },
-                            {
-                                text: "Ignora",
-                                onClick: () => {
-                                    showToast("La sessione scadrà a breve. Alcune funzionalità potrebbero non essere disponibili.", "info", 3000);
+                    // Tenta il refresh silenzioso del token
+                    try {
+                        // Configura un client temporaneo con auto_select: true per il rinnovo silenzioso
+                        const tempClient = google.accounts.oauth2.initTokenClient({
+                            client_id: '927051615660-tfhk7s28v2ni4nsbmlbimaon5mg582o8.apps.googleusercontent.com',
+                            scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file openid profile email',
+                            prompt: 'none',  // Non mostrare alcun prompt all'utente
+                            auto_select: true,  // Seleziona automaticamente l'account
+                            access_type: 'offline',
+                            callback: window.googleAuthClient.callback,
+                            error_callback: (error) => {
+                                // Cancella il timeout
+                                clearTimeout(timeoutId);
+                                
+                                // Ripristina il callback originale
+                                window.googleAuthClient.callback = originalCallback;
+                                
+                                console.error('Errore durante il rinnovo silenzioso:', error);
+                                
+                                // Se il rinnovo silenzioso fallisce, manteniamo il token corrente
+                                if (currentToken && currentToken.access_token) {
+                                    console.log('Mantenimento del token corrente dopo errore di rinnovo silenzioso');
+                                    gapi.client.setToken(currentToken);
+                                    resolve(currentToken); // Continuiamo con il token precedente
+                                } else {
+                                    reject(error);
                                 }
                             }
-                        ]);
-                    } else {
-                        // Se il documento non è visibile, programma una notifica quando l'utente torna
-                        console.log('Documento non visibile, programmazione notifica al ritorno dell\'utente');
+                        });
                         
-                        const handleVisibilityChange = () => {
-                            if (document.visibilityState === 'visible') {
-                                // Rimuovi l'event listener per evitare chiamate multiple
-                                document.removeEventListener('visibilitychange', handleVisibilityChange);
-                                
-                                // Mostra un messaggio all'utente per informarlo che il token sta per scadere
-                                showToast("La sessione Google sta per scadere o è già scaduta. Clicca su 'Rinnova' per continuare a utilizzare le funzionalità di backup.", "warning", 0, [
-                                    {
-                                        text: "Rinnova",
-                                        onClick: handleTokenRenewal
-                                    },
-                                    {
-                                        text: "Ignora",
-                                        onClick: () => {
-                                            showToast("La sessione potrebbe essere scaduta. Alcune funzionalità potrebbero non essere disponibili.", "info", 3000);
-                                        }
-                                    }
-                                ]);
-                            }
-                        };
+                        // Richiedi un nuovo token senza mostrare alcun prompt
+                        tempClient.requestAccessToken({
+                            prompt: 'none',
+                            login_hint: this.userData?.email || '',
+                        });
+                    } catch (error) {
+                        // Cancella il timeout in caso di errore
+                        clearTimeout(timeoutId);
                         
-                        // Aggiungi l'event listener per il cambio di visibilità
-                        document.addEventListener('visibilitychange', handleVisibilityChange);
+                        // Ripristina il callback originale
+                        window.googleAuthClient.callback = originalCallback;
+                        
+                        console.error('Errore durante la richiesta del token silenzioso:', error);
+                        
+                        // Se il rinnovo silenzioso fallisce, manteniamo il token corrente
+                        if (currentToken && currentToken.access_token) {
+                            console.log('Mantenimento del token corrente dopo errore di richiesta');
+                            gapi.client.setToken(currentToken);
+                            resolve(currentToken); // Continuiamo con il token precedente
+                        } else {
+                            reject(error);
+                        }
                     }
-                }, actualNotifyTime);
+                });
             }
             
             async login(manualTrigger = false) {
