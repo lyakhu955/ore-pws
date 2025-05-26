@@ -1,4 +1,4 @@
-
+﻿
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -17377,11 +17377,10 @@ END:VCARD`;
                 pwaStatus.textContent = 'Visita il sito in un browser compatibile per installare l\'app';
             }
         }
-    } else {
-        // Service Worker non supportato
-        if (pwaStatus) {
-            pwaStatus.textContent = 'Il tuo browser non supporta l\'installazione dell\'app';
-        }
+    
+    // Service Worker non supportato
+    if (!('serviceWorker' in navigator) && pwaStatus) {
+        pwaStatus.textContent = 'Il tuo browser non supporta l\'installazione dell\'app';
     }
     </script>
 
