@@ -1,5 +1,10 @@
 // Service Worker per Ore PWS - Versione base per GitHub Pages
 const CACHE_NAME = 'ore-pws-cache-v1';
+const DB_NAME = 'ore-pws-notifications';
+const STORE_NAME = 'scheduled-notifications';
+
+// Array per memorizzare le notifiche programmate
+let scheduledNotifications = [];
 
 // Ottieni il percorso base per GitHub Pages
 const getBasePath = () => {
@@ -20,6 +25,101 @@ const urlsToCache = [
   getBasePath() + 'icons/icon-384x384.png',
   getBasePath() + 'icons/icon-512x512.png'
 ];
+
+// Funzione per salvare le notifiche programmate in IndexedDB
+function saveScheduledNotifications() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    
+    request.onerror = (event) => {
+      console.error('Service Worker: Errore nell\'apertura del database', event.target.error);
+      reject(event.target.error);
+    };
+    
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: 'timestamp' });
+      }
+    };
+    
+    request.onsuccess = (event) => {
+      const db = event.target.result;
+      const transaction = db.transaction([STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      
+      // Cancella tutti i dati esistenti
+      store.clear().onsuccess = () => {
+        // Aggiungi tutte le notifiche programmate
+        let allSaved = true;
+        
+        scheduledNotifications.forEach(notification => {
+          const request = store.put(notification);
+          request.onerror = (event) => {
+            console.error('Service Worker: Errore nel salvataggio della notifica', event.target.error);
+            allSaved = false;
+          };
+        });
+        
+        transaction.oncomplete = () => {
+          console.log('Service Worker: Notifiche salvate con successo in IndexedDB');
+          resolve();
+        };
+        
+        transaction.onerror = (event) => {
+          console.error('Service Worker: Errore nella transazione', event.target.error);
+          reject(event.target.error);
+        };
+      };
+    };
+  });
+}
+
+// Funzione per caricare le notifiche programmate da IndexedDB
+function loadScheduledNotifications() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    
+    request.onerror = (event) => {
+      console.error('Service Worker: Errore nell\'apertura del database', event.target.error);
+      reject(event.target.error);
+    };
+    
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: 'timestamp' });
+      }
+    };
+    
+    request.onsuccess = (event) => {
+      const db = event.target.result;
+      
+      // Se lo store non esiste ancora, risolvi con un array vuoto
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        console.log('Service Worker: Store non trovato, inizializzazione con array vuoto');
+        scheduledNotifications = [];
+        resolve();
+        return;
+      }
+      
+      const transaction = db.transaction([STORE_NAME], 'readonly');
+      const store = transaction.objectStore(STORE_NAME);
+      const getAllRequest = store.getAll();
+      
+      getAllRequest.onsuccess = () => {
+        scheduledNotifications = getAllRequest.result || [];
+        console.log(`Service Worker: Caricate ${scheduledNotifications.length} notifiche programmate`);
+        resolve();
+      };
+      
+      getAllRequest.onerror = (event) => {
+        console.error('Service Worker: Errore nel caricamento delle notifiche', event.target.error);
+        reject(event.target.error);
+      };
+    };
+  });
+}
 
 
 
