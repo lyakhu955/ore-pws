@@ -185,6 +185,15 @@ self.addEventListener('message', (event) => {
 
 // Gestione delle richieste di rete
 self.addEventListener('fetch', (event) => {
+  // Gestisci le richieste HEAD separatamente
+  if (event.request.method === 'HEAD') {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => new Response('', { status: 200, statusText: 'OK' }))
+    );
+    return;
+  }
+  
   // Strategia Cache First con fallback su rete
   event.respondWith(
     caches.match(event.request)
@@ -194,12 +203,17 @@ self.addEventListener('fetch', (event) => {
         }
         return fetch(event.request)
           .then((response) => {
-            // Memorizza nella cache solo se è una risposta valida
-            if (response && response.status === 200 && response.type === 'basic') {
+            // Memorizza nella cache solo se è una risposta valida e non è una richiesta HEAD
+            if (response && response.status === 200 && response.type === 'basic' && 
+                event.request.method !== 'HEAD') {
               const responseToCache = response.clone();
               caches.open(CACHE_NAME)
                 .then((cache) => {
-                  cache.put(event.request, responseToCache);
+                  try {
+                    cache.put(event.request, responseToCache);
+                  } catch (error) {
+                    console.error('Errore durante la memorizzazione nella cache:', error);
+                  }
                 });
             }
             return response;
