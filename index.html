@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -17094,9 +17094,11 @@ END:VCARD`;
         const pwaStatus = document.getElementById('pwaStatus');
         const iosInstructions = document.getElementById('iosInstructions');
         
-        // Funzione per rilevare iOS
-        function isIOS() {
-            return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        // Funzione per rilevare iOS (se non è già definita)
+        if (typeof isIOS !== 'function') {
+            function isIOS() {
+                return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            }
         }
         
         // Aggiungi meta tag specifico per iOS per prevenire lo scaling automatico
@@ -17113,9 +17115,11 @@ END:VCARD`;
             document.head.appendChild(mobileWebAppMeta);
         }
         
-        // Funzione per rilevare Safari su iOS
-        function isIOSSafari() {
-            return isIOS() && /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+        // Funzione per rilevare Safari su iOS (se non è già definita)
+        if (typeof isIOSSafari !== 'function') {
+            function isIOSSafari() {
+                return isIOS() && /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+            }
         }
         
         // Gestione dell'evento beforeinstallprompt (non supportato su iOS)
@@ -17358,7 +17362,7 @@ END:VCARD`;
         });
         
         // Funzione per aggiornare lo stato della PWA
-        function updatePwaStatus() {
+        window.updatePwaStatus = function() {
             if (!pwaStatus) return;
             
             // Verifica se l'app è già installata
@@ -17375,7 +17379,7 @@ END:VCARD`;
                 pwaStatus.textContent = 'App già installata';
             } else if (deferredPrompt) {
                 pwaStatus.textContent = 'L\'app è pronta per essere installata';
-            } else if (isIOS()) {
+            } else if (typeof isIOS === 'function' && isIOS()) {
                 pwaStatus.textContent = 'Usa "Aggiungi alla schermata Home" per installare l\'app';
             } else {
                 pwaStatus.textContent = 'Visita il sito in un browser compatibile per installare l\'app';
@@ -17383,7 +17387,9 @@ END:VCARD`;
         }
         
         // Aggiorna lo stato della PWA
-        updatePwaStatus();
+        if (typeof updatePwaStatus === 'function') {
+            updatePwaStatus();
+        }
     </script>
 
     <!-- Script per la gestione dei contatti -->
