@@ -4626,6 +4626,13 @@
                         </div>
                         
                         <div class="setting-item">
+                            <span class="setting-label">Service Worker</span>
+                            <button id="updateServiceWorker">
+                                <span class="material-symbols-outlined">update</span> Aggiorna Service Worker
+                            </button>
+                        </div>
+                        
+                        <div class="setting-item">
                             <span class="setting-label">PIN Admin</span>
                             <div style="display: flex; gap: 10px; flex-grow: 1;">
                                 <input type="password" id="adminPin" class="settings-input" placeholder="Inserisci PIN Admin" maxlength="7">
@@ -7922,11 +7929,24 @@
          function calculatePayForMonth(monthValue) {
              console.log(`Calcolo busta paga per il mese: ${monthValue}`);
              
+             // Mostra un indicatore di caricamento
+             const cashResultsContainer = document.getElementById('cashResults');
+             if (cashResultsContainer) {
+                 cashResultsContainer.innerHTML = '<div class="loading-indicator"><span class="spinner"></span> Calcolo in corso...</div>';
+             }
+             
              // Verifica che il valore del mese sia valido
              if (!monthValue) {
                  console.warn("Nessun mese selezionato per il calcolo della busta paga");
+                 if (cashResultsContainer) {
+                     cashResultsContainer.innerHTML = '<div class="alert alert-info">Seleziona un mese per visualizzare il calcolo della busta paga</div>';
+                 }
                  return;
              }
+             
+             // Utilizziamo setTimeout per evitare il blocco dell'interfaccia durante i calcoli
+             setTimeout(() => {
+                 try {
              
              const db = getDb();
              
@@ -8157,6 +8177,15 @@
              document.getElementById('vacationAmount').textContent = `€${vacationAmount.toFixed(2)}`;
              document.getElementById('igpBresciaAmount').textContent = `€${igpBresciaAmount.toFixed(2)}`;
              document.getElementById('totalAmount').textContent = `€${totalAmount.toFixed(2)}`;
+                 } catch (error) {
+                     console.error("Errore durante il calcolo della busta paga:", error);
+                     const cashResultsContainer = document.getElementById('cashResults');
+                     if (cashResultsContainer) {
+                         cashResultsContainer.innerHTML = `<div class="alert alert-error">Si è verificato un errore durante il calcolo: ${error.message}</div>`;
+                     }
+                     showToast("Errore durante il calcolo della busta paga", "error", 5000);
+                 }
+             }, 100); // Piccolo ritardo per permettere all'interfaccia di aggiornarsi
          }
          
          // Funzione per formattare una data nel formato DD/MM/YYYY
@@ -15325,6 +15354,37 @@ END:VCARD`;
                                     forceUpdateBtn.replaceWith(forceUpdateBtn.cloneNode(true));
                                     const newForceUpdateBtn = document.getElementById('forceUpdate');
                                     
+                                // Inizializza il pulsante di aggiornamento del service worker
+                                const updateServiceWorkerBtn = document.getElementById('updateServiceWorker');
+                                if (updateServiceWorkerBtn) {
+                                    // Rimuovi eventuali listener precedenti
+                                    updateServiceWorkerBtn.replaceWith(updateServiceWorkerBtn.cloneNode(true));
+                                    const newUpdateServiceWorkerBtn = document.getElementById('updateServiceWorker');
+                                    
+                                    newUpdateServiceWorkerBtn.addEventListener('click', function() {
+                                        showToast('Aggiornamento del Service Worker in corso...', 'info');
+                                        
+                                        if ('serviceWorker' in navigator) {
+                                            navigator.serviceWorker.getRegistration().then(function(registration) {
+                                                if (registration) {
+                                                    registration.update().then(function() {
+                                                        console.log('Service Worker aggiornato con successo');
+                                                        showToast('Service Worker aggiornato! Ricarica la pagina per applicare le modifiche.', 'success', 5000);
+                                                    }).catch(function(error) {
+                                                        console.error('Errore durante l\'aggiornamento del Service Worker:', error);
+                                                        showToast('Errore durante l\'aggiornamento del Service Worker', 'error');
+                                                    });
+                                                } else {
+                                                    console.log('Nessun Service Worker registrato');
+                                                    showToast('Nessun Service Worker registrato', 'warning');
+                                                }
+                                            });
+                                        } else {
+                                            showToast('Service Worker non supportato in questo browser', 'error');
+                                        }
+                                    });
+                                }
+                                    
                                     newForceUpdateBtn.addEventListener('click', function() {
                                         showToast('Aggiornamento in corso...', 'info');
                                         
@@ -17698,19 +17758,32 @@ END:VCARD`;
             
             // Gestione del pulsante di sblocco
             if (unlockAdminBtn && adminPinInput) {
+                // Rimuoviamo eventuali listener precedenti per evitare duplicazioni
+                const newUnlockBtn = unlockAdminBtn.cloneNode(true);
+                unlockAdminBtn.parentNode.replaceChild(newUnlockBtn, unlockAdminBtn);
+                unlockAdminBtn = newUnlockBtn;
+                
+                // Aggiungiamo un flag per prevenire clic multipli
+                let isProcessing = false;
+                
                 unlockAdminBtn.onclick = function() {
-                    console.log("Pulsante sblocco cliccato");
-                    const enteredPin = adminPinInput.value;
+                    // Preveniamo clic multipli che potrebbero causare blocchi
+                    if (isProcessing) {
+                        console.log("Operazione già in corso, ignoro il clic");
+                        return;
+                    }
                     
-                    console.log("PIN inserito:", enteredPin);
-                    console.log("PIN corretto:", CORRECT_PIN);
-                    console.log("Confronto:", enteredPin === CORRECT_PIN);
+                    isProcessing = true;
                     
-                    // Confronto più flessibile per evitare problemi con spazi o caratteri invisibili
-                    // Accetta solo il PIN "1235789" (con o senza spazi)
-                    if (enteredPin.trim() === CORRECT_PIN || 
-                        enteredPin === "1235789" || 
-                        enteredPin.trim() === "1235789") {
+                    try {
+                        console.log("Pulsante sblocco cliccato");
+                        const enteredPin = adminPinInput.value;
+                        
+                        // Confronto più flessibile per evitare problemi con spazi o caratteri invisibili
+                        // Accetta solo il PIN "1235789" (con o senza spazi)
+                        if (enteredPin.trim() === CORRECT_PIN || 
+                            enteredPin === "1235789" || 
+                            enteredPin.trim() === "1235789") {
                         console.log("PIN corretto!");
                         // PIN corretto
                         showToast('Funzionalità admin sbloccate!', 'success', 3000);
@@ -17741,6 +17814,13 @@ END:VCARD`;
                         
                         // Pulisci il campo PIN
                         adminPinInput.value = '';
+                    }
+                    } catch (error) {
+                        console.error("Errore durante la verifica del PIN:", error);
+                        showToast('Si è verificato un errore durante la verifica del PIN', 'error', 3000);
+                    } finally {
+                        // Rilasciamo il flag per permettere nuovi clic
+                        isProcessing = false;
                     }
                 };
             }
