@@ -1,4 +1,4 @@
-﻿﻿﻿﻿
+﻿﻿﻿﻿﻿
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -5691,7 +5691,7 @@
             // Controlla se il PIN Admin è già stato inserito correttamente
             const isAdminUnlocked = localStorage.getItem('adminUnlocked') === 'true';
             const cashNavItem = document.getElementById('cash-nav-item');
-            const unlockAdminBtn = document.getElementById('unlockAdminFeatures');
+            let unlockAdminBtn = document.getElementById('unlockAdminFeatures'); // Cambiato da const a let per permettere la riassegnazione
             const lockAdminBtn = document.getElementById('lockAdminFeatures');
             
             if (isAdminUnlocked) {
@@ -17378,10 +17378,10 @@ END:VCARD`;
             }
         }
         
-    // Chiusura del blocco if ('serviceWorker' in navigator)
-    } else if (pwaStatus) {
         // Service Worker non supportato
-        pwaStatus.textContent = 'Il tuo browser non supporta l\'installazione dell\'app';
+        if (!('serviceWorker' in navigator) && pwaStatus) {
+            pwaStatus.textContent = 'Il tuo browser non supporta l\'installazione dell\'app';
+        }
     }
     </script>
 
