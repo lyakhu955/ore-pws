@@ -17334,10 +17334,12 @@ END:VCARD`;
         */
             
         // Fine della sezione di sviluppo
-            window.addEventListener('focus', function() {
-                // Controlla se la pagina è stata modificata
-                fetch('index.html', {
-                    method: 'HEAD',
+        
+        // Controllo aggiornamenti pagina
+        window.addEventListener('focus', function() {
+            // Controlla se la pagina è stata modificata
+            fetch('index.html', {
+                method: 'HEAD',
                     headers: {
                         'Cache-Control': 'no-cache',
                         'Pragma': 'no-cache'
