@@ -1,4 +1,4 @@
-﻿﻿﻿
+﻿﻿﻿﻿
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -17786,7 +17786,7 @@ END:VCARD`;
             
             // Elementi DOM
             const adminPinInput = document.getElementById('adminPin');
-            const unlockAdminBtn = document.getElementById('unlockAdminFeatures');
+            let unlockAdminBtn = document.getElementById('unlockAdminFeatures'); // Cambiato da const a let per permettere la riassegnazione
             const lockAdminBtn = document.getElementById('lockAdminFeatures');
             const cashNavItem = document.getElementById('cash-nav-item');
             
