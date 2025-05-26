@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿
+﻿﻿﻿﻿﻿﻿
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -17358,16 +17358,21 @@ END:VCARD`;
             });
         });
         
-        // Verifica se l'app è già installata
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                            window.navigator.standalone === true;
-        
-        console.log('App in modalità standalone:', isStandalone);
-        console.log('deferredPrompt disponibile:', !!deferredPrompt);
-        
-        // Aggiorna lo stato della PWA
-        if (pwaStatus) {
-            if (isStandalone) {
+        // Funzione per aggiornare lo stato della PWA
+        function updatePwaStatus() {
+            if (!pwaStatus) return;
+            
+            // Verifica se l'app è già installata
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                                window.navigator.standalone === true;
+            
+            console.log('App in modalità standalone:', isStandalone);
+            console.log('deferredPrompt disponibile:', !!deferredPrompt);
+            
+            // Aggiorna il testo in base allo stato
+            if (!('serviceWorker' in navigator)) {
+                pwaStatus.textContent = 'Il tuo browser non supporta l\'installazione dell\'app';
+            } else if (isStandalone) {
                 pwaStatus.textContent = 'App già installata';
             } else if (deferredPrompt) {
                 pwaStatus.textContent = 'L\'app è pronta per essere installata';
@@ -17378,10 +17383,8 @@ END:VCARD`;
             }
         }
         
-        // Service Worker non supportato
-        if (!('serviceWorker' in navigator) && pwaStatus) {
-            pwaStatus.textContent = 'Il tuo browser non supporta l\'installazione dell\'app';
-        }
+        // Aggiorna lo stato della PWA
+        updatePwaStatus();
     }
     </script>
 
@@ -17786,9 +17789,15 @@ END:VCARD`;
             
             // Elementi DOM
             const adminPinInput = document.getElementById('adminPin');
-            let unlockAdminBtn = document.getElementById('unlockAdminFeatures'); // Cambiato da const a let per permettere la riassegnazione
+            const unlockAdminBtnOriginal = document.getElementById('unlockAdminFeatures');
             const lockAdminBtn = document.getElementById('lockAdminFeatures');
             const cashNavItem = document.getElementById('cash-nav-item');
+            
+            // Se il pulsante di sblocco non esiste, usciamo dalla funzione
+            if (!unlockAdminBtnOriginal || !adminPinInput) {
+                console.warn("Elementi necessari per il PIN Admin non trovati");
+                return;
+            }
             
             // PIN Admin corretto (hardcoded per funzionare anche con GitHub Pages)
             const CORRECT_PIN = "1235789";
@@ -17801,43 +17810,42 @@ END:VCARD`;
             if (isAdminUnlocked && cashNavItem) {
                 cashNavItem.style.display = 'flex';
                 if (lockAdminBtn) lockAdminBtn.style.display = 'block';
-                if (unlockAdminBtn) unlockAdminBtn.style.display = 'none';
+                unlockAdminBtnOriginal.style.display = 'none';
                 console.log("Funzionalità admin già sbloccate");
             } else {
                 if (cashNavItem) cashNavItem.style.display = 'none';
                 if (lockAdminBtn) lockAdminBtn.style.display = 'none';
-                if (unlockAdminBtn) unlockAdminBtn.style.display = 'block';
+                unlockAdminBtnOriginal.style.display = 'block';
                 console.log("Funzionalità admin bloccate");
             }
             
-            // Gestione del pulsante di sblocco
-            if (unlockAdminBtn && adminPinInput) {
-                // Rimuoviamo eventuali listener precedenti per evitare duplicazioni
-                const newUnlockBtn = unlockAdminBtn.cloneNode(true);
-                unlockAdminBtn.parentNode.replaceChild(newUnlockBtn, unlockAdminBtn);
-                unlockAdminBtn = newUnlockBtn;
+            // Rimuoviamo eventuali listener precedenti per evitare duplicazioni
+            // Creiamo un nuovo pulsante e sostituiamo quello originale
+            const newUnlockBtn = unlockAdminBtnOriginal.cloneNode(true);
+            unlockAdminBtnOriginal.parentNode.replaceChild(newUnlockBtn, unlockAdminBtnOriginal);
+            
+            // Aggiungiamo un flag per prevenire clic multipli
+            let isProcessing = false;
+            
+            // Aggiungiamo il listener al nuovo pulsante
+            newUnlockBtn.addEventListener('click', function() {
+                // Preveniamo clic multipli che potrebbero causare blocchi
+                if (isProcessing) {
+                    console.log("Operazione già in corso, ignoro il clic");
+                    return;
+                }
                 
-                // Aggiungiamo un flag per prevenire clic multipli
-                let isProcessing = false;
+                isProcessing = true;
                 
-                unlockAdminBtn.onclick = function() {
-                    // Preveniamo clic multipli che potrebbero causare blocchi
-                    if (isProcessing) {
-                        console.log("Operazione già in corso, ignoro il clic");
-                        return;
-                    }
+                try {
+                    console.log("Pulsante sblocco cliccato");
+                    const enteredPin = adminPinInput.value;
                     
-                    isProcessing = true;
-                    
-                    try {
-                        console.log("Pulsante sblocco cliccato");
-                        const enteredPin = adminPinInput.value;
-                        
-                        // Confronto più flessibile per evitare problemi con spazi o caratteri invisibili
-                        // Accetta solo il PIN "1235789" (con o senza spazi)
-                        if (enteredPin.trim() === CORRECT_PIN || 
-                            enteredPin === "1235789" || 
-                            enteredPin.trim() === "1235789") {
+                    // Confronto più flessibile per evitare problemi con spazi o caratteri invisibili
+                    // Accetta solo il PIN "1235789" (con o senza spazi)
+                    if (enteredPin.trim() === CORRECT_PIN || 
+                        enteredPin === "1235789" || 
+                        enteredPin.trim() === "1235789") {
                         console.log("PIN corretto!");
                         // PIN corretto
                         showToast('Funzionalità admin sbloccate!', 'success', 3000);
@@ -17855,7 +17863,7 @@ END:VCARD`;
                         
                         // Mostra il pulsante di blocco e nascondi quello di sblocco
                         if (lockAdminBtn) lockAdminBtn.style.display = 'block';
-                        unlockAdminBtn.style.display = 'none';
+                        newUnlockBtn.style.display = 'none';
                     } else {
                         console.log("PIN errato!");
                         // PIN errato
@@ -17869,19 +17877,23 @@ END:VCARD`;
                         // Pulisci il campo PIN
                         adminPinInput.value = '';
                     }
-                    } catch (error) {
-                        console.error("Errore durante la verifica del PIN:", error);
-                        showToast('Si è verificato un errore durante la verifica del PIN', 'error', 3000);
-                    } finally {
-                        // Rilasciamo il flag per permettere nuovi clic
-                        isProcessing = false;
-                    }
-                };
-            }
-            
+                } catch (error) {
+                    console.error("Errore durante la verifica del PIN:", error);
+                    showToast('Si è verificato un errore durante la verifica del PIN', 'error', 3000);
+                } finally {
+                    // Rilasciamo il flag per permettere nuovi clic
+                    isProcessing = false;
+                }
+            });
+        
             // Gestione del pulsante di blocco
             if (lockAdminBtn) {
-                lockAdminBtn.onclick = function() {
+                // Rimuoviamo eventuali listener precedenti
+                const newLockBtn = lockAdminBtn.cloneNode(true);
+                lockAdminBtn.parentNode.replaceChild(newLockBtn, lockAdminBtn);
+                
+                // Aggiungiamo il nuovo listener
+                newLockBtn.addEventListener('click', function() {
                     console.log("Pulsante blocco cliccato");
                     // Nascondi la sezione Cash
                     if (cashNavItem) {
@@ -17892,12 +17904,13 @@ END:VCARD`;
                     localStorage.removeItem('adminUnlocked');
                     
                     // Mostra il pulsante di sblocco e nascondi quello di blocco
-                    if (unlockAdminBtn) unlockAdminBtn.style.display = 'block';
-                    lockAdminBtn.style.display = 'none';
+                    const currentUnlockBtn = document.getElementById('unlockAdminFeatures');
+                    if (currentUnlockBtn) currentUnlockBtn.style.display = 'block';
+                    newLockBtn.style.display = 'none';
                     
                     // Notifica l'utente
                     showToast('Funzionalità admin bloccate!', 'info', 3000);
-                };
+                });
             }
         }
         
