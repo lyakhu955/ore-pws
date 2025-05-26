@@ -13019,8 +13019,42 @@ END:VCARD`;
             // Metodi che ogni provider deve implementare
             async login() { throw new Error("Non implementato"); }
             async logout() { throw new Error("Non implementato"); }
-            async backup(data, showLoginPrompt = true) { throw new Error("Non implementato"); }
-            async restore() { throw new Error("Non implementato"); }
+            async backup(data, showLoginPrompt = true) { 
+                // Implementazione con gestione degli errori e timeout
+                return new Promise((resolve, reject) => {
+                    // Impostiamo un timeout per evitare blocchi indefiniti
+                    const timeoutId = setTimeout(() => {
+                        reject(new Error("Timeout durante il backup: operazione annullata per evitare blocchi"));
+                    }, 15000); // 15 secondi di timeout
+                    
+                    try {
+                        // Qui andrebbe l'implementazione reale
+                        clearTimeout(timeoutId);
+                        throw new Error("Non implementato");
+                    } catch (error) {
+                        clearTimeout(timeoutId);
+                        reject(error);
+                    }
+                });
+            }
+            async restore() { 
+                // Implementazione con gestione degli errori e timeout
+                return new Promise((resolve, reject) => {
+                    // Impostiamo un timeout per evitare blocchi indefiniti
+                    const timeoutId = setTimeout(() => {
+                        reject(new Error("Timeout durante il ripristino: operazione annullata per evitare blocchi"));
+                    }, 15000); // 15 secondi di timeout
+                    
+                    try {
+                        // Qui andrebbe l'implementazione reale
+                        clearTimeout(timeoutId);
+                        throw new Error("Non implementato");
+                    } catch (error) {
+                        clearTimeout(timeoutId);
+                        reject(error);
+                    }
+                });
+            }
             
             // Metodi comuni a tutti i provider
             getUserInfo() {
@@ -14902,9 +14936,17 @@ END:VCARD`;
                             }
                         }
                         
-                        // Ora che siamo sicuri che l'utente è autenticato, esegui il backup
-                        // Passiamo true come terzo parametro per saltare i toast nel metodo backup
-                        result = await cloudManager.backup(data, false, true);
+                        // Ora che siamo sicuri che l'utente è autenticato, esegui il backup con timeout
+                        // Impostiamo un timeout per evitare blocchi indefiniti
+                        const backupPromise = cloudManager.backup(data, false, true);
+                        
+                        // Creiamo una Promise con timeout
+                        result = await Promise.race([
+                            backupPromise,
+                            new Promise((_, reject) => 
+                                setTimeout(() => reject(new Error("Timeout durante il backup: operazione annullata per evitare blocchi")), 20000)
+                            )
+                        ]);
                         
                         // Aggiorna l'UI
                         const currentProvider = cloudManager.getCurrentProvider();
@@ -16564,17 +16606,17 @@ END:VCARD`;
         // Rileva se è un dispositivo mobile
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
-        // Configurazione ottimizzata per mobile - Stile Neon
-        const particleCount = isMobile ? 100 : 80;
-        const particleSize = isMobile ? { min: 4, max: 9 } : { min: 3, max: 8 };
-        const linkDistance = isMobile ? 120 : 150;
-        const moveSpeed = isMobile ? 2 : 3;
+        // Configurazione ottimizzata per mobile - Stile Neon (ridotta per migliorare le prestazioni)
+        const particleCount = isMobile ? 50 : 40; // Ridotto il numero di particelle
+        const particleSize = isMobile ? { min: 3, max: 7 } : { min: 2, max: 6 }; // Ridotte le dimensioni
+        const linkDistance = isMobile ? 100 : 120; // Ridotta la distanza dei collegamenti
+        const moveSpeed = isMobile ? 1 : 1.5; // Ridotta la velocità di movimento
         
         await tsParticles.load("pws-particles-container", {
             fullScreen: {
                 enable: false
             },
-            fpsLimit: 60,
+            fpsLimit: 30, // Ridotto il limite di FPS per migliorare le prestazioni
             particles: {
                 number: {
                     value: particleCount,
@@ -16641,11 +16683,11 @@ END:VCARD`;
                 detect_on: "canvas",
                 events: {
                     onhover: {
-                        enable: true,
+                        enable: false, // Disabilitata l'interazione al passaggio del mouse per migliorare le prestazioni
                         mode: "grab"
                     },
                     onclick: {
-                        enable: true,
+                        enable: false, // Disabilitata l'interazione al click per migliorare le prestazioni
                         mode: "push"
                     },
                     resize: true
