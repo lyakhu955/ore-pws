@@ -17332,59 +17332,57 @@ END:VCARD`;
             }
         }
         */
-            
-        // Fine della sezione di sviluppo
         
-        // Controllo aggiornamenti pagina
+        // Fine della sezione di sviluppo
         window.addEventListener('focus', function() {
             // Controlla se la pagina è stata modificata
             fetch('index.html', {
                 method: 'HEAD',
-                    headers: {
-                        'Cache-Control': 'no-cache',
-                        'Pragma': 'no-cache'
-                    }
-                }).then(function(response) {
-                    const lastModified = response.headers.get('Last-Modified');
-                    const cachedLastModified = localStorage.getItem('lastModified');
-                    
-                    if (lastModified && cachedLastModified && lastModified !== cachedLastModified) {
-                        console.log('Pagina modificata, ricarico...');
-                        localStorage.setItem('lastModified', lastModified);
-                        window.location.reload(true);
-                    } else if (lastModified) {
-                        localStorage.setItem('lastModified', lastModified);
-                    }
-                }).catch(function(error) {
-                    console.error('Errore durante il controllo degli aggiornamenti:', error);
-                });
-            });
-            
-            // Verifica se l'app è già installata
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                                window.navigator.standalone === true;
-            
-            console.log('App in modalità standalone:', isStandalone);
-            console.log('deferredPrompt disponibile:', !!deferredPrompt);
-            
-            // Aggiorna lo stato della PWA
-            if (pwaStatus) {
-                if (isStandalone) {
-                    pwaStatus.textContent = 'App già installata';
-                } else if (deferredPrompt) {
-                    pwaStatus.textContent = 'L\'app è pronta per essere installata';
-                } else if (isIOS()) {
-                    pwaStatus.textContent = 'Usa "Aggiungi alla schermata Home" per installare l\'app';
-                } else {
-                    pwaStatus.textContent = 'Visita il sito in un browser compatibile per installare l\'app';
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
                 }
-            }
-        } else {
-            // Service Worker non supportato
-            if (pwaStatus) {
-                pwaStatus.textContent = 'Il tuo browser non supporta l\'installazione dell\'app';
+            }).then(function(response) {
+                const lastModified = response.headers.get('Last-Modified');
+                const cachedLastModified = localStorage.getItem('lastModified');
+                
+                if (lastModified && cachedLastModified && lastModified !== cachedLastModified) {
+                    console.log('Pagina modificata, ricarico...');
+                    localStorage.setItem('lastModified', lastModified);
+                    window.location.reload(true);
+                } else if (lastModified) {
+                    localStorage.setItem('lastModified', lastModified);
+                }
+            }).catch(function(error) {
+                console.error('Errore durante il controllo degli aggiornamenti:', error);
+            });
+        });
+        
+        // Verifica se l'app è già installata
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                            window.navigator.standalone === true;
+        
+        console.log('App in modalità standalone:', isStandalone);
+        console.log('deferredPrompt disponibile:', !!deferredPrompt);
+        
+        // Aggiorna lo stato della PWA
+        if (pwaStatus) {
+            if (isStandalone) {
+                pwaStatus.textContent = 'App già installata';
+            } else if (deferredPrompt) {
+                pwaStatus.textContent = 'L\'app è pronta per essere installata';
+            } else if (isIOS()) {
+                pwaStatus.textContent = 'Usa "Aggiungi alla schermata Home" per installare l\'app';
+            } else {
+                pwaStatus.textContent = 'Visita il sito in un browser compatibile per installare l\'app';
             }
         }
+    } else {
+        // Service Worker non supportato
+        if (pwaStatus) {
+            pwaStatus.textContent = 'Il tuo browser non supporta l\'installazione dell\'app';
+        }
+    }
     </script>
 
     <!-- Script per la gestione dei contatti -->
