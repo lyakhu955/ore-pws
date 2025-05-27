@@ -67,7 +67,13 @@ self.addEventListener('activate', (event) => {
     .then(() => {
       console.log('Service Worker: Attivazione completata');
       
-      // Carica le notifiche programmate
+      // Funzione segnaposto per retrocompatibilità - Notifiche disabilitate
+      function loadScheduledNotifications() {
+        console.log('Service Worker: Caricamento notifiche disabilitato');
+        return Promise.resolve(); // Restituisce una promessa risolta
+      }
+      
+      // Carica le notifiche programmate (funzione disabilitata)
       return loadScheduledNotifications();
     })
     .then(() => {
@@ -123,6 +129,11 @@ self.addEventListener('message', (event) => {
 
 // Gestione delle richieste di rete
 self.addEventListener('fetch', (event) => {
+  // Ignora le richieste HEAD che non possono essere memorizzate nella cache
+  if (event.request.method === 'HEAD') {
+    return; // Non gestire le richieste HEAD
+  }
+  
   // Strategia Cache First con fallback su rete
   event.respondWith(
     caches.match(event.request)
@@ -132,12 +143,16 @@ self.addEventListener('fetch', (event) => {
         }
         return fetch(event.request)
           .then((response) => {
-            // Memorizza nella cache solo se è una risposta valida
-            if (response && response.status === 200 && response.type === 'basic') {
+            // Memorizza nella cache solo se è una risposta valida e non è una richiesta HEAD
+            if (response && response.status === 200 && response.type === 'basic' && event.request.method !== 'HEAD') {
               const responseToCache = response.clone();
               caches.open(CACHE_NAME)
                 .then((cache) => {
-                  cache.put(event.request, responseToCache);
+                  try {
+                    cache.put(event.request, responseToCache);
+                  } catch (error) {
+                    console.error('Errore durante la memorizzazione nella cache:', error);
+                  }
                 });
             }
             return response;
@@ -223,54 +238,57 @@ self.addEventListener('message', (event) => {
         message: 'La funzionalità di notifica è stata disabilitata per migliorare le prestazioni'
       });
     }
-  }
     
-    // Ottieni il percorso base per le icone
-    const basePath = getBasePath();
-    const iconPath = basePath + 'icons/icon-192x192.png';
-    const badgePath = basePath + 'icons/icon-72x72.png';
-    
-    const options = {
-      body: 'Questa è una notifica di test. Se la vedi, le notifiche funzionano correttamente!',
-      icon: iconPath,
-      badge: badgePath,
-      tag: 'ore-pws-test',
-      requireInteraction: true,
-      vibrate: [100, 50, 100],
-      data: {
-        url: basePath,
-        test: true
-      },
-      actions: [
-        {
-          action: 'open-app',
-          title: 'Apri App'
+    // Gestione specifica per il test delle notifiche (per retrocompatibilità)
+    if (event.data.type === 'TEST_NOTIFICATION') {
+      // Ottieni il percorso base per le icone
+      const basePath = getBasePath();
+      const iconPath = basePath + 'icons/icon-192x192.png';
+      const badgePath = basePath + 'icons/icon-72x72.png';
+      
+      const options = {
+        body: 'Questa è una notifica di test. Se la vedi, le notifiche funzionano correttamente!',
+        icon: iconPath,
+        badge: badgePath,
+        tag: 'ore-pws-test',
+        requireInteraction: true,
+        vibrate: [100, 50, 100],
+        data: {
+          url: basePath,
+          test: true
         },
-        {
-          action: 'dismiss',
-          title: 'Chiudi'
-        }
-      ]
-    };
-    
-    self.registration.showNotification('Test Notifica Ore PWS', options)
-      .then(() => {
-        if (event.source) {
-          event.source.postMessage({
-            type: 'TEST_NOTIFICATION_SENT',
-            success: true
-          });
-        }
-      })
-      .catch(error => {
-        console.error('Service Worker: Errore nel test della notifica', error);
-        if (event.source) {
-          event.source.postMessage({
-            type: 'TEST_NOTIFICATION_SENT',
-            success: false,
-            error: error.message
-          });
-        }
-      });
+        actions: [
+          {
+            action: 'open-app',
+            title: 'Apri App'
+          },
+          {
+            action: 'dismiss',
+            title: 'Chiudi'
+          }
+        ]
+      };
+      
+      self.registration.showNotification('Test Notifica Ore PWS', options)
+        .then(() => {
+          if (event.source) {
+            event.source.postMessage({
+              type: 'TEST_NOTIFICATION_SENT',
+              success: true
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Service Worker: Errore nel test della notifica', error);
+          if (event.source) {
+            event.source.postMessage({
+              type: 'TEST_NOTIFICATION_SENT',
+              success: false,
+              error: error.message
+            });
+          }
+        });
+    }
+  }
   }
 });
