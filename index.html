@@ -1,4 +1,4 @@
-﻿﻿﻿﻿
+﻿﻿﻿﻿﻿﻿
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -822,46 +822,7 @@
             filter: drop-shadow(0 0 8px var(--md-sys-color-primary));
         }
         
-        /* Stili per l'overlay della GIF del supereroe */
-        .superhero-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw; /* Usa viewport width */
-            height: 100vh; /* Usa viewport height */
-            background-color: rgba(0, 0, 0, 0.85);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            /* Assicuriamoci che l'overlay non interferisca con i toast */
-            pointer-events: auto;
-            /* Assicuriamoci che l'overlay copra l'intera viewport */
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        .superhero-overlay.visible {
-            opacity: 1;
-            visibility: visible !important;
-            display: flex !important;
-        }
-        
-        .superhero-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
+        /* Stili per l'overlay della GIF del supereroe - Rimossi per ottimizzazione */
         
         .superhero-gif {
             width: 100%;
@@ -5264,25 +5225,7 @@
         </div>
     </div>
 
-    <!-- Overlay per la GIF del supereroe - Ottimizzato per iOS -->
-    <div id="superheroOverlay" class="superhero-overlay">
-        <div class="superhero-container">
-            <!-- Utilizziamo picture per fornire alternative per diversi browser -->
-            <picture>
-                <!-- Fallback per iOS che potrebbe avere problemi con GIF animate remote -->
-                <source srcset="https://raw.githubusercontent.com/lyakhu955/ore-pws/main/freepik__wide-shot-a-stylized-cartoon-superhero-stands-tall__79694.webp" type="image/webp">
-                <!-- GIF originale come fallback -->
-                <img src="https://raw.githubusercontent.com/lyakhu955/ore-pws/main/freepik__wide-shot-a-stylized-cartoon-superhero-stands-tall__79694.gif" 
-                     alt="Supereroe PWS" 
-                     class="superhero-gif"
-                     loading="eager"
-                     decoding="sync"
-                     style="max-width: 90%; max-height: 90%; display: block; margin: auto;">
-            </picture>
-        </div>
-        <button class="close-btn" id="closeSuperhero" title="Chiudi" style="position: absolute; top: 20px; right: 20px; z-index: 10001; background-color: rgba(0, 0, 0, 0.5); color: white; border: none; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); -webkit-touch-callout: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
-            <span class="material-symbols-outlined" style="font-size: 36px; pointer-events: none; -webkit-touch-callout: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;">close</span>
-        </button>
+    <!-- Overlay per la GIF del supereroe rimosso per ottimizzazione -->
         
         <!-- Audio per lo scherzo del pulsante che scappa - Ottimizzato per iOS -->
         <!-- Gli elementi audio sono creati dinamicamente via JavaScript per compatibilità iOS -->
