@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿
+﻿﻿﻿﻿﻿﻿﻿﻿
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -9346,6 +9346,18 @@
                         console.log('Service Worker registrato con successo:', registration.scope);
                         // Salva il riferimento alla registrazione
                         window.swRegistration = registration;
+                        
+                        // Verifica se periodicSync è supportato
+                        if ('periodicSync' in registration) {
+                            // Verifica se l'app è installata (in modalità standalone o fullscreen)
+                            const isInstalled = window.matchMedia('(display-mode: standalone)').matches || 
+                                               window.matchMedia('(display-mode: fullscreen)').matches;
+                            
+                            if (!isInstalled) {
+                                console.log('L\'app non è installata come PWA. Alcune funzionalità come periodicSync potrebbero non essere disponibili.');
+                                // Non mostriamo messaggi all'utente per non disturbarlo
+                            }
+                        }
                     })
                     .catch(error => {
                         console.error('Errore nella registrazione del Service Worker:', error);
