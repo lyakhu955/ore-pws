@@ -1,4 +1,4 @@
-
+﻿﻿﻿﻿
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -616,20 +616,7 @@
             font-size: 1.1rem;
             color: var(--md-sys-color-secondary);
         }
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ore PWS Group (Modern)</title>
-    <!-- Google Fonts: Roboto and Material Symbols Outlined -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    <!-- Include Flatpickr CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <style>
+        /* Codice duplicato rimosso */
         /* Material Design 3 Inspired Theme - Android 2025 */
 
         :root {
@@ -5316,18 +5303,87 @@
         ];
 
         // --- Utility Functions (Database, Toast, etc.) ---
+        
+        // Funzione per gestire lo spazio nel localStorage
+        function manageLocalStorageSpace() {
+            try {
+                // Calcola lo spazio utilizzato
+                let totalSize = 0;
+                let itemSizes = {};
+                
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    const value = localStorage.getItem(key);
+                    const size = (key.length + value.length) * 2; // Approssimazione in byte (2 byte per carattere)
+                    
+                    totalSize += size;
+                    itemSizes[key] = size;
+                }
+                
+                // Converti in MB
+                const totalSizeMB = totalSize / (1024 * 1024);
+                
+                // Log dello spazio utilizzato
+                console.log(`Spazio localStorage utilizzato: ${totalSizeMB.toFixed(2)}MB`);
+                
+                // Se lo spazio utilizzato supera i 4MB, pulisci i dati meno importanti
+                if (totalSizeMB > 4) {
+                    console.warn("Spazio localStorage quasi esaurito, pulizia in corso...");
+                    
+                    // Rimuovi i dati temporanei o meno importanti
+                    const lowPriorityKeys = [
+                        'reminderSettings', // Già disabilitato
+                        'pws-particles-enabled', // Configurazione particelle
+                        'excelFiles', // File Excel (già gestiti separatamente)
+                        'lastViewedMonth', // Preferenza UI
+                        'lastViewedYear', // Preferenza UI
+                        'lastSelectedVehicle' // Preferenza UI
+                    ];
+                    
+                    // Rimuovi i dati meno importanti
+                    lowPriorityKeys.forEach(key => {
+                        if (localStorage.getItem(key)) {
+                            console.log(`Rimozione dati non essenziali: ${key}`);
+                            localStorage.removeItem(key);
+                        }
+                    });
+                    
+                    // Verifica lo spazio dopo la pulizia
+                    let newTotalSize = 0;
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        const value = localStorage.getItem(key);
+                        newTotalSize += (key.length + value.length) * 2;
+                    }
+                    
+                    const newTotalSizeMB = newTotalSize / (1024 * 1024);
+                    console.log(`Nuovo spazio utilizzato dopo pulizia: ${newTotalSizeMB.toFixed(2)}MB`);
+                    
+                    // Se ancora troppo grande, mostra un avviso
+                    if (newTotalSizeMB > 4.5) {
+                        showToast("Memoria locale quasi piena. Considera di esportare e poi cancellare alcuni dati.", "warning", 5000);
+                    }
+                }
+                
+                return totalSizeMB;
+            } catch (error) {
+                console.error("Errore nella gestione dello spazio localStorage:", error);
+                return -1;
+            }
+        }
+        
+        // Esegui la gestione dello spazio all'avvio e periodicamente
+        window.addEventListener('load', () => {
+            // Controlla lo spazio all'avvio
+            setTimeout(manageLocalStorageSpace, 5000);
+            
+            // Controlla lo spazio ogni ora
+            setInterval(manageLocalStorageSpace, 60 * 60 * 1000);
+        });
+        
         // ... other code like getDb, etc. ...
 
-        // --- Remove this section if it exists elsewhere in the script ---
-        // // --- Constants ---
-        // const DEFAULT_VEHICLES = [
-        //     { id: 'default_panda10', name: 'Panda 10' },
-        //     { id: 'default_doblo_metano7', name: 'Doblò Metano 7' },
-        //     { id: 'default_doblo11', name: 'Doblò 11' },
-        //     { id: 'default_doblo9', name: 'Doblò 9' },
-        //     { id: 'default_ducato_ch', name: 'Ducato CH' }
-        // ];
-        // --- End Remove ---
+        // Sezione rimossa - Codice duplicato
 
         // Fixed initDatepicker definition to prevent ReferenceError
         function initDatepicker() {
@@ -9023,12 +9079,51 @@
         
         function saveExcelFiles(files) {
             try {
-                // Limitiamo il numero di file salvati a 10 per evitare di riempire il localStorage
-                const filesToSave = files.slice(0, 10);
-                localStorage.setItem('excelFiles', JSON.stringify(filesToSave));
+                // Limitiamo il numero di file salvati a 5 per evitare di riempire il localStorage
+                const filesToSave = files.slice(0, 5);
+                
+                // Verifica se il file è troppo grande (>1MB)
+                const jsonData = JSON.stringify(filesToSave);
+                const sizeInMB = (new Blob([jsonData]).size) / (1024 * 1024);
+                
+                if (sizeInMB > 1) {
+                    console.warn(`File Excel troppo grandi (${sizeInMB.toFixed(2)}MB). Rimozione dei dati binari...`);
+                    
+                    // Rimuovi i dati binari dai file più vecchi, mantenendoli solo per il più recente
+                    const cleanedFiles = filesToSave.map((file, index) => {
+                        if (index === 0) return file; // Mantieni i dati solo per il file più recente
+                        
+                        // Per gli altri file, rimuovi i dati binari ma mantieni i metadati
+                        const { data, ...metadata } = file;
+                        return {
+                            ...metadata,
+                            dataRemoved: true
+                        };
+                    });
+                    
+                    localStorage.setItem('excelFiles', JSON.stringify(cleanedFiles));
+                    showToast("Alcuni dati Excel sono stati compressi per risparmiare spazio", "info");
+                } else {
+                    localStorage.setItem('excelFiles', jsonData);
+                }
             } catch (error) {
                 console.error("Errore nel salvataggio dei file Excel:", error);
                 showToast("Errore nel salvataggio dei file Excel", "error");
+                
+                // In caso di errore, prova a salvare solo i metadati
+                try {
+                    const metadataOnly = files.slice(0, 5).map(file => {
+                        const { data, ...metadata } = file;
+                        return {
+                            ...metadata,
+                            dataRemoved: true
+                        };
+                    });
+                    localStorage.setItem('excelFiles', JSON.stringify(metadataOnly));
+                    showToast("Salvati solo i metadati dei file Excel per problemi di spazio", "warning");
+                } catch (e) {
+                    console.error("Errore anche nel salvataggio dei metadati:", e);
+                }
             }
         }
         
@@ -9285,186 +9380,20 @@
             }
         }
         
-        // Inizializza le impostazioni dei promemoria
+        // Funzione segnaposto per la retrocompatibilità - Promemoria rimossi
         function initReminderSettings() {
-            console.log("Inizializzazione impostazioni promemoria...");
+            console.log("Funzionalità promemoria disabilitata");
             
-            // Elementi DOM
-            const reminderEnabled = document.getElementById('reminderEnabled');
-            const reminderSettings = document.getElementById('reminderSettings');
-            const reminderTime = document.getElementById('reminderTime');
-            const reminderText = document.getElementById('reminderText');
-            const saveReminderBtn = document.getElementById('saveReminder');
-            const testNotificationBtn = document.getElementById('testNotification');
-            const dayCheckboxes = document.querySelectorAll('.day-checkbox input[type="checkbox"]');
-            
-            // Funzione per aggiornare la visualizzazione dei giorni selezionati
-            function updateDaySelection() {
-                dayCheckboxes.forEach(checkbox => {
-                    const dayLabel = checkbox.closest('.day-checkbox');
-                    if (checkbox.checked) {
-                        dayLabel.classList.add('selected');
-                    } else {
-                        dayLabel.classList.remove('selected');
-                    }
-                });
-            }
-            
-            // Inizializza la visualizzazione dei giorni selezionati
-            updateDaySelection();
-            
-            // Aggiungi event listener per i label dei giorni
-            document.querySelectorAll('.day-checkbox').forEach(label => {
-                label.addEventListener('click', function(e) {
-                    // Trova il checkbox all'interno del label
-                    const checkbox = this.querySelector('input[type="checkbox"]');
-                    if (checkbox) {
-                        // Inverti lo stato del checkbox
-                        checkbox.checked = !checkbox.checked;
-                        
-                        // Aggiorna la visualizzazione
-                        updateDaySelection();
-                    }
-                });
-            });
-            
-            // Carica le impostazioni salvate
-            const savedSettings = JSON.parse(localStorage.getItem('reminderSettings')) || {
-                enabled: false,
-                time: '20:00',
-                days: [1, 2, 3, 4, 5], // Lun-Ven
-                text: 'We allora le segnamo ste ore???'
-            };
-            
-            // Applica le impostazioni salvate
-            reminderEnabled.checked = savedSettings.enabled;
-            reminderTime.value = savedSettings.time;
-            reminderText.value = savedSettings.text;
-            
-            // Imposta i giorni della settimana
-            dayCheckboxes.forEach(checkbox => {
-                checkbox.checked = savedSettings.days.includes(parseInt(checkbox.value));
-            });
-            
-            // Aggiorna la visualizzazione dei giorni selezionati
-            updateDaySelection();
-            
-            // Mostra/nascondi le impostazioni in base allo stato
-            reminderSettings.style.display = savedSettings.enabled ? 'block' : 'none';
-            
-            // Event listener per il toggle di attivazione
-            reminderEnabled.addEventListener('change', function() {
-                reminderSettings.style.display = this.checked ? 'block' : 'none';
-                
-                // Aggiorna le impostazioni
-                savedSettings.enabled = this.checked;
-                localStorage.setItem('reminderSettings', JSON.stringify(savedSettings));
-                
-                // Gestisci le notifiche
-                if (this.checked) {
-                    requestNotificationPermission();
-                    scheduleReminder(savedSettings);
-                } else {
-                    cancelReminder();
-                }
-            });
-            
-            // Event listener per il pulsante di salvataggio
-            saveReminderBtn.addEventListener('click', function() {
-                // Raccogli i giorni selezionati
-                const selectedDays = [];
-                dayCheckboxes.forEach(checkbox => {
-                    if (checkbox.checked) {
-                        selectedDays.push(parseInt(checkbox.value));
-                    }
-                });
-                
-                // Aggiorna le impostazioni
-                savedSettings.time = reminderTime.value;
-                savedSettings.text = reminderText.value;
-                savedSettings.days = selectedDays;
-                
-                // Salva le impostazioni
-                localStorage.setItem('reminderSettings', JSON.stringify(savedSettings));
-                
-                // Aggiorna il promemoria se attivo
-                if (savedSettings.enabled) {
-                    scheduleReminder(savedSettings);
-                }
-                
-                // Feedback all'utente
-                const giorni = selectedDays.map(day => {
-                    const giorni = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
-                    return giorni[day];
-                }).join(', ');
-                
-                showToast(`Promemoria impostato per le ore ${reminderTime.value} nei giorni: ${giorni}`);
-            });
-            
-            // Event listener per il pulsante di test delle notifiche
-            testNotificationBtn.addEventListener('click', function() {
-                // Richiedi il permesso per le notifiche se non è già stato concesso
-                requestNotificationPermission().then(() => {
-                    // Testa la notifica
-                    testNotification();
-                    showToast('Invio notifica di test...', 'info');
-                }).catch(error => {
-                    console.error('Errore nel test della notifica:', error);
-                    showToast('Per testare le notifiche, devi prima concedere il permesso', 'warning');
-                });
-            });
-            
-            // Se il promemoria è attivo, pianificalo
-            if (savedSettings.enabled) {
-                requestNotificationPermission();
-                scheduleReminder(savedSettings);
+            // Rimuovi eventuali dati di promemoria dal localStorage per liberare spazio
+            if (localStorage.getItem('reminderSettings')) {
+                localStorage.removeItem('reminderSettings');
+                console.log("Dati dei promemoria rimossi dal localStorage");
             }
         }
         
 
         
-        // Funzione per testare le notifiche
-        function testNotification() {
-            console.log("Test notifica...");
-            
-            // Se il Service Worker è registrato e attivo, usa quello
-            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-                navigator.serviceWorker.controller.postMessage({
-                    type: 'TEST_NOTIFICATION'
-                });
-                return;
-            }
-            
-            // Se il Service Worker è registrato ma non attivo
-            if (window.swRegistration) {
-                window.swRegistration.showNotification('Test Notifica Ore PWS', {
-                    body: 'Questa è una notifica di test. Se la vedi, le notifiche funzionano correttamente!',
-                    icon: './icons/icon-192x192.png',
-                    tag: 'ore-pws-test',
-                    requireInteraction: true
-                });
-                return;
-            }
-            
-            // Altrimenti usa l'API Notification standard
-            if (Notification.permission === 'granted') {
-                const options = {
-                    body: 'Questa è una notifica di test. Se la vedi, le notifiche funzionano correttamente!',
-                    icon: './icons/icon-192x192.png',
-                    tag: 'ore-pws-test',
-                    requireInteraction: true
-                };
-                
-                try {
-                    new Notification('Test Notifica Ore PWS', options);
-                } catch (error) {
-                    console.error('Errore nel test della notifica:', error);
-                    showToast('Errore nel test della notifica: ' + error.message, 'error');
-                }
-            } else {
-                showToast('Permesso notifiche non concesso', 'warning');
-            }
-        }
+        // Funzione rimossa - Notifiche non più utilizzate
         
         // Registrazione del Service Worker per PWA
         if ('serviceWorker' in navigator) {
@@ -16559,43 +16488,44 @@ END:VCARD`;
         }
     });
 
-    // Funzione per inizializzare le particelle
+    // Funzione per inizializzare le particelle - Ottimizzata per prestazioni
     async function initParticles() {
         // Rileva se è un dispositivo mobile
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
-        // Configurazione ottimizzata per mobile - Stile Neon
-        const particleCount = isMobile ? 100 : 80;
-        const particleSize = isMobile ? { min: 4, max: 9 } : { min: 3, max: 8 };
-        const linkDistance = isMobile ? 120 : 150;
-        const moveSpeed = isMobile ? 2 : 3;
+        // Configurazione fortemente ottimizzata per mobile - Stile Neon
+        const particleCount = isMobile ? 20 : 50; // Ridotto drasticamente il numero di particelle
+        const particleSize = isMobile ? { min: 2, max: 5 } : { min: 3, max: 7 }; // Ridotte le dimensioni
+        const linkDistance = isMobile ? 80 : 120; // Ridotta la distanza dei collegamenti
+        const moveSpeed = isMobile ? 1 : 2; // Ridotta la velocità
+        const fpsLimit = isMobile ? 30 : 60; // Limitato FPS su mobile
         
         await tsParticles.load("pws-particles-container", {
             fullScreen: {
                 enable: false
             },
-            fpsLimit: 60,
+            fpsLimit: fpsLimit,
             particles: {
                 number: {
                     value: particleCount,
                     density: {
                         enable: true,
-                        value_area: 800
+                        value_area: 1200 // Aumentato per ridurre la densità
                     }
                 },
                 color: {
-                    value: ["#00ffff", "#ff00ff", "#00ff00", "#ffff00"]
+                    value: ["#00ffff", "#ff00ff"] // Ridotto a 2 colori
                 },
                 shape: {
-                    type: ["circle", "triangle"],
+                    type: ["circle"], // Solo cerchi per migliorare le prestazioni
                     options: {}
                 },
                 opacity: {
-                    value: 1,
+                    value: 0.8, // Ridotta l'opacità
                     random: false,
                     anim: {
-                        enable: true,
-                        speed: 1,
+                        enable: !isMobile, // Disabilitata su mobile
+                        speed: 0.8,
                         opacity_min: 0.5,
                         sync: false
                     }
@@ -16604,8 +16534,8 @@ END:VCARD`;
                     value: particleSize,
                     random: true,
                     anim: {
-                        enable: true,
-                        speed: 1,
+                        enable: !isMobile, // Disabilitata su mobile
+                        speed: 0.8,
                         size_min: 1,
                         sync: false
                     }
@@ -16614,12 +16544,12 @@ END:VCARD`;
                     enable: true,
                     distance: linkDistance,
                     color: "#ffffff",
-                    opacity: 0.4,
+                    opacity: 0.3, // Ridotta l'opacità
                     width: 1,
                     shadow: {
-                        enable: true,
+                        enable: !isMobile, // Disabilitata su mobile
                         color: "#00ffff",
-                        blur: 5
+                        blur: 3 // Ridotto il blur
                     }
                 },
                 move: {
@@ -16641,7 +16571,7 @@ END:VCARD`;
                 detect_on: "canvas",
                 events: {
                     onhover: {
-                        enable: true,
+                        enable: !isMobile, // Disabilitata su mobile
                         mode: "grab"
                     },
                     onclick: {
@@ -16652,37 +16582,44 @@ END:VCARD`;
                 },
                 modes: {
                     grab: {
-                        distance: 140,
+                        distance: isMobile ? 80 : 120, // Ridotta la distanza
                         links: {
-                            opacity: 1,
+                            opacity: 0.7, // Ridotta l'opacità
                             color: "#00ffff"
                         }
                     },
                     bubble: {
-                        distance: 200,
-                        size: 15,
+                        distance: 150, // Ridotta la distanza
+                        size: 10, // Ridotta la dimensione
                         duration: 2,
-                        opacity: 0.8,
-                        speed: 3
-                    },
-                    repulse: {
-                        distance: 200,
-                        duration: 0.4
+                        opacity: 0.6, // Ridotta l'opacità
+                        speed: 2 // Ridotta la velocità
                     },
                     push: {
-                        particles_nb: 4
+                        particles_nb: isMobile ? 2 : 3 // Ridotto il numero
                     },
                     remove: {
-                        particles_nb: 2
+                        particles_nb: 1 // Ridotto il numero
                     }
                 }
             },
-            retina_detect: true,
+            retina_detect: !isMobile, // Disabilitato su mobile
             pauseOnBlur: true
         });
         
         // Aggiorna i colori quando cambia il tema
         document.addEventListener('themeChange', updateParticlesColors);
+        
+        // Aggiungi un controllo per fermare le particelle quando la pagina non è visibile
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                const container = tsParticles.domItem(0);
+                if (container) container.pause();
+            } else {
+                const container = tsParticles.domItem(0);
+                if (container) container.play();
+            }
+        });
     }
 
     // Funzione per aggiornare i colori delle particelle in base al tema
@@ -16827,8 +16764,8 @@ END:VCARD`;
             return '/' + REPO_NAME + '/' + path;
         }
         
-        // I meta tag PWA sono stati aggiunti direttamente nell'head
-        console.log('Meta tag PWA aggiunti direttamente nell\'head');
+        // Ottimizzazione dei meta tag PWA
+        console.log('Ottimizzazione meta tag PWA');
         
         // Aggiungi il manifest con il percorso corretto
         const manifestLink = document.createElement('link');
@@ -16836,10 +16773,10 @@ END:VCARD`;
         manifestLink.href = getPath('manifest.json');
         document.head.appendChild(manifestLink);
         
-        // Aggiungi le icone appropriate in base al dispositivo
+        // Funzione ottimizzata per aggiungere le icone appropriate in base al dispositivo
         function addDeviceSpecificIcons() {
-            // Rimuovi eventuali icone esistenti per evitare duplicazioni
-            document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"], link[rel="shortcut icon"]').forEach(el => el.remove());
+            // Rimuovi eventuali icone e meta tag esistenti per evitare duplicazioni
+            document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"], link[rel="shortcut icon"], meta[name="theme-color"], meta[name="apple-mobile-web-app-capable"], meta[name="apple-mobile-web-app-status-bar-style"], meta[name="mobile-web-app-capable"]').forEach(el => el.remove());
             
             // Percorso base per le icone
             const iconBasePath = getPath('icons/');
@@ -16850,7 +16787,7 @@ END:VCARD`;
             
             console.log('Rilevamento dispositivo:', isAndroid ? 'Android' : (isIOSDevice ? 'iOS' : 'Desktop/Altro'));
             
-            // Favicon standard per tutti i browser
+            // Favicon standard per tutti i browser (solo una dimensione per risparmiare risorse)
             const favicon = document.createElement('link');
             favicon.rel = 'icon';
             favicon.type = 'image/png';
@@ -16858,28 +16795,17 @@ END:VCARD`;
             favicon.href = iconBasePath + 'icon-72x72.png'; // Usiamo l'icona più piccola per il favicon
             document.head.appendChild(favicon);
             
-            // Favicon piccola per la barra dei preferiti
-            const smallFavicon = document.createElement('link');
-            smallFavicon.rel = 'shortcut icon';
-            smallFavicon.type = 'image/png';
-            smallFavicon.href = iconBasePath + 'icon-72x72.png';
-            document.head.appendChild(smallFavicon);
-            
-            // Per Android, aggiungiamo icone specifiche
+            // Per Android, aggiungiamo solo le icone essenziali
             if (isAndroid) {
                 console.log('Dispositivo Android rilevato, aggiungendo icone specifiche');
                 
-                // Icone per Android con dimensioni specifiche
-                const androidSizes = ['192x192', '512x512'];
-                
-                androidSizes.forEach(size => {
-                    const androidIcon = document.createElement('link');
-                    androidIcon.rel = 'icon';
-                    androidIcon.type = 'image/png';
-                    androidIcon.sizes = size;
-                    androidIcon.href = iconBasePath + 'icon-' + size + '.png';
-                    document.head.appendChild(androidIcon);
-                });
+                // Solo l'icona principale per Android
+                const androidIcon = document.createElement('link');
+                androidIcon.rel = 'icon';
+                androidIcon.type = 'image/png';
+                androidIcon.sizes = '192x192';
+                androidIcon.href = iconBasePath + 'icon-192x192.png';
+                document.head.appendChild(androidIcon);
                 
                 // Aggiungi meta tag per il tema
                 const themeMeta = document.createElement('meta');
@@ -16888,7 +16814,7 @@ END:VCARD`;
                 document.head.appendChild(themeMeta);
             }
             
-            // Icone per iOS con dimensioni specifiche
+            // Icone per iOS con dimensioni specifiche (solo le essenziali)
             if (isIOSDevice) {
                 console.log('Dispositivo iOS rilevato, aggiungendo icone specifiche');
                 
@@ -16898,11 +16824,10 @@ END:VCARD`;
                 appleIcon.href = iconBasePath + 'icon-192x192.png';
                 document.head.appendChild(appleIcon);
                 
-                // Icone specifiche per diversi dispositivi iOS
+                // Solo le icone essenziali per iOS
                 const appleSizes = [
                     { size: '152x152', device: 'iPad', icon: 'icon-152x152.png' },
-                    { size: '167x167', device: 'iPad Pro', icon: 'icon-152x152.png' },
-                    { size: '180x180', device: 'iPhone Retina', icon: 'icon-192x192.png' }
+                    { size: '180x180', device: 'iPhone', icon: 'icon-192x192.png' }
                 ];
                 
                 appleSizes.forEach(item => {
@@ -16913,13 +16838,13 @@ END:VCARD`;
                     document.head.appendChild(sizeIcon);
                 });
                 
-                // Aggiungi meta tag per prevenire lo scaling automatico
+                // Configura il viewport per iOS (una sola volta)
                 const viewportMeta = document.querySelector('meta[name="viewport"]');
                 if (viewportMeta) {
                     viewportMeta.content = 'width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no';
                 }
                 
-                // Aggiungi meta tag per la modalità standalone
+                // Aggiungi meta tag per la modalità standalone (una sola volta)
                 const appleMobileWebAppCapable = document.createElement('meta');
                 appleMobileWebAppCapable.name = 'apple-mobile-web-app-capable';
                 appleMobileWebAppCapable.content = 'yes';
@@ -16945,20 +16870,6 @@ END:VCARD`;
         // Funzione per rilevare iOS
         function isIOS() {
             return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        }
-        
-        // Aggiungi meta tag specifico per iOS per prevenire lo scaling automatico
-        if (isIOS()) {
-            const viewportFitMeta = document.createElement('meta');
-            viewportFitMeta.name = 'viewport';
-            viewportFitMeta.content = 'width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no';
-            document.head.appendChild(viewportFitMeta);
-            
-            // Aggiungi meta tag per la modalità standalone
-            const mobileWebAppMeta = document.createElement('meta');
-            mobileWebAppMeta.name = 'mobile-web-app-capable';
-            mobileWebAppMeta.content = 'yes';
-            document.head.appendChild(mobileWebAppMeta);
         }
         
         // Funzione per rilevare Safari su iOS
