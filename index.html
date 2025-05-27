@@ -1,4 +1,5 @@
-﻿﻿<!DOCTYPE html>
+
+<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -4625,13 +4626,6 @@
                         </div>
                         
                         <div class="setting-item">
-                            <span class="setting-label">Service Worker</span>
-                            <button id="updateServiceWorker">
-                                <span class="material-symbols-outlined">update</span> Aggiorna Service Worker
-                            </button>
-                        </div>
-                        
-                        <div class="setting-item">
                             <span class="setting-label">PIN Admin</span>
                             <div style="display: flex; gap: 10px; flex-grow: 1;">
                                 <input type="password" id="adminPin" class="settings-input" placeholder="Inserisci PIN Admin" maxlength="7">
@@ -5690,7 +5684,7 @@
             // Controlla se il PIN Admin è già stato inserito correttamente
             const isAdminUnlocked = localStorage.getItem('adminUnlocked') === 'true';
             const cashNavItem = document.getElementById('cash-nav-item');
-            let unlockAdminBtn = document.getElementById('unlockAdminFeatures'); // Cambiato da const a let per permettere la riassegnazione
+            const unlockAdminBtn = document.getElementById('unlockAdminFeatures');
             const lockAdminBtn = document.getElementById('lockAdminFeatures');
             
             if (isAdminUnlocked) {
@@ -7928,24 +7922,11 @@
          function calculatePayForMonth(monthValue) {
              console.log(`Calcolo busta paga per il mese: ${monthValue}`);
              
-             // Mostra un indicatore di caricamento
-             const cashResultsContainer = document.getElementById('cashResults');
-             if (cashResultsContainer) {
-                 cashResultsContainer.innerHTML = '<div class="loading-indicator"><span class="spinner"></span> Calcolo in corso...</div>';
-             }
-             
              // Verifica che il valore del mese sia valido
              if (!monthValue) {
                  console.warn("Nessun mese selezionato per il calcolo della busta paga");
-                 if (cashResultsContainer) {
-                     cashResultsContainer.innerHTML = '<div class="alert alert-info">Seleziona un mese per visualizzare il calcolo della busta paga</div>';
-                 }
                  return;
              }
-             
-             // Utilizziamo setTimeout per evitare il blocco dell'interfaccia durante i calcoli
-             setTimeout(() => {
-                 try {
              
              const db = getDb();
              
@@ -8176,15 +8157,6 @@
              document.getElementById('vacationAmount').textContent = `€${vacationAmount.toFixed(2)}`;
              document.getElementById('igpBresciaAmount').textContent = `€${igpBresciaAmount.toFixed(2)}`;
              document.getElementById('totalAmount').textContent = `€${totalAmount.toFixed(2)}`;
-                 } catch (error) {
-                     console.error("Errore durante il calcolo della busta paga:", error);
-                     const cashResultsContainer = document.getElementById('cashResults');
-                     if (cashResultsContainer) {
-                         cashResultsContainer.innerHTML = `<div class="alert alert-error">Si è verificato un errore durante il calcolo: ${error.message}</div>`;
-                     }
-                     showToast("Errore durante il calcolo della busta paga", "error", 5000);
-                 }
-             }, 100); // Piccolo ritardo per permettere all'interfaccia di aggiornarsi
          }
          
          // Funzione per formattare una data nel formato DD/MM/YYYY
@@ -9502,61 +9474,10 @@
                         console.log('Service Worker registrato con successo:', registration.scope);
                         // Salva il riferimento alla registrazione
                         window.swRegistration = registration;
-                        
-                        // Gestione degli aggiornamenti del Service Worker
-                        registration.addEventListener('updatefound', () => {
-                            // Un nuovo Service Worker è stato trovato e sta per essere installato
-                            const newWorker = registration.installing;
-                            
-                            newWorker.addEventListener('statechange', () => {
-                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    // Un nuovo Service Worker è stato installato ma è in attesa di attivazione
-                                    console.log('Nuovo Service Worker installato e in attesa di attivazione');
-                                    
-                                    // Mostra un messaggio all'utente
-                                    showToast('Nuova versione disponibile! Ricarica la pagina per aggiornare.', 'info', 10000);
-                                    
-                                    // Aggiungi un pulsante per ricaricare la pagina
-                                    const reloadButton = document.createElement('button');
-                                    reloadButton.textContent = 'Ricarica ora';
-                                    reloadButton.className = 'toast-action-btn';
-                                    reloadButton.onclick = () => {
-                                        window.location.reload();
-                                    };
-                                    
-                                    // Aggiungi il pulsante al toast (se la funzione lo supporta)
-                                    document.querySelector('.toast-container .toast:last-child')?.appendChild(reloadButton);
-                                }
-                            });
-                        });
-                        
-                        // Controlla se c'è già un aggiornamento in attesa
-                        if (registration.waiting && navigator.serviceWorker.controller) {
-                            console.log('Service Worker in attesa di attivazione trovato');
-                            showToast('Nuova versione disponibile! Ricarica la pagina per aggiornare.', 'info', 10000);
-                        }
                     })
                     .catch(error => {
                         console.error('Errore nella registrazione del Service Worker:', error);
-                        showToast('Impossibile registrare il Service Worker. Alcune funzionalità potrebbero non essere disponibili offline.', 'error');
                     });
-            });
-            
-            // Gestione dei messaggi dal Service Worker
-            navigator.serviceWorker.addEventListener('message', (event) => {
-                console.log('Messaggio ricevuto dal Service Worker:', event.data);
-                
-                if (event.data && event.data.type === 'NOTIFICATION_SCHEDULED') {
-                    showToast('Notifica programmata con successo!', 'success');
-                } else if (event.data && event.data.type === 'NOTIFICATIONS_CANCELLED') {
-                    showToast('Notifiche cancellate con successo!', 'success');
-                } else if (event.data && event.data.type === 'TEST_NOTIFICATION_SENT') {
-                    if (event.data.success) {
-                        showToast('Notifica di test inviata con successo!', 'success');
-                    } else {
-                        showToast('Errore nell\'invio della notifica di test: ' + (event.data.error || 'Errore sconosciuto'), 'error');
-                    }
-                }
             });
         }
         
@@ -13098,42 +13019,8 @@ END:VCARD`;
             // Metodi che ogni provider deve implementare
             async login() { throw new Error("Non implementato"); }
             async logout() { throw new Error("Non implementato"); }
-            async backup(data, showLoginPrompt = true) { 
-                // Implementazione con gestione degli errori e timeout
-                return new Promise((resolve, reject) => {
-                    // Impostiamo un timeout per evitare blocchi indefiniti
-                    const timeoutId = setTimeout(() => {
-                        reject(new Error("Timeout durante il backup: operazione annullata per evitare blocchi"));
-                    }, 15000); // 15 secondi di timeout
-                    
-                    try {
-                        // Qui andrebbe l'implementazione reale
-                        clearTimeout(timeoutId);
-                        throw new Error("Non implementato");
-                    } catch (error) {
-                        clearTimeout(timeoutId);
-                        reject(error);
-                    }
-                });
-            }
-            async restore() { 
-                // Implementazione con gestione degli errori e timeout
-                return new Promise((resolve, reject) => {
-                    // Impostiamo un timeout per evitare blocchi indefiniti
-                    const timeoutId = setTimeout(() => {
-                        reject(new Error("Timeout durante il ripristino: operazione annullata per evitare blocchi"));
-                    }, 15000); // 15 secondi di timeout
-                    
-                    try {
-                        // Qui andrebbe l'implementazione reale
-                        clearTimeout(timeoutId);
-                        throw new Error("Non implementato");
-                    } catch (error) {
-                        clearTimeout(timeoutId);
-                        reject(error);
-                    }
-                });
-            }
+            async backup(data, showLoginPrompt = true) { throw new Error("Non implementato"); }
+            async restore() { throw new Error("Non implementato"); }
             
             // Metodi comuni a tutti i provider
             getUserInfo() {
@@ -15015,17 +14902,9 @@ END:VCARD`;
                             }
                         }
                         
-                        // Ora che siamo sicuri che l'utente è autenticato, esegui il backup con timeout
-                        // Impostiamo un timeout per evitare blocchi indefiniti
-                        const backupPromise = cloudManager.backup(data, false, true);
-                        
-                        // Creiamo una Promise con timeout
-                        result = await Promise.race([
-                            backupPromise,
-                            new Promise((_, reject) => 
-                                setTimeout(() => reject(new Error("Timeout durante il backup: operazione annullata per evitare blocchi")), 20000)
-                            )
-                        ]);
+                        // Ora che siamo sicuri che l'utente è autenticato, esegui il backup
+                        // Passiamo true come terzo parametro per saltare i toast nel metodo backup
+                        result = await cloudManager.backup(data, false, true);
                         
                         // Aggiorna l'UI
                         const currentProvider = cloudManager.getCurrentProvider();
@@ -15403,37 +15282,6 @@ END:VCARD`;
                                     // Rimuovi eventuali listener precedenti
                                     forceUpdateBtn.replaceWith(forceUpdateBtn.cloneNode(true));
                                     const newForceUpdateBtn = document.getElementById('forceUpdate');
-                                    
-                                // Inizializza il pulsante di aggiornamento del service worker
-                                const updateServiceWorkerBtn = document.getElementById('updateServiceWorker');
-                                if (updateServiceWorkerBtn) {
-                                    // Rimuovi eventuali listener precedenti
-                                    updateServiceWorkerBtn.replaceWith(updateServiceWorkerBtn.cloneNode(true));
-                                    const newUpdateServiceWorkerBtn = document.getElementById('updateServiceWorker');
-                                    
-                                    newUpdateServiceWorkerBtn.addEventListener('click', function() {
-                                        showToast('Aggiornamento del Service Worker in corso...', 'info');
-                                        
-                                        if ('serviceWorker' in navigator) {
-                                            navigator.serviceWorker.getRegistration().then(function(registration) {
-                                                if (registration) {
-                                                    registration.update().then(function() {
-                                                        console.log('Service Worker aggiornato con successo');
-                                                        showToast('Service Worker aggiornato! Ricarica la pagina per applicare le modifiche.', 'success', 5000);
-                                                    }).catch(function(error) {
-                                                        console.error('Errore durante l\'aggiornamento del Service Worker:', error);
-                                                        showToast('Errore durante l\'aggiornamento del Service Worker', 'error');
-                                                    });
-                                                } else {
-                                                    console.log('Nessun Service Worker registrato');
-                                                    showToast('Nessun Service Worker registrato', 'warning');
-                                                }
-                                            });
-                                        } else {
-                                            showToast('Service Worker non supportato in questo browser', 'error');
-                                        }
-                                    });
-                                }
                                     
                                     newForceUpdateBtn.addEventListener('click', function() {
                                         showToast('Aggiornamento in corso...', 'info');
@@ -16716,17 +16564,17 @@ END:VCARD`;
         // Rileva se è un dispositivo mobile
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
-        // Configurazione ottimizzata per mobile - Stile Neon (ridotta per migliorare le prestazioni)
-        const particleCount = isMobile ? 50 : 40; // Ridotto il numero di particelle
-        const particleSize = isMobile ? { min: 3, max: 7 } : { min: 2, max: 6 }; // Ridotte le dimensioni
-        const linkDistance = isMobile ? 100 : 120; // Ridotta la distanza dei collegamenti
-        const moveSpeed = isMobile ? 1 : 1.5; // Ridotta la velocità di movimento
+        // Configurazione ottimizzata per mobile - Stile Neon
+        const particleCount = isMobile ? 100 : 80;
+        const particleSize = isMobile ? { min: 4, max: 9 } : { min: 3, max: 8 };
+        const linkDistance = isMobile ? 120 : 150;
+        const moveSpeed = isMobile ? 2 : 3;
         
         await tsParticles.load("pws-particles-container", {
             fullScreen: {
                 enable: false
             },
-            fpsLimit: 30, // Ridotto il limite di FPS per migliorare le prestazioni
+            fpsLimit: 60,
             particles: {
                 number: {
                     value: particleCount,
@@ -16793,11 +16641,11 @@ END:VCARD`;
                 detect_on: "canvas",
                 events: {
                     onhover: {
-                        enable: false, // Disabilitata l'interazione al passaggio del mouse per migliorare le prestazioni
+                        enable: true,
                         mode: "grab"
                     },
                     onclick: {
-                        enable: false, // Disabilitata l'interazione al click per migliorare le prestazioni
+                        enable: true,
                         mode: "push"
                     },
                     resize: true
@@ -17094,11 +16942,9 @@ END:VCARD`;
         const pwaStatus = document.getElementById('pwaStatus');
         const iosInstructions = document.getElementById('iosInstructions');
         
-        // Funzione per rilevare iOS (se non è già definita)
-        if (typeof isIOS !== 'function') {
-            function isIOS() {
-                return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-            }
+        // Funzione per rilevare iOS
+        function isIOS() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         }
         
         // Aggiungi meta tag specifico per iOS per prevenire lo scaling automatico
@@ -17115,11 +16961,9 @@ END:VCARD`;
             document.head.appendChild(mobileWebAppMeta);
         }
         
-        // Funzione per rilevare Safari su iOS (se non è già definita)
-        if (typeof isIOSSafari !== 'function') {
-            function isIOSSafari() {
-                return isIOS() && /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
-            }
+        // Funzione per rilevare Safari su iOS
+        function isIOSSafari() {
+            return isIOS() && /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
         }
         
         // Gestione dell'evento beforeinstallprompt (non supportato su iOS)
@@ -17306,11 +17150,8 @@ END:VCARD`;
             }
         });
 
-        // Gestione del service worker in modalità sviluppo
-        // Decommentare questa sezione solo durante lo sviluppo
-        /*
-        if ('serviceWorker' in navigator && window.location.hostname === 'localhost') {
-            console.log('Modalità sviluppo: disabilitazione Service Worker');
+        // Disabilita il service worker per lo sviluppo
+        if ('serviceWorker' in navigator) {
             // Rimuovi tutti i service worker esistenti
             navigator.serviceWorker.getRegistrations().then(function(registrations) {
                 for (let registration of registrations) {
@@ -17333,37 +17174,33 @@ END:VCARD`;
                     console.log('Tutte le cache sono state eliminate');
                 });
             }
-        }
-        */
-        
-        // Fine della sezione di sviluppo
-        window.addEventListener('focus', function() {
-            // Controlla se la pagina è stata modificata
-            fetch('index.html', {
-                method: 'HEAD',
-                headers: {
-                    'Cache-Control': 'no-cache',
-                    'Pragma': 'no-cache'
-                }
-            }).then(function(response) {
-                const lastModified = response.headers.get('Last-Modified');
-                const cachedLastModified = localStorage.getItem('lastModified');
-                
-                if (lastModified && cachedLastModified && lastModified !== cachedLastModified) {
-                    console.log('Pagina modificata, ricarico...');
-                    localStorage.setItem('lastModified', lastModified);
-                    window.location.reload(true);
-                } else if (lastModified) {
-                    localStorage.setItem('lastModified', lastModified);
-                }
-            }).catch(function(error) {
-                console.error('Errore durante il controllo degli aggiornamenti:', error);
+            
+            console.log('Service Worker disabilitato per lo sviluppo');
+            
+            // Aggiungi un listener per il reload della pagina
+            window.addEventListener('focus', function() {
+                // Controlla se la pagina è stata modificata
+                fetch('index.html', {
+                    method: 'HEAD',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                }).then(function(response) {
+                    const lastModified = response.headers.get('Last-Modified');
+                    const cachedLastModified = localStorage.getItem('lastModified');
+                    
+                    if (lastModified && cachedLastModified && lastModified !== cachedLastModified) {
+                        console.log('Pagina modificata, ricarico...');
+                        localStorage.setItem('lastModified', lastModified);
+                        window.location.reload(true);
+                    } else if (lastModified) {
+                        localStorage.setItem('lastModified', lastModified);
+                    }
+                }).catch(function(error) {
+                    console.error('Errore durante il controllo degli aggiornamenti:', error);
+                });
             });
-        });
-        
-        // Funzione per aggiornare lo stato della PWA
-        window.updatePwaStatus = function() {
-            if (!pwaStatus) return;
             
             // Verifica se l'app è già installata
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
@@ -17372,23 +17209,23 @@ END:VCARD`;
             console.log('App in modalità standalone:', isStandalone);
             console.log('deferredPrompt disponibile:', !!deferredPrompt);
             
-            // Aggiorna il testo in base allo stato
-            if (!('serviceWorker' in navigator)) {
-                pwaStatus.textContent = 'Il tuo browser non supporta l\'installazione dell\'app';
-            } else if (isStandalone) {
-                pwaStatus.textContent = 'App già installata';
-            } else if (deferredPrompt) {
-                pwaStatus.textContent = 'L\'app è pronta per essere installata';
-            } else if (typeof isIOS === 'function' && isIOS()) {
-                pwaStatus.textContent = 'Usa "Aggiungi alla schermata Home" per installare l\'app';
-            } else {
-                pwaStatus.textContent = 'Visita il sito in un browser compatibile per installare l\'app';
+            // Aggiorna lo stato della PWA
+            if (pwaStatus) {
+                if (isStandalone) {
+                    pwaStatus.textContent = 'App già installata';
+                } else if (deferredPrompt) {
+                    pwaStatus.textContent = 'L\'app è pronta per essere installata';
+                } else if (isIOS()) {
+                    pwaStatus.textContent = 'Usa "Aggiungi alla schermata Home" per installare l\'app';
+                } else {
+                    pwaStatus.textContent = 'Visita il sito in un browser compatibile per installare l\'app';
+                }
             }
-        }
-        
-        // Aggiorna lo stato della PWA
-        if (typeof updatePwaStatus === 'function') {
-            updatePwaStatus();
+        } else {
+            // Service Worker non supportato
+            if (pwaStatus) {
+                pwaStatus.textContent = 'Il tuo browser non supporta l\'installazione dell\'app';
+            }
         }
     </script>
 
@@ -17793,15 +17630,9 @@ END:VCARD`;
             
             // Elementi DOM
             const adminPinInput = document.getElementById('adminPin');
-            const unlockAdminBtnOriginal = document.getElementById('unlockAdminFeatures');
+            const unlockAdminBtn = document.getElementById('unlockAdminFeatures');
             const lockAdminBtn = document.getElementById('lockAdminFeatures');
             const cashNavItem = document.getElementById('cash-nav-item');
-            
-            // Se il pulsante di sblocco non esiste, usciamo dalla funzione
-            if (!unlockAdminBtnOriginal || !adminPinInput) {
-                console.warn("Elementi necessari per il PIN Admin non trovati");
-                return;
-            }
             
             // PIN Admin corretto (hardcoded per funzionare anche con GitHub Pages)
             const CORRECT_PIN = "1235789";
@@ -17814,36 +17645,24 @@ END:VCARD`;
             if (isAdminUnlocked && cashNavItem) {
                 cashNavItem.style.display = 'flex';
                 if (lockAdminBtn) lockAdminBtn.style.display = 'block';
-                unlockAdminBtnOriginal.style.display = 'none';
+                if (unlockAdminBtn) unlockAdminBtn.style.display = 'none';
                 console.log("Funzionalità admin già sbloccate");
             } else {
                 if (cashNavItem) cashNavItem.style.display = 'none';
                 if (lockAdminBtn) lockAdminBtn.style.display = 'none';
-                unlockAdminBtnOriginal.style.display = 'block';
+                if (unlockAdminBtn) unlockAdminBtn.style.display = 'block';
                 console.log("Funzionalità admin bloccate");
             }
             
-            // Rimuoviamo eventuali listener precedenti per evitare duplicazioni
-            // Creiamo un nuovo pulsante e sostituiamo quello originale
-            const newUnlockBtn = unlockAdminBtnOriginal.cloneNode(true);
-            unlockAdminBtnOriginal.parentNode.replaceChild(newUnlockBtn, unlockAdminBtnOriginal);
-            
-            // Aggiungiamo un flag per prevenire clic multipli
-            let isProcessing = false;
-            
-            // Aggiungiamo il listener al nuovo pulsante
-            newUnlockBtn.addEventListener('click', function() {
-                // Preveniamo clic multipli che potrebbero causare blocchi
-                if (isProcessing) {
-                    console.log("Operazione già in corso, ignoro il clic");
-                    return;
-                }
-                
-                isProcessing = true;
-                
-                try {
+            // Gestione del pulsante di sblocco
+            if (unlockAdminBtn && adminPinInput) {
+                unlockAdminBtn.onclick = function() {
                     console.log("Pulsante sblocco cliccato");
                     const enteredPin = adminPinInput.value;
+                    
+                    console.log("PIN inserito:", enteredPin);
+                    console.log("PIN corretto:", CORRECT_PIN);
+                    console.log("Confronto:", enteredPin === CORRECT_PIN);
                     
                     // Confronto più flessibile per evitare problemi con spazi o caratteri invisibili
                     // Accetta solo il PIN "1235789" (con o senza spazi)
@@ -17867,7 +17686,7 @@ END:VCARD`;
                         
                         // Mostra il pulsante di blocco e nascondi quello di sblocco
                         if (lockAdminBtn) lockAdminBtn.style.display = 'block';
-                        newUnlockBtn.style.display = 'none';
+                        unlockAdminBtn.style.display = 'none';
                     } else {
                         console.log("PIN errato!");
                         // PIN errato
@@ -17881,23 +17700,12 @@ END:VCARD`;
                         // Pulisci il campo PIN
                         adminPinInput.value = '';
                     }
-                } catch (error) {
-                    console.error("Errore durante la verifica del PIN:", error);
-                    showToast('Si è verificato un errore durante la verifica del PIN', 'error', 3000);
-                } finally {
-                    // Rilasciamo il flag per permettere nuovi clic
-                    isProcessing = false;
-                }
-            });
-        
+                };
+            }
+            
             // Gestione del pulsante di blocco
             if (lockAdminBtn) {
-                // Rimuoviamo eventuali listener precedenti
-                const newLockBtn = lockAdminBtn.cloneNode(true);
-                lockAdminBtn.parentNode.replaceChild(newLockBtn, lockAdminBtn);
-                
-                // Aggiungiamo il nuovo listener
-                newLockBtn.addEventListener('click', function() {
+                lockAdminBtn.onclick = function() {
                     console.log("Pulsante blocco cliccato");
                     // Nascondi la sezione Cash
                     if (cashNavItem) {
@@ -17908,13 +17716,12 @@ END:VCARD`;
                     localStorage.removeItem('adminUnlocked');
                     
                     // Mostra il pulsante di sblocco e nascondi quello di blocco
-                    const currentUnlockBtn = document.getElementById('unlockAdminFeatures');
-                    if (currentUnlockBtn) currentUnlockBtn.style.display = 'block';
-                    newLockBtn.style.display = 'none';
+                    if (unlockAdminBtn) unlockAdminBtn.style.display = 'block';
+                    lockAdminBtn.style.display = 'none';
                     
                     // Notifica l'utente
                     showToast('Funzionalità admin bloccate!', 'info', 3000);
-                });
+                };
             }
         }
         
