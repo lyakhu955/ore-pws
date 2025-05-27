@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -16954,8 +16954,19 @@ END:VCARD`;
                 // Salva le impostazioni
                 if (saveParticleSettings(newSettings)) {
                     // Ricarica le particelle con le nuove impostazioni
-                    tsParticles.destroy();
-                    initParticles();
+                    // Ottieni l'istanza delle particelle e distruggila
+                    const container = tsParticles.domItem(0);
+                    if (container) {
+                        container.destroy();
+                    } else {
+                        // Alternativa: distruggi tutte le istanze
+                        tsParticles.destroyAll();
+                    }
+                    
+                    // Inizializza nuovamente le particelle
+                    setTimeout(() => {
+                        initParticles();
+                    }, 100);
                     
                     // Feedback sonoro
                     playSound('success');
