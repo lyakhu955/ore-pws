@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -1550,6 +1550,154 @@
         .setting-item .vehicles-manager { /* Full width for vehicle manager */
             width: 100%;
             margin-top: 0.5rem; /* Space when it's below label */
+        }
+        
+        /* Stili per il controllo delle particelle */
+        .toggle-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            border-radius: var(--border-radius-full);
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .toggle-button:hover {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+        
+        .particle-control-panel {
+            width: 100%;
+            margin-top: 1rem;
+            padding: 1.5rem;
+            background-color: var(--md-sys-color-surface);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: var(--border-radius-medium);
+            box-shadow: var(--elevation-1);
+        }
+        
+        .particle-control-group {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+        
+        .particle-control-group:last-of-type {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .particle-control-group h3 {
+            margin-bottom: 1rem;
+            color: var(--md-sys-color-primary);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        
+        .particle-control-item {
+            margin-bottom: 1rem;
+        }
+        
+        .particle-control-item label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .particle-control-item input[type="range"] {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: var(--md-sys-color-surface-variant);
+            border-radius: var(--border-radius-full);
+            outline: none;
+        }
+        
+        .particle-control-item input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--md-sys-color-primary);
+            cursor: pointer;
+            box-shadow: var(--elevation-1);
+        }
+        
+        .particle-control-item input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--md-sys-color-primary);
+            cursor: pointer;
+            box-shadow: var(--elevation-1);
+            border: none;
+        }
+        
+        .particle-control-item select {
+            width: 100%;
+            padding: 0.5rem;
+            border-radius: var(--border-radius-small);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+        }
+        
+        .color-picker-container {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .color-picker-container input[type="color"] {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: var(--border-radius-small);
+            cursor: pointer;
+            padding: 0;
+            background: none;
+        }
+        
+        .small-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+            cursor: pointer;
+            border: 1px solid var(--md-sys-color-outline-variant);
+            padding: 0;
+        }
+        
+        .small-btn:hover {
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+        }
+        
+        .particle-control-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .secondary-btn {
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+        }
+        
+        .primary-btn {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
         }
 
 
@@ -4734,6 +4882,140 @@
                                 <input type="checkbox" id="pwsParticlesToggle">
                                 <span class="toggle-slider"></span>
                             </label>
+                        </div>
+
+                        <div class="setting-item" id="particleControlToggle">
+                            <span class="setting-label">Controllo Particelle</span>
+                            <button class="toggle-button" id="toggleParticleControls">
+                                <span class="material-symbols-outlined">tune</span>
+                                <span class="toggle-text">Configura</span>
+                            </button>
+                        </div>
+
+                        <!-- Pannello di controllo particelle (nascosto di default) -->
+                        <div id="particleControlPanel" class="particle-control-panel" style="display: none;">
+                            <div class="particle-control-group">
+                                <h3>Aspetto Particelle</h3>
+                                
+                                <!-- Numero di particelle -->
+                                <div class="particle-control-item">
+                                    <label for="particleCount">Numero di particelle: <span id="particleCountValue">50</span></label>
+                                    <input type="range" id="particleCount" min="10" max="200" step="5" value="50">
+                                </div>
+                                
+                                <!-- Forma delle particelle -->
+                                <div class="particle-control-item">
+                                    <label for="particleShape">Forma:</label>
+                                    <select id="particleShape">
+                                        <option value="circle">Cerchio</option>
+                                        <option value="square">Quadrato</option>
+                                        <option value="triangle">Triangolo</option>
+                                        <option value="star">Stella</option>
+                                        <option value="polygon">Poligono</option>
+                                        <option value="image">Immagine</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Immagine personalizzata (visibile solo se selezionata l'opzione immagine) -->
+                                <div class="particle-control-item" id="particleImageContainer" style="display: none;">
+                                    <label for="particleImage">Immagine personalizzata:</label>
+                                    <input type="file" id="particleImage" accept="image/*">
+                                    <div id="particleImagePreview" style="margin-top: 5px; max-width: 100px; max-height: 100px;"></div>
+                                </div>
+                                
+                                <!-- Colori delle particelle -->
+                                <div class="particle-control-item">
+                                    <label>Colori:</label>
+                                    <div class="color-picker-container">
+                                        <input type="color" id="particleColor1" value="#00ffff">
+                                        <input type="color" id="particleColor2" value="#ff00ff">
+                                        <button id="addColorBtn" class="small-btn">
+                                            <span class="material-symbols-outlined">add</span>
+                                        </button>
+                                    </div>
+                                    <div id="extraColorsContainer"></div>
+                                </div>
+                                
+                                <!-- Opacità delle particelle -->
+                                <div class="particle-control-item">
+                                    <label for="particleOpacity">Opacità: <span id="particleOpacityValue">0.8</span></label>
+                                    <input type="range" id="particleOpacity" min="0.1" max="1" step="0.1" value="0.8">
+                                </div>
+                                
+                                <!-- Dimensione delle particelle -->
+                                <div class="particle-control-item">
+                                    <label>Dimensione (min/max):</label>
+                                    <div style="display: flex; gap: 10px; align-items: center;">
+                                        <input type="number" id="particleSizeMin" min="1" max="20" value="3" style="width: 60px;">
+                                        <span>-</span>
+                                        <input type="number" id="particleSizeMax" min="1" max="50" value="7" style="width: 60px;">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="particle-control-group">
+                                <h3>Movimento e Connessioni</h3>
+                                
+                                <!-- Velocità delle particelle -->
+                                <div class="particle-control-item">
+                                    <label for="particleSpeed">Velocità: <span id="particleSpeedValue">2</span></label>
+                                    <input type="range" id="particleSpeed" min="0.1" max="10" step="0.1" value="2">
+                                </div>
+                                
+                                <!-- Distanza di collegamento -->
+                                <div class="particle-control-item">
+                                    <label for="linkDistance">Distanza collegamenti: <span id="linkDistanceValue">120</span>px</label>
+                                    <input type="range" id="linkDistance" min="50" max="300" step="10" value="120">
+                                </div>
+                                
+                                <!-- Colore dei collegamenti -->
+                                <div class="particle-control-item">
+                                    <label for="linkColor">Colore collegamenti:</label>
+                                    <input type="color" id="linkColor" value="#ffffff">
+                                </div>
+                                
+                                <!-- Opacità dei collegamenti -->
+                                <div class="particle-control-item">
+                                    <label for="linkOpacity">Opacità collegamenti: <span id="linkOpacityValue">0.3</span></label>
+                                    <input type="range" id="linkOpacity" min="0.1" max="1" step="0.1" value="0.3">
+                                </div>
+                            </div>
+                            
+                            <div class="particle-control-group">
+                                <h3>Interattività</h3>
+                                
+                                <!-- Interazione al passaggio del mouse -->
+                                <div class="particle-control-item">
+                                    <label for="hoverEffect">Effetto al passaggio del mouse:</label>
+                                    <select id="hoverEffect">
+                                        <option value="none">Nessuno</option>
+                                        <option value="grab" selected>Attrazione</option>
+                                        <option value="bubble">Bolla</option>
+                                        <option value="repulse">Repulsione</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Interazione al click -->
+                                <div class="particle-control-item">
+                                    <label for="clickEffect">Effetto al click:</label>
+                                    <select id="clickEffect">
+                                        <option value="none">Nessuno</option>
+                                        <option value="push" selected>Aggiungi particelle</option>
+                                        <option value="remove">Rimuovi particelle</option>
+                                        <option value="bubble">Bolla</option>
+                                        <option value="repulse">Repulsione</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="particle-control-actions">
+                                <button id="resetParticleSettings" class="secondary-btn">
+                                    <span class="material-symbols-outlined">restart_alt</span> Ripristina Default
+                                </button>
+                                <button id="applyParticleSettings" class="primary-btn">
+                                    <span class="material-symbols-outlined">check</span> Applica
+                                </button>
+                            </div>
                         </div>
                         
                         <div class="setting-item">
@@ -16380,22 +16662,350 @@ END:VCARD`;
             });
         }
         
+        // Inizializza il controllo delle particelle
+        initParticleControls();
+        
         if (particlesEnabled) {
             initParticles();
         }
     });
+    
+    // Funzione per caricare le impostazioni delle particelle
+    function loadParticleSettings() {
+        const defaultSettings = {
+            count: null, // Usa i valori predefiniti basati sul dispositivo
+            size: null,
+            shape: ["circle"],
+            colors: ["#00ffff", "#ff00ff"],
+            opacity: 0.8,
+            linkDistance: null,
+            linkColor: "#ffffff",
+            linkOpacity: 0.3,
+            speed: null,
+            hoverEffect: "grab",
+            clickEffect: "push",
+            image: null
+        };
+        
+        try {
+            const savedSettings = JSON.parse(localStorage.getItem('pws-particles-settings'));
+            return savedSettings ? { ...defaultSettings, ...savedSettings } : defaultSettings;
+        } catch (e) {
+            console.error("Errore nel caricamento delle impostazioni particelle:", e);
+            return defaultSettings;
+        }
+    }
+    
+    // Funzione per salvare le impostazioni delle particelle
+    function saveParticleSettings(settings) {
+        try {
+            localStorage.setItem('pws-particles-settings', JSON.stringify(settings));
+            return true;
+        } catch (e) {
+            console.error("Errore nel salvataggio delle impostazioni particelle:", e);
+            return false;
+        }
+    }
+    
+    // Funzione per inizializzare i controlli delle particelle
+    function initParticleControls() {
+        const toggleBtn = document.getElementById('toggleParticleControls');
+        const controlPanel = document.getElementById('particleControlPanel');
+        const particleShape = document.getElementById('particleShape');
+        const particleImageContainer = document.getElementById('particleImageContainer');
+        const particleImage = document.getElementById('particleImage');
+        const particleImagePreview = document.getElementById('particleImagePreview');
+        const addColorBtn = document.getElementById('addColorBtn');
+        const extraColorsContainer = document.getElementById('extraColorsContainer');
+        const resetBtn = document.getElementById('resetParticleSettings');
+        const applyBtn = document.getElementById('applyParticleSettings');
+        
+        // Carica le impostazioni salvate
+        const settings = loadParticleSettings();
+        
+        // Inizializza i valori dei controlli
+        if (document.getElementById('particleCount')) {
+            document.getElementById('particleCount').value = settings.count || (isMobile() ? 20 : 50);
+            document.getElementById('particleCountValue').textContent = document.getElementById('particleCount').value;
+            
+            // Aggiorna il valore visualizzato quando cambia lo slider
+            document.getElementById('particleCount').addEventListener('input', function() {
+                document.getElementById('particleCountValue').textContent = this.value;
+            });
+        }
+        
+        if (particleShape) {
+            particleShape.value = Array.isArray(settings.shape) ? settings.shape[0] : "circle";
+            
+            // Mostra/nascondi il selettore di immagine in base alla forma selezionata
+            particleShape.addEventListener('change', function() {
+                particleImageContainer.style.display = this.value === 'image' ? 'block' : 'none';
+            });
+            
+            // Inizializza la visibilità del selettore di immagine
+            particleImageContainer.style.display = particleShape.value === 'image' ? 'block' : 'none';
+        }
+        
+        // Gestione dell'immagine personalizzata
+        if (particleImage) {
+            particleImage.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const img = document.createElement('img');
+                        img.src = event.target.result;
+                        img.style.maxWidth = '100%';
+                        img.style.maxHeight = '100%';
+                        particleImagePreview.innerHTML = '';
+                        particleImagePreview.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Mostra l'immagine salvata se presente
+            if (settings.image) {
+                const img = document.createElement('img');
+                img.src = settings.image;
+                img.style.maxWidth = '100%';
+                img.style.maxHeight = '100%';
+                particleImagePreview.innerHTML = '';
+                particleImagePreview.appendChild(img);
+            }
+        }
+        
+        // Inizializza i colori
+        if (document.getElementById('particleColor1') && document.getElementById('particleColor2')) {
+            if (settings.colors && settings.colors.length > 0) {
+                document.getElementById('particleColor1').value = settings.colors[0];
+                if (settings.colors.length > 1) {
+                    document.getElementById('particleColor2').value = settings.colors[1];
+                }
+                
+                // Aggiungi colori extra se presenti
+                if (settings.colors.length > 2) {
+                    for (let i = 2; i < settings.colors.length; i++) {
+                        addExtraColorPicker(settings.colors[i]);
+                    }
+                }
+            }
+        }
+        
+        // Funzione per aggiungere un selettore di colore extra
+        function addExtraColorPicker(color = "#ffffff") {
+            const colorId = `particleColor${extraColorsContainer.children.length + 3}`;
+            const colorContainer = document.createElement('div');
+            colorContainer.className = 'color-picker-container';
+            colorContainer.style.marginTop = '5px';
+            
+            const colorInput = document.createElement('input');
+            colorInput.type = 'color';
+            colorInput.id = colorId;
+            colorInput.value = color;
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'small-btn';
+            removeBtn.innerHTML = '<span class="material-symbols-outlined">remove</span>';
+            removeBtn.onclick = function() {
+                extraColorsContainer.removeChild(colorContainer);
+            };
+            
+            colorContainer.appendChild(colorInput);
+            colorContainer.appendChild(removeBtn);
+            extraColorsContainer.appendChild(colorContainer);
+        }
+        
+        // Gestione del pulsante per aggiungere colori
+        if (addColorBtn) {
+            addColorBtn.addEventListener('click', function() {
+                if (extraColorsContainer.children.length < 4) { // Limita a 6 colori totali (2 predefiniti + 4 extra)
+                    addExtraColorPicker();
+                } else {
+                    alert("Hai raggiunto il numero massimo di colori (6)");
+                }
+            });
+        }
+        
+        // Inizializza gli altri controlli
+        if (document.getElementById('particleOpacity')) {
+            document.getElementById('particleOpacity').value = settings.opacity || 0.8;
+            document.getElementById('particleOpacityValue').textContent = document.getElementById('particleOpacity').value;
+            
+            // Aggiorna il valore visualizzato quando cambia lo slider
+            document.getElementById('particleOpacity').addEventListener('input', function() {
+                document.getElementById('particleOpacityValue').textContent = this.value;
+            });
+        }
+        
+        if (document.getElementById('particleSizeMin') && document.getElementById('particleSizeMax')) {
+            const size = settings.size || { min: 3, max: 7 };
+            document.getElementById('particleSizeMin').value = size.min;
+            document.getElementById('particleSizeMax').value = size.max;
+        }
+        
+        if (document.getElementById('particleSpeed')) {
+            document.getElementById('particleSpeed').value = settings.speed || 2;
+            document.getElementById('particleSpeedValue').textContent = document.getElementById('particleSpeed').value;
+            
+            // Aggiorna il valore visualizzato quando cambia lo slider
+            document.getElementById('particleSpeed').addEventListener('input', function() {
+                document.getElementById('particleSpeedValue').textContent = this.value;
+            });
+        }
+        
+        if (document.getElementById('linkDistance')) {
+            document.getElementById('linkDistance').value = settings.linkDistance || 120;
+            document.getElementById('linkDistanceValue').textContent = document.getElementById('linkDistance').value;
+            
+            // Aggiorna il valore visualizzato quando cambia lo slider
+            document.getElementById('linkDistance').addEventListener('input', function() {
+                document.getElementById('linkDistanceValue').textContent = this.value;
+            });
+        }
+        
+        if (document.getElementById('linkColor')) {
+            document.getElementById('linkColor').value = settings.linkColor || "#ffffff";
+        }
+        
+        if (document.getElementById('linkOpacity')) {
+            document.getElementById('linkOpacity').value = settings.linkOpacity || 0.3;
+            document.getElementById('linkOpacityValue').textContent = document.getElementById('linkOpacity').value;
+            
+            // Aggiorna il valore visualizzato quando cambia lo slider
+            document.getElementById('linkOpacity').addEventListener('input', function() {
+                document.getElementById('linkOpacityValue').textContent = this.value;
+            });
+        }
+        
+        if (document.getElementById('hoverEffect')) {
+            document.getElementById('hoverEffect').value = settings.hoverEffect || "grab";
+        }
+        
+        if (document.getElementById('clickEffect')) {
+            document.getElementById('clickEffect').value = settings.clickEffect || "push";
+        }
+        
+        // Gestione del pulsante per mostrare/nascondere il pannello di controllo
+        if (toggleBtn && controlPanel) {
+            toggleBtn.addEventListener('click', function() {
+                const isVisible = controlPanel.style.display !== 'none';
+                controlPanel.style.display = isVisible ? 'none' : 'block';
+                this.querySelector('.toggle-text').textContent = isVisible ? 'Configura' : 'Chiudi';
+                this.querySelector('.material-symbols-outlined').textContent = isVisible ? 'tune' : 'close';
+                
+                // Feedback sonoro
+                playSound('click');
+            });
+        }
+        
+        // Gestione del pulsante per ripristinare le impostazioni predefinite
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function() {
+                if (confirm("Sei sicuro di voler ripristinare le impostazioni predefinite delle particelle?")) {
+                    localStorage.removeItem('pws-particles-settings');
+                    
+                    // Feedback sonoro
+                    playSound('click');
+                    
+                    // Ricarica la pagina per applicare le impostazioni predefinite
+                    location.reload();
+                }
+            });
+        }
+        
+        // Gestione del pulsante per applicare le impostazioni
+        if (applyBtn) {
+            applyBtn.addEventListener('click', function() {
+                // Raccogli tutti i valori dai controlli
+                const newSettings = {
+                    count: parseInt(document.getElementById('particleCount').value),
+                    shape: [document.getElementById('particleShape').value],
+                    colors: [
+                        document.getElementById('particleColor1').value,
+                        document.getElementById('particleColor2').value
+                    ],
+                    opacity: parseFloat(document.getElementById('particleOpacity').value),
+                    size: {
+                        min: parseInt(document.getElementById('particleSizeMin').value),
+                        max: parseInt(document.getElementById('particleSizeMax').value)
+                    },
+                    speed: parseFloat(document.getElementById('particleSpeed').value),
+                    linkDistance: parseInt(document.getElementById('linkDistance').value),
+                    linkColor: document.getElementById('linkColor').value,
+                    linkOpacity: parseFloat(document.getElementById('linkOpacity').value),
+                    hoverEffect: document.getElementById('hoverEffect').value,
+                    clickEffect: document.getElementById('clickEffect').value
+                };
+                
+                // Aggiungi colori extra se presenti
+                const extraColors = extraColorsContainer.querySelectorAll('input[type="color"]');
+                extraColors.forEach(color => {
+                    newSettings.colors.push(color.value);
+                });
+                
+                // Gestione dell'immagine personalizzata
+                if (newSettings.shape[0] === 'image' && particleImagePreview.querySelector('img')) {
+                    newSettings.image = particleImagePreview.querySelector('img').src;
+                } else {
+                    newSettings.image = null;
+                }
+                
+                // Salva le impostazioni
+                if (saveParticleSettings(newSettings)) {
+                    // Ricarica le particelle con le nuove impostazioni
+                    tsParticles.destroy();
+                    initParticles();
+                    
+                    // Feedback sonoro
+                    playSound('success');
+                    
+                    // Notifica l'utente
+                    alert("Impostazioni particelle applicate con successo!");
+                } else {
+                    alert("Errore nel salvataggio delle impostazioni. Riprova.");
+                }
+            });
+        }
+        
+        // Funzione per rilevare se è un dispositivo mobile
+        function isMobile() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+    }
 
     // Funzione per inizializzare le particelle - Ottimizzata per prestazioni
     async function initParticles() {
         // Rileva se è un dispositivo mobile
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
-        // Configurazione fortemente ottimizzata per mobile - Stile Neon
-        const particleCount = isMobile ? 20 : 50; // Ridotto drasticamente il numero di particelle
-        const particleSize = isMobile ? { min: 2, max: 5 } : { min: 3, max: 7 }; // Ridotte le dimensioni
-        const linkDistance = isMobile ? 80 : 120; // Ridotta la distanza dei collegamenti
-        const moveSpeed = isMobile ? 1 : 2; // Ridotta la velocità
+        // Carica le impostazioni personalizzate o usa i valori predefiniti
+        const particleSettings = loadParticleSettings();
+        
+        // Configurazione ottimizzata con supporto per impostazioni personalizzate
+        const particleCount = particleSettings.count || (isMobile ? 20 : 50);
+        const particleSize = particleSettings.size || (isMobile ? { min: 2, max: 5 } : { min: 3, max: 7 });
+        const linkDistance = particleSettings.linkDistance || (isMobile ? 80 : 120);
+        const moveSpeed = particleSettings.speed || (isMobile ? 1 : 2);
         const fpsLimit = isMobile ? 30 : 60; // Limitato FPS su mobile
+        const particleShape = particleSettings.shape || ["circle"];
+        const particleColors = particleSettings.colors || ["#00ffff", "#ff00ff"];
+        const particleOpacity = particleSettings.opacity || 0.8;
+        const linkColor = particleSettings.linkColor || "#ffffff";
+        const linkOpacity = particleSettings.linkOpacity || 0.3;
+        const hoverEffect = particleSettings.hoverEffect || "grab";
+        const clickEffect = particleSettings.clickEffect || "push";
+        const particleImage = particleSettings.image || null;
+        
+        // Configurazione per forme personalizzate
+        const shapeOptions = {};
+        if (particleShape.includes("image") && particleImage) {
+            shapeOptions.image = {
+                src: particleImage,
+                width: 32,
+                height: 32
+            };
+        }
         
         await tsParticles.load("pws-particles-container", {
             fullScreen: {
@@ -16411,19 +17021,19 @@ END:VCARD`;
                     }
                 },
                 color: {
-                    value: ["#00ffff", "#ff00ff"] // Ridotto a 2 colori
+                    value: particleColors
                 },
                 shape: {
-                    type: ["circle"], // Solo cerchi per migliorare le prestazioni
-                    options: {}
+                    type: particleShape,
+                    options: shapeOptions
                 },
                 opacity: {
-                    value: 0.8, // Ridotta l'opacità
+                    value: particleOpacity,
                     random: false,
                     anim: {
                         enable: !isMobile, // Disabilitata su mobile
                         speed: 0.8,
-                        opacity_min: 0.5,
+                        opacity_min: particleOpacity * 0.6,
                         sync: false
                     }
                 },
@@ -16433,19 +17043,19 @@ END:VCARD`;
                     anim: {
                         enable: !isMobile, // Disabilitata su mobile
                         speed: 0.8,
-                        size_min: 1,
+                        size_min: particleSize.min * 0.5,
                         sync: false
                     }
                 },
                 links: {
                     enable: true,
                     distance: linkDistance,
-                    color: "#ffffff",
-                    opacity: 0.3, // Ridotta l'opacità
+                    color: linkColor,
+                    opacity: linkOpacity,
                     width: 1,
                     shadow: {
                         enable: !isMobile, // Disabilitata su mobile
-                        color: "#00ffff",
+                        color: particleColors[0],
                         blur: 3 // Ridotto il blur
                     }
                 },
@@ -16468,29 +17078,33 @@ END:VCARD`;
                 detect_on: "canvas",
                 events: {
                     onhover: {
-                        enable: !isMobile, // Disabilitata su mobile
-                        mode: "grab"
+                        enable: !isMobile && hoverEffect !== "none", // Disabilitata su mobile o se impostata su "none"
+                        mode: hoverEffect
                     },
                     onclick: {
-                        enable: true,
-                        mode: "push"
+                        enable: clickEffect !== "none",
+                        mode: clickEffect
                     },
                     resize: true
                 },
                 modes: {
                     grab: {
-                        distance: isMobile ? 80 : 120, // Ridotta la distanza
+                        distance: linkDistance, // Usa la stessa distanza dei collegamenti
                         links: {
-                            opacity: 0.7, // Ridotta l'opacità
-                            color: "#00ffff"
+                            opacity: linkOpacity * 2 > 1 ? 1 : linkOpacity * 2, // Aumenta l'opacità ma max 1
+                            color: particleColors[0] // Usa il primo colore delle particelle
                         }
                     },
                     bubble: {
-                        distance: 150, // Ridotta la distanza
-                        size: 10, // Ridotta la dimensione
+                        distance: 150,
+                        size: particleSize.max * 1.5, // Dimensione proporzionale
                         duration: 2,
-                        opacity: 0.6, // Ridotta l'opacità
-                        speed: 2 // Ridotta la velocità
+                        opacity: particleOpacity,
+                        speed: moveSpeed
+                    },
+                    repulse: {
+                        distance: 200,
+                        duration: 0.4
                     },
                     push: {
                         particles_nb: isMobile ? 2 : 3 // Ridotto il numero
