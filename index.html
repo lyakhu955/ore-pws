@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -15094,71 +15094,13 @@ END:VCARD`;
                                 
                                 // La gestione del PIN Admin è stata spostata in uno script separato alla fine del file
                                 
-                                if (unlockAdminBtn && adminPinInput) {
-                                    // Rimuovi eventuali listener precedenti
-                                    unlockAdminBtn.replaceWith(unlockAdminBtn.cloneNode(true));
-                                    const newUnlockBtn = document.getElementById('unlockAdminFeatures');
-                                    
-                                    newUnlockBtn.addEventListener('click', function() {
-                                        const enteredPin = adminPinInput.value;
-                                        
-                                        if (enteredPin === CORRECT_PIN) {
-                                            // PIN corretto
-                                            showToast('Funzionalità admin sbloccate!', 'success', 3000);
-                                            
-                                            // Mostra la sezione Cash nella barra di navigazione
-                                            if (cashNavItem) {
-                                                cashNavItem.style.display = 'flex';
-                                            }
-                                            
-                                            // Salva lo stato di sblocco
-                                            localStorage.setItem('adminUnlocked', 'true');
-                                            
-                                            // Pulisci il campo PIN
-                                            adminPinInput.value = '';
-                                        } else {
-                                            // PIN errato
-                                            showToast('PIN non valido!', 'error', 3000);
-                                            
-                                            // Effetto di vibrazione per feedback tattile
-                                            if ('vibrate' in navigator) {
-                                                navigator.vibrate(200);
-                                            }
-                                            
-                                            // Pulisci il campo PIN
-                                            adminPinInput.value = '';
-                                            
-                                            // Mostra il pulsante di blocco e nascondi quello di sblocco
-                                            if (lockAdminBtn) lockAdminBtn.style.display = 'block';
-                                            newUnlockBtn.style.display = 'none';
-                                        }
-                                    });
-                                }
+                                // Reinizializza il PIN Admin quando la sezione impostazioni è attiva
+                                // Questo assicura che i listener siano aggiornati
+                                if (typeof initAdminPin === 'function') {
+                                 initAdminPin();
+                                   }
                                 
-                                // Gestione del pulsante di blocco
-                                if (lockAdminBtn) {
-                                    // Rimuovi eventuali listener precedenti
-                                    lockAdminBtn.replaceWith(lockAdminBtn.cloneNode(true));
-                                    const newLockBtn = document.getElementById('lockAdminFeatures');
-                                    
-                                    newLockBtn.addEventListener('click', function() {
-                                        // Nascondi la sezione Cash
-                                        if (cashNavItem) {
-                                            cashNavItem.style.display = 'none';
-                                        }
-                                        
-                                        // Rimuovi lo stato di sblocco
-                                        localStorage.removeItem('adminUnlocked');
-                                        
-                                        // Mostra il pulsante di sblocco e nascondi quello di blocco
-                                        const unlockBtn = document.getElementById('unlockAdminFeatures');
-                                        if (unlockBtn) unlockBtn.style.display = 'block';
-                                        newLockBtn.style.display = 'none';
-                                        
-                                        // Notifica l'utente
-                                        showToast('Funzionalità admin bloccate!', 'info', 3000);
-                                    });
-                                }
+                                // La gestione del pulsante di blocco è inclusa nella funzione initAdminPin
                                 
                                 // Inizializza il pulsante di aggiornamento forzato
                                 const forceUpdateBtn = document.getElementById('forceUpdate');
