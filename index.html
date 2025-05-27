@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -4984,6 +4984,11 @@
                             <div class="particle-control-group">
                                 <h3>Interattività</h3>
                                 
+                                <!-- Nota per dispositivi mobili -->
+                                <div class="particle-control-item mobile-note" style="display: none; margin-bottom: 15px; padding: 10px; background-color: var(--md-sys-color-primary-container); border-radius: var(--border-radius-small); color: var(--md-sys-color-on-primary-container);">
+                                    <strong>Nota:</strong> Su dispositivi mobili, l'interazione avviene tramite tocco. Gli effetti al passaggio del mouse funzioneranno anche con il tocco.
+                                </div>
+                                
                                 <!-- Interazione al passaggio del mouse -->
                                 <div class="particle-control-item">
                                     <label for="hoverEffect">Effetto al passaggio del mouse:</label>
@@ -4992,6 +4997,7 @@
                                         <option value="grab" selected>Attrazione</option>
                                         <option value="bubble">Bolla</option>
                                         <option value="repulse">Repulsione</option>
+                                        <option value="connect">Connessione</option>
                                     </select>
                                 </div>
                                 
@@ -5004,6 +5010,7 @@
                                         <option value="remove">Rimuovi particelle</option>
                                         <option value="bubble">Bolla</option>
                                         <option value="repulse">Repulsione</option>
+                                        <option value="connect">Connessione</option>
                                     </select>
                                 </div>
                             </div>
@@ -16723,6 +16730,14 @@ END:VCARD`;
         // Carica le impostazioni salvate
         const settings = loadParticleSettings();
         
+        // Mostra la nota per dispositivi mobili se necessario
+        if (isMobile()) {
+            const mobileNote = document.querySelector('.mobile-note');
+            if (mobileNote) {
+                mobileNote.style.display = 'block';
+            }
+        }
+        
         // Inizializza i valori dei controlli
         if (document.getElementById('particleCount')) {
             document.getElementById('particleCount').value = settings.count || (isMobile() ? 20 : 50);
@@ -17086,14 +17101,18 @@ END:VCARD`;
                 }
             },
             interactivity: {
-                detect_on: "canvas",
+                detect_on: "window", // Cambiato da "canvas" a "window" per migliorare la rilevazione
                 events: {
                     onhover: {
-                        enable: !isMobile && hoverEffect !== "none", // Disabilitata su mobile o se impostata su "none"
+                        enable: hoverEffect !== "none", // Abilitata anche su mobile se l'effetto non è "none"
                         mode: hoverEffect
                     },
                     onclick: {
                         enable: clickEffect !== "none",
+                        mode: clickEffect
+                    },
+                    ontap: { // Aggiunto supporto specifico per il tocco
+                        enable: isMobile && clickEffect !== "none",
                         mode: clickEffect
                     },
                     resize: true
@@ -17107,21 +17126,30 @@ END:VCARD`;
                         }
                     },
                     bubble: {
-                        distance: 150,
+                        distance: isMobile ? 100 : 150, // Ridotta per mobile
                         size: particleSize.max * 1.5, // Dimensione proporzionale
-                        duration: 2,
+                        duration: isMobile ? 1 : 2, // Ridotta per mobile
                         opacity: particleOpacity,
                         speed: moveSpeed
                     },
                     repulse: {
-                        distance: 200,
-                        duration: 0.4
+                        distance: isMobile ? 150 : 200, // Ridotta per mobile
+                        duration: isMobile ? 0.6 : 0.4 // Aumentata per mobile per un effetto più lungo
                     },
                     push: {
-                        particles_nb: isMobile ? 2 : 3 // Ridotto il numero
+                        particles_nb: isMobile ? 3 : 4 // Aumentato per mobile per un effetto più visibile
                     },
                     remove: {
-                        particles_nb: 1 // Ridotto il numero
+                        particles_nb: isMobile ? 2 : 1 // Aumentato per mobile per un effetto più visibile
+                    },
+                    // Aggiungiamo una modalità "connect" per dispositivi touch
+                    connect: {
+                        distance: linkDistance * 1.5,
+                        links: {
+                            opacity: linkOpacity * 3 > 1 ? 1 : linkOpacity * 3,
+                            color: particleColors[0]
+                        },
+                        radius: 120
                     }
                 }
             },
