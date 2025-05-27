@@ -84,22 +84,34 @@ self.addEventListener('activate', (event) => {
       
       // Registra un evento periodico per il controllo delle notifiche
       if ('periodicSync' in self.registration) {
-        // Usa Periodic Sync API se disponibile
-        try {
-          self.registration.periodicSync.register('check-notifications', {
-            minInterval: 15 * 60 * 1000 // Minimo 15 minuti (limitazione del browser)
-          }).then(() => {
-            console.log('Service Worker: Periodic Sync registrato');
-          }).catch(error => {
-            console.error('Service Worker: Errore nella registrazione di Periodic Sync', error);
-            // Fallback a setInterval
+        // Verifica se il permesso è già stato concesso
+        self.registration.periodicSync.getTags()
+          .then(tags => {
+            // Se non ci sono tag registrati, prova a registrarne uno nuovo
+            if (!tags.includes('check-notifications')) {
+              console.log('Service Worker: Tentativo di registrazione Periodic Sync');
+              
+              // Usa Periodic Sync API se disponibile
+              return self.registration.periodicSync.register('check-notifications', {
+                minInterval: 15 * 60 * 1000 // Minimo 15 minuti (limitazione del browser)
+              });
+            }
+            return Promise.resolve();
+          })
+          .then(() => {
+            console.log('Service Worker: Periodic Sync registrato con successo');
+          })
+          .catch(error => {
+            // Gestione specifica per errori di permesso
+            if (error.name === 'NotAllowedError') {
+              console.log('Service Worker: Permesso per Periodic Sync negato. Questo è normale su GitHub Pages o se il sito non è installato come PWA.');
+              console.log('Service Worker: Utilizzo fallback con setInterval');
+            } else {
+              console.error('Service Worker: Errore nella registrazione di Periodic Sync', error);
+            }
+            // Fallback a setInterval in ogni caso di errore
             setInterval(checkScheduledNotifications, 5 * 60 * 1000);
           });
-        } catch (error) {
-          console.error('Service Worker: Errore nella registrazione di Periodic Sync', error);
-          // Fallback a setInterval
-          setInterval(checkScheduledNotifications, 5 * 60 * 1000);
-        }
       } else {
         // Fallback a setInterval
         console.log('Service Worker: Periodic Sync non supportato, uso setInterval');
