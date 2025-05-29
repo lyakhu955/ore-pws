@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -8916,32 +8916,40 @@
          function getVehicleNameById(vehicleId) {
              if (!vehicleId) return '';
              
-             // Log per debug
-             console.log("Cercando veicolo con ID:", vehicleId);
+             // Rimuovi eventuali prefissi v_ o v_default_
+             let cleanVehicleId = vehicleId;
+             if (vehicleId.startsWith('v_default_')) {
+                 cleanVehicleId = 'default_' + vehicleId.substring(10);
+             } else if (vehicleId.startsWith('v_')) {
+                 cleanVehicleId = vehicleId.substring(2);
+             }
              
              const db = getDb();
              // Ensure vehicles exists and is an array
              const vehicles = Array.isArray(db.vehicles) ? db.vehicles : [];
              
              // Prima cerca per ID esatto
-             let vehicle = vehicles.find(v => v && v.id === vehicleId);
+             let vehicle = vehicles.find(v => v && v.id === cleanVehicleId);
              
              // Se non trova, prova a cercare per nome (nel caso l'ID sia in realtà un nome)
              if (!vehicle) {
-                 vehicle = vehicles.find(v => v && v.name === vehicleId);
+                 vehicle = vehicles.find(v => v && v.name === cleanVehicleId);
              }
              
              // Se ancora non trova, controlla se è un ID predefinito
-             if (!vehicle && vehicleId.startsWith('default_')) {
-                 // Estrai il nome dal formato default_nome
-                 const defaultName = vehicleId.replace('default_', '').replace(/_/g, ' ');
+             if (!vehicle && cleanVehicleId.startsWith('default_')) {
+                 // Cerca nei veicoli predefiniti
+                 const defaultVehicle = DEFAULT_VEHICLES.find(v => v.id === cleanVehicleId);
+                 if (defaultVehicle) {
+                     return defaultVehicle.name;
+                 }
+                 
+                 // Se ancora non trova, estrai il nome dal formato default_nome
+                 const defaultName = cleanVehicleId.replace('default_', '').replace(/_/g, ' ');
                  return defaultName.charAt(0).toUpperCase() + defaultName.slice(1);
              }
              
-             // Log del risultato
-             console.log("Veicolo trovato:", vehicle);
-             
-             return vehicle ? vehicle.name : vehicleId; // Ritorna il nome o l'ID stesso se non trovato
+             return vehicle ? vehicle.name : cleanVehicleId; // Ritorna il nome o l'ID stesso se non trovato
          }
 
         // --- Monthly Report Functions ---
@@ -9728,7 +9736,7 @@
                 workbook.created = new Date();
                 workbook.modified = new Date();
                 
-                // Crea un foglio di lavoro
+                // Crea un foglio di lavoro per le ore
                 const worksheet = workbook.addWorksheet('Report Ore', {
                     pageSetup: {
                         paperSize: 9, // A4
@@ -9749,13 +9757,33 @@
                     }
                 });
                 
+                // Crea un secondo foglio di lavoro per i mezzi
+                const vehicleWorksheet = workbook.addWorksheet('Report Mezzi', {
+                    pageSetup: {
+                        paperSize: 9, // A4
+                        orientation: 'landscape', // Orientamento orizzontale
+                        margins: {
+                            left: 0,
+                            right: 0,
+                            top: 0,
+                            bottom: 0,
+                            header: 0,
+                            footer: 0
+                        },
+                        fitToPage: true,
+                        fitToWidth: 1, // Adatta a 1 pagina in larghezza
+                        fitToHeight: 0, // Non adattare in altezza
+                        horizontalCentered: true
+                    }
+                });
+                
                 // Imposta le dimensioni delle colonne in modo preciso
                 // Utilizziamo le misure esatte fornite con un fattore di correzione
                 
                 // Fattore di correzione per compensare la differenza di interpretazione di ExcelJS
                 const columnCorrectionFactor = 1.1; // Aumentiamo del 10% per compensare
                 
-                // Larghezze delle colonne (valori target)
+                // Larghezze delle colonne (valori target) per il foglio ore
                 const targetColumnWidths = {
                     'A': 8.11,
                     'B': 8.11,
@@ -9783,13 +9811,32 @@
                     columnWidths[col] = width * columnCorrectionFactor;
                 }
                 
-                // Imposta le larghezze delle colonne
+                // Imposta le larghezze delle colonne per il foglio ore
                 for (const [col, width] of Object.entries(columnWidths)) {
                     worksheet.getColumn(col).width = width;
                     
                     // Applica il testo a capo alle colonne dei lavori (I, K, M, O)
                     if (['I', 'K', 'M', 'O'].includes(col)) {
                         worksheet.getColumn(col).alignment = { wrapText: true };
+                    }
+                }
+                
+                // Configurazione del foglio mezzi
+                // Larghezze delle colonne per il foglio mezzi
+                const vehicleColumnWidths = {
+                    'A': 8.11, // Data
+                    'B': 8.11, // Data (continuazione)
+                    'C': 15,   // Mezzo utilizzato
+                    'D': 30    // Lavoro associato
+                };
+                
+                // Imposta le larghezze delle colonne per il foglio mezzi
+                for (const [col, width] of Object.entries(vehicleColumnWidths)) {
+                    vehicleWorksheet.getColumn(col).width = width * columnCorrectionFactor;
+                    
+                    // Applica il testo a capo alla colonna del lavoro
+                    if (col === 'D') {
+                        vehicleWorksheet.getColumn(col).alignment = { wrapText: true };
                     }
                 }
                 
@@ -10305,6 +10352,325 @@
                 
                 // Totale giorni ferie
                 worksheet.getCell(74, 14).value = totalVacationDays;
+                
+                // Configura il foglio dei mezzi con un layout semplificato
+                
+                // Intestazione del foglio mezzi
+                const vehicleHeaderRow = 1;
+                
+                // Intestazione con nome utente e mese
+                vehicleWorksheet.getCell(vehicleHeaderRow, 1).value = `REPORT MEZZI ${userName.toUpperCase()}`;
+                vehicleWorksheet.getCell(vehicleHeaderRow + 1, 1).value = `MESE: ${monthName.toUpperCase()} ${year}`;
+                
+                // Unisci le celle per l'intestazione
+                mergeCells(vehicleWorksheet, vehicleHeaderRow, 1, vehicleHeaderRow, 8);
+                mergeCells(vehicleWorksheet, vehicleHeaderRow + 1, 1, vehicleHeaderRow + 1, 8);
+                
+                // Stile per l'intestazione
+                setCellStyle(vehicleWorksheet.getCell(vehicleHeaderRow, 1), { 
+                    bold: true, 
+                    size: 16,
+                    alignment: centerAlignment
+                });
+                setCellStyle(vehicleWorksheet.getCell(vehicleHeaderRow + 1, 1), { 
+                    bold: true, 
+                    size: 14,
+                    alignment: centerAlignment
+                });
+                
+                // Intestazioni delle colonne (riga 3)
+                const columnHeaderRow = vehicleHeaderRow + 2;
+                
+                // Colonne A-B: DATA
+                const dateHeaderCell = vehicleWorksheet.getCell(columnHeaderRow, 1);
+                dateHeaderCell.value = "DATA";
+                setCellStyle(dateHeaderCell, { 
+                    bold: true, 
+                    alignment: centerAlignment,
+                    border: thickBorder
+                });
+                mergeCells(vehicleWorksheet, columnHeaderRow, 1, columnHeaderRow, 2);
+                
+                // Colonne C-D: MEZZO UTILIZZATO
+                const vehicleHeaderCell = vehicleWorksheet.getCell(columnHeaderRow, 3);
+                vehicleHeaderCell.value = "MEZZO UTILIZZATO";
+                setCellStyle(vehicleHeaderCell, { 
+                    bold: true, 
+                    alignment: centerAlignment,
+                    border: thickBorder
+                });
+                mergeCells(vehicleWorksheet, columnHeaderRow, 3, columnHeaderRow, 4);
+                
+                // Colonne E-L: LAVORI ASSOCIATI (4 colonne)
+                const workHeaders = ["LAVORO 1", "LAVORO 2", "LAVORO 3", "LAVORO 4"];
+                for (let i = 0; i < workHeaders.length; i++) {
+                    const headerCell = vehicleWorksheet.getCell(columnHeaderRow, i * 2 + 5);
+                    headerCell.value = workHeaders[i];
+                    setCellStyle(headerCell, { 
+                        bold: true, 
+                        alignment: centerAlignment,
+                        border: thickBorder
+                    });
+                    mergeCells(vehicleWorksheet, columnHeaderRow, i * 2 + 5, columnHeaderRow, i * 2 + 6);
+                }
+                
+                // Prepara le righe per i dati
+                const dataStartRow = columnHeaderRow + 1;
+                
+                // Popola il foglio mezzi con tutti i giorni del mese
+                
+                // Mappa per tenere traccia di tutti i mezzi utilizzati nel mese
+                const monthlyVehicleUsage = new Map();
+                
+                // Variabile per tenere traccia della riga corrente
+                let currentRow = dataStartRow;
+                
+                // Itera su tutti i giorni del mese
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const currentDate = new Date(year, month, day);
+                    const dateStr = formatDate(currentDate);
+                    
+                    // Controlla se è un weekend (0 = domenica, 6 = sabato)
+                    const isWeekend = currentDate.getDay() === 0 || currentDate.getDay() === 6;
+                    
+                    // Controlla se ci sono entry per questa data
+                    const entries = db.entries[dateStr] || [];
+                    
+                    // Mappa per tenere traccia dei mezzi e dei lavori associati per questo giorno
+                    const vehicleWorkMap = new Map();
+                    
+                    // Raccogli tutti i mezzi utilizzati e i lavori associati
+                    entries.forEach(entry => {
+                        if (entry.vehicle) {
+                            const vehicleName = getVehicleNameById(entry.vehicle);
+                            if (vehicleName) {
+                                // Se il mezzo è già nella mappa, aggiungi il lavoro alla lista
+                                if (vehicleWorkMap.has(vehicleName)) {
+                                    vehicleWorkMap.get(vehicleName).push(entry.description || "");
+                                } else {
+                                    // Altrimenti, crea una nuova entry nella mappa
+                                    vehicleWorkMap.set(vehicleName, [entry.description || ""]);
+                                }
+                                
+                                // Aggiorna anche la mappa mensile
+                                if (monthlyVehicleUsage.has(vehicleName)) {
+                                    monthlyVehicleUsage.get(vehicleName).count++;
+                                } else {
+                                    monthlyVehicleUsage.set(vehicleName, { count: 1 });
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Aggiungi una riga per questo giorno, anche se non ci sono mezzi utilizzati
+                    // Colonne A-B: Data
+                    const dateCell = vehicleWorksheet.getCell(currentRow, 1);
+                    dateCell.value = formatDateForExcel(currentDate);
+                    setCellStyle(dateCell, { 
+                        bold: true, 
+                        alignment: centerAlignment,
+                        border: thickBorder
+                    });
+                    mergeCells(vehicleWorksheet, currentRow, 1, currentRow, 2);
+                    
+                    // Se è un weekend, colora la riga di grigio medio-chiaro
+                    if (isWeekend) {
+                        for (let col = 1; col <= 8; col++) {
+                            const cell = vehicleWorksheet.getCell(currentRow, col);
+                            cell.fill = {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: 'FFE0E0E0' } // Grigio chiaro
+                            };
+                        }
+                    }
+                    
+                    // Se ci sono mezzi utilizzati, aggiungili al foglio
+                    if (vehicleWorkMap.size > 0) {
+                        let isFirstVehicle = true;
+                        
+                        // Per ogni mezzo utilizzato in questo giorno
+                        for (const [vehicleName, works] of vehicleWorkMap.entries()) {
+                            if (!isFirstVehicle) {
+                                // Se non è il primo mezzo, aggiungi una nuova riga
+                                currentRow++;
+                                
+                                // Mantieni la stessa data
+                                const additionalDateCell = vehicleWorksheet.getCell(currentRow, 1);
+                                additionalDateCell.value = formatDateForExcel(currentDate);
+                                setCellStyle(additionalDateCell, { 
+                                    bold: true, 
+                                    alignment: centerAlignment,
+                                    border: thickBorder
+                                });
+                                mergeCells(vehicleWorksheet, currentRow, 1, currentRow, 2);
+                                
+                                // Applica lo stile weekend se necessario
+                                if (isWeekend) {
+                                    for (let col = 1; col <= 8; col++) {
+                                        const cell = vehicleWorksheet.getCell(currentRow, col);
+                                        cell.fill = {
+                                            type: 'pattern',
+                                            pattern: 'solid',
+                                            fgColor: { argb: 'FFE0E0E0' } // Grigio chiaro
+                                        };
+                                    }
+                                }
+                            }
+                            
+                            // Colonne C-D: Mezzo utilizzato
+                            const vehicleCell = vehicleWorksheet.getCell(currentRow, 3);
+                            vehicleCell.value = vehicleName;
+                            setCellStyle(vehicleCell, { 
+                                bold: true, 
+                                alignment: centerAlignment,
+                                border: thickBorder
+                            });
+                            mergeCells(vehicleWorksheet, currentRow, 3, currentRow, 4);
+                            
+                            // Colonne E-L: Lavori associati (4 colonne)
+                            // Dividi la descrizione in base a vari separatori
+                            const workText = works.filter(w => w.trim() !== "").join(", ");
+                            if (workText) {
+                                // Utilizziamo una regex che considera come separatori: virgola, punto, trattino, barra, due punti e nuova riga
+                                const separatorRegex = /[,.\-\/:]+|\n+/;
+                                const workItems = workText
+                                    .split(separatorRegex)
+                                    .map(item => item.trim())
+                                    .filter(item => item.length > 0);
+                                
+                                // Colonne per i lavori
+                                const workColumns = [5, 7, 9, 11]; // E-F, G-H, I-J, K-L
+                                
+                                // Funzione per applicare il testo a capo alla cella
+                                const applyWrapText = (cell) => {
+                                    if (!cell.alignment) {
+                                        cell.alignment = {};
+                                    }
+                                    cell.alignment.wrapText = true;
+                                    cell.alignment.vertical = 'middle';
+                                    cell.alignment.horizontal = 'left';
+                                };
+                                
+                                // Distribuisci gli elementi di lavoro nelle colonne disponibili
+                                for (let i = 0; i < Math.min(workItems.length, workColumns.length); i++) {
+                                    const col = workColumns[i];
+                                    const cell = vehicleWorksheet.getCell(currentRow, col);
+                                    cell.value = workItems[i];
+                                    setCellStyle(cell, { 
+                                        alignment: { vertical: 'middle', horizontal: 'left', wrapText: true },
+                                        border: thickBorder
+                                    });
+                                    mergeCells(vehicleWorksheet, currentRow, col, currentRow, col + 1);
+                                }
+                                
+                                // Se non ci sono elementi dopo la divisione, usa la descrizione originale
+                                if (workItems.length === 0) {
+                                    const cell = vehicleWorksheet.getCell(currentRow, 5);
+                                    cell.value = workText;
+                                    setCellStyle(cell, { 
+                                        alignment: { vertical: 'middle', horizontal: 'left', wrapText: true },
+                                        border: thickBorder
+                                    });
+                                    mergeCells(vehicleWorksheet, currentRow, 5, currentRow, 6);
+                                }
+                                
+                                // Se ci sono più elementi di quante colonne disponibili, concatena gli elementi rimanenti nell'ultima colonna
+                                if (workItems.length > workColumns.length) {
+                                    const lastCol = workColumns[workColumns.length - 1];
+                                    const lastCell = vehicleWorksheet.getCell(currentRow, lastCol);
+                                    const remainingItems = workItems.slice(workColumns.length);
+                                    lastCell.value = lastCell.value + ", " + remainingItems.join(", ");
+                                    setCellStyle(lastCell, { 
+                                        alignment: { vertical: 'middle', horizontal: 'left', wrapText: true },
+                                        border: thickBorder
+                                    });
+                                }
+                            } else {
+                                // Se non ci sono lavori, crea celle vuote ma con bordi
+                                for (let i = 0; i < 4; i++) {
+                                    const col = i * 2 + 5;
+                                    const cell = vehicleWorksheet.getCell(currentRow, col);
+                                    setCellStyle(cell, { 
+                                        alignment: { vertical: 'middle', horizontal: 'left', wrapText: true },
+                                        border: thickBorder
+                                    });
+                                    mergeCells(vehicleWorksheet, currentRow, col, currentRow, col + 1);
+                                }
+                            }
+                            
+                            isFirstVehicle = false;
+                        }
+                    } else {
+                        // Se non ci sono mezzi utilizzati, aggiungi celle vuote ma con bordi
+                        // Colonne C-D: Mezzo utilizzato (vuoto)
+                        const vehicleCell = vehicleWorksheet.getCell(currentRow, 3);
+                        setCellStyle(vehicleCell, { 
+                            alignment: centerAlignment,
+                            border: thickBorder
+                        });
+                        mergeCells(vehicleWorksheet, currentRow, 3, currentRow, 4);
+                        
+                        // Colonne E-L: Lavori associati (4 colonne vuote)
+                        for (let i = 0; i < 4; i++) {
+                            const col = i * 2 + 5;
+                            const cell = vehicleWorksheet.getCell(currentRow, col);
+                            setCellStyle(cell, { 
+                                alignment: { vertical: 'middle', horizontal: 'left', wrapText: true },
+                                border: thickBorder
+                            });
+                            mergeCells(vehicleWorksheet, currentRow, col, currentRow, col + 1);
+                        }
+                    }
+                    
+                    // Passa alla riga successiva
+                    currentRow++;
+                }
+                
+                // Aggiungi il riepilogo dei mezzi utilizzati nel mese
+                if (monthlyVehicleUsage.size > 0) {
+                    // Aggiungi una riga vuota
+                    currentRow++;
+                    
+                    // Aggiungi l'intestazione del riepilogo
+                    const summaryHeaderCell = vehicleWorksheet.getCell(currentRow, 1);
+                    summaryHeaderCell.value = "RIEPILOGO MEZZI UTILIZZATI";
+                    setCellStyle(summaryHeaderCell, { 
+                        bold: true, 
+                        size: 12,
+                        alignment: centerAlignment,
+                        border: thickBorder
+                    });
+                    mergeCells(vehicleWorksheet, currentRow, 1, currentRow, 12);
+                    
+                    // Ordina i mezzi per numero di utilizzi (decrescente)
+                    const sortedVehicles = Array.from(monthlyVehicleUsage.entries())
+                        .sort((a, b) => b[1].count - a[1].count);
+                    
+                    // Aggiungi una riga per ogni mezzo utilizzato
+                    sortedVehicles.forEach(([vehicleName, data]) => {
+                        currentRow++;
+                        
+                        // Colonne A-B: Nome del mezzo
+                        const nameCell = vehicleWorksheet.getCell(currentRow, 1);
+                        nameCell.value = vehicleName;
+                        setCellStyle(nameCell, { 
+                            bold: true, 
+                            alignment: centerAlignment,
+                            border: thickBorder
+                        });
+                        mergeCells(vehicleWorksheet, currentRow, 1, currentRow, 4);
+                        
+                        // Colonne E-L: Numero di giorni di utilizzo
+                        const countCell = vehicleWorksheet.getCell(currentRow, 5);
+                        countCell.value = `Utilizzato per ${data.count} giorni`;
+                        setCellStyle(countCell, { 
+                            alignment: centerAlignment,
+                            border: thickBorder
+                        });
+                        mergeCells(vehicleWorksheet, currentRow, 5, currentRow, 12);
+                    });
+                }
                 
                 // Esporta il file Excel
                 workbook.xlsx.writeBuffer().then(buffer => {
