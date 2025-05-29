@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -9706,679 +9706,603 @@
                 return;
             }
 
-            const db = getDb();
-            const userName = localStorage.getItem('userName') || 'Utente';
-            const [year, monthNum] = yearMonth.split('-').map(Number);
-            const monthIndex = monthNum - 1;
-            const monthName = new Date(year, monthIndex, 1).toLocaleDateString('it-IT', { month: 'long' });
-            const filename = `ReportOre_${userName}_${monthName}_${year}.xlsx`;
-            
-            // Definizione delle costanti per le larghezze delle colonne (in pixel)
-            const PIXEL_TO_EXCEL_UNIT = 7; // Approssimazione: 1 unità Excel ≈ 7 pixel
-            const COLUMN_A_WIDTH_PX = 185; // Larghezza esatta richiesta per colonna A
-            const COLUMN_A_WIDTH = COLUMN_A_WIDTH_PX / PIXEL_TO_EXCEL_UNIT; // Conversione in unità Excel
-
-            // --- 1. Pre-process data to find max description columns ---
-            let maxDescCols = 1; // Minimum 1 for notes
-            const descriptionDelimiterRegex = /[.,-\/]/; // Regex for delimiters
-            const daysInMonth = new Date(year, monthNum, 0).getDate();
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const date = new Date(year, monthIndex, day);
-                if (isNaN(date.getTime())) continue;
-                const dateStr = formatDateForInput(date);
-                const entries = db.entries[dateStr] || [];
-                entries.forEach(entry => {
-                    if (entry.description) {
-                        const parts = entry.description.split(descriptionDelimiterRegex).map(s => s.trim()).filter(s => s);
-                        if (parts.length > maxDescCols) {
-                            maxDescCols = parts.length;
-                        }
+            try {
+                // Estrai anno e mese dalla stringa yearMonth (formato: "YYYY-MM")
+                const [year, monthStr] = yearMonth.split('-');
+                const month = parseInt(monthStr) - 1; // Mese è 0-based in JavaScript
+                
+                // Nomi dei mesi in italiano
+                const monthNames = [
+                    "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
+                    "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
+                ];
+                
+                const monthName = monthNames[month];
+                const userName = localStorage.getItem('userName') || 'Utente';
+                const excelFilename = `ReportOre_${userName}_${monthName}_${year}.xlsx`;
+                
+                // Crea un nuovo workbook
+                const workbook = new ExcelJS.Workbook();
+                workbook.creator = 'Ore PWS Group';
+                workbook.lastModifiedBy = userName;
+                workbook.created = new Date();
+                workbook.modified = new Date();
+                
+                // Crea un foglio di lavoro
+                const worksheet = workbook.addWorksheet('Report Ore', {
+                    pageSetup: {
+                        paperSize: 9, // A4
+                        orientation: 'landscape', // Orientamento orizzontale
+                        margins: {
+                            left: 0,
+                            right: 0,
+                            top: 0,
+                            bottom: 0,
+                            header: 0,
+                            footer: 0
+                        },
+                        fitToPage: true,
+                        fitToWidth: 1, // Adatta a 1 pagina in larghezza (tutte le colonne su una pagina)
+                        fitToHeight: 0, // Non adattare in altezza (0 = usa quante pagine servono)
+                        printArea: 'A1:R74',
+                        horizontalCentered: true
                     }
                 });
-            }
-            console.log("Max colonne descrizione necessarie:", maxDescCols);
-
-            // --- 2. Create a new workbook and worksheet with ExcelJS ---
-            const workbook = new ExcelJS.Workbook();
-            workbook.creator = userName;
-            workbook.lastModifiedBy = userName;
-            workbook.created = new Date();
-            workbook.modified = new Date();
-            
-            // Add a worksheet with dark theme
-            const worksheet = workbook.addWorksheet('Report Ore', {
-                properties: { tabColor: { argb: '6A6AFF' } } // Colore tab azzurro
-            });
-            
-            // Imposta un colore di sfondo scuro per tutto il foglio
-            worksheet.properties.outlineLevelCol = 1;
-            worksheet.properties.defaultColWidth = 12;
-            
-            // Imposta il colore di sfondo per tutto il foglio
-            worksheet.pageSetup.paperSize = 9; // A4
-            worksheet.pageSetup.orientation = 'landscape';
-            worksheet.pageSetup.fitToPage = true;
-            
-            // Utilizziamo il tema chiaro originale
-            const lightThemeColor = 'FFFFFF'; // Bianco
-
-            // --- 3. Define column widths ---
-            const columns = [
-                { key: 'giorno', width: COLUMN_A_WIDTH }, // Larghezza esatta in unità Excel
-                { key: 'data', width: 12 },
-                { key: 'tipo', width: 10 },
-                { key: 'mezzo', width: 25 }, // Aumentata larghezza per evitare testo troncato
-                { key: 'oraInizio', width: 10 },
-                { key: 'pausa', width: 8 },
-                { key: 'oraFine', width: 10 },
-                { key: 'oreTrasferte', width: 12 },
-                { key: 'oreNotturne', width: 12 },
-                { key: 'oreTotali', width: 12 }
-            ];
-
-            // Add dynamic description columns
-            for (let i = 1; i <= maxDescCols; i++) {
-                columns.push({ key: `lavoro${i}`, width: 20 });
-            }
-
-            worksheet.columns = columns;
-            
-            // Aggiungiamo manualmente le intestazioni delle colonne
-            const headerTitles = [
-                'Giorno', 'Data', 'Tipo', 'Mezzo', 'Ora Inizio', 'Pausa', 'Ora Fine',
-                'Trasferta', 'Ore Notturne', 'Ore Totali'
-            ];
-            
-            // Aggiungiamo le intestazioni per le colonne di descrizione
-            for (let i = 1; i <= maxDescCols; i++) {
-                headerTitles.push(`Lavoro${i}`);
-            }
-            
-            // Nessuna funzione per lo sfondo, utilizziamo il tema chiaro predefinito
-
-            // --- 4. Add title row ---
-            
-            worksheet.mergeCells('A1:' + String.fromCharCode(65 + columns.length - 1) + '1'); // Merge cells for title (A1:K1 or more)
-            const titleRow = worksheet.getRow(1);
-            titleRow.height = 30;
-            titleRow.getCell(1).value = `${userName} - Report Ore Lavorative - ${monthName} ${year}`;
-            titleRow.getCell(1).font = { 
-                name: 'Arial', 
-                size: 16, 
-                bold: true, 
-                color: { argb: '006A6A' } // Colore primario dell'app
-            };
-            titleRow.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
-            titleRow.getCell(1).fill = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: 'E6F7F7' } // Colore di sfondo chiaro
-            };
-
-            // Add empty row
-            worksheet.addRow({});
-
-            // --- 5. Style the header row ---
-            const headerRow = worksheet.getRow(3);
-            headerRow.height = 25;
-            headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };
-            headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
-            
-            // Apply header titles and style to header cells
-            for (let i = 1; i <= columns.length; i++) {
-                const cell = headerRow.getCell(i);
-                // Imposta il valore dell'intestazione
-                cell.value = headerTitles[i-1];
                 
-                // Applica lo stile
-                cell.fill = {
-                    type: 'pattern',
-                    pattern: 'solid',
-                    fgColor: { argb: '006A6A' } // Colore primario dell'app
+                // Imposta le dimensioni delle colonne in modo preciso
+                // Utilizziamo le misure esatte fornite con un fattore di correzione
+                
+                // Fattore di correzione per compensare la differenza di interpretazione di ExcelJS
+                const columnCorrectionFactor = 1.1; // Aumentiamo del 10% per compensare
+                
+                // Larghezze delle colonne (valori target)
+                const targetColumnWidths = {
+                    'A': 8.11,
+                    'B': 8.11,
+                    'C': 4.56,
+                    'D': 4.44,
+                    'E': 6, // Aumentata da 4.33 a 6
+                    'F': 4.22,
+                    'G': 4.56,
+                    'H': 4.56,
+                    'I': 8.11,
+                    'J': 8.11,
+                    'K': 8.11,
+                    'L': 8.11,
+                    'M': 8.11,
+                    'N': 8.11,
+                    'O': 8.11,
+                    'P': 8.11,
+                    'Q': 9.67,
+                    'R': 8.11
                 };
-                // Add border to header cells - più marcato
-                cell.border = {
-                    top: { style: 'medium' },
-                    left: { style: 'medium' },
-                    bottom: { style: 'medium' },
-                    right: { style: 'medium' }
+                
+                // Calcola le larghezze corrette applicando il fattore di correzione
+                const columnWidths = {};
+                for (const [col, width] of Object.entries(targetColumnWidths)) {
+                    columnWidths[col] = width * columnCorrectionFactor;
+                }
+                
+                // Imposta le larghezze delle colonne
+                for (const [col, width] of Object.entries(columnWidths)) {
+                    worksheet.getColumn(col).width = width;
+                }
+                
+                // Imposta le dimensioni delle righe
+                // Utilizziamo le misure esatte fornite con un fattore di correzione
+                
+                // Fattore di correzione per compensare la differenza di interpretazione di ExcelJS
+                const rowCorrectionFactor = 1.25; // Aumentiamo del 25% per compensare
+                
+                // Altezze delle righe (valori target)
+                const targetRowHeights = {
+                    1: 14.4, 2: 15, 3: 14.4, 4: 29.4, 5: 14.4, 6: 15, 7: 14.4, 8: 15, 9: 14.4, 10: 15,
+                    11: 14.4, 12: 15, 13: 14.4, 14: 15, 15: 14.4, 16: 15, 17: 14.4, 18: 15, 19: 14.4, 20: 15,
+                    21: 14.4, 22: 15, 23: 14.4, 24: 15, 25: 14.4, 26: 15, 27: 14.4, 28: 15, 29: 14.4, 30: 15,
+                    31: 14.4, 32: 14.4, 33: 14.4, 34: 14.4, 35: 14.4, 36: 14.4, 37: 14.4, 38: 30, 39: 14.4, 40: 14.4,
+                    41: 14.4, 42: 29.4, 43: 14.4, 44: 14.4, 45: 14.4, 46: 14.4, 47: 14.4, 48: 14.4, 49: 14.4, 50: 14.4,
+                    51: 14.4, 52: 14.4, 53: 14.4, 54: 14.4, 55: 14.4, 56: 14.4, 57: 14.4, 58: 14.4, 59: 14.4, 60: 14.4,
+                    61: 14.4, 62: 15, 63: 14.4, 64: 15, 65: 14.4, 66: 15, 67: 14.4, 68: 15, 69: 14.4, 70: 15,
+                    71: 14.4, 72: 15, 73: 14.4, 74: 14.4
                 };
-            }
-
-            // --- 6. Add data rows ---
-            let rowIndex = 4; // Start after header
-            let monthTotalHours = 0, monthTotalTransferta = 0, monthTotalNotturne = 0;
-            let monthWorkDays = 0, monthFerieDays = 0, monthMalattiaDays = 0;
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const date = new Date(year, monthIndex, day);
-                if (isNaN(date.getTime())) continue;
                 
-                const dateStr = formatDateForInput(date);
-                const dayOfWeek = date.toLocaleDateString('it-IT', { weekday: 'long' });
-                const entries = db.entries[dateStr] || [];
-                const holidayInfo = db.holidays[dateStr];
+                // Calcola le altezze corrette applicando il fattore di correzione
+                const rowHeights = {};
+                for (const [row, height] of Object.entries(targetRowHeights)) {
+                    rowHeights[row] = height * rowCorrectionFactor;
+                }
                 
-                let rowsAddedForDay = false;
-
-                if (holidayInfo) {
-                    // --- Absence Row ---
-                    const typeText = holidayInfo.type === 'ferie' ? 'Ferie' : 'Malattia';
-                    const rowData = {
-                        giorno: dayOfWeek,
-                        data: dateStr,
-                        tipo: typeText,
-                        mezzo: '',
-                        oraInizio: '',
-                        pausa: null, // Usiamo null invece di stringa vuota
-                        oraFine: '',
-                        oreTrasferte: null, // Usiamo null invece di stringa vuota
-                        oreNotturne: null, // Usiamo null invece di stringa vuota
-                        oreTotali: null // Usiamo null invece di stringa vuota
-                    };
+                // Imposta le altezze delle righe
+                for (const [row, height] of Object.entries(rowHeights)) {
+                    worksheet.getRow(parseInt(row)).height = height;
+                }
+                
+                // Funzione per unire celle
+                function mergeCells(worksheet, startRow, startCol, endRow, endCol) {
+                    worksheet.mergeCells(startRow, startCol, endRow, endCol);
+                }
+                
+                // Funzione per impostare lo stile delle celle
+                function setCellStyle(cell, style = {}) {
+                    if (style.bold) cell.font = { bold: true, ...cell.font };
+                    if (style.size) cell.font = { size: style.size, ...cell.font };
+                    if (style.alignment) cell.alignment = style.alignment;
+                    if (style.border) cell.border = style.border;
+                    if (style.fill) cell.fill = style.fill;
+                }
+                
+                // Stili comuni
+                const centerAlignment = { vertical: 'middle', horizontal: 'center' };
+                const thickBorder = {
+                    top: { style: 'thick' },
+                    left: { style: 'thick' },
+                    bottom: { style: 'thick' },
+                    right: { style: 'thick' }
+                };
+                
+                // Funzione per aggiungere una pagina al report
+                function addReportPage(startRow, numRows, isFirstPage = true) {
+                    // Riga 1-2: Nome utente e mese/anno
+                    // Colonne A-H: Nome utente
+                    const userNameCell = worksheet.getCell(`A${startRow}`);
+                    userNameCell.value = userName;
+                    setCellStyle(userNameCell, { 
+                        bold: true, 
+                        size: 24, 
+                        alignment: centerAlignment,
+                        border: thickBorder
+                    });
+                    mergeCells(worksheet, startRow, 1, startRow + 1, 8);
                     
-                    // Add note to first description column
-                    rowData.lavoro1 = holidayInfo.note || '';
+                    // Colonne I-P: Mese e anno
+                    const monthYearCell = worksheet.getCell(`I${startRow}`);
+                    monthYearCell.value = `${monthName} ${year}`;
+                    setCellStyle(monthYearCell, { 
+                        bold: true, 
+                        size: 24, 
+                        alignment: centerAlignment,
+                        border: thickBorder
+                    });
+                    mergeCells(worksheet, startRow, 9, startRow + 1, 16);
                     
-                    const row = worksheet.addRow(rowData);
+                    // Colonne Q-R: Ferie/malattie
+                    const holidayCell = worksheet.getCell(`Q${startRow}`);
+                    holidayCell.value = "FERIE/MALATTIE";
+                    setCellStyle(holidayCell, { 
+                        bold: true, 
+                        size: 14, 
+                        alignment: centerAlignment,
+                        border: thickBorder
+                    });
+                    mergeCells(worksheet, startRow, 17, startRow + 3, 18);
                     
-                    // Style the row based on type - nuovi colori
-                    const bgColor = holidayInfo.type === 'ferie' ? 'FFEB3B' : 'F44336'; // Giallo per ferie, rosso per malattia
-                    const fontColor = holidayInfo.type === 'ferie' ? '000000' : 'FFFFFF'; // Testo nero su giallo, bianco su rosso
+                    // Riga 3-4: Intestazioni
+                    // Colonne A-B: DATA
+                    const dateHeaderCell = worksheet.getCell(`A${startRow + 2}`);
+                    dateHeaderCell.value = "DATA";
+                    setCellStyle(dateHeaderCell, { 
+                        bold: true, 
+                        size: 11, // Ridotto da 28 a 11
+                        alignment: centerAlignment,
+                        border: thickBorder
+                    });
+                    mergeCells(worksheet, startRow + 2, 1, startRow + 3, 2);
                     
-                    for (let i = 1; i <= columns.length; i++) {
-                        const cell = row.getCell(i);
-                        cell.fill = {
-                            type: 'pattern',
-                            pattern: 'solid',
-                            fgColor: { argb: bgColor }
-                        };
-                        cell.border = {
-                            top: { style: 'medium', color: { argb: '666666' } },
-                            left: { style: 'medium', color: { argb: '666666' } },
-                            bottom: { style: 'medium', color: { argb: '666666' } },
-                            right: { style: 'medium', color: { argb: '666666' } }
-                        };
-                        // Imposta il colore del testo
-                        cell.font = {
-                            color: { argb: fontColor },
-                            name: 'Arial',
-                            size: 10
-                        };
-                        // Allineamento centrato per tutte le celle
-                        cell.alignment = { 
-                            horizontal: 'center', 
-                            vertical: 'middle' 
-                        };
+                    // Intestazioni colonne C-H (ruotate)
+                    const columnHeaders = ["INIZIO", "PAUSA", "FINE", "TRANSF.", "NOTT.", "TOT."];
+                    for (let i = 0; i < columnHeaders.length; i++) {
+                        const headerCell = worksheet.getCell(startRow + 2, i + 3);
+                        headerCell.value = columnHeaders[i];
+                        
+                        // Imposta dimensione carattere 11 per colonne D e F (indici 1 e 3)
+                        const fontSize = (i === 1 || i === 3) ? 11 : 14;
+                        
+                        setCellStyle(headerCell, { 
+                            bold: true, 
+                            size: fontSize, 
+                            alignment: { 
+                                vertical: 'middle', 
+                                horizontal: 'center', 
+                                textRotation: 90 
+                            },
+                            border: thickBorder
+                        });
+                        mergeCells(worksheet, startRow + 2, i + 3, startRow + 3, i + 3);
                     }
                     
-                    // Evidenzia il tipo di assenza
-                    row.getCell(3).font = {
-                        bold: true,
-                        color: { argb: fontColor },
-                        name: 'Arial',
-                        size: 10
-                    };
+                    // Intestazioni clienti (I-P)
+                    const clientHeaders = ["CLIENTE 1", "CLIENTE 2", "CLIENTE 3", "CLIENTE 4"];
+                    for (let i = 0; i < clientHeaders.length; i++) {
+                        const headerCell = worksheet.getCell(startRow + 2, i * 2 + 9);
+                        headerCell.value = clientHeaders[i];
+                        setCellStyle(headerCell, { 
+                            bold: true, 
+                            size: 14, 
+                            alignment: centerAlignment,
+                            border: thickBorder
+                        });
+                        mergeCells(worksheet, startRow + 2, i * 2 + 9, startRow + 3, i * 2 + 10);
+                    }
                     
-                    if (holidayInfo.type === 'ferie') monthFerieDays++;
-                    if (holidayInfo.type === 'malattia') monthMalattiaDays++;
-                    
-                    rowsAddedForDay = true;
-                    rowIndex++;
-                } else if (entries.length > 0) {
-                    // --- Work Entry Rows ---
-                    let dayHasWork = false;
-                    let dayHasDescription = false;
-                    
-                    entries.forEach(entry => {
-                        const vehicleName = getVehicleNameById(entry.vehicle) || "";
+                    // Righe per i dati (coppie di righe)
+                    for (let i = 0; i < numRows; i++) {
+                        const rowIndex = startRow + 4 + i * 2;
                         
-                        // Assicuriamoci che i valori numerici siano effettivamente numeri
-                        // Convertiamo esplicitamente in Number per evitare problemi di formattazione
-                        const breakTimeNum = typeof entry.breakTime === 'number' ? Number(entry.breakTime) : 0;
-                        const totalHoursNum = typeof entry.totalHours === 'number' ? Number(entry.totalHours) : 0;
+                        // Colonne A-B: Data
+                        const dateCell = worksheet.getCell(rowIndex, 1);
+                        setCellStyle(dateCell, { 
+                            bold: true, 
+                            alignment: centerAlignment,
+                            border: thickBorder
+                        });
+                        mergeCells(worksheet, rowIndex, 1, rowIndex + 1, 2);
                         
-                        // Per notturne, usiamo null invece di stringa vuota quando non ci sono ore
-                        // Excel tratterà null come cella vuota ma senza errori di formattazione
-                        const notturneNum = (typeof entry.notturne === 'number' && entry.notturne > 0) ? 
-                            Number(entry.notturne) : null;
-                            
-                        // Per trasferta, usiamo "TR" se è spuntata, altrimenti stringa vuota
-                        const transfertaValue = entry.transferta === true || 
-                            (typeof entry.transferta === 'number' && entry.transferta > 0) ? 
-                            "TR" : "";
-                        
-                        const rowData = {
-                            giorno: dayOfWeek,
-                            data: dateStr,
-                            tipo: 'Lavoro',
-                            mezzo: vehicleName,
-                            oraInizio: entry.startTime || '',
-                            pausa: breakTimeNum, // Manteniamo visibile lo 0 per le pause
-                            oraFine: entry.endTime || '',
-                            oreTrasferte: transfertaValue, // Ora è "TR" o stringa vuota
-                            oreNotturne: notturneNum,
-                            oreTotali: totalHoursNum
-                        };
-                        
-                        // Split description and add to LavoroX columns
-                        const descParts = entry.description ? entry.description.split(descriptionDelimiterRegex).map(s => s.trim()).filter(s => s) : [];
-                        for (let i = 1; i <= maxDescCols; i++) {
-                            rowData[`lavoro${i}`] = descParts[i-1] || '';
+                        // Colonne C-H: Dati orari
+                        for (let j = 3; j <= 8; j++) {
+                            const cell = worksheet.getCell(rowIndex, j);
+                            setCellStyle(cell, { 
+                                bold: true, 
+                                alignment: centerAlignment,
+                                border: thickBorder
+                            });
+                            mergeCells(worksheet, rowIndex, j, rowIndex + 1, j);
                         }
                         
-                        const row = worksheet.addRow(rowData);
-                        
-                        // Determina se è weekend (sabato o domenica)
-                        const dayNum = date.getDay(); // 0 = domenica, 6 = sabato
-                        const isWeekend = dayNum === 0 || dayNum === 6;
-                        
-                        // Determina se ci sono ore notturne o trasferte
-                        const hasNightHours = notturneNum > 0;
-                        const hasTransferHours = transfertaValue === "TR";
-                        
-                        // Scegli il colore di sfondo in base alle condizioni
-                        let bgColor, fontColor = 'FFFFFF'; // Default: testo bianco
-                        
-                        if (isWeekend) {
-                            // Weekend: viola intenso (mantenuto)
-                            bgColor = '673AB7'; // Deep Purple
-                            fontColor = 'FFFFFF'; // Testo bianco
-                        } else if (hasNightHours) {
-                            // Solo ore notturne: grigio scuro
-                            bgColor = '424242'; // Grigio scuro
-                            fontColor = 'FFFFFF'; // Testo bianco
-                        } else if (hasTransferHours) {
-                            // Solo trasferte: grigio più chiaro per maggiore contrasto
-                            bgColor = 'BDBDBD'; // Grigio più chiaro
-                            fontColor = '000000'; // Testo nero per contrasto
-                        } else {
-                            // Normale giorno lavorativo: sfondo bianco senza colore
-                            bgColor = 'FFFFFF'; // Bianco
-                            fontColor = '000000'; // Testo nero
+                        // Colonne I-R: Clienti e ferie/malattie
+                        for (let j = 9; j <= 17; j += 2) {
+                            const cell = worksheet.getCell(rowIndex, j);
+                            setCellStyle(cell, { 
+                                bold: true, 
+                                alignment: centerAlignment,
+                                border: thickBorder
+                            });
+                            mergeCells(worksheet, rowIndex, j, rowIndex + 1, j + 1);
                         }
+                    }
+                    
+                    // Se è la seconda pagina, aggiungi le righe di riepilogo
+                    if (!isFirstPage) {
+                        const summaryRow1 = startRow + 4 + numRows * 2;
+                        const summaryRow2 = summaryRow1 + 1;
                         
-                        for (let i = 1; i <= columns.length; i++) {
-                            const cell = row.getCell(i);
-                            cell.fill = {
+                        // Colonna A-B: Totali
+                        const totalsCell = worksheet.getCell(summaryRow1, 1);
+                        totalsCell.value = "Totali";
+                        setCellStyle(totalsCell, { 
+                            bold: true, 
+                            size: 12, 
+                            alignment: centerAlignment,
+                            border: thickBorder
+                        });
+                        mergeCells(worksheet, summaryRow1, 1, summaryRow2, 2);
+                        
+                        // Colonna C-D: Ore lavorate
+                        const hoursWorkedCell = worksheet.getCell(summaryRow1, 3);
+                        hoursWorkedCell.value = "Ore lavorate";
+                        setCellStyle(hoursWorkedCell, { 
+                            bold: true, 
+                            size: 11, 
+                            alignment: { ...centerAlignment, wrapText: true },
+                            border: thickBorder
+                        });
+                        mergeCells(worksheet, summaryRow1, 3, summaryRow2, 4);
+                        
+                        // Colonna E: Totale ore
+                        const totalHoursCell = worksheet.getCell(summaryRow1, 5);
+                        setCellStyle(totalHoursCell, { 
+                            bold: true, 
+                            size: 12, 
+                            alignment: centerAlignment,
+                            border: thickBorder
+                        });
+                        mergeCells(worksheet, summaryRow1, 5, summaryRow2, 5);
+                        
+                        // Colonna F-G: Giorni lavorati
+                        const daysWorkedCell = worksheet.getCell(summaryRow1, 6);
+                        daysWorkedCell.value = "Giorni lavorati";
+                        setCellStyle(daysWorkedCell, { 
+                            bold: true, 
+                            size: 11, 
+                            alignment: { ...centerAlignment, wrapText: true },
+                            border: thickBorder
+                        });
+                        mergeCells(worksheet, summaryRow1, 6, summaryRow2, 7);
+                        
+                        // Colonna H: Totale giorni lavorati
+                        const totalDaysCell = worksheet.getCell(summaryRow1, 8);
+                        setCellStyle(totalDaysCell, { 
+                            bold: true, 
+                            size: 12, 
+                            alignment: centerAlignment,
+                            border: thickBorder
+                        });
+                        mergeCells(worksheet, summaryRow1, 8, summaryRow2, 8);
+                        
+                        // Colonna I-J: Giorni trasferta (riga 1)
+                        const transfertaDaysCell = worksheet.getCell(summaryRow1, 9);
+                        transfertaDaysCell.value = "Giorni trasferta";
+                        setCellStyle(transfertaDaysCell, { 
+                            bold: true, 
+                            size: 11, 
+                            alignment: centerAlignment,
+                            border: thickBorder
+                        });
+                        mergeCells(worksheet, summaryRow1, 9, summaryRow1, 10);
+                        
+                        // Colonna K: Totale giorni trasferta (riga 1)
+                        const totalTransfertaCell = worksheet.getCell(summaryRow1, 11);
+                        setCellStyle(totalTransfertaCell, { 
+                            bold: true, 
+                            size: 12, 
+                            alignment: centerAlignment,
+                            border: thickBorder
+                        });
+                        
+                        // Colonna L-M: Giorni malattia (riga 1)
+                        const sickDaysCell = worksheet.getCell(summaryRow1, 12);
+                        sickDaysCell.value = "Giorni malattia";
+                        setCellStyle(sickDaysCell, { 
+                            bold: true, 
+                            size: 11, 
+                            alignment: centerAlignment,
+                            border: thickBorder
+                        });
+                        mergeCells(worksheet, summaryRow1, 12, summaryRow1, 13);
+                        
+                        // Colonna N: Totale giorni malattia (riga 1)
+                        const totalSickCell = worksheet.getCell(summaryRow1, 14);
+                        setCellStyle(totalSickCell, { 
+                            bold: true, 
+                            size: 12, 
+                            alignment: centerAlignment,
+                            border: thickBorder
+                        });
+                        
+                        // Colonna I-J: Ore notturne (riga 2)
+                        const nightHoursCell = worksheet.getCell(summaryRow2, 9);
+                        nightHoursCell.value = "Ore notturne";
+                        setCellStyle(nightHoursCell, { 
+                            bold: true, 
+                            size: 11, 
+                            alignment: centerAlignment,
+                            border: thickBorder
+                        });
+                        mergeCells(worksheet, summaryRow2, 9, summaryRow2, 10);
+                        
+                        // Colonna K: Totale ore notturne (riga 2)
+                        const totalNightCell = worksheet.getCell(summaryRow2, 11);
+                        setCellStyle(totalNightCell, { 
+                            bold: true, 
+                            size: 12, 
+                            alignment: centerAlignment,
+                            border: thickBorder
+                        });
+                        
+                        // Colonna L-M: Giorni ferie (riga 2)
+                        const vacationDaysCell = worksheet.getCell(summaryRow2, 12);
+                        vacationDaysCell.value = "Giorni ferie";
+                        setCellStyle(vacationDaysCell, { 
+                            bold: true, 
+                            size: 11, 
+                            alignment: centerAlignment,
+                            border: thickBorder
+                        });
+                        mergeCells(worksheet, summaryRow2, 12, summaryRow2, 13);
+                        
+                        // Colonna N: Totale giorni ferie (riga 2)
+                        const totalVacationCell = worksheet.getCell(summaryRow2, 14);
+                        setCellStyle(totalVacationCell, { 
+                            bold: true, 
+                            size: 12, 
+                            alignment: centerAlignment,
+                            border: thickBorder
+                        });
+                    }
+                }
+                
+                // Aggiungi la prima pagina (16 coppie di righe)
+                addReportPage(1, 16, true);
+                
+                // Aggiungi la seconda pagina (15 coppie di righe)
+                addReportPage(39, 15, false);
+                
+                // Ottieni i dati dal database
+                const db = getDb();
+                
+                // Contatori per i totali
+                let totalHours = 0;
+                let totalWorkDays = 0;
+                let totalTransfertaDays = 0;
+                let totalNightHours = 0;
+                let totalSickDays = 0;
+                let totalVacationDays = 0;
+                
+                // Mappa per tenere traccia delle date già elaborate
+                const processedDates = new Map();
+                
+                // Aggiungi tutti i giorni del mese, indipendentemente se hanno voci o meno
+                const daysInMonth = new Date(parseInt(year), month + 1, 0).getDate(); // Ottiene il numero di giorni nel mese
+                
+                for (let day = 1; day <= daysInMonth; day++) {
+                    // Crea l'oggetto data per questo giorno
+                    const currentDate = new Date(parseInt(year), month, day);
+                    const dateStr = formatDateForInput(currentDate);
+                    
+                    // Determina la riga in base al giorno del mese
+                    let rowIndex;
+                    if (day <= 16) {
+                      // Prima pagina: giorni 1-16
+                        rowIndex = 5 + (day - 1) * 2;
+                      } else {
+                        // Seconda pagina: giorni 17-31
+                        rowIndex = 43 + (day - 17) * 2;
+                    }
+                    
+                    // Aggiungi la data nel formato "Giorno GG/MM" nella colonna A-B
+                    worksheet.getCell(rowIndex, 1).value = formatDateForExcel(currentDate);
+                    
+                    // Controlla se è un weekend (0 = domenica, 6 = sabato)
+                    const isWeekend = currentDate.getDay() === 0 || currentDate.getDay() === 6;
+                    
+                    // Se è un weekend, colora la riga di grigio medio-chiaro
+                    if (isWeekend) {
+                        // Colora tutte le celle della riga di grigio medio-chiaro
+                        for (let col = 1; col <= 20; col++) {
+                            worksheet.getCell(rowIndex, col).fill = {
                                 type: 'pattern',
                                 pattern: 'solid',
-                                fgColor: { argb: bgColor }
-                            };
-                            cell.border = {
-                                top: { style: 'medium', color: { argb: '666666' } },
-                                left: { style: 'medium', color: { argb: '666666' } },
-                                bottom: { style: 'medium', color: { argb: '666666' } },
-                                right: { style: 'medium', color: { argb: '666666' } }
+                                fgColor: { argb: 'FFD3D3D3' } // Grigio medio-chiaro (LightGray)
                             };
                             
-                            // Imposta il colore del testo
-                            cell.font = {
-                                color: { argb: fontColor },
-                                name: 'Arial',
-                                size: 10
-                            };
-                            
-                            // Allineamento centrato per tutte le celle
-                            cell.alignment = { 
-                                horizontal: 'center', 
-                                vertical: 'middle' 
-                            };
-                            
-                            // Format number cells
-                            if (i === 8 || i === 9 || i === 10) { // Trasferte, Notturne, Totali
-                                cell.numFmt = '0.0';
-                            }
-                            // Formato speciale per la pausa (con decimali solo se necessario)
-                            if (i === 6) { // Pausa
-                                cell.numFmt = '0.#'; // Mostra decimali solo se diversi da zero
-                            }
-                        }
-                        
-                        // Highlight total hours with bold
-                        row.getCell(10).font = { 
-                            bold: true, 
-                            color: { argb: fontColor },
-                            name: 'Arial',
-                            size: 10
-                        };
-                        
-                        // Evidenzia le celle specifiche per ore notturne e trasferte se presenti
-                        if (hasNightHours) {
-                            row.getCell(9).font = { 
-                                bold: true, 
-                                color: { argb: 'FFEB3B' }, // Giallo per ore notturne (più visibile su sfondo scuro)
-                                name: 'Arial',
-                                size: 10
+                            // Colora anche la riga successiva (per mantenere lo stile a doppia riga)
+                            worksheet.getCell(rowIndex + 1, col).fill = {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: 'FFD3D3D3' } // Grigio medio-chiaro (LightGray)
                             };
                         }
-                        
-                        if (hasTransferHours) {
-                            const transferHoursCell = row.getCell(8); // Colonna trasferta
-                            
-                            // Se lo sfondo è grigio chiaro, usiamo un colore più scuro per il testo
-                            if (bgColor === 'BDBDBD') {
-                                transferHoursCell.font = {
-                                    bold: true,
-                                    color: { argb: '000000' }, // Nero
-                                    name: 'Arial',
-                                    size: 11 // Dimensione leggermente maggiore
-                                };
-                                // Aggiungiamo un bordo per evidenziare ulteriormente
-                                transferHoursCell.border = {
-                                    top: { style: 'medium', color: { argb: '000000' } },
-                                    left: { style: 'medium', color: { argb: '000000' } },
-                                    bottom: { style: 'medium', color: { argb: '000000' } },
-                                    right: { style: 'medium', color: { argb: '000000' } }
-                                };
-                            } else {
-                                transferHoursCell.font = {
-                                    bold: true,
-                                    color: { argb: '8BC34A' }, // Verde lime per trasferte (più visibile su sfondo scuro)
-                                    name: 'Arial',
-                                    size: 10
-                                };
-                            }
-                        }
-                        
-                        // Se è weekend, evidenzia il giorno della settimana
-                        if (isWeekend) {
-                            row.getCell(1).font = { 
-                                bold: true, 
-                                color: { argb: 'FF9800' }, // Arancione per weekend (più visibile su sfondo scuro)
-                                name: 'Arial',
-                                size: 10
-                            };
-                        }
-                        
-                        monthTotalHours += totalHoursNum;
-                        // Incrementiamo il contatore delle ore notturne
-                        monthTotalNotturne += notturneNum;
-                        // Verifica se ci sono ore o descrizione
-                        if (totalHoursNum > 0) dayHasWork = true;
-                        if (entry.description && entry.description.trim() !== '') dayHasDescription = true;
-                        
-                        // Nota: il conteggio dei giorni di trasferta viene fatto una sola volta per giorno
-                        // dopo aver processato tutte le voci del giorno
-                        
-                        rowsAddedForDay = true;
-                        rowIndex++;
-                    });
-                    
-                    // Nessuno sfondo speciale per la prossima riga
-                    
-                    // Incrementa il contatore dei giorni di trasferta se almeno una voce del giorno ha trasferta
-                    if (entries.some(entry => entry.transferta === true || 
-                        (typeof entry.transferta === 'number' && entry.transferta > 0))) {
-                        monthTotalTransferta += 1; // Contiamo i giorni, non le ore
                     }
                     
-                    // Conta come giorno lavorato se ci sono ore o descrizione
-                    if (dayHasWork || dayHasDescription) monthWorkDays++;
+                    // Segna questa data come elaborata
+                    processedDates.set(dateStr, { rowIndex, isWeekend });
                 }
                 
-                // Add a blank row after each day with data
-                if (rowsAddedForDay) {
-                    worksheet.addRow({});
-                    rowIndex++;
+                // Elabora le voci di lavoro
+                if (db.entries) {
+                    Object.entries(db.entries).forEach(([dateStr, entriesOnDate]) => {
+                        const dateParts = dateStr.split('/');
+                        if (dateParts.length !== 3) return;
+                        
+                        const day = parseInt(dateParts[0]);
+                        const entryMonth = parseInt(dateParts[1]) - 1;
+                        const entryYear = parseInt(dateParts[2]);
+                        
+                        // Salta le voci che non sono del mese/anno corrente
+                        if (entryMonth !== month || entryYear !== parseInt(year)) return;
+                        
+                        // Ottieni la riga dalla mappa delle date elaborate
+                        if (!processedDates.has(dateStr)) return; // Dovrebbe essere già nella mappa, ma per sicurezza
+                        
+                        let rowIndex = processedDates.get(dateStr).rowIndex;
+                        
+                        // Incrementa il conteggio dei giorni lavorati
+                        totalWorkDays++;
+                        
+                        // Elabora tutte le voci per questa data
+                        entriesOnDate.forEach(entry => {
+                            // Aggiungi i dati dell'orario
+                            worksheet.getCell(rowIndex, 3).value = entry.startTime || "";
+                            worksheet.getCell(rowIndex, 4).value = entry.breakTime || "0"; // Inserisci "0" se non c'è pausa
+                            worksheet.getCell(rowIndex, 5).value = entry.endTime || "";
+                            worksheet.getCell(rowIndex, 6).value = entry.transferta ? "SI" : "";
+                            worksheet.getCell(rowIndex, 7).value = entry.notturne || "";
+                            worksheet.getCell(rowIndex, 8).value = entry.totalHours || "";
+                            
+                            // Aggiungi la descrizione nella colonna del cliente appropriata
+                            if (entry.description) {
+                                // Dividi la descrizione in base a vari separatori
+                                // Utilizziamo una regex che considera come separatori: virgola, punto, trattino, barra, due punti e nuova riga
+                                const separatorRegex = /[,.\-\/:]+|\n+/;
+                                const workItems = entry.description
+                                    .split(separatorRegex)
+                                    .map(item => item.trim())
+                                    .filter(item => item.length > 0);
+                                
+                                // Colonne per i clienti
+                                const clientColumns = [9, 11, 13, 15]; // I-J, K-L, M-N, O-P
+                                
+                                // Distribuisci gli elementi di lavoro nelle colonne disponibili
+                                for (let i = 0; i < Math.min(workItems.length, clientColumns.length); i++) {
+                                    const col = clientColumns[i];
+                                    worksheet.getCell(rowIndex, col).value = workItems[i];
+                                }
+                                
+                                // Se non ci sono elementi dopo la divisione, usa la descrizione originale
+                                if (workItems.length === 0) {
+                                    worksheet.getCell(rowIndex, 9).value = entry.description;
+                                }
+                                
+                                // Se ci sono più elementi di quante colonne disponibili, concatena gli elementi rimanenti nell'ultima colonna
+                                if (workItems.length > clientColumns.length) {
+                                    const lastCol = clientColumns[clientColumns.length - 1];
+                                    const lastCell = worksheet.getCell(rowIndex, lastCol);
+                                    const remainingItems = workItems.slice(clientColumns.length);
+                                    lastCell.value = lastCell.value + ", " + remainingItems.join(", ");
+                                }
+                            }
+                            
+                            // Aggiorna i totali
+                            totalHours += parseFloat(entry.totalHours) || 0;
+                            if (entry.transferta) totalTransfertaDays++;
+                            totalNightHours += parseFloat(entry.notturne) || 0;
+                        });
+                    });
                 }
-            }
-            
-            // --- 7. Add summary section ---
-            // Assicuriamoci che la colonna A abbia esattamente la larghezza richiesta
-            worksheet.getColumn('A').width = COLUMN_A_WIDTH;
-            
-            // Add a title for the summary
-            const summaryTitleRow = worksheet.addRow({});
-            
-            summaryTitleRow.getCell(1).value = 'Riepilogo Mensile';
-            summaryTitleRow.getCell(2).value = `${monthName} ${year}`;
-            summaryTitleRow.getCell(1).font = { bold: true, size: 14, color: { argb: '006A6A' } }; // Colore primario dell'app
-            summaryTitleRow.getCell(2).font = { bold: true, size: 14 };
-            
-            // Style the summary title
-            summaryTitleRow.getCell(1).fill = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: 'E6F7F7' } // Colore di sfondo chiaro
-            };
-            summaryTitleRow.getCell(2).fill = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: 'E6F7F7' } // Colore di sfondo chiaro
-            };
-            // Allineamento centrato per il titolo del riepilogo
-            summaryTitleRow.getCell(1).alignment = { 
-                horizontal: 'center', 
-                vertical: 'middle' 
-            };
-            summaryTitleRow.getCell(2).alignment = { 
-                horizontal: 'center', 
-                vertical: 'middle' 
-            };
-            
-            worksheet.addRow({}); // Empty row
-            
-            // Add summary header
-            const summaryHeaderRow = worksheet.addRow({});
-            summaryHeaderRow.getCell(1).value = 'Descrizione';
-            summaryHeaderRow.getCell(2).value = 'Valore';
-            summaryHeaderRow.getCell(1).font = { bold: true, size: 11 };
-            summaryHeaderRow.getCell(2).font = { bold: true, size: 11 };
-            
-            // Imposta altezza della riga di intestazione
-            summaryHeaderRow.height = 22;
-            
-            // Imposta la larghezza della colonna B (Valore)
-            worksheet.getColumn('B').width = 15;
-            summaryHeaderRow.getCell(1).fill = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: 'CCE8E7' } // Colore secondario container
-            };
-            summaryHeaderRow.getCell(2).fill = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: 'CCE8E7' } // Colore secondario container
-            };
-            // Allineamento centrato per le intestazioni del riepilogo
-            summaryHeaderRow.getCell(1).alignment = { 
-                horizontal: 'center', 
-                vertical: 'middle' 
-            };
-            summaryHeaderRow.getCell(2).alignment = { 
-                horizontal: 'center', 
-                vertical: 'middle' 
-            };
-            
-            // Add summary data
-            const addSummaryRow = (label, value, format = '0.0') => {
-                const row = worksheet.addRow({ giorno: label, data: value });
                 
-                // Imposta un'altezza minima per la riga
-                row.height = 22; // Aumentata per garantire spazio sufficiente
+                // Elabora le voci di ferie/malattie
+                if (db.holidays) {
+                    Object.entries(db.holidays).forEach(([dateStr, holiday]) => {
+                        const dateParts = dateStr.split('/');
+                        if (dateParts.length !== 3) return;
+                        
+                        const day = parseInt(dateParts[0]);
+                        const entryMonth = parseInt(dateParts[1]) - 1;
+                        const entryYear = parseInt(dateParts[2]);
+                        
+                        // Salta le voci che non sono del mese/anno corrente
+                        if (entryMonth !== month || entryYear !== parseInt(year)) return;
+                        
+                        // Ottieni la riga dalla mappa delle date elaborate
+                        if (!processedDates.has(dateStr)) return; // Dovrebbe essere già nella mappa, ma per sicurezza
+                        
+                        let rowIndex = processedDates.get(dateStr).rowIndex;
+                        
+                        // Aggiungi il tipo di assenza nella colonna Q-R
+                        worksheet.getCell(rowIndex, 17).value = holiday.type === 'malattia' ? 'MALATTIA' : 'FERIE';
+                        
+                        // Aggiorna i conteggi
+                        if (holiday.type === 'malattia') {
+                            totalSickDays++;
+                        } else {
+                            totalVacationDays++;
+                        }
+                    });
+                }
                 
-                // Stile per la cella dell'etichetta - bordi più marcati
-                row.getCell(1).border = { 
-                    top: { style: 'medium' }, 
-                    left: { style: 'medium' }, 
-                    bottom: { style: 'medium' }, 
-                    right: { style: 'medium' } 
-                };
-                row.getCell(1).alignment = { 
-                    horizontal: 'left', 
-                    vertical: 'middle',
-                    indent: 2, // Aumentata indentazione per migliore leggibilità
-                    wrapText: true // Permette al testo di andare a capo se necessario
-                };
-                // Aggiungiamo stile al testo
-                row.getCell(1).font = {
-                    bold: true,
-                    name: 'Arial',
-                    size: 11 // Dimensione aumentata per migliore leggibilità
-                };
+                // Aggiungi i totali nella seconda pagina
+                // Totale ore lavorate
+                worksheet.getCell(73, 5).value = totalHours.toFixed(2);
                 
-                // Stile per la cella del valore - bordi più marcati
-                row.getCell(2).border = { 
-                    top: { style: 'medium' }, 
-                    left: { style: 'medium' }, 
-                    bottom: { style: 'medium' }, 
-                    right: { style: 'medium' } 
-                };
-                row.getCell(2).alignment = { 
-                    horizontal: 'center', 
-                    vertical: 'middle' 
-                };
-                row.getCell(2).numFmt = format;
-                row.getCell(2).font = { 
-                    bold: true,
-                    name: 'Arial',
-                    size: 11 // Dimensione aumentata per migliore leggibilità
-                };
+                // Totale giorni lavorati
+                worksheet.getCell(73, 8).value = totalWorkDays;
                 
-                return row;
-            };
-            
-            addSummaryRow('Ore Lavorate:', monthTotalHours);
-            addSummaryRow('Giorni Lavorati:', monthWorkDays, '0');
-            addSummaryRow('Giorni Trasferta:', monthTotalTransferta, '0');
-            addSummaryRow('Ore Notturne:', monthTotalNotturne);
-            
-            if (monthFerieDays > 0) {
-                // Aggiungiamo la riga senza colorazione speciale
-                addSummaryRow('Giorni Ferie:', monthFerieDays, '0');
-            }
-            
-            if (monthMalattiaDays > 0) {
-                // Aggiungiamo la riga senza colorazione speciale
-                addSummaryRow('Giorni Malattia:', monthMalattiaDays, '0');
-            }
-            
-            // --- Aggiungi legenda colori ---
-            worksheet.addRow({}); // Riga vuota
-            worksheet.addRow({}); // Riga vuota
-            
-            const legendTitleRow = worksheet.addRow({});
-            legendTitleRow.getCell(1).value = 'LEGENDA';
-            legendTitleRow.getCell(1).font = { bold: true, size: 12 };
-            legendTitleRow.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
-            legendTitleRow.getCell(1).fill = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: '006A6A' } // Colore primario dell'app
-            };
-            legendTitleRow.getCell(1).font.color = { argb: 'FFFFFF' };
-            legendTitleRow.height = 22; // Altezza maggiore per il titolo
-            
-            // Unisci le celle per il titolo della legenda
-            worksheet.mergeCells(`A${legendTitleRow.number}:B${legendTitleRow.number}`);
-            
-            // Manteniamo la larghezza della colonna A come definita in precedenza
-            // e impostiamo una larghezza adeguata per la colonna B nella legenda
-            worksheet.getColumn(2).width = 20; // Colonna della descrizione
-            
-            // Funzione per aggiungere una riga alla legenda
-            const addLegendRow = (description, colorCode) => {
-                const row = worksheet.addRow({});
-                const cell1 = row.getCell(1);
-                const cell2 = row.getCell(2);
+                // Totale giorni trasferta
+                worksheet.getCell(73, 11).value = totalTransfertaDays;
                 
-                // Imposta altezza della riga
-                row.height = 20; // Altezza fissa per tutte le righe della legenda
+                // Totale giorni malattia
+                worksheet.getCell(73, 14).value = totalSickDays;
                 
-                // Colora la prima cella con il colore di esempio
-                cell1.fill = {
-                    type: 'pattern',
-                    pattern: 'solid',
-                    fgColor: { argb: colorCode }
-                };
+                // Totale ore notturne
+                worksheet.getCell(74, 11).value = totalNightHours.toFixed(2);
                 
-                // Aggiungi la descrizione nella seconda cella
-                cell2.value = description;
+                // Totale giorni ferie
+                worksheet.getCell(74, 14).value = totalVacationDays;
                 
-                // Stile per entrambe le celle
-                [cell1, cell2].forEach(cell => {
-                    cell.border = {
-                        top: { style: 'medium' },
-                        left: { style: 'medium' },
-                        bottom: { style: 'medium' },
-                        right: { style: 'medium' }
-                    };
-                    cell.alignment = { vertical: 'middle' };
-                });
-                
-                // Allineamento specifico per la descrizione
-                cell2.alignment.horizontal = 'center'; // Centrato per migliore aspetto
-                cell2.alignment.wrapText = true; // Permette il testo a capo se necessario
-                
-                // Stile del testo
-                cell2.font = {
-                    name: 'Arial',
-                    size: 10,
-                    bold: true // Grassetto per migliore leggibilità
-                };
-                
-                return row;
-            };
-            
-            // Aggiungi le righe della legenda con i colori aggiornati e descrizioni più brevi
-            addLegendRow('Weekend', '673AB7');
-            addLegendRow('Ore notturne', '424242');
-            addLegendRow('Trasferte', 'BDBDBD');
-            addLegendRow('Ferie', 'FFEB3B');
-            addLegendRow('Malattia', 'F44336');
-            
-            // --- 8. Save and download the file ---
-            try {
+                // Esporta il file Excel
                 workbook.xlsx.writeBuffer().then(buffer => {
                     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                    
-                    // Salva il file Excel
-                    saveAs(blob, filename);
-                    
-                    // Salva i metadati del file nel localStorage
-                    saveExcelFileMetadata({
-                        id: Date.now().toString(),
-                        name: filename,
-                        date: new Date().toISOString(),
-                        month: monthName,
-                        year: year,
-                        data: buffer // Salviamo il buffer per poterlo scaricare nuovamente
-                    });
-                    
-                    // Recuperiamo i file esistenti prima dell'aggiornamento
-                    const filesBeforeUpdate = getExcelFiles();
-                    
-                    // Controlliamo se esiste già un file per lo stesso mese e anno
-                    const existingFile = filesBeforeUpdate.find(file => 
-                        file.month === monthName && file.year === year
-                    );
-                    
-                    // Aggiorna la lista dei file Excel (ma non espande automaticamente la sezione)
-                    updateExcelFilesList();
-                    
-                    // Assicuriamoci che la sezione rimanga chiusa
-                    const toggleButton = document.getElementById('toggleExcelFiles');
-                    const container = document.getElementById('excelFilesContainer');
-                    
-                    if (toggleButton && container) {
-                        // Manteniamo lo stato corrente - se era chiusa rimane chiusa
-                        // Se l'utente l'aveva aperta manualmente, rimane aperta
-                    }
-                    
-                    // Mostriamo un messaggio diverso se stiamo sovrascrivendo un file esistente
-                    if (existingFile) {
-                        showToast('Report Excel aggiornato nella lista!', 'success');
-                        console.log(`Esportazione Excel completata (sovrascrittura): ${filename}`);
-                    } else {
-                        showToast('Report Excel esportato e salvato nella lista!', 'success');
-                        console.log(`Esportazione Excel completata (nuovo): ${filename}`);
-                    }
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = excelFilename;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    showToast('Report Excel generato con successo!', 'success');
                 });
-            } catch (excelError) {
-                console.error("Errore durante la creazione del file Excel:", excelError);
-                showToast(`Errore durante la creazione dell'Excel: ${excelError.message}`, "error");
+                
+            } catch (error) {
+                console.error("Errore durante la generazione del report Excel:", error);
+                showToast("Errore durante la generazione del report Excel: " + error.message, "error");
             }
         }
         
@@ -11128,6 +11052,76 @@
                 return `${day}/${month}/${year}`;
             } catch (error) {
                 console.error('Errore nella formattazione della data per input:', error);
+                return '';
+            }
+        }
+        
+        /**
+         * Formats a Date object into a "Giorno GG/MM" string for Excel export.
+         * Returns empty string if date is invalid.
+         */
+        function formatDateForExcel(date) {
+            if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+                return '';
+            }
+            try {
+                const weekdays = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+                const weekday = weekdays[date.getDay()];
+                const day = date.getDate().toString().padStart(2, '0');
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                
+                // Controlla se è un giorno festivo speciale (non weekend)
+                const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                
+                // Verifica se è una festività speciale (non weekend)
+                let isSpecialHoliday = false;
+                
+                // Festività fisse in Italia
+                const fixedHolidays = [
+                    { day: 1, month: 1 },    // Capodanno
+                    { day: 6, month: 1 },    // Epifania
+                    { day: 25, month: 4 },   // Festa della Liberazione
+                    { day: 1, month: 5 },    // Festa del Lavoro
+                    { day: 2, month: 6 },    // Festa della Repubblica
+                    { day: 15, month: 8 },   // Ferragosto
+                    { day: 1, month: 11 },   // Tutti i Santi
+                    { day: 8, month: 12 },   // Immacolata Concezione
+                    { day: 25, month: 12 },  // Natale
+                    { day: 26, month: 12 }   // Santo Stefano
+                ];
+                
+                // Verifica festività fisse
+                if (fixedHolidays.some(holiday => 
+                    holiday.day === date.getDate() && 
+                    holiday.month === (date.getMonth() + 1)
+                )) {
+                    isSpecialHoliday = true;
+                }
+                
+                // Calcola la Pasqua e Lunedì dell'Angelo
+                const easterDate = getEasterDate(date.getFullYear());
+                if (easterDate) {
+                    // Pasqua
+                    if (date.getTime() === easterDate.getTime()) {
+                        isSpecialHoliday = true;
+                    }
+                    
+                    // Lunedì dell'Angelo (Pasquetta) - giorno dopo Pasqua
+                    const easterMonday = new Date(easterDate);
+                    easterMonday.setDate(easterDate.getDate() + 1);
+                    if (date.getTime() === easterMonday.getTime()) {
+                        isSpecialHoliday = true;
+                    }
+                }
+                
+                // Aggiungi la stella gialla solo se è una festività speciale
+                if (isSpecialHoliday) {
+                    return `⭐ ${weekday} ${day}/${month}`;
+                } else {
+                    return `${weekday} ${day}/${month}`;
+                }
+            } catch (error) {
+                console.error('Errore nella formattazione della data per Excel:', error);
                 return '';
             }
         }
