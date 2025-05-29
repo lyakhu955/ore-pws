@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -9786,6 +9786,11 @@
                 // Imposta le larghezze delle colonne
                 for (const [col, width] of Object.entries(columnWidths)) {
                     worksheet.getColumn(col).width = width;
+                    
+                    // Applica il testo a capo alle colonne dei lavori (I, K, M, O)
+                    if (['I', 'K', 'M', 'O'].includes(col)) {
+                        worksheet.getColumn(col).alignment = { wrapText: true };
+                    }
                 }
                 
                 // Imposta le dimensioni delle righe
@@ -10211,15 +10216,27 @@
                                 // Colonne per i clienti
                                 const clientColumns = [9, 11, 13, 15]; // I-J, K-L, M-N, O-P
                                 
+                                // Funzione per applicare il testo a capo alla cella
+                                const applyWrapText = (cell) => {
+                                    if (!cell.alignment) {
+                                        cell.alignment = {};
+                                    }
+                                    cell.alignment.wrapText = true;
+                                };
+                                
                                 // Distribuisci gli elementi di lavoro nelle colonne disponibili
                                 for (let i = 0; i < Math.min(workItems.length, clientColumns.length); i++) {
                                     const col = clientColumns[i];
-                                    worksheet.getCell(rowIndex, col).value = workItems[i];
+                                    const cell = worksheet.getCell(rowIndex, col);
+                                    cell.value = workItems[i];
+                                    applyWrapText(cell);
                                 }
                                 
                                 // Se non ci sono elementi dopo la divisione, usa la descrizione originale
                                 if (workItems.length === 0) {
-                                    worksheet.getCell(rowIndex, 9).value = entry.description;
+                                    const cell = worksheet.getCell(rowIndex, 9);
+                                    cell.value = entry.description;
+                                    applyWrapText(cell);
                                 }
                                 
                                 // Se ci sono più elementi di quante colonne disponibili, concatena gli elementi rimanenti nell'ultima colonna
@@ -10228,6 +10245,7 @@
                                     const lastCell = worksheet.getCell(rowIndex, lastCol);
                                     const remainingItems = workItems.slice(clientColumns.length);
                                     lastCell.value = lastCell.value + ", " + remainingItems.join(", ");
+                                    applyWrapText(lastCell);
                                 }
                             }
                             
