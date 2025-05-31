@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -14286,7 +14286,19 @@ END:VCARD`;
                     // Se il token è scaduto da molto tempo, richiedi un nuovo token completo
                     if (isTokenExpiredLong) {
                         console.log('Token scaduto da più di 24 ore, richiedo un nuovo token completo...');
-                        this.login(true).then(resolve).catch(reject);
+                        // Pulisci il token salvato per evitare loop infiniti
+                        localStorage.removeItem('googleAuthToken');
+                        localStorage.removeItem('googleTokenExpiry');
+                        // Reimposta lo stato di login
+                        this.isLoggedIn = false;
+                        // Mostra un messaggio all'utente
+                        showToast("La sessione è scaduta. Per favore, effettua nuovamente l'accesso.", "warning", 10000);
+                        // Aggiorna l'interfaccia utente
+                        if (typeof updateCloudAccountUI === 'function') {
+                            updateCloudAccountUI();
+                        }
+                        // Rifiuta la promessa per interrompere il ciclo
+                        reject(new Error('Token scaduto, necessario nuovo login manuale'));
                         return;
                     }
                     
@@ -14300,20 +14312,22 @@ END:VCARD`;
                         // Ripristina il callback originale
                         window.googleAuthClient.callback = originalCallback;
                         
-                        // Tenta un login completo
-                        console.log('Tentativo di login completo dopo timeout del refresh...');
-                        this.login(true).then(resolve).catch(loginError => {
-                            console.error('Anche il login completo è fallito dopo timeout:', loginError);
-                            
-                            // Se anche il login completo fallisce, torniamo al token precedente se disponibile
-                            if (currentToken && currentToken.access_token) {
-                                console.log('Ripristino del token precedente dopo timeout');
-                                gapi.client.setToken(currentToken);
-                                resolve(currentToken); // Continuiamo con il token precedente
-                            } else {
-                                this.handleRefreshFailure(currentToken, reject, new Error('Timeout durante il refresh del token'));
-                            }
-                        });
+                        // Pulisci il token salvato per evitare loop infiniti
+                        localStorage.removeItem('googleAuthToken');
+                        localStorage.removeItem('googleTokenExpiry');
+                        // Reimposta lo stato di login
+                        this.isLoggedIn = false;
+                        
+                        // Mostra un messaggio all'utente
+                        showToast("La sessione è scaduta. Per favore, effettua nuovamente l'accesso.", "warning", 10000);
+                        
+                        // Aggiorna l'interfaccia utente
+                        if (typeof updateCloudAccountUI === 'function') {
+                            updateCloudAccountUI();
+                        }
+                        
+                        // Rifiuta la promessa per interrompere il ciclo
+                        reject(new Error('Timeout durante il refresh del token, necessario nuovo login manuale'));
                     }, 30000); // 30 secondi di timeout
                     
                     window.googleAuthClient.callback = (tokenResponse) => {
@@ -14347,21 +14361,23 @@ END:VCARD`;
                         } else {
                             console.warn('Nessun token ricevuto durante il refresh');
                             
-                            // Se il refresh fallisce, tentiamo un login completo
-                            console.log('Tentativo di login completo dopo fallimento del refresh...');
-                            this.login(true).then(resolve).catch(error => {
-                                console.error('Anche il login completo è fallito:', error);
-                                
-                                // Se anche il login completo fallisce, torniamo al token precedente se disponibile
-                                if (currentToken && currentToken.access_token) {
-                                    console.log('Ripristino del token precedente');
-                                    gapi.client.setToken(currentToken);
-                                    resolve(currentToken); // Continuiamo con il token precedente
-                                } else {
-                                    // Se non abbiamo un token precedente, segnala l'errore
-                                    this.handleRefreshFailure(currentToken, reject);
-                                }
-                            });
+                            // Pulisci il token salvato per evitare loop infiniti
+                            localStorage.removeItem('googleAuthToken');
+                            localStorage.removeItem('googleTokenExpiry');
+                            
+                          // Reimposta lo stato di login
+                            this.isLoggedIn = false;
+                            
+                              // Mostra un messaggio all'utente
+                            showToast("La sessione è scaduta. Per favore, effettua nuovamente l'accesso.", "warning", 10000);
+                            
+                            // Aggiorna l'interfaccia utente
+                            if (typeof updateCloudAccountUI === 'function') {
+                                updateCloudAccountUI();
+                            }
+                          
+                            // Rifiuta la promessa per interrompere il ciclo
+                              reject(new Error('Refresh del token fallito, necessario nuovo login manuale'));
                         }
                     };
                     
@@ -14384,21 +14400,9 @@ END:VCARD`;
                         
                         console.error('Errore durante la richiesta del token:', error);
                         
-                        // Tenta un login completo
-                        console.log('Tentativo di login completo dopo errore di refresh...');
-                        this.login(true).then(resolve).catch(loginError => {
-                            console.error('Anche il login completo è fallito:', loginError);
-                            
-                             // Se il refresh silenzioso fallisce, manteniamo la sessione attiva
-                            // e non mostriamo messaggi all'utente per non interrompere l'esperienza
-                            if (currentToken && currentToken.access_token) {
-                                console.log('Mantenimento del token corrente dopo errore di refresh');
-                                gapi.client.setToken(currentToken);
-                                resolve(currentToken);
-                            } else {
-                                this.handleRefreshFailure(currentToken, reject, error);
-                            }
-                        });
+                        // Invece di tentare un login completo, gestiamo direttamente il fallimento
+                        console.log('Gestione fallimento refresh token dopo errore...');
+                        this.handleRefreshFailure(currentToken, reject, error);
                     }
                 });
             }
