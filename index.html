@@ -1,9 +1,64 @@
-﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ore PWS Group (Modern)</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Applicazione per la gestione delle ore di lavoro - Ore PWS Group">
+    <meta name="keywords" content="ore lavoro, timesheet, gestione tempo, PWS Group">
+    <meta name="author" content="PWS Group">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Ore PWS Group - Gestione Ore di Lavoro">
+    <meta property="og:description" content="Applicazione moderna per la gestione delle ore di lavoro con sincronizzazione cloud">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://i.imgur.com/BnllByD.png">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Ore PWS Group - Gestione Ore di Lavoro">
+    <meta name="twitter:description" content="Applicazione moderna per la gestione delle ore di lavoro">
+    <meta name="twitter:image" content="https://i.imgur.com/BnllByD.png">
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#006A6A">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Ore PWS">
+
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="./icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="./icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="./icons/icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="./icons/icon-128x128.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="./icons/icon-128x128.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="./icons/icon-96x96.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="./icons/icon-72x72.png">
+    <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="./icons/icon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="./icons/icon-72x72.png">
+    <link rel="shortcut icon" href="./icons/icon-96x96.png">
+
+    <!-- Dynamic Canonical URL -->
+    <script>
+        // Set canonical URL dynamically based on current domain
+        const canonicalUrl = window.location.origin + window.location.pathname;
+        const canonicalLink = document.createElement('link');
+        canonicalLink.rel = 'canonical';
+        canonicalLink.href = canonicalUrl;
+        document.head.appendChild(canonicalLink);
+
+        // Set Open Graph URL dynamically
+        const ogUrlMeta = document.createElement('meta');
+        ogUrlMeta.property = 'og:url';
+        ogUrlMeta.content = canonicalUrl;
+        document.head.appendChild(ogUrlMeta);
+    </script>
     <!-- Google Fonts: Roboto and Material Symbols Outlined -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17807,8 +17862,9 @@ END:VCARD`;
                 return './' + path;
             }
 
-            // Su Vercel (hostname contiene .vercel.app)
-            if (window.location.hostname.includes('.vercel.app')) {
+            // Su Vercel (hostname contiene .vercel.app) o dominio personalizzato
+            if (window.location.hostname.includes('.vercel.app') ||
+                window.location.hostname.includes('ore-pws.meme')) {
                 return '/' + path;
             }
 
