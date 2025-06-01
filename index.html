@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -13492,7 +13492,7 @@ END:VCARD`;
                         // Configura Google Identity Services
                         window.googleAuthClient = google.accounts.oauth2.initTokenClient({
                             client_id: '990017681774-kmghq0vajmb8lbv7gqv2qsi7fn1rbp4f.apps.googleusercontent.com',
-                            scope: 'https://www.googleapis.com/auth/drive.file openid profile email',
+                            scope: 'https://www.googleapis.com/auth/drive openid profile email',
                             prompt: 'consent',  // Mostra sempre il consenso per garantire il refresh token
                             auto_select: false,  // Lascia che l'utente scelga l'account
                             // Richiedi un token con scadenza più lunga (massimo consentito)
@@ -13562,7 +13562,7 @@ END:VCARD`;
                     // Configura Google Identity Services
                     window.googleAuthClient = google.accounts.oauth2.initTokenClient({
                         client_id: '990017681774-kmghq0vajmb8lbv7gqv2qsi7fn1rbp4f.apps.googleusercontent.com',
-                        scope: 'https://www.googleapis.com/auth/drive.file openid profile email',
+                        scope: 'https://www.googleapis.com/auth/drive openid profile email',
                         prompt: 'consent',  // Mostra sempre il consenso per garantire il refresh token
                         auto_select: false,  // Lascia che l'utente scelga l'account
                         // Richiedi un token con scadenza più lunga (massimo consentito)
@@ -13948,7 +13948,7 @@ END:VCARD`;
                         // Configura un client temporaneo con auto_select: true per il rinnovo silenzioso
                         const tempClient = google.accounts.oauth2.initTokenClient({
                             client_id: '990017681774-kmghq0vajmb8lbv7gqv2qsi7fn1rbp4f.apps.googleusercontent.com',
-                            scope: 'https://www.googleapis.com/auth/drive.file openid profile email',
+                            scope: 'https://www.googleapis.com/auth/drive openid profile email',
                             prompt: 'none',  // Non mostrare alcun prompt all'utente
                             auto_select: true,  // Seleziona automaticamente l'account
                             access_type: 'offline',
@@ -14021,7 +14021,7 @@ END:VCARD`;
                     // Reinizializza il client di autenticazione per assicurarsi che sia aggiornato
                     window.googleAuthClient = google.accounts.oauth2.initTokenClient({
                         client_id: '990017681774-kmghq0vajmb8lbv7gqv2qsi7fn1rbp4f.apps.googleusercontent.com',
-                        scope: 'https://www.googleapis.com/auth/drive.file openid profile email',
+                        scope: 'https://www.googleapis.com/auth/drive openid profile email',
                         prompt: 'consent',  // Mostra sempre il consenso per garantire il refresh token
                         auto_select: false,  // Lascia che l'utente scelga l'account
                         // Richiedi un token con scadenza più lunga (massimo consentito)
