@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿﻿﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -15539,7 +15539,16 @@ END:VCARD`;
 
                         // Chiedi conferma all'utente
                         const backupDate = new Date(result.timestamp).toLocaleString();
-                        if (!confirm(`Ripristinare i dati dal backup del ${backupDate}? I dati attuali verranno sovrascritti.`)) {
+                        const hasLocalData = checkIfLocalDataExists();
+
+                        let confirmMessage;
+                        if (hasLocalData) {
+                            confirmMessage = `⚠️ ATTENZIONE: Hai già dei dati salvati!\n\nRipristinare il backup del ${backupDate}?\n\n❌ I tuoi dati attuali verranno SOVRASCRITTI e persi definitivamente.\n\n✅ Consiglio: Fai prima un backup dei dati attuali.`;
+                        } else {
+                            confirmMessage = `Ripristinare i dati dal backup del ${backupDate}?`;
+                        }
+
+                        if (!confirm(confirmMessage)) {
                             // L'utente ha annullato
                             showToast('Ripristino annullato dall\'utente', 'info');
                             return;
@@ -15718,6 +15727,55 @@ END:VCARD`;
             }
         }
 
+        // Funzione per controllare se esistono dati locali significativi
+        function checkIfLocalDataExists() {
+            try {
+                // Controlla i dati principali del time tracker
+                const timeTrackerData = localStorage.getItem('timeTrackerData');
+                if (timeTrackerData) {
+                    const data = JSON.parse(timeTrackerData);
+                    // Controlla se ci sono entries (ore registrate)
+                    if (data.entries && Object.keys(data.entries).length > 0) {
+                        console.log('Trovate entries nel time tracker:', Object.keys(data.entries).length);
+                        return true;
+                    }
+                    // Controlla se ci sono veicoli configurati
+                    if (data.vehicles && data.vehicles.length > 0) {
+                        console.log('Trovati veicoli configurati:', data.vehicles.length);
+                        return true;
+                    }
+                    // Controlla se ci sono tariffe personalizzate
+                    if (data.rates && (data.rates.normalHour > 0 || data.rates.nightHour > 0)) {
+                        console.log('Trovate tariffe personalizzate');
+                        return true;
+                    }
+                }
+
+                // Controlla se c'è un nome utente configurato
+                const userName = localStorage.getItem('userName');
+                if (userName && userName.trim() !== '' && userName !== 'Utente') {
+                    console.log('Trovato nome utente configurato:', userName);
+                    return true;
+                }
+
+                // Controlla se ci sono file Excel salvati
+                const excelFiles = localStorage.getItem('excelFiles');
+                if (excelFiles) {
+                    const files = JSON.parse(excelFiles);
+                    if (files && files.length > 0) {
+                        console.log('Trovati file Excel salvati:', files.length);
+                        return true;
+                    }
+                }
+
+                console.log('Nessun dato locale significativo trovato');
+                return false;
+            } catch (error) {
+                console.error('Errore nel controllo dati locali:', error);
+                return false; // In caso di errore, assumiamo che non ci siano dati
+            }
+        }
+
         // Aggiungi alla funzione di inizializzazione principale
         document.addEventListener('DOMContentLoaded', async () => {
             // Carica le API di Google
@@ -15740,6 +15798,31 @@ END:VCARD`;
                             // Aggiorna l'interfaccia utente
                             updateProviderSelectionUI();
                             updateCloudAccountUI();
+
+                            // Controlla se esistono dati locali
+                            const hasLocalData = checkIfLocalDataExists();
+                            console.log('Dati locali presenti:', hasLocalData);
+
+                            if (!hasLocalData) {
+                                console.log('Nessun dato locale trovato, controllo backup su Google Drive...');
+                                try {
+                                    // Tenta il ripristino automatico
+                                    await provider.restore();
+                                    showToast("🎉 Dati ripristinati automaticamente dal backup Google Drive!", "success", 5000);
+                                    console.log('Ripristino automatico completato con successo');
+
+                                    // Ricarica la pagina per mostrare i dati ripristinati
+                                    setTimeout(() => {
+                                        window.location.reload();
+                                    }, 2000);
+                                } catch (restoreError) {
+                                    console.log('Nessun backup trovato o errore nel ripristino automatico:', restoreError.message);
+                                    // Non mostrare errore all'utente se è solo perché non c'è backup
+                                    if (!restoreError.message.includes('Nessun backup trovato')) {
+                                        showToast("ℹ️ Benvenuto! Inizia a registrare le tue ore di lavoro.", "info", 4000);
+                                    }
+                                }
+                            }
                         }
                     } catch (e) {
                         console.warn('Impossibile ripristinare automaticamente la sessione:', e);
