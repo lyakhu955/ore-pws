@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -17674,7 +17674,7 @@ END:VCARD`;
 
     <!-- PWA Service Worker Registration -->
     <script>
-        // Configurazione specifica per GitHub Pages
+        // Configurazione per diversi ambienti di deploy
         const REPO_NAME = 'ore-pws';
 
         // Funzione per ottenere il percorso corretto in base all'ambiente
@@ -17691,7 +17691,12 @@ END:VCARD`;
                 return './' + path;
             }
 
-            // In GitHub Pages
+            // Su Vercel (hostname contiene .vercel.app)
+            if (window.location.hostname.includes('.vercel.app')) {
+                return '/' + path;
+            }
+
+            // Su GitHub Pages (fallback)
             return '/' + REPO_NAME + '/' + path;
         }
 
