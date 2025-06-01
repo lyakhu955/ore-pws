@@ -1,9 +1,10 @@
 {
+  "_comment": "Manifest configurato per funzionare su domini multipli: ore-pws.meme e domini Vercel",
   "name": "Ore PWS Group",
   "short_name": "Ore PWS",
   "description": "Applicazione per la gestione delle ore di lavoro",
-  "id": "/",
-  "start_url": "./index.html",
+  "id": "/?source=pwa",
+  "start_url": "./index.html?source=pwa",
   "display": "standalone",
   "background_color": "#FAFDFC",
   "theme_color": "#006A6A",
