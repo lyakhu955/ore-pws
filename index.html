@@ -1,4 +1,4 @@
-﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -14171,6 +14171,7 @@ END:VCARD`;
                         console.log('Nessun file di backup trovato, creazione di un nuovo file...');
 
                         // Crea un nuovo file nella cartella principale di Drive
+                        console.log('Creazione nuovo file backup con nome:', this.backupFileName);
                         const fileMetadata = {
                             name: this.backupFileName,
                             // Non specifichiamo parents, così il file sarà salvato nella cartella principale
@@ -14545,17 +14546,49 @@ END:VCARD`;
                     }
 
                     console.log('Avvio ripristino da Google Drive...');
+                    console.log('Nome file cercato:', this.backupFileName);
 
-                    // Trova il file di backup nella cartella principale di Drive
-                    const response = await gapi.client.drive.files.list({
+                    // Prima prova: cerca il file specifico
+                    console.log('Tentativo 1: Ricerca file specifico...');
+                    let response = await gapi.client.drive.files.list({
                         fields: 'files(id, name, modifiedTime)',
                         q: `name='${this.backupFileName}' and trashed=false`
                     });
 
-                    const files = response.result.files;
+                    let files = response.result.files;
+                    console.log('File trovati (ricerca specifica):', files);
+
+                    // Se non trova nulla, prova una ricerca più ampia
+                    if (!files || files.length === 0) {
+                        console.log('Tentativo 2: Ricerca più ampia...');
+                        response = await gapi.client.drive.files.list({
+                            fields: 'files(id, name, modifiedTime)',
+                            q: `name contains 'Ore PWS' and name contains 'Backup' and trashed=false`
+                        });
+                        files = response.result.files;
+                        console.log('File trovati (ricerca ampia):', files);
+                    }
+
+                    // Se ancora non trova nulla, lista tutti i file JSON
+                    if (!files || files.length === 0) {
+                        console.log('Tentativo 3: Lista tutti i file JSON...');
+                        response = await gapi.client.drive.files.list({
+                            fields: 'files(id, name, modifiedTime)',
+                            q: `name contains '.json' and trashed=false`
+                        });
+                        files = response.result.files;
+                        console.log('Tutti i file JSON trovati:', files);
+
+                        // Filtra manualmente per trovare il backup
+                        files = files.filter(file =>
+                            file.name.includes('Ore PWS') &&
+                            file.name.includes('Backup')
+                        );
+                        console.log('File backup filtrati manualmente:', files);
+                    }
 
                     if (!files || files.length === 0) {
-                        console.warn('Nessun backup trovato su Google Drive');
+                        console.warn('Nessun backup trovato su Google Drive dopo tutti i tentativi');
                         throw new Error("Nessun backup trovato");
                     }
 
