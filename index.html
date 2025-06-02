@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -10213,14 +10213,25 @@
                 // Prima pagina: A1:R38, Seconda pagina: A39:R75
 
                 // Aggiungi interruzione di pagina manuale dopo la riga 38
+                // Provo diversi metodi per garantire la divisione corretta
+
+                // Metodo 1: PageBreaks con ID corretto (provo con 37 per forzare dopo riga 38)
                 worksheet.pageBreaks = {
                     rowBreaks: [
-                        { id: 38, max: 16383, man: true }  // Interruzione manuale dopo riga 38
+                        { id: 37, max: 16383, man: true }  // Interruzione manuale dopo riga 37 (per forzare divisione dopo 38)
                     ],
                     colBreaks: [] // Nessuna interruzione di colonna necessaria
                 };
 
-                // Imposta range di stampa specifici tramite named ranges
+                // Metodo 2: Aggiungi interruzione di pagina tramite riga
+                try {
+                    const row38 = worksheet.getRow(38);
+                    row38.addPageBreak();
+                } catch (error) {
+                    console.log('Errore nell\'aggiunta dell\'interruzione di pagina alla riga:', error);
+                }
+
+                // Metodo 3: Imposta range di stampa specifici tramite named ranges
                 // Migliora la compatibilità con diversi software di visualizzazione PDF
                 try {
                     workbook.definedNames.add('Prima_Pagina', 'Report Ore!$A$1:$R$38');
@@ -10768,6 +10779,11 @@
                 worksheet.pageSetup.pageOrder = 'downThenOver';
                 worksheet.pageSetup.cellComments = 'None';
                 worksheet.pageSetup.errors = 'displayed';
+
+                // *** STRATEGIA AGGIUNTIVA: VERIFICA E DEBUG ***
+                // Verifica finale delle interruzioni di pagina
+                console.log('Interruzioni di pagina impostate:', worksheet.pageBreaks);
+                console.log('Print area impostata:', worksheet.pageSetup.printArea);
 
                 // Esporta il file Excel
                 workbook.xlsx.writeBuffer().then(buffer => {
