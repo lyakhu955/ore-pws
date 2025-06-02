@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -10777,12 +10777,12 @@
                     a.download = excelFilename;
                     a.click();
                     window.URL.revokeObjectURL(url);
-                    showToast('Report Excel generato con successo!', 'success');
+                    showToast('Report Mezzi Excel generato con successo!', 'success');
                 });
 
             } catch (error) {
-                console.error("Errore durante la generazione del report Excel:", error);
-                showToast("Errore durante la generazione del report Excel: " + error.message, "error");
+                console.error("Errore durante la generazione del Report Mezzi:", error);
+                showToast("Errore durante la generazione del Report Mezzi: " + error.message, "error");
             }
         }
 
@@ -10805,24 +10805,44 @@
                 const monthIndex = monthNum - 1;
                 const monthName = new Date(year, monthIndex, 1).toLocaleDateString('it-IT', { month: 'long' });
                 const excelFilename = `ReportOre_${userName}_${monthName}_${year}.xlsx`;
-                const monthNames = [
-                    "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
-                    "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
-                ];
 
-                const monthName = monthNames[month];
+                // Mostra messaggio con istruzioni per la conversione in PDF
+                showToast(`File Excel "${excelFilename}" generato. Per convertirlo in PDF, aprilo con Excel e usa "Salva con nome" > "PDF".`, 'info', 8000);
+
+            } catch (error) {
+                console.error("Errore durante la conversione in PDF:", error);
+                showToast("Errore durante la conversione in PDF: " + error.message, "error");
+            }
+        }
+
+        // CODICE DUPLICATO RIMOSSO
+
+        function exportMonthlyReportToPdf(yearMonth) {
+            console.log(`Inizio conversione in PDF per ${yearMonth}...`);
+            if (!yearMonth) {
+                showToast("Seleziona un mese da convertire.", "warning");
+                return;
+            }
+
+            try {
+                // Prima esportiamo il file Excel normalmente
+                exportMonthlyReportToExcel(yearMonth);
+
+                // Poi mostriamo un messaggio all'utente con istruzioni per la conversione in PDF
                 const userName = localStorage.getItem('userName') || 'Utente';
-                const excelFilename = `ReportMezzi_${userName}_${monthName}_${year}.xlsx`;
+                const [year, monthNum] = yearMonth.split('-').map(Number);
+                const monthIndex = monthNum - 1;
+                const monthName = new Date(year, monthIndex, 1).toLocaleDateString('it-IT', { month: 'long' });
+                const excelFilename = `ReportOre_${userName}_${monthName}_${year}.xlsx`;
 
-                // Crea un nuovo workbook solo per i mezzi
-                const workbook = new ExcelJS.Workbook();
-                workbook.creator = 'Ore PWS Group';
-                workbook.lastModifiedBy = userName;
-                workbook.created = new Date();
-                workbook.modified = new Date();
+                // Mostra messaggio con istruzioni per la conversione in PDF
+                showToast(`File Excel "${excelFilename}" generato. Per convertirlo in PDF, aprilo con Excel e usa "Salva con nome" > "PDF".`, 'info', 8000);
 
-                // Crea il foglio per i mezzi
-                const vehicleWorksheet = workbook.addWorksheet('Report Mezzi', {
+            } catch (error) {
+                console.error("Errore durante la conversione in PDF:", error);
+                showToast("Errore durante la conversione in PDF: " + error.message, "error");
+            }
+        }
                     pageSetup: {
                         paperSize: 9, // A4
                         orientation: 'landscape', // Orientamento orizzontale
