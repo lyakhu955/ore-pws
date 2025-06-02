@@ -1,4 +1,4 @@
-﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -10970,10 +10970,142 @@
                     }
                 });
 
-                // Qui aggiungerò tutto il codice per popolare il foglio mezzi
-                // (lo copio dalla funzione originale)
+                // Popola il foglio mezzi con i dati del mese selezionato
+                const db = getDb();
 
-                showToast("Funzione Report Mezzi in sviluppo...", "info");
+                // Configura le colonne
+                const vehicleColumnWidths = {
+                    'A': 8.11, 'B': 8.11, 'C': 15, 'D': 15, 'E': 12, 'F': 12, 'G': 12, 'H': 12
+                };
+
+                const columnCorrectionFactor = 1.2;
+                for (const [col, width] of Object.entries(vehicleColumnWidths)) {
+                    vehicleWorksheet.getColumn(col).width = width * columnCorrectionFactor;
+                    if (col === 'D') {
+                        vehicleWorksheet.getColumn(col).alignment = { wrapText: true };
+                    }
+                }
+
+                // Intestazione
+                vehicleWorksheet.getCell(1, 1).value = `REPORT MEZZI ${userName.toUpperCase()}`;
+                vehicleWorksheet.getCell(2, 1).value = `MESE: ${monthName.toUpperCase()} ${year}`;
+
+                // Unisci celle intestazione
+                vehicleWorksheet.mergeCells('A1:H1');
+                vehicleWorksheet.mergeCells('A2:H2');
+
+                // Stile intestazione
+                vehicleWorksheet.getCell(1, 1).font = { bold: true, size: 16 };
+                vehicleWorksheet.getCell(1, 1).alignment = { horizontal: 'center', vertical: 'middle' };
+                vehicleWorksheet.getCell(2, 1).font = { bold: true, size: 14 };
+                vehicleWorksheet.getCell(2, 1).alignment = { horizontal: 'center', vertical: 'middle' };
+
+                // Headers colonne
+                const headerRow = 3;
+                vehicleWorksheet.getCell(headerRow, 1).value = "DATA";
+                vehicleWorksheet.mergeCells(`A${headerRow}:B${headerRow}`);
+
+                vehicleWorksheet.getCell(headerRow, 3).value = "MEZZO UTILIZZATO";
+                vehicleWorksheet.mergeCells(`C${headerRow}:D${headerRow}`);
+
+                const workHeaders = ["LAVORO 1", "LAVORO 2", "LAVORO 3", "LAVORO 4"];
+                for (let i = 0; i < workHeaders.length; i++) {
+                    const col = String.fromCharCode(69 + i); // E, F, G, H
+                    vehicleWorksheet.getCell(headerRow, 5 + i).value = workHeaders[i];
+                }
+
+                // Stile headers
+                for (let col = 1; col <= 8; col++) {
+                    const cell = vehicleWorksheet.getCell(headerRow, col);
+                    cell.font = { bold: true };
+                    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                    cell.border = {
+                        top: { style: 'thick' }, bottom: { style: 'thick' },
+                        left: { style: 'thick' }, right: { style: 'thick' }
+                    };
+                }
+
+                // Popola i dati
+                let currentRow = 4;
+                const daysInMonth = new Date(parseInt(year), month + 1, 0).getDate();
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateStr = `${year}-${monthStr.padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                    const currentDate = new Date(parseInt(year), month, day);
+                    const isWeekend = currentDate.getDay() === 0 || currentDate.getDay() === 6;
+
+                    // Data
+                    vehicleWorksheet.getCell(currentRow, 1).value = day;
+                    vehicleWorksheet.mergeCells(`A${currentRow}:B${currentRow}`);
+
+                    // Cerca mezzi utilizzati per questo giorno
+                    const dayEntry = db.entries && db.entries[dateStr];
+                    const vehicles = dayEntry && dayEntry.vehicles ? dayEntry.vehicles : {};
+
+                    if (Object.keys(vehicles).length > 0) {
+                        let isFirst = true;
+                        for (const [vehicleName, vehicleData] of Object.entries(vehicles)) {
+                            if (!isFirst) {
+                                currentRow++;
+                                vehicleWorksheet.getCell(currentRow, 1).value = day;
+                                vehicleWorksheet.mergeCells(`A${currentRow}:B${currentRow}`);
+                            }
+
+                            // Mezzo utilizzato
+                            vehicleWorksheet.getCell(currentRow, 3).value = vehicleName;
+                            vehicleWorksheet.mergeCells(`C${currentRow}:D${currentRow}`);
+
+                            // Lavori (semplificato)
+                            const workText = vehicleData.work || '';
+                            vehicleWorksheet.getCell(currentRow, 5).value = workText;
+
+                            isFirst = false;
+                        }
+                    } else {
+                        // Nessun mezzo utilizzato
+                        vehicleWorksheet.getCell(currentRow, 3).value = '';
+                        vehicleWorksheet.mergeCells(`C${currentRow}:D${currentRow}`);
+                    }
+
+                    // Stile weekend
+                    if (isWeekend) {
+                        for (let col = 1; col <= 8; col++) {
+                            vehicleWorksheet.getCell(currentRow, col).fill = {
+                                type: 'pattern', pattern: 'solid',
+                                fgColor: { argb: 'FFE0E0E0' }
+                            };
+                        }
+                    }
+
+                    // Bordi
+                    for (let col = 1; col <= 8; col++) {
+                        vehicleWorksheet.getCell(currentRow, col).border = {
+                            top: { style: 'thin' }, bottom: { style: 'thin' },
+                            left: { style: 'thin' }, right: { style: 'thin' }
+                        };
+                    }
+
+                    currentRow++;
+                }
+
+                // Esporta il file
+                workbook.xlsx.writeBuffer().then(buffer => {
+                    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = excelFilename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+
+                    showToast(`Report Mezzi esportato: ${excelFilename}`, "success");
+                    console.log(`File Excel Report Mezzi salvato: ${excelFilename}`);
+                }).catch(error => {
+                    console.error("Errore durante il salvataggio del Report Mezzi:", error);
+                    showToast("Errore durante il salvataggio del Report Mezzi.", "error");
+                });
 
             } catch (error) {
                 console.error("Errore durante l'esportazione Report Mezzi:", error);
