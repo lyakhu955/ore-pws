@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -10435,6 +10435,8 @@
             }
         }
 
+        // PRIMA FUNZIONE exportVehicleReportToExcel DUPLICATA RIMOSSA
+
         function exportVehicleReportToExcel(yearMonth) {
             console.log(`Inizio esportazione Report Mezzi per ${yearMonth}...`);
             if (!yearMonth) {
@@ -10784,24 +10786,25 @@
             }
         }
 
-        function exportVehicleReportToExcel(yearMonth) {
-            console.log(`Inizio esportazione Report Mezzi per ${yearMonth}...`);
+        // SECONDA FUNZIONE exportVehicleReportToExcel DUPLICATA RIMOSSA
+
+        function exportMonthlyReportToPdf(yearMonth) {
+            console.log(`Inizio conversione in PDF per ${yearMonth}...`);
             if (!yearMonth) {
-                showToast("Seleziona un mese da esportare.", "warning");
-                return;
-            }
-            if (typeof ExcelJS === 'undefined') {
-                showToast("Libreria per export Excel non caricata.", "error");
-                console.error("Libreria ExcelJS non trovata.");
+                showToast("Seleziona un mese da convertire.", "warning");
                 return;
             }
 
             try {
-                // Estrai anno e mese dalla stringa yearMonth (formato: "YYYY-MM")
-                const [year, monthStr] = yearMonth.split('-');
-                const month = parseInt(monthStr) - 1; // Mese è 0-based in JavaScript
+                // Prima esportiamo il file Excel normalmente
+                exportMonthlyReportToExcel(yearMonth);
 
-                // Nomi dei mesi in italiano
+                // Poi mostriamo un messaggio all'utente con istruzioni per la conversione in PDF
+                const userName = localStorage.getItem('userName') || 'Utente';
+                const [year, monthNum] = yearMonth.split('-').map(Number);
+                const monthIndex = monthNum - 1;
+                const monthName = new Date(year, monthIndex, 1).toLocaleDateString('it-IT', { month: 'long' });
+                const excelFilename = `ReportOre_${userName}_${monthName}_${year}.xlsx`;
                 const monthNames = [
                     "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
                     "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
