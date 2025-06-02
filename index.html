@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -18982,17 +18982,26 @@ END:VCARD`;
                             console.log('Provider Google selezionato:', success);
                         }
 
-                        // Simula il click sul pulsante Google Drive delle impostazioni
+                        // Prova prima il click sul pulsante delle impostazioni
                         const googleLoginBtn = document.getElementById('googleLoginBtn');
                         if (googleLoginBtn) {
                             // Usa lo stesso pulsante delle impostazioni
                             googleLoginBtn.click();
                             showToast("Login Google Drive avviato! Segui le istruzioni nel popup.", "success", 5000);
                         } else {
-                            // Se il pulsante non esiste, usa la funzione diretta
-                            if (typeof loginWithSelectedProvider === 'function') {
-                                await loginWithSelectedProvider();
-                                showToast("Login Google Drive completato! I tuoi dati sono ora al sicuro.", "success", 5000);
+                            // Se il pulsante non esiste, usa il provider direttamente
+                            if (window.cloudManager && cloudManager.providers.google) {
+                                const googleProvider = cloudManager.providers.google;
+                                const userData = await googleProvider.login(true);
+
+                                if (userData) {
+                                    // Imposta il provider come corrente dopo il login riuscito
+                                    cloudManager.setSelectedProvider('google');
+                                    cloudManager.currentProvider = 'google';
+                                    showToast("Login Google Drive completato! I tuoi dati sono ora al sicuro.", "success", 5000);
+                                } else {
+                                    throw new Error("Login fallito");
+                                }
                             } else {
                                 // Ultimo fallback: vai alle impostazioni
                                 const settingsNavItem = document.querySelector('.nav-item[data-section="settings-section"]');
