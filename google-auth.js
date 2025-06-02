@@ -1159,6 +1159,9 @@ function integrateWithCloudManager() {
   } else {
     console.warn('Sistema di backup cloud non trovato');
   }
+  } catch (error) {
+    console.error('Errore durante l\'integrazione con il sistema di backup cloud:', error);
+  }
 }
 
 // Trova o crea il file di backup
