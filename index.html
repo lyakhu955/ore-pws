@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -9780,8 +9780,8 @@
                 workbook.created = new Date();
                 workbook.modified = new Date();
 
-                // Configurazione comune per i fogli ore
-                const hoursPageSetup = {
+                // Configurazione per il primo foglio ore (forzato a 1 pagina)
+                const worksheet1PageSetup = {
                     pageSetup: {
                         paperSize: 9, // A4
                         orientation: 'landscape', // Orientamento orizzontale
@@ -9794,25 +9794,39 @@
                             footer: 0
                         },
                         fitToPage: true,
-                        fitToWidth: 1, // Adatta a 1 pagina in larghezza (tutte le colonne su una pagina)
-                        fitToHeight: 0, // Non adattare in altezza (0 = usa quante pagine servono)
+                        fitToWidth: 1, // Adatta a 1 pagina in larghezza
+                        fitToHeight: 1, // Forza a 1 pagina in altezza
                         printArea: 'A1:R38', // Area di stampa per singola pagina
                         horizontalCentered: true
                     }
                 };
 
                 // Crea il primo foglio per la prima metà del mese (giorni 1-16)
-                const worksheet1 = workbook.addWorksheet('Report Ore - Prima Metà', hoursPageSetup);
+                const worksheet1 = workbook.addWorksheet('Report Ore - Prima Metà', worksheet1PageSetup);
 
-                // Crea il secondo foglio per la seconda metà del mese (giorni 17-31)
-                const worksheet2Config = {
-                    ...hoursPageSetup,
+                // Configurazione per il secondo foglio ore (con totali)
+                const worksheet2PageSetup = {
                     pageSetup: {
-                        ...hoursPageSetup.pageSetup,
-                        printArea: 'A1:R36' // Area di stampa per seconda metà con totali
+                        paperSize: 9, // A4
+                        orientation: 'landscape', // Orientamento orizzontale
+                        margins: {
+                            left: 0,
+                            right: 0,
+                            top: 0,
+                            bottom: 0,
+                            header: 0,
+                            footer: 0
+                        },
+                        fitToPage: true,
+                        fitToWidth: 1, // Adatta a 1 pagina in larghezza
+                        fitToHeight: 1, // Forza a 1 pagina in altezza
+                        printArea: 'A1:R36', // Area di stampa per seconda metà con totali
+                        horizontalCentered: true
                     }
                 };
-                const worksheet2 = workbook.addWorksheet('Report Ore - Seconda Metà', worksheet2Config);
+
+                // Crea il secondo foglio per la seconda metà del mese (giorni 17-31)
+                const worksheet2 = workbook.addWorksheet('Report Ore - Seconda Metà', worksheet2PageSetup);
 
                 // Crea il terzo foglio per i mezzi
                 const vehicleWorksheet = workbook.addWorksheet('Report Mezzi', {
