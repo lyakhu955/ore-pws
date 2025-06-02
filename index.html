@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -10491,10 +10491,86 @@
                     }
                 });
 
-                // Resto del codice della funzione verrà aggiunto qui
-                // Per ora salto alla fine per completare la struttura
+                // Ottieni i dati dal database
+                const db = getDb();
 
-                // Esporta il file Excel
+                // Funzioni helper per la formattazione Excel
+                const setCellStyle = (cell, style) => {
+                    if (style.bold) cell.font = { ...cell.font, bold: true };
+                    if (style.size) cell.font = { ...cell.font, size: style.size };
+                    if (style.alignment) cell.alignment = style.alignment;
+                    if (style.border) cell.border = style.border;
+                    if (style.fill) cell.fill = style.fill;
+                };
+
+                const mergeCells = (worksheet, startRow, startCol, endRow, endCol) => {
+                    worksheet.mergeCells(startRow, startCol, endRow, endCol);
+                };
+
+                // Stili comuni
+                const centerAlignment = { vertical: 'middle', horizontal: 'center' };
+                const thickBorder = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' }
+                };
+
+                // Crea l'intestazione del foglio
+                const headerCell = vehicleWorksheet.getCell(1, 1);
+                headerCell.value = `REPORT MEZZI - ${monthName.toUpperCase()} ${year}`;
+                setCellStyle(headerCell, {
+                    bold: true,
+                    size: 16,
+                    alignment: centerAlignment
+                });
+                mergeCells(vehicleWorksheet, 1, 1, 1, 12);
+
+                // Crea le intestazioni delle colonne
+                const headers = ['DATA', '', 'MEZZO', '', 'LAVORO 1', '', 'LAVORO 2', '', 'LAVORO 3', '', 'LAVORO 4', ''];
+                headers.forEach((header, index) => {
+                    const cell = vehicleWorksheet.getCell(3, index + 1);
+                    cell.value = header;
+                    setCellStyle(cell, {
+                        bold: true,
+                        alignment: centerAlignment,
+                        border: thickBorder
+                    });
+                });
+
+                // Merge delle celle per le intestazioni
+                mergeCells(vehicleWorksheet, 3, 1, 3, 2); // DATA
+                mergeCells(vehicleWorksheet, 3, 3, 3, 4); // MEZZO
+                mergeCells(vehicleWorksheet, 3, 5, 3, 6); // LAVORO 1
+                mergeCells(vehicleWorksheet, 3, 7, 3, 8); // LAVORO 2
+                mergeCells(vehicleWorksheet, 3, 9, 3, 10); // LAVORO 3
+                mergeCells(vehicleWorksheet, 3, 11, 3, 12); // LAVORO 4
+
+                // Imposta la larghezza delle colonne
+                vehicleWorksheet.columns = [
+                    { width: 12 }, { width: 12 }, // DATA
+                    { width: 15 }, { width: 15 }, // MEZZO
+                    { width: 20 }, { width: 20 }, // LAVORO 1
+                    { width: 20 }, { width: 20 }, // LAVORO 2
+                    { width: 20 }, { width: 20 }, // LAVORO 3
+                    { width: 20 }, { width: 20 }  // LAVORO 4
+                ];
+
+                // Funzione helper per formattare la data per Excel
+                const formatDateForExcel = (date) => {
+                    const day = date.getDate().toString().padStart(2, '0');
+                    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                    const year = date.getFullYear();
+                    return `${day}/${month}/${year}`;
+                };
+
+                // Genera i dati per ogni giorno del mese
+                let currentRow = 4;
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const monthlyVehicleUsage = new Map();
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const currentDate = new Date(year, month, day);
                     const dateStr = formatDate(currentDate);
 
                     // Controlla se è un weekend (0 = domenica, 6 = sabato)
