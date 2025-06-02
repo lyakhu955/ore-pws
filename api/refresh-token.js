@@ -57,6 +57,10 @@ export default async function handler(req, res) {
     console.log('Client ID configured:', process.env.GOOGLE_CLIENT_ID ? 'YES' : 'NO');
     console.log('Client Secret configured:', process.env.GOOGLE_CLIENT_SECRET ? 'YES' : 'NO');
 
+    // Aggiungi timeout per evitare richieste che si bloccano
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 secondi timeout
+
     // Chiama l'API di Google per rinnovare il token
     const response = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
@@ -68,8 +72,12 @@ export default async function handler(req, res) {
         client_secret: process.env.GOOGLE_CLIENT_SECRET,
         refresh_token: refreshToken,
         grant_type: 'refresh_token'
-      })
+      }),
+      signal: controller.signal
     });
+
+    // Cancella il timeout se la richiesta è completata
+    clearTimeout(timeoutId);
 
     const data = await response.json();
 
@@ -95,6 +103,16 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Refresh token error:', error);
+
+    // Gestisci specificamente gli errori di timeout
+    if (error.name === 'AbortError') {
+      return res.status(408).json({
+        error: 'Request timeout',
+        message: 'Timeout durante la richiesta di rinnovo del token',
+        details: 'La richiesta a Google ha impiegato troppo tempo'
+      });
+    }
+
     res.status(500).json({
       error: 'Internal server error',
       message: 'Errore interno del server durante il rinnovo del token',
