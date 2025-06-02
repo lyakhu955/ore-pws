@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -9780,8 +9780,8 @@
                 workbook.created = new Date();
                 workbook.modified = new Date();
 
-                // Crea un foglio di lavoro per le ore
-                const worksheet = workbook.addWorksheet('Report Ore', {
+                // Configurazione comune per i fogli ore
+                const hoursPageSetup = {
                     pageSetup: {
                         paperSize: 9, // A4
                         orientation: 'landscape', // Orientamento orizzontale
@@ -9796,12 +9796,25 @@
                         fitToPage: true,
                         fitToWidth: 1, // Adatta a 1 pagina in larghezza (tutte le colonne su una pagina)
                         fitToHeight: 0, // Non adattare in altezza (0 = usa quante pagine servono)
-                        printArea: 'A1:R74',
+                        printArea: 'A1:R38', // Area di stampa per singola pagina
                         horizontalCentered: true
                     }
-                });
+                };
 
-                // Crea un secondo foglio di lavoro per i mezzi
+                // Crea il primo foglio per la prima metà del mese (giorni 1-16)
+                const worksheet1 = workbook.addWorksheet('Report Ore - Prima Metà', hoursPageSetup);
+
+                // Crea il secondo foglio per la seconda metà del mese (giorni 17-31)
+                const worksheet2Config = {
+                    ...hoursPageSetup,
+                    pageSetup: {
+                        ...hoursPageSetup.pageSetup,
+                        printArea: 'A1:R36' // Area di stampa per seconda metà con totali
+                    }
+                };
+                const worksheet2 = workbook.addWorksheet('Report Ore - Seconda Metà', worksheet2Config);
+
+                // Crea il terzo foglio per i mezzi
                 const vehicleWorksheet = workbook.addWorksheet('Report Mezzi', {
                     pageSetup: {
                         paperSize: 9, // A4
@@ -9855,15 +9868,21 @@
                     columnWidths[col] = width * columnCorrectionFactor;
                 }
 
-                // Imposta le larghezze delle colonne per il foglio ore
-                for (const [col, width] of Object.entries(columnWidths)) {
-                    worksheet.getColumn(col).width = width;
+                // Funzione per impostare le larghezze delle colonne per i fogli ore
+                function setupHoursWorksheetColumns(worksheet) {
+                    for (const [col, width] of Object.entries(columnWidths)) {
+                        worksheet.getColumn(col).width = width;
 
-                    // Applica il testo a capo alle colonne dei lavori (I, K, M, O)
-                    if (['I', 'K', 'M', 'O'].includes(col)) {
-                        worksheet.getColumn(col).alignment = { wrapText: true };
+                        // Applica il testo a capo alle colonne dei lavori (I, K, M, O)
+                        if (['I', 'K', 'M', 'O'].includes(col)) {
+                            worksheet.getColumn(col).alignment = { wrapText: true };
+                        }
                     }
                 }
+
+                // Imposta le larghezze delle colonne per entrambi i fogli ore
+                setupHoursWorksheetColumns(worksheet1);
+                setupHoursWorksheetColumns(worksheet2);
 
                 // Configurazione del foglio mezzi
                 // Larghezze delle colonne per il foglio mezzi
@@ -9908,10 +9927,20 @@
                     rowHeights[row] = height * rowCorrectionFactor;
                 }
 
-                // Imposta le altezze delle righe
-                for (const [row, height] of Object.entries(rowHeights)) {
-                    worksheet.getRow(parseInt(row)).height = height;
+                // Funzione per impostare le altezze delle righe per i fogli ore
+                function setupHoursWorksheetRows(worksheet) {
+                    // Imposta le altezze solo per le righe 1-38 (una singola pagina)
+                    for (const [row, height] of Object.entries(rowHeights)) {
+                        const rowNum = parseInt(row);
+                        if (rowNum <= 38) {
+                            worksheet.getRow(rowNum).height = height;
+                        }
+                    }
                 }
+
+                // Imposta le altezze delle righe per entrambi i fogli ore
+                setupHoursWorksheetRows(worksheet1);
+                setupHoursWorksheetRows(worksheet2);
 
                 // Funzione per unire celle
                 function mergeCells(worksheet, startRow, startCol, endRow, endCol) {
@@ -9937,7 +9966,7 @@
                 };
 
                 // Funzione per aggiungere una pagina al report
-                function addReportPage(startRow, numRows, isFirstPage = true) {
+                function addReportPage(worksheet, startRow, numRows, isFirstPage = true) {
                     // Riga 1-2: Nome utente e mese/anno
                     // Colonne A-H: Nome utente
                     const userNameCell = worksheet.getCell(`A${startRow}`);
@@ -10196,11 +10225,11 @@
                     }
                 }
 
-                // Aggiungi la prima pagina (16 coppie di righe)
-                addReportPage(1, 16, true);
+                // Aggiungi la prima pagina nel primo foglio (16 coppie di righe)
+                addReportPage(worksheet1, 1, 16, true);
 
-                // Aggiungi la seconda pagina (15 coppie di righe)
-                addReportPage(39, 15, false);
+                // Aggiungi la seconda pagina nel secondo foglio (15 coppie di righe) con totali
+                addReportPage(worksheet2, 1, 15, false);
 
                 // Ottieni i dati dal database
                 const db = getDb();
@@ -10224,14 +10253,16 @@
                     const currentDate = new Date(parseInt(year), month, day);
                     const dateStr = formatDateForInput(currentDate);
 
-                    // Determina la riga in base al giorno del mese
-                    let rowIndex;
+                    // Determina il foglio e la riga in base al giorno del mese
+                    let worksheet, rowIndex;
                     if (day <= 16) {
-                      // Prima pagina: giorni 1-16
+                        // Prima metà: giorni 1-16 nel primo foglio
+                        worksheet = worksheet1;
                         rowIndex = 5 + (day - 1) * 2;
-                      } else {
-                        // Seconda pagina: giorni 17-31
-                        rowIndex = 43 + (day - 17) * 2;
+                    } else {
+                        // Seconda metà: giorni 17-31 nel secondo foglio
+                        worksheet = worksheet2;
+                        rowIndex = 5 + (day - 17) * 2;
                     }
 
                     // Aggiungi la data nel formato "Giorno GG/MM" nella colonna A-B
@@ -10260,7 +10291,7 @@
                     }
 
                     // Segna questa data come elaborata
-                    processedDates.set(dateStr, { rowIndex, isWeekend });
+                    processedDates.set(dateStr, { worksheet, rowIndex, isWeekend });
                 }
 
                 // Elabora le voci di lavoro
@@ -10276,10 +10307,12 @@
                         // Salta le voci che non sono del mese/anno corrente
                         if (entryMonth !== month || entryYear !== parseInt(year)) return;
 
-                        // Ottieni la riga dalla mappa delle date elaborate
+                        // Ottieni il foglio e la riga dalla mappa delle date elaborate
                         if (!processedDates.has(dateStr)) return; // Dovrebbe essere già nella mappa, ma per sicurezza
 
-                        let rowIndex = processedDates.get(dateStr).rowIndex;
+                        const dateInfo = processedDates.get(dateStr);
+                        const worksheet = dateInfo.worksheet;
+                        const rowIndex = dateInfo.rowIndex;
 
                         // Incrementa il conteggio dei giorni lavorati
                         totalWorkDays++;
@@ -10361,10 +10394,12 @@
                         // Salta le voci che non sono del mese/anno corrente
                         if (entryMonth !== month || entryYear !== parseInt(year)) return;
 
-                        // Ottieni la riga dalla mappa delle date elaborate
+                        // Ottieni il foglio e la riga dalla mappa delle date elaborate
                         if (!processedDates.has(dateStr)) return; // Dovrebbe essere già nella mappa, ma per sicurezza
 
-                        let rowIndex = processedDates.get(dateStr).rowIndex;
+                        const dateInfo = processedDates.get(dateStr);
+                        const worksheet = dateInfo.worksheet;
+                        const rowIndex = dateInfo.rowIndex;
 
                         // Aggiungi il tipo di assenza nella colonna Q-R
                         worksheet.getCell(rowIndex, 17).value = holiday.type === 'malattia' ? 'MALATTIA' : 'FERIE';
@@ -10378,24 +10413,25 @@
                     });
                 }
 
-                // Aggiungi i totali nella seconda pagina
+                // Aggiungi i totali nel secondo foglio (seconda metà del mese)
+                // I totali sono ora alle righe 35-36 (dopo 15 coppie di righe + 4 righe di intestazione)
                 // Totale ore lavorate
-                worksheet.getCell(73, 5).value = totalHours.toFixed(2);
+                worksheet2.getCell(35, 5).value = totalHours.toFixed(2);
 
                 // Totale giorni lavorati
-                worksheet.getCell(73, 8).value = totalWorkDays;
+                worksheet2.getCell(35, 8).value = totalWorkDays;
 
                 // Totale giorni trasferta
-                worksheet.getCell(73, 11).value = totalTransfertaDays;
+                worksheet2.getCell(35, 11).value = totalTransfertaDays;
 
                 // Totale giorni malattia
-                worksheet.getCell(73, 14).value = totalSickDays;
+                worksheet2.getCell(35, 14).value = totalSickDays;
 
                 // Totale ore notturne
-                worksheet.getCell(74, 11).value = totalNightHours.toFixed(2);
+                worksheet2.getCell(36, 11).value = totalNightHours.toFixed(2);
 
                 // Totale giorni ferie
-                worksheet.getCell(74, 14).value = totalVacationDays;
+                worksheet2.getCell(36, 14).value = totalVacationDays;
 
                 // Configura il foglio dei mezzi con un layout semplificato
 
