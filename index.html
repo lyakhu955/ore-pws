@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -4914,16 +4914,6 @@
                                                 <input type="checkbox" id="autoBackupToggle" checked>
                                                 <span class="toggle-slider"></span>
                                             </label>
-                                        </div>
-
-                                        <div class="backup-setting-item">
-                                            <span class="backup-setting-label">Frequenza Backup</span>
-                                            <select id="backupFrequencySelect" class="settings-select">
-                                                <option value="change">Ad ogni modifica</option>
-                                                <option value="hourly">Ogni ora</option>
-                                                <option value="daily">Giornaliero</option>
-                                                <option value="weekly">Settimanale</option>
-                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -15686,14 +15676,7 @@ END:VCARD`;
                 });
             }
 
-            // Selezione frequenza backup
-            const frequencySelect = document.getElementById('backupFrequencySelect');
-            if (frequencySelect) {
-                frequencySelect.addEventListener('change', (e) => {
-                    localStorage.setItem('backupFrequency', e.target.value);
-                    setupAutoBackup();
-                });
-            }
+
         }
 
         // Login con il provider selezionato
@@ -15726,30 +15709,12 @@ END:VCARD`;
         function setupAutoBackup() {
             // Leggi le preferenze dell'utente
             const autoBackupEnabled = localStorage.getItem('autoBackupEnabled') !== 'false'; // Default: true
-            const backupFrequency = localStorage.getItem('backupFrequency') || 'daily';
 
-            console.log('Configurazione backup automatico - Frequenza:', backupFrequency, 'Abilitato:', autoBackupEnabled);
+            console.log('Configurazione backup automatico - Abilitato:', autoBackupEnabled);
 
             // Aggiorna UI
             const autoBackupToggle = document.getElementById('autoBackupToggle');
-            const frequencySelect = document.getElementById('backupFrequencySelect');
-
             if (autoBackupToggle) autoBackupToggle.checked = autoBackupEnabled;
-
-            // Imposta il valore del selettore della frequenza
-            if (frequencySelect) {
-                // Verifica se l'opzione esiste
-                const optionExists = Array.from(frequencySelect.options).some(option => option.value === backupFrequency);
-
-                if (optionExists) {
-                    frequencySelect.value = backupFrequency;
-                    console.log('Frequenza di backup impostata su:', backupFrequency);
-                } else {
-                    console.warn('Opzione di frequenza non valida:', backupFrequency, 'Impostazione predefinita: daily');
-                    frequencySelect.value = 'daily';
-                    localStorage.setItem('backupFrequency', 'daily');
-                }
-            }
 
             // Cancella eventuali timer esistenti
             if (window.autoBackupTimer) {
@@ -15757,75 +15722,54 @@ END:VCARD`;
                 window.autoBackupTimer = null;
             }
 
+            if (window.backupDebounceTimer) {
+                clearTimeout(window.backupDebounceTimer);
+                window.backupDebounceTimer = null;
+            }
+
             // Se il backup automatico è disabilitato o nessun provider è attivo, esci
-            if (!autoBackupEnabled || !cloudManager.getCurrentProvider()) return;
-
-            // Imposta l'intervallo in base alla frequenza
-            let intervalMs;
-            switch (backupFrequency) {
-                case 'hourly':
-                    intervalMs = 60 * 60 * 1000; // 1 ora
-                    break;
-                case 'daily':
-                    intervalMs = 24 * 60 * 60 * 1000; // 1 giorno
-                    break;
-                case 'weekly':
-                    intervalMs = 7 * 24 * 60 * 60 * 1000; // 1 settimana
-                    break;
-                default:
-                    intervalMs = 24 * 60 * 60 * 1000; // Default: 1 giorno
-            }
-
-            // Pianifica backup periodico
-            window.autoBackupTimer = setInterval(async () => {
-                if (cloudManager.getCurrentProvider()) {
-                    console.log('Esecuzione backup automatico periodico...');
-                    try {
-                        const data = getDb();
-                        // Usa la modalità silenziosa (true come secondo parametro)
-                        const result = await cloudManager.backup(data, true);
-
-                        // Aggiorna l'UI
-                        const currentProvider = cloudManager.getCurrentProvider();
-                        localStorage.setItem(`lastBackupTime_${currentProvider}`, result.timestamp);
-                        updateLastBackupInfo();
-
-                        console.log('Backup automatico periodico completato');
-                    } catch (error) {
-                        console.error('Errore durante il backup automatico periodico:', error);
-                    }
+            if (!autoBackupEnabled || !cloudManager.getCurrentProvider()) {
+                // Ripristina la funzione saveDb originale se il backup automatico è disabilitato
+                if (window.originalSaveDb) {
+                    window.saveDb = window.originalSaveDb;
                 }
-            }, intervalMs);
-
-            // Esegui backup dopo ogni modifica significativa (se la frequenza è 'change')
-            if (backupFrequency === 'change') {
-                const originalSaveDb = window.saveDb;
-                window.saveDb = function(data) {
-                    const result = originalSaveDb(data);
-
-                    // Pianifica backup con un leggero ritardo per evitare troppe chiamate
-                    if (window.backupDebounceTimer) {
-                        clearTimeout(window.backupDebounceTimer);
-                    }
-
-                    window.backupDebounceTimer = setTimeout(() => {
-                        if (cloudManager.getCurrentProvider()) {
-                            // Esegui il backup senza mostrare notifiche
-                            const provider = cloudManager.getProvider(cloudManager.getCurrentProvider());
-                            provider.backup(data).then(result => {
-                                const currentProvider = cloudManager.getCurrentProvider();
-                                localStorage.setItem(`lastBackupTime_${currentProvider}`, result.timestamp);
-                                updateLastBackupInfo();
-                                console.log('Backup automatico completato silenziosamente');
-                            }).catch(error => {
-                                console.error('Errore durante il backup automatico:', error);
-                            });
-                        }
-                    }, 1000); // 1 secondo di debounce (più immediato)
-
-                    return result;
-                };
+                return;
             }
+
+            // Backup automatico ad ogni modifica
+            // Salva la funzione originale se non è già stata salvata
+            if (!window.originalSaveDb) {
+                window.originalSaveDb = window.saveDb;
+            }
+
+            window.saveDb = function(data) {
+                const result = window.originalSaveDb(data);
+
+                // Pianifica backup con un leggero ritardo per evitare troppe chiamate
+                if (window.backupDebounceTimer) {
+                    clearTimeout(window.backupDebounceTimer);
+                }
+
+                window.backupDebounceTimer = setTimeout(async () => {
+                    if (cloudManager.getCurrentProvider()) {
+                        try {
+                            console.log('Esecuzione backup automatico dopo modifica...');
+                            const currentData = getDb();
+                            const backupResult = await cloudManager.backup(currentData, true); // silent = true
+                            if (backupResult.success) {
+                                console.log('Backup automatico dopo modifica completato');
+                                const currentProvider = cloudManager.getCurrentProvider();
+                                localStorage.setItem(`lastBackupTime_${currentProvider}`, backupResult.timestamp);
+                                updateLastBackupInfo();
+                            }
+                        } catch (error) {
+                            console.error('Errore durante il backup automatico dopo modifica:', error);
+                        }
+                    }
+                }, 2000); // Attendi 2 secondi dopo l'ultima modifica
+
+                return result;
+            };
         }
 
         // Funzione per controllare se esistono dati locali significativi
