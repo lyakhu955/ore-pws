@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -15263,6 +15263,8 @@ END:VCARD`;
             // Crea il gestore se non esiste
             if (!cloudManager) {
                 cloudManager = new CloudBackupManager();
+                // Rendi disponibile globalmente
+                window.cloudManager = cloudManager;
 
                 // Verifica lo stato di autenticazione di tutti i provider solo se richiesto
                 if (!skipAuthCheck) {
@@ -18989,22 +18991,22 @@ END:VCARD`;
 
                         // Seleziona Google Drive come provider
                         if (window.cloudManager) {
-                            const success = cloudManager.setSelectedProvider('google');
+                            const success = window.cloudManager.setSelectedProvider('google');
                             console.log('Provider Google selezionato:', success);
                         }
 
                         // Usa direttamente il provider Google (più affidabile)
-                        if (window.cloudManager && cloudManager.providers.google) {
+                        if (window.cloudManager && window.cloudManager.providers.google) {
                             console.log('Avvio login diretto con Google Provider...');
-                            const googleProvider = cloudManager.providers.google;
+                            const googleProvider = window.cloudManager.providers.google;
 
                             showToast("Apertura popup Google Drive...", "info", 2000);
                             const userData = await googleProvider.login(true);
 
                             if (userData) {
                                 // Imposta il provider come corrente dopo il login riuscito
-                                cloudManager.setSelectedProvider('google');
-                                cloudManager.currentProvider = 'google';
+                                window.cloudManager.setSelectedProvider('google');
+                                window.cloudManager.currentProvider = 'google';
 
                                 // Aggiorna l'UI
                                 if (typeof updateProviderSelectionUI === 'function') {
