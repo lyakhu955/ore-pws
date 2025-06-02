@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -15363,11 +15363,14 @@ END:VCARD`;
             loginButtonsContainer.style.display = 'flex';
             loginButtonsContainer.innerHTML = '';
 
-            if (selectedProvider) {
-                const provider = cloudManager.getProvider(selectedProvider);
+            // Mostra sempre il pulsante Google Drive (provider predefinito)
+            const providerToShow = selectedProvider || 'google';
+            const provider = cloudManager.getProvider(providerToShow);
+
+            if (provider) {
                 const button = document.createElement('button');
-                button.id = `${selectedProvider}LoginBtn`;
-                button.className = `cloud-login-btn ${selectedProvider}-btn`;
+                button.id = `${providerToShow}LoginBtn`;
+                button.className = `cloud-login-btn ${providerToShow}-btn`;
 
                // Verifica se il provider ha proprietà iconClass e iconName
                 if (provider.iconClass && provider.iconName) {
@@ -15382,7 +15385,15 @@ END:VCARD`;
                     `;
                 }
 
-                button.addEventListener('click', loginWithSelectedProvider);
+                // Se non c'è un provider selezionato, seleziona Google automaticamente
+                if (!selectedProvider) {
+                    button.addEventListener('click', async () => {
+                        cloudManager.setSelectedProvider('google');
+                        await loginWithSelectedProvider();
+                    });
+                } else {
+                    button.addEventListener('click', loginWithSelectedProvider);
+                }
 
                 loginButtonsContainer.appendChild(button);
             } else {
