@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -10815,66 +10815,74 @@
             }
         }
 
-        // CODICE DUPLICATO RIMOSSO
+        // SECONDA FUNZIONE exportMonthlyReportToPdf DUPLICATA RIMOSSA
 
-        function exportMonthlyReportToPdf(yearMonth) {
-            console.log(`Inizio conversione in PDF per ${yearMonth}...`);
-            if (!yearMonth) {
-                showToast("Seleziona un mese da convertire.", "warning");
+        // TUTTO IL CODICE DUPLICATO RIMOSSO - MANTENUTA SOLO LA PRIMA FUNZIONE PDF
+
+        // Helper to get combined and sorted vehicles
+        function getAllVehiclesSorted() {
+            const db = getDb();
+            const userVehicles = db.vehicles || [];
+            const defaultVehicles = ['Auto aziendale', 'Mezzo proprio', 'Mezzo pubblico'];
+            const allVehicles = [...defaultVehicles, ...userVehicles.map(v => v.name)];
+            return [...new Set(allVehicles)].sort();
+        }
+
+        // Populates the vehicle list in the Settings section
+        function populateVehicleSettingsList() {
+            console.log("Populating vehicle settings list...");
+            const vehicleListContainer = document.getElementById('vehicleList');
+
+            if (!vehicleListContainer) {
+                console.error("Vehicle list container not found!");
                 return;
             }
 
-            try {
-                // Prima esportiamo il file Excel normalmente
-                exportMonthlyReportToExcel(yearMonth);
+            const db = getDb();
+            const userVehicles = db.vehicles || [];
 
-                // Poi mostriamo un messaggio all'utente con istruzioni per la conversione in PDF
-                const userName = localStorage.getItem('userName') || 'Utente';
-                const [year, monthNum] = yearMonth.split('-').map(Number);
-                const monthIndex = monthNum - 1;
-                const monthName = new Date(year, monthIndex, 1).toLocaleDateString('it-IT', { month: 'long' });
-                const excelFilename = `ReportOre_${userName}_${monthName}_${year}.xlsx`;
+            vehicleListContainer.innerHTML = '';
 
-                // Mostra messaggio con istruzioni per la conversione in PDF
-                showToast(`File Excel "${excelFilename}" generato. Per convertirlo in PDF, aprilo con Excel e usa "Salva con nome" > "PDF".`, 'info', 8000);
-
-            } catch (error) {
-                console.error("Errore durante la conversione in PDF:", error);
-                showToast("Errore durante la conversione in PDF: " + error.message, "error");
-            }
+            userVehicles.forEach(vehicle => {
+                const vehicleItem = document.createElement('div');
+                vehicleItem.className = 'vehicle-item';
+                vehicleItem.innerHTML = `
+                    <span>${vehicle.name}</span>
+                    <button onclick="deleteVehicle('${vehicle.id}')" class="delete-btn">
+                        <span class="material-symbols-outlined">delete</span>
+                    </button>
+                `;
+                vehicleListContainer.appendChild(vehicleItem);
+            });
         }
-                    pageSetup: {
-                        paperSize: 9, // A4
-                        orientation: 'landscape', // Orientamento orizzontale
-                        margins: {
-                            left: 0,
-                            right: 0,
-                            top: 0,
-                            bottom: 0,
-                            header: 0,
-                            footer: 0
-                        },
-                        fitToPage: true,
-                        fitToWidth: 1, // Adatta a 1 pagina in larghezza
-                        fitToHeight: 0, // Non adattare in altezza
-                        horizontalCentered: true
-                    }
-                });
 
-                // Fattore di correzione per compensare la differenza di interpretazione di ExcelJS
-                const columnCorrectionFactor = 1.1; // Aumentiamo del 10% per compensare
+        // Populates the vehicle select dropdown in the Home section form
+        function populateVehicleDropdown() {
+            console.log("Populating vehicle dropdown...");
+            const vehicleSelectDropdown = document.getElementById('vehicleSelect');
 
-                // Configurazione del foglio mezzi
-                // Larghezze delle colonne per il foglio mezzi
-                const vehicleColumnWidths = {
-                    'A': 8.11, // Data
-                    'B': 8.11, // Data (continuazione)
-                    'C': 15,   // Mezzo utilizzato
-                    'D': 30    // Lavoro associato
-                };
+            if (!vehicleSelectDropdown) {
+                console.error("Vehicle select dropdown not found!");
+                return;
+            }
 
-                // Imposta le larghezze delle colonne per il foglio mezzi
-                for (const [col, width] of Object.entries(vehicleColumnWidths)) {
+            const allVehicles = getAllVehiclesSorted();
+            vehicleSelectDropdown.innerHTML = '<option value="">Seleziona mezzo</option>';
+
+            allVehicles.forEach(vehicle => {
+                const option = document.createElement('option');
+                option.value = vehicle;
+                option.textContent = vehicle;
+                vehicleSelectDropdown.appendChild(option);
+            });
+        }
+
+        // Main function to update all vehicle UI parts (call after add/delete)
+        function updateVehicleUI() {
+            console.log("Updating all vehicle UI elements...");
+            populateVehicleSettingsList();
+            populateVehicleDropdown();
+        }
                     vehicleWorksheet.getColumn(col).width = width * columnCorrectionFactor;
 
                     // Applica il testo a capo alla colonna del lavoro
