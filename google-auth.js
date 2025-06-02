@@ -11,6 +11,7 @@ let currentUser = null;
 let userPhotoUrl = null;
 let userEmail = null;
 let tokenRefreshTimer = null;
+let proactiveRefreshTimer = null;
 
 // Inizializza il client di autenticazione Google
 function initGoogleAuth() {
@@ -132,6 +133,9 @@ function handleTokenResponse(response) {
         // Imposta il timer per il refresh del token
         setupTokenRefresh(tokenData.expires_at);
 
+        // Avvia il sistema di refresh proattivo
+        startProactiveRefresh();
+
         // Mostra un messaggio di successo
         showToast('Accesso effettuato con successo!', 'success');
       })
@@ -202,6 +206,9 @@ function checkSavedToken() {
         // Imposta il timer per il refresh del token
         setupTokenRefresh(tokenData.expires_at);
 
+        // Avvia il sistema di refresh proattivo
+        startProactiveRefresh();
+
         // Verifica che il token sia effettivamente valido facendo una richiesta
         validateToken(tokenData.access_token)
           .then(isValid => {
@@ -247,59 +254,21 @@ async function validateToken(accessToken) {
   }
 }
 
-// Richiedi un nuovo token usando la serverless function di Vercel
+// Richiedi un nuovo token usando il sistema silenzioso migliorato
 async function requestNewToken() {
-  const savedTokenStr = localStorage.getItem('googleAuthToken');
+  console.log('Richiesta nuovo token...');
 
-  if (!savedTokenStr) {
-    console.log('Nessun refresh token disponibile, richiedo login utente...');
-    clearAuthData();
+  // Prova prima il refresh silenzioso
+  const success = await performSilentTokenRefresh();
+
+  if (success) {
+    console.log('Token rinnovato con successo tramite refresh silenzioso');
     return;
   }
 
-  try {
-    const tokenData = JSON.parse(savedTokenStr);
-
-    // Se abbiamo un refresh token, proviamo a usare la serverless function
-    if (tokenData.refresh_token) {
-      console.log('Tentativo di refresh automatico del token...');
-
-      const newToken = await refreshTokenWithVercel(tokenData.refresh_token);
-
-      if (newToken) {
-        console.log('Token rinnovato automaticamente con successo!');
-
-        // Aggiorna il token salvato
-        const updatedTokenData = {
-          access_token: newToken.access_token,
-          refresh_token: tokenData.refresh_token, // Mantieni il refresh token
-          expires_at: Date.now() + (newToken.expires_in * 1000)
-        };
-
-        localStorage.setItem('googleAuthToken', JSON.stringify(updatedTokenData));
-
-        // Imposta il nuovo token per le richieste API
-        gapi.client.setToken({
-          access_token: newToken.access_token
-        });
-
-        // Imposta il timer per il prossimo refresh
-        setupTokenRefresh(updatedTokenData.expires_at);
-
-        showToast('Sessione rinnovata automaticamente', 'success');
-        return;
-      }
-    }
-  } catch (error) {
-    console.error('Errore durante il refresh automatico:', error);
-  }
-
-  // Se il refresh automatico fallisce, pulisci i dati e richiedi login utente
-  console.log('Refresh automatico fallito, richiedo login utente...');
-  clearAuthData();
-  showToast('Sessione scaduta. Effettua nuovamente il login.', 'warning', 0, () => {
-    loginWithGoogle();
-  });
+  // Se il refresh silenzioso fallisce, gestisci il fallimento
+  console.log('Refresh silenzioso fallito, avvio gestione fallimento...');
+  await handleRefreshFailure();
 }
 
 // Funzione per rinnovare il token usando la serverless function di Vercel
@@ -465,10 +434,15 @@ function clearAuthData() {
   userEmail = null;
   userPhotoUrl = null;
 
-  // Cancella il timer di refresh del token
+  // Cancella i timer di refresh del token
   if (tokenRefreshTimer) {
     clearTimeout(tokenRefreshTimer);
     tokenRefreshTimer = null;
+  }
+
+  if (proactiveRefreshTimer) {
+    clearInterval(proactiveRefreshTimer);
+    proactiveRefreshTimer = null;
   }
 
   // Resetta il token per le richieste API
@@ -477,7 +451,7 @@ function clearAuthData() {
   }
 }
 
-// Imposta il timer per il refresh del token
+// Imposta il timer per il refresh del token (completamente invisibile)
 function setupTokenRefresh(expiresAt) {
   // Cancella il timer esistente
   if (tokenRefreshTimer) {
@@ -488,20 +462,181 @@ function setupTokenRefresh(expiresAt) {
   // Calcola il tempo rimanente prima della scadenza del token
   const timeRemaining = expiresAt - Date.now();
 
-  // Imposta il timer per richiedere un nuovo token 5 minuti prima della scadenza
-  const refreshTime = Math.max(0, timeRemaining - (5 * 60 * 1000));
+  // Imposta il timer per richiedere un nuovo token 15 minuti prima della scadenza
+  // Questo dà più tempo per gestire eventuali errori senza interrompere l'utente
+  const refreshTime = Math.max(0, timeRemaining - (15 * 60 * 1000));
 
-  console.log(`Token scadrà tra ${Math.round(timeRemaining / 60000)} minuti, refresh programmato tra ${Math.round(refreshTime / 60000)} minuti`);
+  console.log(`Token scadrà tra ${Math.round(timeRemaining / 60000)} minuti, refresh automatico programmato tra ${Math.round(refreshTime / 60000)} minuti`);
 
-  // Imposta il timer
-  tokenRefreshTimer = setTimeout(() => {
-    console.log('Timer di refresh del token attivato');
+  // Imposta il timer per il refresh automatico invisibile
+  tokenRefreshTimer = setTimeout(async () => {
+    console.log('Avvio refresh automatico invisibile del token...');
 
-    // Mostra un messaggio all'utente
-    showToast('La sessione sta per scadere. Clicca qui per continuare.', 'warning', 0, () => {
+    try {
+      const success = await performSilentTokenRefresh();
+
+      if (success) {
+        console.log('Refresh automatico completato con successo');
+        // Il nuovo timer è già stato impostato in performSilentTokenRefresh
+      } else {
+        console.log('Refresh automatico fallito, tentativo di fallback...');
+        await handleRefreshFailure();
+      }
+    } catch (error) {
+      console.error('Errore durante il refresh automatico:', error);
+      await handleRefreshFailure();
+    }
+  }, refreshTime);
+}
+
+// Esegue il refresh del token in modo completamente invisibile
+async function performSilentTokenRefresh() {
+  const savedTokenStr = localStorage.getItem('googleAuthToken');
+
+  if (!savedTokenStr) {
+    console.log('Nessun token salvato disponibile per il refresh');
+    return false;
+  }
+
+  try {
+    const tokenData = JSON.parse(savedTokenStr);
+
+    // Verifica che abbiamo un refresh token
+    if (!tokenData.refresh_token) {
+      console.log('Nessun refresh token disponibile');
+      return false;
+    }
+
+    console.log('Tentativo di refresh silenzioso tramite API backend...');
+
+    // Usa la serverless function per il refresh
+    const newToken = await refreshTokenWithVercel(tokenData.refresh_token);
+
+    if (newToken && newToken.access_token) {
+      console.log('Token rinnovato automaticamente con successo!');
+
+      // Aggiorna il token salvato
+      const updatedTokenData = {
+        access_token: newToken.access_token,
+        refresh_token: tokenData.refresh_token, // Mantieni il refresh token
+        expires_at: Date.now() + (newToken.expires_in * 1000)
+      };
+
+      localStorage.setItem('googleAuthToken', JSON.stringify(updatedTokenData));
+
+      // Imposta il nuovo token per le richieste API
+      if (gapi && gapi.client) {
+        gapi.client.setToken({
+          access_token: newToken.access_token
+        });
+      }
+
+      // Imposta il timer per il prossimo refresh automatico
+      setupTokenRefresh(updatedTokenData.expires_at);
+
+      // Assicurati che il refresh proattivo sia ancora attivo
+      if (!proactiveRefreshTimer) {
+        startProactiveRefresh();
+      }
+
+      // Log silenzioso del successo (senza toast per non disturbare l'utente)
+      console.log('Sessione rinnovata automaticamente in background');
+
+      return true;
+    }
+
+    return false;
+
+  } catch (error) {
+    console.error('Errore durante il refresh silenzioso:', error);
+    return false;
+  }
+}
+
+// Gestisce il fallimento del refresh automatico
+async function handleRefreshFailure() {
+  console.log('Gestione fallimento refresh automatico...');
+
+  // Prova un secondo tentativo dopo 30 secondi
+  setTimeout(async () => {
+    console.log('Secondo tentativo di refresh automatico...');
+
+    const success = await performSilentTokenRefresh();
+
+    if (success) {
+      console.log('Secondo tentativo riuscito');
+      return;
+    }
+
+    // Se anche il secondo tentativo fallisce, mostra un messaggio discreto
+    console.log('Refresh automatico fallito definitivamente');
+
+    // Verifica se il token è ancora valido per qualche minuto
+    const savedTokenStr = localStorage.getItem('googleAuthToken');
+    if (savedTokenStr) {
+      try {
+        const tokenData = JSON.parse(savedTokenStr);
+        const timeRemaining = tokenData.expires_at - Date.now();
+
+        // Se abbiamo ancora almeno 5 minuti, programma un altro tentativo
+        if (timeRemaining > (5 * 60 * 1000)) {
+          console.log('Token ancora valido, programmo un altro tentativo...');
+          setTimeout(() => performSilentTokenRefresh(), 2 * 60 * 1000); // Riprova tra 2 minuti
+          return;
+        }
+      } catch (e) {
+        console.error('Errore nel parsing del token:', e);
+      }
+    }
+
+    // Solo ora, come ultima risorsa, mostra un messaggio discreto all'utente
+    showToast('Sessione in scadenza. Clicca qui per rinnovare.', 'warning', 10000, () => {
       loginWithGoogle();
     });
-  }, refreshTime);
+
+  }, 30000); // Aspetta 30 secondi prima del secondo tentativo
+}
+
+// Sistema di refresh proattivo - controlla periodicamente lo stato del token
+function startProactiveRefresh() {
+  // Cancella il timer esistente se presente
+  if (proactiveRefreshTimer) {
+    clearInterval(proactiveRefreshTimer);
+  }
+
+  // Controlla ogni 10 minuti se il token ha bisogno di essere rinnovato
+  proactiveRefreshTimer = setInterval(async () => {
+    const savedTokenStr = localStorage.getItem('googleAuthToken');
+
+    if (!savedTokenStr || !isLoggedIn) {
+      // Se non c'è token o l'utente non è loggato, ferma il refresh proattivo
+      clearInterval(proactiveRefreshTimer);
+      proactiveRefreshTimer = null;
+      return;
+    }
+
+    try {
+      const tokenData = JSON.parse(savedTokenStr);
+      const timeRemaining = tokenData.expires_at - Date.now();
+
+      // Se il token scadrà entro 20 minuti, prova un refresh proattivo
+      if (timeRemaining < (20 * 60 * 1000) && timeRemaining > 0) {
+        console.log('Refresh proattivo: token in scadenza, tentativo di rinnovo...');
+
+        const success = await performSilentTokenRefresh();
+
+        if (success) {
+          console.log('Refresh proattivo completato con successo');
+        } else {
+          console.log('Refresh proattivo fallito, il timer principale gestirà la situazione');
+        }
+      }
+    } catch (error) {
+      console.error('Errore durante il refresh proattivo:', error);
+    }
+  }, 10 * 60 * 1000); // Ogni 10 minuti
+
+  console.log('Sistema di refresh proattivo avviato');
 }
 
 // Aggiorna l'interfaccia utente
