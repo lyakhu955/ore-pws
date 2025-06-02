@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -18971,9 +18971,15 @@ END:VCARD`;
                 // Attendi un momento per far vedere il toast
                 setTimeout(async () => {
                     try {
-                        // Prima seleziona Google Drive come provider
+                        // Assicurati che cloudManager sia inizializzato
+                        if (!window.cloudManager) {
+                            await initCloudBackup(true); // Inizializza senza controllo auth
+                        }
+
+                        // Seleziona Google Drive come provider
                         if (window.cloudManager) {
-                            cloudManager.setSelectedProvider('google');
+                            const success = cloudManager.setSelectedProvider('google');
+                            console.log('Provider Google selezionato:', success);
                         }
 
                         // Simula il click sul pulsante Google Drive delle impostazioni
