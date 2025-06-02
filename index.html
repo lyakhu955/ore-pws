@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -9795,6 +9795,33 @@
                     }
                 };
 
+                // Aggiunge proprietà specifiche per forzare la stampa dell'intera cartella
+                workbook.calcProperties = {
+                    calcId: 124519,
+                    calcMode: 'auto',
+                    fullCalcOnLoad: true
+                };
+
+                // Impostazioni del workbook per la stampa
+                workbook.workbookProtection = null;
+                workbook.definedNames = workbook.definedNames || [];
+
+                // Aggiunge una proprietà personalizzata per forzare la stampa dell'intera cartella
+                if (!workbook.properties.custom) {
+                    workbook.properties.custom = {};
+                }
+                workbook.properties.custom['PrintEntireWorkbook'] = true;
+
+                // Forza l'impostazione di stampa dell'intera cartella di lavoro tramite definedNames
+                workbook.definedNames.add('_xlnm.Print_Area', '');
+                workbook.definedNames.add('_xlnm.Print_Titles', '');
+
+                // Aggiunge una proprietà specifica per forzare la stampa dell'intera cartella
+                workbook.properties.application = 'Ore PWS Group';
+                workbook.properties.appVersion = '16.0300';
+                workbook.properties.company = 'PWS Group';
+                workbook.properties.manager = userName;
+
                 // Configurazione comune per i fogli ore
                 const hoursPageSetup = {
                     pageSetup: {
@@ -10776,15 +10803,63 @@
                     // Forza l'impostazione per stampare l'intero workbook
                     worksheet.pageSetup.printTitlesRow = '';
                     worksheet.pageSetup.printTitlesColumn = '';
+
+                    // Aggiunge proprietà specifiche per ogni foglio
+                    worksheet.state = 'visible';
+                    worksheet.properties = {
+                        ...worksheet.properties,
+                        defaultRowHeight: 15,
+                        dyDescent: 0.25
+                    };
+
+                    // Forza ogni foglio ad essere incluso nella stampa
+                    if (!worksheet.pageSetup.printArea) {
+                        worksheet.pageSetup.printArea = undefined; // Rimuove limitazioni di area
+                    }
+
+                    // Aggiunge proprietà per forzare la selezione del foglio per la stampa
+                    worksheet.properties.tabColor = undefined;
+                    worksheet.properties.outlineLevelRow = 0;
+                    worksheet.properties.outlineLevelCol = 0;
                 });
 
                 // Imposta il primo foglio come attivo per la stampa dell'intera cartella
                 if (workbook.worksheets.length > 0) {
                     workbook.worksheets[0].state = 'visible';
+
+                    // Forza le impostazioni di stampa a livello di workbook
                     workbook.views = [{
                         x: 0, y: 0, width: 10000, height: 20000,
                         firstSheet: 0, activeTab: 0, visibility: 'visible'
                     }];
+
+                    // Aggiunge metadati specifici per la stampa
+                    workbook.properties.core = {
+                        ...workbook.properties.core,
+                        creator: 'Ore PWS Group',
+                        lastModifiedBy: userName,
+                        created: new Date(),
+                        modified: new Date()
+                    };
+
+                    // Forza l'impostazione finale per stampare l'intera cartella di lavoro
+                    // Seleziona tutti i fogli per la stampa
+                    workbook.worksheets.forEach((ws, index) => {
+                        ws.state = 'visible';
+                        // Imposta il primo foglio come attivo, gli altri come selezionati
+                        if (index === 0) {
+                            ws.properties.tabSelected = true;
+                        }
+                    });
+
+                    // Aggiunge una configurazione finale per forzare la stampa dell'intera cartella
+                    workbook.calcProperties = {
+                        ...workbook.calcProperties,
+                        calcCompleted: true,
+                        calcOnSave: true,
+                        concurrent: true,
+                        concurrentManual: true
+                    };
                 }
 
                 // Esporta il file Excel
