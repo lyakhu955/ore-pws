@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -9796,8 +9796,13 @@
                         fitToPage: true,
                         fitToWidth: 1, // Adatta a 1 pagina in larghezza (tutte le colonne su una pagina)
                         fitToHeight: 0, // Non adattare in altezza (0 = usa quante pagine servono)
-                        printArea: 'A1:R74',
-                        horizontalCentered: true
+                        printArea: 'A1:R75', // Esteso fino alla riga 75 per includere i totali
+                        horizontalCentered: true,
+                        // Impostazioni aggiuntive per migliorare la compatibilità PDF/mobile
+                        blackAndWhite: false,
+                        draft: false,
+                        showGridLines: false,
+                        showRowColHeaders: false
                     }
                 });
 
@@ -10201,6 +10206,28 @@
 
                 // Aggiungi la seconda pagina (15 coppie di righe)
                 addReportPage(39, 15, false);
+
+                // *** AGGIUNTA INTERRUZIONI DI PAGINA MANUALI ***
+                // Risolve i problemi di conversione PDF e stampa mobile
+                // Forza la divisione esatta del contenuto in 2 pagine A4 orizzontali:
+                // Prima pagina: A1:R37, Seconda pagina: A38:R75
+
+                // Aggiungi interruzione di pagina manuale dopo la riga 37
+                worksheet.pageBreaks = {
+                    rowBreaks: [
+                        { id: 37, max: 16383, man: true }  // Interruzione manuale dopo riga 37
+                    ],
+                    colBreaks: [] // Nessuna interruzione di colonna necessaria
+                };
+
+                // Imposta range di stampa specifici tramite named ranges
+                // Migliora la compatibilità con diversi software di visualizzazione PDF
+                try {
+                    workbook.definedNames.add('Prima_Pagina', 'Report Ore!$A$1:$R$37');
+                    workbook.definedNames.add('Seconda_Pagina', 'Report Ore!$A$38:$R$75');
+                } catch (error) {
+                    console.log('Named ranges già esistenti o errore nella definizione:', error);
+                }
 
                 // Ottieni i dati dal database
                 const db = getDb();
@@ -10716,6 +10743,32 @@
                     });
                 }
 
+                // *** OTTIMIZZAZIONI FINALI PER COMPATIBILITÀ PDF/MOBILE ***
+
+                // Imposta le viste del foglio per ottimizzare la visualizzazione
+                worksheet.views = [
+                    {
+                        state: 'normal',
+                        rightToLeft: false,
+                        activeCell: 'A1',
+                        showRuler: false,
+                        showRowColHeaders: false,
+                        showGridLines: false,
+                        zoomScale: 100,
+                        zoomScaleNormal: 100
+                    }
+                ];
+
+                // Forza il ricalcolo delle interruzioni di pagina
+                worksheet.pageSetup.fitToPage = true;
+                worksheet.pageSetup.fitToWidth = 1;
+                worksheet.pageSetup.fitToHeight = 2; // Esattamente 2 pagine in altezza
+
+                // Imposta proprietà aggiuntive per migliorare la stampa
+                worksheet.pageSetup.pageOrder = 'downThenOver';
+                worksheet.pageSetup.cellComments = 'None';
+                worksheet.pageSetup.errors = 'displayed';
+
                 // Esporta il file Excel
                 workbook.xlsx.writeBuffer().then(buffer => {
                     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -10725,7 +10778,7 @@
                     a.download = excelFilename;
                     a.click();
                     window.URL.revokeObjectURL(url);
-                    showToast('Report Excel generato con successo!', 'success');
+                    showToast('Report Excel generato con successo! Ottimizzato per stampa e conversione PDF.', 'success');
                 });
 
             } catch (error) {
