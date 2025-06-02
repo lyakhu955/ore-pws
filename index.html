@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -18977,13 +18977,20 @@ END:VCARD`;
                             showToast("Login Google Drive completato! I tuoi dati sono ora al sicuro.", "success", 5000);
                         } else {
                             // Fallback: vai alle impostazioni
-                            showSection('settings-section');
+                            const settingsNavItem = document.querySelector('.nav-item[data-section="settings-section"]');
+                            if (settingsNavItem) {
+                                settingsNavItem.click();
+                            }
                             showToast("Vai nella sezione 'Backup Cloud' per configurare Google Drive", "info", 4000);
                         }
                     } catch (error) {
                         console.error('Errore durante il login:', error);
                         showToast("Errore durante il login. Prova dalle Impostazioni.", "error", 4000);
-                        showSection('settings-section');
+                        // Vai alle impostazioni in caso di errore
+                        const settingsNavItem = document.querySelector('.nav-item[data-section="settings-section"]');
+                        if (settingsNavItem) {
+                            settingsNavItem.click();
+                        }
                     }
                 }, 500);
             });
