@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -9780,20 +9780,11 @@
                 workbook.created = new Date();
                 workbook.modified = new Date();
 
-                // Imposta la stampa dell'intera cartella di lavoro
+                // Imposta i primi due fogli (ore) come attivi per la stampa
                 workbook.views = [{
                     x: 0, y: 0, width: 10000, height: 20000,
                     firstSheet: 0, activeTab: 0, visibility: 'visible'
                 }];
-
-                // Forza l'impostazione di stampa per l'intera cartella di lavoro
-                workbook.properties = {
-                    ...workbook.properties,
-                    printOptions: {
-                        printEntireWorkbook: true,
-                        printActiveSheets: false
-                    }
-                };
 
                 // Configurazione comune per i fogli ore
                 const hoursPageSetup = {
@@ -10767,24 +10758,33 @@
                     });
                 }
 
-                // Impostazioni finali di stampa per l'intera cartella di lavoro
-                // Assicura che tutti i fogli abbiano le impostazioni di stampa corrette
-                workbook.eachSheet((worksheet, sheetId) => {
-                    if (!worksheet.pageSetup) {
-                        worksheet.pageSetup = {};
-                    }
-                    // Forza l'impostazione per stampare l'intero workbook
-                    worksheet.pageSetup.printTitlesRow = '';
-                    worksheet.pageSetup.printTitlesColumn = '';
-                });
-
-                // Imposta il primo foglio come attivo per la stampa dell'intera cartella
-                if (workbook.worksheets.length > 0) {
+                // Imposta i primi due fogli (ore) come attivi per la stampa
+                // Questo permette di stampare entrambi i fogli ore con "Stampa fogli attivi"
+                if (workbook.worksheets.length >= 2) {
+                    // Imposta i primi due fogli come selezionati/attivi
                     workbook.worksheets[0].state = 'visible';
+                    workbook.worksheets[1].state = 'visible';
+
+                    // Il terzo foglio (mezzi) rimane visibile ma non attivo
+                    if (workbook.worksheets.length >= 3) {
+                        workbook.worksheets[2].state = 'visible';
+                    }
+
+                    // Imposta le viste del workbook per mostrare i fogli selezionati
                     workbook.views = [{
                         x: 0, y: 0, width: 10000, height: 20000,
                         firstSheet: 0, activeTab: 0, visibility: 'visible'
                     }];
+
+                    // Marca i primi due fogli come selezionati per la stampa
+                    workbook.worksheets[0].properties = {
+                        ...workbook.worksheets[0].properties,
+                        tabSelected: true
+                    };
+                    workbook.worksheets[1].properties = {
+                        ...workbook.worksheets[1].properties,
+                        tabSelected: true
+                    };
                 }
 
                 // Esporta il file Excel
