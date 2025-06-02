@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -18971,6 +18971,11 @@ END:VCARD`;
                 // Attendi un momento per far vedere il toast
                 setTimeout(async () => {
                     try {
+                        // Prima seleziona Google Drive come provider
+                        if (window.cloudManager) {
+                            cloudManager.setSelectedProvider('google');
+                        }
+
                         // Simula il click sul pulsante Google Drive delle impostazioni
                         const googleLoginBtn = document.getElementById('googleLoginBtn');
                         if (googleLoginBtn) {
