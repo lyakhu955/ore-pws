@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -18982,34 +18982,39 @@ END:VCARD`;
                             console.log('Provider Google selezionato:', success);
                         }
 
-                        // Prova prima il click sul pulsante delle impostazioni
-                        const googleLoginBtn = document.getElementById('googleLoginBtn');
-                        if (googleLoginBtn) {
-                            // Usa lo stesso pulsante delle impostazioni
-                            googleLoginBtn.click();
-                            showToast("Login Google Drive avviato! Segui le istruzioni nel popup.", "success", 5000);
-                        } else {
-                            // Se il pulsante non esiste, usa il provider direttamente
-                            if (window.cloudManager && cloudManager.providers.google) {
-                                const googleProvider = cloudManager.providers.google;
-                                const userData = await googleProvider.login(true);
+                        // Usa direttamente il provider Google (più affidabile)
+                        if (window.cloudManager && cloudManager.providers.google) {
+                            console.log('Avvio login diretto con Google Provider...');
+                            const googleProvider = cloudManager.providers.google;
 
-                                if (userData) {
-                                    // Imposta il provider come corrente dopo il login riuscito
-                                    cloudManager.setSelectedProvider('google');
-                                    cloudManager.currentProvider = 'google';
-                                    showToast("Login Google Drive completato! I tuoi dati sono ora al sicuro.", "success", 5000);
-                                } else {
-                                    throw new Error("Login fallito");
+                            showToast("Apertura popup Google Drive...", "info", 2000);
+                            const userData = await googleProvider.login(true);
+
+                            if (userData) {
+                                // Imposta il provider come corrente dopo il login riuscito
+                                cloudManager.setSelectedProvider('google');
+                                cloudManager.currentProvider = 'google';
+
+                                // Aggiorna l'UI
+                                if (typeof updateProviderSelectionUI === 'function') {
+                                    updateProviderSelectionUI();
                                 }
+                                if (typeof updateCloudAccountUI === 'function') {
+                                    updateCloudAccountUI();
+                                }
+
+                                        showToast("🎉 Login Google Drive completato! I tuoi dati sono ora al sicuro.", "success", 5000);
                             } else {
-                                // Ultimo fallback: vai alle impostazioni
-                                const settingsNavItem = document.querySelector('.nav-item[data-section="settings-section"]');
-                                if (settingsNavItem) {
-                                    settingsNavItem.click();
-                                }
-                                showToast("Vai nella sezione 'Backup Cloud' per configurare Google Drive", "info", 4000);
+                                throw new Error("Login fallito - nessun dato utente ricevuto");
                             }
+                        } else {
+                            // Fallback: vai alle impostazioni
+                            console.log('CloudManager o provider Google non disponibile, reindirizzo alle impostazioni');
+                            const settingsNavItem = document.querySelector('.nav-item[data-section="settings-section"]');
+                            if (settingsNavItem) {
+                                settingsNavItem.click();
+                            }
+                            showToast("Vai nella sezione 'Backup Cloud' per configurare Google Drive", "info", 4000);
                         }
                     } catch (error) {
                         console.error('Errore durante il login:', error);
