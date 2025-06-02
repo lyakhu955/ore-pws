@@ -1,4 +1,4 @@
-??????????????????????????????????????????????????????<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -16662,7 +16662,7 @@ END:VCARD`;
                     return hours * 60 + 45;
                 }},
                 // Formato "7-17" (orario completo) con vari separatori
-                { pattern: /^.*?(\d+)(?:[.,:](\d+))?\s*(?:-|?|fino|a)\s*(\d+)(?:[.,:](\d+))?/i, handler: (match) => {
+                { pattern: /^.*?(\d+)(?:[.,:](\d+))?\s*(?:-|\?|fino|a)\s*(\d+)(?:[.,:](\d+))?/i, handler: (match) => {
                     const hours = parseInt(match[1]);
                     const minutes = match[2] ? parseInt(match[2]) : 0;
                     return hours * 60 + minutes;
@@ -16727,7 +16727,7 @@ END:VCARD`;
                     return hours * 60 + 45;
                 }},
                 // Formato "7-17" (orario completo) con vari separatori
-                { pattern: /(\d+)(?:[.,:](\d+))?\s*(?:-|?|fino|a)\s*(\d+)(?:[.,:](\d+))?/i, handler: (match) => {
+                { pattern: /(\d+)(?:[.,:](\d+))?\s*(?:-|\?|fino|a)\s*(\d+)(?:[.,:](\d+))?/i, handler: (match) => {
                     const hours = parseInt(match[3]);
                     const minutes = match[4] ? parseInt(match[4]) : 0;
                     return hours * 60 + minutes;
@@ -16892,7 +16892,7 @@ END:VCARD`;
                     /(?:ho\s+)?finito\s+(?:alle\s+)?(\d+)(?:[.,:](\d+))?/gi,
                     /(?:sono\s+)?uscit[oa]\s+(?:alle\s+)?(\d+)(?:[.,:](\d+))?/gi,
                     // Formati orari completi
-                    /(\d+)(?:[.,:](\d+))?\s*(?:-|?|fino|a)\s*(\d+)(?:[.,:](\d+))?/gi,
+                    /(\d+)(?:[.,:](\d+))?\s*(?:-|\?|fino|a)\s*(\d+)(?:[.,:](\d+))?/gi,
                     // Pause
                     /pausa\s+(?:di\s+)?(\d+)(?:[.,:](\d+))?/gi,
                     /pausa\s+(?:di\s+)?(?:un['']?ora|1\s+ora)/gi,
