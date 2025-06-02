@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -15907,15 +15907,48 @@ END:VCARD`;
                             if (!hasLocalData) {
                                 console.log('Nessun dato locale trovato, controllo backup su Google Drive...');
                                 try {
+                                    // Controlla se il ripristino è già stato fatto in questa sessione
+                                    const restoreFlag = sessionStorage.getItem('autoRestoreCompleted');
+                                    if (restoreFlag) {
+                                        console.log('Ripristino automatico già completato in questa sessione, salto...');
+                                        return;
+                                    }
+
+                                    // Controlla se è stato fatto un ripristino recente (ultimi 5 minuti)
+                                    const lastRestore = localStorage.getItem('lastAutoRestore');
+                                    if (lastRestore) {
+                                        const timeDiff = Date.now() - parseInt(lastRestore);
+                                        if (timeDiff < 5 * 60 * 1000) { // 5 minuti
+                                            console.log('Ripristino automatico fatto di recente, salto...');
+                                            sessionStorage.setItem('autoRestoreCompleted', 'true');
+                                            return;
+                                        }
+                                    }
+
                                     // Tenta il ripristino automatico
                                     await provider.restore();
+
+                                    // Segna il ripristino come completato per questa sessione
+                                    sessionStorage.setItem('autoRestoreCompleted', 'true');
+                                    // Segna anche nel localStorage per evitare ripristini futuri non necessari
+                                    localStorage.setItem('lastAutoRestore', Date.now().toString());
+
+                                    // Verifica che i dati siano stati effettivamente ripristinati
+                                    setTimeout(() => {
+                                        const dataCheck = checkIfLocalDataExists();
+                                        console.log('Verifica post-ripristino - Dati presenti:', dataCheck);
+                                    }, 100);
+
                                     showToast("🎉 Dati ripristinati automaticamente dal backup Google Drive!", "success", 5000);
                                     console.log('Ripristino automatico completato con successo');
 
-                                    // Ricarica la pagina per mostrare i dati ripristinati
-                                    setTimeout(() => {
-                                        window.location.reload();
-                                    }, 2000);
+                                    // Aggiorna l'UI invece di ricaricare la pagina
+                                    if (typeof loadData === 'function') {
+                                        loadData();
+                                    }
+                                    if (typeof updateUI === 'function') {
+                                        updateUI();
+                                    }
                                 } catch (restoreError) {
                                     console.log('Nessun backup trovato o errore nel ripristino automatico:', restoreError.message);
                                     // Non mostrare errore all'utente se è solo perché non c'è backup
