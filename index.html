@@ -10959,69 +10959,35 @@
             populateVehicleSettingsList();
             populateVehicleDropdown();
         }
-                    vehicleWorksheet.getColumn(col).width = width * columnCorrectionFactor;
 
-                    // Applica il testo a capo alla colonna del lavoro
-                    if (col === 'D') {
-                        vehicleWorksheet.getColumn(col).alignment = { wrapText: true };
-                    }
-                
+        // SECONDA FUNZIONE exportVehicleReportToExcel DUPLICATA RIMOSSA
 
-                // Funzione per unire celle
-                function mergeCells(worksheet, startRow, startCol, endRow, endCol) {
-                    worksheet.mergeCells(startRow, startCol, endRow, endCol);
-                }
+        function exportMonthlyReportToPdf(yearMonth) {
+            console.log(`Inizio conversione in PDF per ${yearMonth}...`);
+            if (!yearMonth) {
+                showToast("Seleziona un mese da convertire.", "warning");
+                return;
+            }
 
-                // Funzione per impostare lo stile delle celle
-                function setCellStyle(cell, style = {}) {
-                    if (style.bold) cell.font = { bold: true, ...cell.font };
-                    if (style.size) cell.font = { size: style.size, ...cell.font };
-                    if (style.alignment) cell.alignment = style.alignment;
-                    if (style.border) cell.border = style.border;
-                    if (style.fill) cell.fill = style.fill;
-                }
+            try {
+                // Prima esportiamo il file Excel normalmente
+                exportMonthlyReportToExcel(yearMonth);
 
-                // Stili comuni
-                const centerAlignment = { vertical: 'middle', horizontal: 'center' };
-                const thickBorder = {
-                    top: { style: 'thick' },
-                    left: { style: 'thick' },
-                    bottom: { style: 'thick' },
-                    right: { style: 'thick' }
-                };
+                // Poi mostriamo un messaggio all'utente con istruzioni per la conversione in PDF
+                const userName = localStorage.getItem('userName') || 'Utente';
+                const [year, monthNum] = yearMonth.split('-').map(Number);
+                const monthIndex = monthNum - 1;
+                const monthName = new Date(year, monthIndex, 1).toLocaleDateString('it-IT', { month: 'long' });
+                const excelFilename = `ReportOre_${userName}_${monthName}_${year}.xlsx`;
 
-                // Calcola i giorni nel mese
-                const daysInMonth = new Date(parseInt(year), month + 1, 0).getDate();
+                // Mostra messaggio con istruzioni per la conversione in PDF
+                showToast(`File Excel "${excelFilename}" generato. Per convertirlo in PDF, aprilo con Excel e usa "Salva con nome" > "PDF".`, 'info', 8000);
 
-                // Ottieni i dati dal database
-                const db = getDb();
-
-                // Funzione per formattare la data per Excel
-                function formatDateForExcel(date) {
-                    const day = date.getDate().toString().padStart(2, '0');
-                    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-                    const year = date.getFullYear();
-                    return `${day}/${month}/${year}`;
-                }
-
-                // Configura il foglio dei mezzi con un layout semplificato
-
-                // Intestazione del foglio mezzi
-                const vehicleHeaderRow = 1;
-
-                // Intestazione con nome utente e mese
-                vehicleWorksheet.getCell(vehicleHeaderRow, 1).value = `REPORT MEZZI ${userName.toUpperCase()}`;
-                vehicleWorksheet.getCell(vehicleHeaderRow + 1, 1).value = `MESE: ${monthName.toUpperCase()} ${year}`;
-
-                // Unisci le celle per l'intestazione
-                mergeCells(vehicleWorksheet, vehicleHeaderRow, 1, vehicleHeaderRow, 8);
-                mergeCells(vehicleWorksheet, vehicleHeaderRow + 1, 1, vehicleHeaderRow + 1, 8);
-
-                // Stile per l'intestazione
-                setCellStyle(vehicleWorksheet.getCell(vehicleHeaderRow, 1), {
-                    bold: true,
-                    size: 16,
-                    alignment: centerAlignment
+            } catch (error) {
+                console.error("Errore durante la conversione in PDF:", error);
+                showToast("Errore durante la conversione in PDF: " + error.message, "error");
+            }
+        }
                 });
                 setCellStyle(vehicleWorksheet.getCell(vehicleHeaderRow + 1, 1), {
                     bold: true,
