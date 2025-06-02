@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿﻿﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -3353,6 +3353,13 @@
         }
         .export-btn.excel-btn:hover { background-color: #165231; }
 
+        #exportVehicleReport {
+            background-color: #2E7D32 !important; /* Verde più scuro per mezzi */
+        }
+        #exportVehicleReport:hover {
+            background-color: #1B5E20 !important;
+        }
+
         .export-btn.pdf-btn {
             background-color: #D93025; /* PDF Red */
             color: white;
@@ -5264,7 +5271,10 @@
                                 <select id="exportMonthSelect"></select>
                             </div>
                             <button id="exportMonthlyExcel" class="export-btn excel-btn">
-                                <span class="material-symbols-outlined">download_for_offline</span> Esporta Excel
+                                <span class="material-symbols-outlined">download_for_offline</span> Esporta Report Ore
+                            </button>
+                            <button id="exportVehicleReport" class="export-btn excel-btn" style="background-color: #2E7D32;">
+                                <span class="material-symbols-outlined">local_shipping</span> Esporta Report Mezzi
                             </button>
                             <button id="exportMonthlyPdf" class="export-btn pdf-btn">
                                 <span class="material-symbols-outlined">picture_as_pdf</span> Converti PDF
@@ -9038,6 +9048,7 @@
              // Re-acquire elements after cloning
              const newMonthSelect = document.getElementById('exportMonthSelect');
              const newExportExcelBtn = document.getElementById('exportMonthlyExcel');
+             const newExportVehicleBtn = document.getElementById('exportVehicleReport');
              const newExportPdfBtn = document.getElementById('exportMonthlyPdf');
              const newReportContent = document.getElementById('monthlyReportContent'); // Content div doesn't need cloning
 
@@ -9050,6 +9061,11 @@
              newExportExcelBtn.addEventListener('click', () => {
                  console.log(`Richiesta esportazione Excel per: ${newMonthSelect.value}`);
                  exportMonthlyReportToExcel(newMonthSelect.value);
+             });
+
+             newExportVehicleBtn.addEventListener('click', () => {
+                 console.log(`Richiesta esportazione Report Mezzi per: ${newMonthSelect.value}`);
+                 exportVehicleReportToExcel(newMonthSelect.value);
              });
 
              newExportPdfBtn.addEventListener('click', () => {
@@ -9820,25 +9836,7 @@
                 };
                 const worksheet2 = workbook.addWorksheet('Report Ore - Seconda Metà', worksheet2Config);
 
-                // Crea il terzo foglio per i mezzi
-                const vehicleWorksheet = workbook.addWorksheet('Report Mezzi', {
-                    pageSetup: {
-                        paperSize: 9, // A4
-                        orientation: 'landscape', // Orientamento orizzontale
-                        margins: {
-                            left: 0,
-                            right: 0,
-                            top: 0,
-                            bottom: 0,
-                            header: 0,
-                            footer: 0
-                        },
-                        fitToPage: true,
-                        fitToWidth: 1, // Adatta a 1 pagina in larghezza
-                        fitToHeight: 0, // Non adattare in altezza
-                        horizontalCentered: true
-                    }
-                });
+                // Rimosso il foglio mezzi - ora è in una funzione separata
 
                 // Imposta le dimensioni delle colonne in modo preciso
                 // Utilizziamo le misure esatte fornite con un fattore di correzione
@@ -10914,6 +10912,72 @@
             } catch (error) {
                 console.error("Errore durante l'esportazione:", error);
                 showToast(`Errore durante l'esportazione: ${error.message}`, "error");
+            }
+        }
+
+        // Funzione per esportare solo il Report Mezzi
+        function exportVehicleReportToExcel(yearMonth) {
+            console.log(`Inizio esportazione Report Mezzi per ${yearMonth}...`);
+            if (!yearMonth) {
+                showToast("Seleziona un mese da esportare.", "warning");
+                return;
+            }
+            if (typeof ExcelJS === 'undefined') {
+                showToast("Libreria per export Excel non caricata.", "error");
+                console.error("Libreria ExcelJS non trovata.");
+                return;
+            }
+
+            try {
+                // Estrai anno e mese dalla stringa yearMonth (formato: "YYYY-MM")
+                const [year, monthStr] = yearMonth.split('-');
+                const month = parseInt(monthStr) - 1; // Mese è 0-based in JavaScript
+
+                // Nomi dei mesi in italiano
+                const monthNames = [
+                    "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
+                    "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"
+                ];
+
+                const monthName = monthNames[month];
+                const userName = localStorage.getItem('userName') || 'Utente';
+                const excelFilename = `ReportMezzi_${userName}_${monthName}_${year}.xlsx`;
+
+                // Crea un nuovo workbook solo per i mezzi
+                const workbook = new ExcelJS.Workbook();
+                workbook.creator = 'Ore PWS Group';
+                workbook.lastModifiedBy = userName;
+                workbook.created = new Date();
+                workbook.modified = new Date();
+
+                // Crea il foglio per i mezzi
+                const vehicleWorksheet = workbook.addWorksheet('Report Mezzi', {
+                    pageSetup: {
+                        paperSize: 9, // A4
+                        orientation: 'landscape', // Orientamento orizzontale
+                        margins: {
+                            left: 0,
+                            right: 0,
+                            top: 0,
+                            bottom: 0,
+                            header: 0,
+                            footer: 0
+                        },
+                        fitToPage: true,
+                        fitToWidth: 1, // Adatta a 1 pagina in larghezza
+                        fitToHeight: 0, // Non adattare in altezza
+                        horizontalCentered: true
+                    }
+                });
+
+                // Qui aggiungerò tutto il codice per popolare il foglio mezzi
+                // (lo copio dalla funzione originale)
+
+                showToast("Funzione Report Mezzi in sviluppo...", "info");
+
+            } catch (error) {
+                console.error("Errore durante l'esportazione Report Mezzi:", error);
+                showToast("Errore durante la generazione del Report Mezzi: " + error.message, "error");
             }
         }
 
