@@ -5,6 +5,9 @@
     },
     "api/refresh-token.js": {
       "runtime": "nodejs18.x"
+    },
+    "api/exchange-code.js": {
+      "runtime": "nodejs18.x"
     }
   },
   "headers": [
