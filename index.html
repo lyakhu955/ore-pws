@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Ore PWS Group (Modern)</title>
 
     <!-- SEO Meta Tags -->
@@ -26,8 +26,10 @@
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#006A6A">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Ore PWS">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Ore PWS">
 
     <!-- Apple Touch Icons -->
     <link rel="apple-touch-icon" sizes="180x180" href="./icons/icon-192x192.png">
@@ -68,6 +70,101 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         /* Material Design 3 Inspired Theme - Android 2025 */
+
+        /* iOS Safari Compatibility Fixes */
+        html {
+            height: 100%;
+            height: -webkit-fill-available;
+        }
+
+        body {
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+        }
+
+        /* Safe Area Support for iOS */
+        @supports (padding: max(0px)) {
+            body {
+                padding-left: env(safe-area-inset-left, 0px);
+                padding-right: env(safe-area-inset-right, 0px);
+                padding-top: env(safe-area-inset-top, 0px);
+            }
+
+            header {
+                padding-top: calc(0.75rem + env(safe-area-inset-top, 0px));
+                padding-left: calc(1rem + env(safe-area-inset-left, 0px));
+                padding-right: calc(1rem + env(safe-area-inset-right, 0px));
+            }
+
+            main {
+                margin-top: calc(70px + env(safe-area-inset-top, 0px));
+            }
+
+            .bottom-nav {
+                padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+                padding-left: env(safe-area-inset-left, 0px);
+                padding-right: env(safe-area-inset-right, 0px);
+            }
+
+
+        }
+
+        /* iOS Touch Optimization */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+
+        button, .btn, .button, [role="button"] {
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        /* iOS Scroll Optimization */
+        .scrollable, .modal-content, .calendar-container {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Additional Webkit Prefixes for iOS Safari */
+        .card, .modal, .bottom-nav {
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+        }
+
+        input, select, textarea {
+            -webkit-appearance: none;
+            -webkit-border-radius: 0;
+        }
+
+        /* iOS Safari Animation Optimization */
+        .fade-in {
+            -webkit-animation: fadeIn 0.3s ease-out;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* iOS Safari Scroll Bounce Fix */
+        body {
+            overscroll-behavior: none;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* iOS Safari Input Focus Fix */
+        input, textarea, select {
+            font-size: 16px; /* Prevents zoom on focus in iOS Safari */
+        }
+
+        @media screen and (max-width: 768px) {
+            input, textarea, select {
+                font-size: 16px !important; /* Force 16px on mobile to prevent zoom */
+            }
+        }
+
+        /* Override existing body padding for safe area compatibility */
+        body {
+            padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+        }
 
         :root {
             /* Light Theme Palette (Material You - Teal/Blue Base) */
