@@ -17,6 +17,9 @@ let proactiveRefreshTimer = null;
 function initGoogleAuth() {
   console.log('Inizializzazione Google Auth...');
 
+  // Controlla se stiamo tornando da un redirect di autenticazione
+  checkAuthRedirectReturn();
+
   // Carica le librerie Google necessarie
   loadGoogleLibraries()
     .then(() => {
@@ -39,6 +42,72 @@ function initGoogleAuth() {
     .catch(error => {
       console.error('Errore durante il caricamento delle librerie Google:', error);
     });
+}
+
+// Controlla se stiamo tornando da un redirect di autenticazione
+function checkAuthRedirectReturn() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const code = urlParams.get('code');
+  const state = urlParams.get('state');
+  const error = urlParams.get('error');
+
+  if (state === 'google_auth_redirect') {
+    console.log('Ritorno da redirect Google OAuth rilevato');
+
+    // Pulisci l'URL
+    const cleanUrl = window.location.origin + window.location.pathname;
+    window.history.replaceState({}, document.title, cleanUrl);
+
+    if (error) {
+      console.error('Errore durante l\'autenticazione redirect:', error);
+      showToast('Errore durante l\'autenticazione: ' + error, 'error');
+      return;
+    }
+
+    if (code) {
+      console.log('Codice di autorizzazione ricevuto, scambio con token...');
+      exchangeCodeForToken(code);
+    }
+  }
+}
+
+// Scambia il codice di autorizzazione con i token
+async function exchangeCodeForToken(code) {
+  try {
+    console.log('Scambio codice di autorizzazione con token...');
+
+    showToast('Completamento autenticazione...', 'info', 3000);
+
+    // Usa la serverless function per lo scambio sicuro
+    const response = await fetch('/api/exchange-code', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        code: code,
+        redirect_uri: `${window.location.origin}${window.location.pathname}`
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Errore durante lo scambio del codice');
+    }
+
+    const tokenData = await response.json();
+
+    // Simula la risposta del token client per riutilizzare la logica esistente
+    handleTokenResponse({
+      access_token: tokenData.access_token,
+      refresh_token: tokenData.refresh_token,
+      expires_in: tokenData.expires_in || 3600
+    });
+
+  } catch (error) {
+    console.error('Errore durante lo scambio del codice:', error);
+    showToast('Errore durante l\'autenticazione: ' + error.message, 'error');
+  }
 }
 
 // Carica le librerie Google necessarie
@@ -307,7 +376,7 @@ async function refreshTokenWithVercel(refreshToken) {
   }
 }
 
-// Effettua il login con Google
+// Effettua il login con Google (con fallback per mobile)
 function loginWithGoogle() {
   if (!tokenClient) {
     console.error('Client di token non inizializzato');
@@ -316,7 +385,63 @@ function loginWithGoogle() {
   }
 
   console.log('Richiesta token di accesso...');
-  tokenClient.requestAccessToken();
+
+  // Rileva se siamo su mobile o se i popup sono bloccati
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const isPopupBlocked = checkPopupBlocked();
+
+  if (isMobile || isPopupBlocked) {
+    console.log('Popup bloccato o dispositivo mobile, uso redirect...');
+    loginWithGoogleRedirect();
+  } else {
+    console.log('Uso popup per login...');
+    try {
+      tokenClient.requestAccessToken();
+    } catch (error) {
+      console.error('Popup fallito, provo con redirect:', error);
+      loginWithGoogleRedirect();
+    }
+  }
+}
+
+// Controlla se i popup sono bloccati
+function checkPopupBlocked() {
+  try {
+    const popup = window.open('', '_blank', 'width=1,height=1');
+    if (popup) {
+      popup.close();
+      return false;
+    }
+    return true;
+  } catch (e) {
+    return true;
+  }
+}
+
+// Login con redirect (per mobile e popup bloccati)
+function loginWithGoogleRedirect() {
+  console.log('Avvio login con redirect...');
+
+  // Salva lo stato corrente per il ritorno
+  localStorage.setItem('googleAuthRedirectState', JSON.stringify({
+    timestamp: Date.now(),
+    returnUrl: window.location.href
+  }));
+
+  // Costruisci URL di redirect
+  const redirectUrl = `${window.location.origin}${window.location.pathname}`;
+  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` + new URLSearchParams({
+    client_id: CLIENT_ID,
+    redirect_uri: redirectUrl,
+    response_type: 'code',
+    scope: SCOPES,
+    access_type: 'offline',
+    prompt: 'consent',
+    state: 'google_auth_redirect'
+  });
+
+  // Redirect alla pagina di autenticazione Google
+  window.location.href = authUrl;
 }
 
 // Effettua il logout
