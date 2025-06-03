@@ -126,6 +126,7 @@ function handleTokenResponse(response) {
 
         // Salva le informazioni dell'utente
         localStorage.setItem('googleUserInfo', JSON.stringify(userData));
+        localStorage.setItem('googleUserEmail', userData.email); // Per hint nel refresh
 
         // Aggiorna l'interfaccia utente
         updateUI(true);
@@ -427,6 +428,7 @@ function clearAuthData() {
   // Rimuovi il token e le informazioni utente dal localStorage
   localStorage.removeItem('googleAuthToken');
   localStorage.removeItem('googleUserInfo');
+  localStorage.removeItem('googleUserEmail');
 
   // Resetta le variabili di stato
   isLoggedIn = false;
@@ -462,9 +464,9 @@ function setupTokenRefresh(expiresAt) {
   // Calcola il tempo rimanente prima della scadenza del token
   const timeRemaining = expiresAt - Date.now();
 
-  // Imposta il timer per richiedere un nuovo token 15 minuti prima della scadenza
-  // Questo dà più tempo per gestire eventuali errori senza interrompere l'utente
-  const refreshTime = Math.max(0, timeRemaining - (15 * 60 * 1000));
+  // Imposta il timer per richiedere un nuovo token 10 minuti prima della scadenza
+  // Ottimizzato per refresh silenzioso più frequente
+  const refreshTime = Math.max(0, timeRemaining - (10 * 60 * 1000));
 
   console.log(`Token scadrà tra ${Math.round(timeRemaining / 60000)} minuti, refresh automatico programmato tra ${Math.round(refreshTime / 60000)} minuti`);
 
@@ -489,7 +491,7 @@ function setupTokenRefresh(expiresAt) {
   }, refreshTime);
 }
 
-// Esegue il refresh del token in modo completamente invisibile
+// Esegue il refresh del token in modo completamente invisibile usando iframe
 async function performSilentTokenRefresh() {
   const savedTokenStr = localStorage.getItem('googleAuthToken');
 
@@ -507,42 +509,24 @@ async function performSilentTokenRefresh() {
       return false;
     }
 
-    console.log('Tentativo di refresh silenzioso tramite API backend...');
+    console.log('Tentativo di refresh silenzioso tramite iframe nascosto...');
 
-    // Usa la serverless function per il refresh
+    // Prova prima il metodo iframe silenzioso
+    const iframeResult = await performIframeSilentRefresh(tokenData.refresh_token);
+
+    if (iframeResult && iframeResult.access_token) {
+      console.log('Token rinnovato tramite iframe silenzioso!');
+      return updateTokenData(iframeResult, tokenData.refresh_token);
+    }
+
+    console.log('Iframe silenzioso fallito, provo con serverless function...');
+
+    // Fallback alla serverless function esistente
     const newToken = await refreshTokenWithVercel(tokenData.refresh_token);
 
     if (newToken && newToken.access_token) {
-      console.log('Token rinnovato automaticamente con successo!');
-
-      // Aggiorna il token salvato
-      const updatedTokenData = {
-        access_token: newToken.access_token,
-        refresh_token: tokenData.refresh_token, // Mantieni il refresh token
-        expires_at: Date.now() + (newToken.expires_in * 1000)
-      };
-
-      localStorage.setItem('googleAuthToken', JSON.stringify(updatedTokenData));
-
-      // Imposta il nuovo token per le richieste API
-      if (gapi && gapi.client) {
-        gapi.client.setToken({
-          access_token: newToken.access_token
-        });
-      }
-
-      // Imposta il timer per il prossimo refresh automatico
-      setupTokenRefresh(updatedTokenData.expires_at);
-
-      // Assicurati che il refresh proattivo sia ancora attivo
-      if (!proactiveRefreshTimer) {
-        startProactiveRefresh();
-      }
-
-      // Log silenzioso del successo (senza toast per non disturbare l'utente)
-      console.log('Sessione rinnovata automaticamente in background');
-
-      return true;
+      console.log('Token rinnovato tramite serverless function!');
+      return updateTokenData(newToken, tokenData.refresh_token);
     }
 
     return false;
@@ -553,7 +537,99 @@ async function performSilentTokenRefresh() {
   }
 }
 
-// Gestisce il fallimento del refresh automatico
+// Aggiorna i dati del token e imposta i timer
+function updateTokenData(newToken, refreshToken) {
+  // Aggiorna il token salvato
+  const updatedTokenData = {
+    access_token: newToken.access_token,
+    refresh_token: refreshToken, // Mantieni il refresh token
+    expires_at: Date.now() + (newToken.expires_in * 1000)
+  };
+
+  localStorage.setItem('googleAuthToken', JSON.stringify(updatedTokenData));
+
+  // Imposta il nuovo token per le richieste API
+  if (gapi && gapi.client) {
+    gapi.client.setToken({
+      access_token: newToken.access_token
+    });
+  }
+
+  // Imposta il timer per il prossimo refresh automatico
+  setupTokenRefresh(updatedTokenData.expires_at);
+
+  // Assicurati che il refresh proattivo sia ancora attivo
+  if (!proactiveRefreshTimer) {
+    startProactiveRefresh();
+  }
+
+  // Log silenzioso del successo (senza toast per non disturbare l'utente)
+  console.log('Sessione rinnovata automaticamente in background');
+
+  return true;
+}
+
+// Refresh silenzioso tramite iframe nascosto (completamente invisibile)
+function performIframeSilentRefresh(refreshToken) {
+  return new Promise((resolve, reject) => {
+    // Crea iframe nascosto
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = 'none';
+    iframe.style.position = 'absolute';
+    iframe.style.top = '-1000px';
+    iframe.style.left = '-1000px';
+
+    // Timeout per evitare attese infinite
+    const timeout = setTimeout(() => {
+      cleanup();
+      reject(new Error('Silent refresh timeout'));
+    }, 15000); // 15 secondi timeout
+
+    // Funzione di pulizia
+    const cleanup = () => {
+      clearTimeout(timeout);
+      window.removeEventListener('message', messageHandler);
+      if (iframe.parentNode) {
+        iframe.parentNode.removeChild(iframe);
+      }
+    };
+
+    // Handler per i messaggi dall'iframe
+    const messageHandler = (event) => {
+      // Verifica origine per sicurezza
+      if (event.origin !== window.location.origin) {
+        return;
+      }
+
+      if (event.data && event.data.type === 'SILENT_REFRESH_SUCCESS') {
+        cleanup();
+        resolve({
+          access_token: event.data.access_token,
+          expires_in: event.data.expires_in,
+          token_type: event.data.token_type
+        });
+      } else if (event.data && event.data.type === 'SILENT_REFRESH_ERROR') {
+        cleanup();
+        reject(new Error(event.data.description || 'Silent refresh failed'));
+      }
+    };
+
+    // Ascolta i messaggi dall'iframe
+    window.addEventListener('message', messageHandler);
+
+    // Imposta l'URL dell'iframe per il refresh silenzioso
+    const refreshUrl = `/api/silent-refresh?refresh_token=${encodeURIComponent(refreshToken)}&origin=${encodeURIComponent(window.location.origin)}`;
+    iframe.src = refreshUrl;
+
+    // Aggiungi l'iframe al DOM
+    document.body.appendChild(iframe);
+  });
+}
+
+// Gestisce il fallimento del refresh automatico con fallback intelligente
 async function handleRefreshFailure() {
   console.log('Gestione fallimento refresh automatico...');
 
@@ -568,10 +644,9 @@ async function handleRefreshFailure() {
       return;
     }
 
-    // Se anche il secondo tentativo fallisce, mostra un messaggio discreto
+    // Se anche il secondo tentativo fallisce, verifica lo stato del token
     console.log('Refresh automatico fallito definitivamente');
 
-    // Verifica se il token è ancora valido per qualche minuto
     const savedTokenStr = localStorage.getItem('googleAuthToken');
     if (savedTokenStr) {
       try {
@@ -584,17 +659,59 @@ async function handleRefreshFailure() {
           setTimeout(() => performSilentTokenRefresh(), 2 * 60 * 1000); // Riprova tra 2 minuti
           return;
         }
+
+        // Se il token scadrà presto, prova il fallback popup automatico
+        if (timeRemaining > (1 * 60 * 1000)) { // Almeno 1 minuto rimasto
+          console.log('Token in scadenza imminente, tentativo popup automatico...');
+          await attemptAutomaticPopupRefresh();
+          return;
+        }
       } catch (e) {
         console.error('Errore nel parsing del token:', e);
       }
     }
 
-    // Solo ora, come ultima risorsa, mostra un messaggio discreto all'utente
-    showToast('Sessione in scadenza. Clicca qui per rinnovare.', 'warning', 10000, () => {
+    // Solo come ultima risorsa, mostra un messaggio discreto all'utente
+    showToast('Sessione scaduta. Clicca qui per riconnetterti.', 'warning', 15000, () => {
       loginWithGoogle();
     });
 
   }, 30000); // Aspetta 30 secondi prima del secondo tentativo
+}
+
+// Tentativo automatico di refresh tramite popup (solo se necessario)
+async function attemptAutomaticPopupRefresh() {
+  try {
+    console.log('Tentativo popup automatico per refresh token...');
+
+    // Mostra una notifica discreta che stiamo rinnovando la sessione
+    showToast('Rinnovo sessione in corso...', 'info', 3000);
+
+    // Usa il client token esistente per un refresh automatico
+    if (tokenClient) {
+      // Configura il client per un refresh silenzioso se possibile
+      tokenClient.requestAccessToken({
+        prompt: '', // Prova senza prompt
+        hint: localStorage.getItem('googleUserEmail') || ''
+      });
+    } else {
+      // Se non abbiamo il client, inizializza e riprova
+      await initGoogleAuth();
+      setTimeout(() => {
+        if (tokenClient) {
+          tokenClient.requestAccessToken();
+        }
+      }, 1000);
+    }
+
+  } catch (error) {
+    console.error('Errore durante il popup automatico:', error);
+
+    // Se anche il popup automatico fallisce, mostra il messaggio all'utente
+    showToast('Sessione scaduta. Clicca qui per riconnetterti.', 'warning', 15000, () => {
+      loginWithGoogle();
+    });
+  }
 }
 
 // Sistema di refresh proattivo - controlla periodicamente lo stato del token
