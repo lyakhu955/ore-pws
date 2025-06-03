@@ -13708,7 +13708,44 @@ END:VCARD`;
             });
         }
 
-        // Funzione initGoogleAuth ora gestita dal file google-auth.js esterno
+        // Funzione per inizializzare il client di autenticazione Google
+        async function initGoogleAuth() {
+            return new Promise((resolve, reject) => {
+                try {
+                    if (!window.google || !window.google.accounts || !window.google.accounts.oauth2) {
+                        reject(new Error('Google Identity Services non disponibili'));
+                        return;
+                    }
+
+                    // Configura Google Identity Services
+                    window.googleAuthClient = google.accounts.oauth2.initTokenClient({
+                        client_id: '990017681774-kmghq0vajmb8lbv7gqv2qsi7fn1rbp4f.apps.googleusercontent.com',
+                        scope: 'https://www.googleapis.com/auth/drive openid profile email',
+                        prompt: 'consent',  // Mostra sempre il consenso per garantire il refresh token
+                        auto_select: false,  // Lascia che l'utente scelga l'account
+                        // Richiedi un token con scadenza più lunga (massimo consentito)
+                        access_type: 'offline',  // Richiedi un refresh token
+                        include_granted_scopes: true,  // Include tutti gli scope già concessi
+                        callback: (tokenResponse) => {
+                            if (tokenResponse && tokenResponse.access_token) {
+                                // Imposta il token di accesso per le richieste API
+                                gapi.client.setToken(tokenResponse);
+                                console.log('Token di accesso ottenuto con successo');
+                            }
+                        },
+                        error_callback: (error) => {
+                            console.error('Errore durante l\'autenticazione:', error);
+                        }
+                    });
+
+                    console.log('Client di autenticazione Google inizializzato con successo');
+                    resolve();
+                } catch (error) {
+                    console.error('Errore nell\'inizializzazione del client di autenticazione Google:', error);
+                    reject(error);
+                }
+            });
+        }
 
         // Carica le API di Microsoft
         function loadMicrosoftApi() {
@@ -19086,9 +19123,6 @@ END:VCARD`;
             });
         });
     </script>
-
-    <!-- Sistema di autenticazione Google ottimizzato -->
-    <script src="./google-auth.js"></script>
 
 </body>
 </html>
