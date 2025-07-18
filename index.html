@@ -2176,6 +2176,134 @@
              .calendar-day.malattia .calendar-holiday-name {
                color: var(--md-sys-color-on-secondary-container);
            }
+                   /* Calendar Share Styles */
+        .calendar-share-container {
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .calendar-share-btn {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius-full);
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            box-shadow: var(--elevation-2);
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .calendar-share-btn:hover {
+            background-color: var(--md-sys-color-primary);
+            transform: translateY(-1px);
+            box-shadow: var(--elevation-3);
+        }
+
+        .calendar-share-btn.success {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .calendar-share-btn.success:hover {
+            background-color: #45a049;
+        }
+
+        .calendar-day-checkbox {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            display: none;
+        }
+
+        .calendar-day-checkbox input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .calendar-day-checkbox .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 20px;
+            width: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 2px solid var(--md-sys-color-outline);
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .calendar-day-checkbox input:checked ~ .checkmark {
+            background-color: var(--md-sys-color-primary);
+            border-color: var(--md-sys-color-primary);
+        }
+
+        .calendar-day-checkbox .checkmark::after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+
+        .calendar-day-checkbox input:checked ~ .checkmark::after {
+            display: block;
+        }
+
+        .calendar-day-checkbox .checkmark::after {
+            left: 6px;
+            top: 2px;
+            width: 4px;
+            height: 8px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .calendar-day.selectable {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .calendar-day.selectable:hover .calendar-day-checkbox {
+            display: block;
+        }
+
+        .calendar-day.selected {
+            background-color: var(--md-sys-color-primary-container);
+            border: 2px solid var(--md-sys-color-primary);
+        }
+
+        .calendar-day.selected .calendar-day-checkbox {
+            display: block;
+        }
+
+        .calendar-selection-mode .calendar-day.selectable .calendar-day-checkbox {
+            display: block;
+        }
+
+        .calendar-selection-mode .calendar-day.selectable {
+            cursor: pointer;
+        }
+
+        .calendar-selection-mode .calendar-day:not(.selectable) {
+            opacity: 0.5;
+        }
+
 
         /* Modal */
         .modal {
@@ -7472,7 +7600,13 @@
              const monthNames = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
              const dayNames = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"];
 
-             let html = `<div class="calendar-header">
+             let html = `<div class="calendar-share-container">
+                         <button id="calendar-share-btn" class="calendar-share-btn" onclick="toggleCalendarShare()">
+                             <span class="material-symbols-outlined">share</span>
+                             <span class="share-text">Condividi</span>
+                         </button>
+                       </div>
+                       <div class="calendar-header">
                          <button onclick="changeMonth(-1)" title="Mese Precedente"><span class="material-symbols-outlined">chevron_left</span></button>
                          <div class="calendar-title">
                              <span class="calendar-month">${monthNames[month]}</span>
@@ -7480,6 +7614,7 @@
                          </div>
                          <button onclick="changeMonth(1)" title="Mese Successivo"><span class="material-symbols-outlined">chevron_right</span></button>
                        </div>`;
+
              html += `<div class="calendar-grid">`;
 
              // Weekday Headers
@@ -7533,7 +7668,14 @@
                  else if(entries.length > 0) title += ` - Lavorato: ${totalHours.toFixed(1)}h`;
 
 
-                 html += `<div class="${dayClasses}" data-date="${dateStr}" title="${escapeHtml(title)}">`; // Add title attribute
+                 const hasWorkEntries = entries.length > 0 && totalHours > 0;
+                 const selectableClass = hasWorkEntries ? ' selectable' : '';
+                 const checkbox = hasWorkEntries ? `<div class="calendar-day-checkbox">
+                                                      <input type="checkbox" id="day-${dateStr}" data-date="${dateStr}">
+                                                      <span class="checkmark"></span>
+                                                   </div>` : '';
+                 html += `<div class="${dayClasses}${selectableClass}" data-date="${dateStr}" title="${escapeHtml(title)}">
+                          ${checkbox}`;
                  html += `<span class="calendar-day-number">${day}</span>`;
                  html += `<div class="calendar-day-content">`;
 
@@ -7581,6 +7723,172 @@
              html += `</div>`; // end grid
              return html;
          }
+
+        // Calendar Share Functionality
+        let calendarSelectionMode = false;
+        let selectedDays = new Set();
+
+        function toggleCalendarShare() {
+            const btn = document.getElementById('calendar-share-btn');
+            const calendar = document.getElementById('calendarEntries');
+
+            if (!calendarSelectionMode) {
+                // Attiva modalità selezione
+                calendarSelectionMode = true;
+                calendar.classList.add('calendar-selection-mode');
+                btn.querySelector('.share-text').textContent = 'Copia (0)';
+                btn.querySelector('.material-symbols-outlined').textContent = 'content_copy';
+
+                // Aggiungi event listeners per la selezione
+                attachSelectionListeners();
+            } else {
+                // Copia e reset
+                if (selectedDays.size > 0) {
+                    copySelectedDaysToClipboard();
+                } else {
+                    showToast('Nessun giorno selezionato', 'warning');
+                }
+                resetCalendarSelection();
+            }
+        }
+
+        function attachSelectionListeners() {
+            const selectableDays = document.querySelectorAll('.calendar-day.selectable');
+
+            selectableDays.forEach(day => {
+                day.addEventListener('click', handleDaySelection);
+                day.addEventListener('touchstart', handleDaySelection);
+            });
+        }
+
+        function handleDaySelection(event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const day = event.currentTarget;
+            const dateStr = day.dataset.date;
+            const checkbox = day.querySelector('input[type="checkbox"]');
+
+            if (!checkbox) return;
+
+            if (selectedDays.has(dateStr)) {
+                selectedDays.delete(dateStr);
+                checkbox.checked = false;
+                day.classList.remove('selected');
+            } else {
+                selectedDays.add(dateStr);
+                checkbox.checked = true;
+                day.classList.add('selected');
+            }
+
+            updateShareButton();
+        }
+
+        function updateShareButton() {
+            const btn = document.getElementById('calendar-share-btn');
+            const count = selectedDays.size;
+            btn.querySelector('.share-text').textContent = `Copia (${count})`;
+        }
+
+        function copySelectedDaysToClipboard() {
+            const db = getDb();
+            const sortedDates = Array.from(selectedDays).sort((a, b) => {
+                const dateA = parseDate(a);
+                const dateB = parseDate(b);
+                return dateA - dateB;
+            });
+
+            let reportText = "🗓️ REPORT ORE LAVORO\n\n";
+
+            sortedDates.forEach(dateStr => {
+                const entries = db.entries[dateStr] || [];
+                const date = parseDate(dateStr);
+                const dayName = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'][date.getDay()];
+                const formattedDate = `${dayName} ${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+
+                reportText += `📅 ${formattedDate}\n`;
+
+                entries.forEach(entry => {
+                    // Formato ore: inizio-pausa-fine
+                    const startTime = entry.startTime || '';
+                    const endTime = entry.endTime || '';
+                    const breakTime = entry.breakTime || 0;
+                    const timeFormat = `${startTime}-${breakTime}-${endTime}`;
+
+                    reportText += `⏰ Ore: ${timeFormat}\n`;
+
+                    // Descrizione lavoro
+                    if (entry.description && entry.description.trim() !== '') {
+                        reportText += `📍 ${entry.description}\n`;
+                    }
+
+                    // Trasferta (solo se true)
+                    if (entry.transferta === true) {
+                        reportText += `🚗 Trasferta: Sì\n`;
+                    }
+
+                    // Ore notturne (solo se > 0)
+                    if (entry.notturne && entry.notturne > 0) {
+                        reportText += `🌙 Ore notturne: ${entry.notturne}h\n`;
+                    }
+
+                    // Totale ore
+                    if (entry.totalHours && entry.totalHours > 0) {
+                        reportText += `💼 Totale ore: ${entry.totalHours}h\n`;
+                    }
+                });
+
+                reportText += "\n";
+            });
+
+            // Copia negli appunti
+            navigator.clipboard.writeText(reportText).then(() => {
+                showSuccessButton();
+                showToast('Report copiato negli appunti!', 'success');
+            }).catch(err => {
+                console.error('Errore nella copia:', err);
+                showToast('Errore nella copia negli appunti', 'error');
+            });
+        }
+
+        function showSuccessButton() {
+            const btn = document.getElementById('calendar-share-btn');
+            btn.classList.add('success');
+            btn.querySelector('.share-text').textContent = 'Copiato!';
+            btn.querySelector('.material-symbols-outlined').textContent = 'check';
+
+            setTimeout(() => {
+                resetCalendarSelection();
+            }, 2000);
+        }
+
+        function resetCalendarSelection() {
+            const btn = document.getElementById('calendar-share-btn');
+            const calendar = document.getElementById('calendarEntries');
+
+            calendarSelectionMode = false;
+            selectedDays.clear();
+            calendar.classList.remove('calendar-selection-mode');
+
+            // Reset pulsante
+            btn.classList.remove('success');
+            btn.querySelector('.share-text').textContent = 'Condividi';
+            btn.querySelector('.material-symbols-outlined').textContent = 'share';
+
+            // Rimuovi selezioni
+            document.querySelectorAll('.calendar-day.selected').forEach(day => {
+                day.classList.remove('selected');
+                const checkbox = day.querySelector('input[type="checkbox"]');
+                if (checkbox) checkbox.checked = false;
+            });
+
+            // Rimuovi event listeners
+            document.querySelectorAll('.calendar-day.selectable').forEach(day => {
+                day.removeEventListener('click', handleDaySelection);
+                day.removeEventListener('touchstart', handleDaySelection);
+            });
+        }
+
 
         function updateMonthlySummary(year, month, db) {
             // Get the container element
