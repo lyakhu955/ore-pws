@@ -2216,6 +2216,217 @@
             background-color: #45a049;
         }
 
+        /* Calendar Paste Button */
+        .calendar-buttons-container {
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .calendar-paste-btn {
+            background-color: var(--md-sys-color-secondary);
+            color: var(--md-sys-color-on-secondary);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius-large);
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--elevation-1);
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .calendar-paste-btn:hover {
+            background-color: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+            box-shadow: var(--elevation-2);
+            transform: translateY(-1px);
+        }
+
+        .calendar-paste-btn:active {
+            transform: translateY(0);
+            box-shadow: var(--elevation-1);
+        }
+
+        .calendar-paste-btn.processing {
+            background-color: #FF9800;
+            color: white;
+        }
+
+        .calendar-paste-btn.processing:hover {
+            background-color: #F57C00;
+        }
+
+        .calendar-paste-btn.success {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .calendar-paste-btn.success:hover {
+            background-color: #45a049;
+        }
+
+        .calendar-paste-btn.error {
+            background-color: var(--md-sys-color-error);
+            color: var(--md-sys-color-on-error);
+        }
+
+        .calendar-paste-btn.error:hover {
+            background-color: var(--md-sys-color-error-container);
+            color: var(--md-sys-color-on-error-container);
+        }
+
+        /* Import Preview Modal */
+        .import-preview-modal {
+            display: none;
+            position: fixed;
+            z-index: 1100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .import-preview-content {
+            background-color: var(--md-sys-color-surface);
+            margin: 5% auto;
+            padding: 1.5rem;
+            border-radius: var(--border-radius-large);
+            box-shadow: var(--elevation-5);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .import-preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .import-preview-title {
+            color: var(--md-sys-color-on-surface);
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .import-close-btn {
+            background: none;
+            border: none;
+            color: var(--md-sys-color-on-surface);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .import-close-btn:hover {
+            background-color: var(--md-sys-color-surface-variant);
+        }
+
+        .import-preview-body {
+            margin-bottom: 1.5rem;
+        }
+
+        .import-summary {
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            padding: 1rem;
+            border-radius: var(--border-radius-medium);
+            margin-bottom: 1rem;
+        }
+
+        .import-entries-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: var(--border-radius-medium);
+            padding: 0.5rem;
+        }
+
+        .import-entry-item {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background-color: var(--md-sys-color-surface-variant);
+            border-radius: var(--border-radius-small);
+            border-left: 4px solid var(--md-sys-color-primary);
+        }
+
+        .import-entry-date {
+            font-weight: 500;
+            color: var(--md-sys-color-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .import-entry-details {
+            font-size: 0.875rem;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .import-preview-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .import-action-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius-medium);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+
+        .import-btn-cancel {
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .import-btn-cancel:hover {
+            background-color: var(--md-sys-color-outline-variant);
+        }
+
+        .import-btn-replace {
+            background-color: var(--md-sys-color-error);
+            color: var(--md-sys-color-on-error);
+        }
+
+        .import-btn-replace:hover {
+            background-color: var(--md-sys-color-error-container);
+            color: var(--md-sys-color-on-error-container);
+        }
+
+        .import-btn-merge {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .import-btn-merge:hover {
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+        }
+
         .calendar-day-checkbox {
             position: absolute;
             top: 4px;
@@ -7600,10 +7811,14 @@
              const monthNames = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
              const dayNames = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"];
 
-             let html = `<div class="calendar-share-container">
+             let html = `<div class="calendar-buttons-container">
                          <button id="calendar-share-btn" class="calendar-share-btn" onclick="toggleCalendarShare()">
                              <span class="material-symbols-outlined">share</span>
                              <span class="share-text">Condividi</span>
+                         </button>
+                         <button id="calendar-paste-btn" class="calendar-paste-btn" onclick="pasteWorkHours()">
+                             <span class="material-symbols-outlined">content_paste</span>
+                             <span class="paste-text">Incolla</span>
                          </button>
                        </div>
                        <div class="calendar-header">
@@ -7887,6 +8102,335 @@
                 day.removeEventListener('click', handleDaySelection);
                 day.removeEventListener('touchstart', handleDaySelection);
             });
+        }
+
+        // Calendar Paste Functionality
+        let pendingImportData = null;
+
+        async function pasteWorkHours() {
+            const btn = document.getElementById('calendar-paste-btn');
+
+            try {
+                // Update button to processing state
+                btn.classList.add('processing');
+                btn.querySelector('.paste-text').textContent = 'Lettura...';
+                btn.querySelector('.material-symbols-outlined').textContent = 'refresh';
+
+                // Check clipboard API support
+                if (!navigator.clipboard || !navigator.clipboard.readText) {
+                    throw new Error('La funzione incolla non è supportata in questo browser');
+                }
+
+                // Read clipboard text
+                const clipboardText = await navigator.clipboard.readText();
+
+                if (!clipboardText || clipboardText.trim() === '') {
+                    throw new Error('Il clipboard è vuoto');
+                }
+
+                // Parse the clipboard content
+                const parsedData = parseWorkHoursReport(clipboardText);
+
+                if (!parsedData || parsedData.entries.length === 0) {
+                    throw new Error('Formato non riconosciuto. Assicurati di aver copiato un report valido.');
+                }
+
+                // Store data for import and show preview
+                pendingImportData = parsedData;
+                showImportPreview(parsedData);
+
+                // Reset button
+                resetPasteButton();
+
+            } catch (error) {
+                console.error('Errore durante l\'incolla:', error);
+
+                // Show error state
+                btn.classList.remove('processing');
+                btn.classList.add('error');
+                btn.querySelector('.paste-text').textContent = 'Errore';
+                btn.querySelector('.material-symbols-outlined').textContent = 'error';
+
+                showToast(error.message, 'error');
+
+                // Reset after delay
+                setTimeout(() => {
+                    resetPasteButton();
+                }, 3000);
+            }
+        }
+
+        function parseWorkHoursReport(text) {
+            try {
+                const lines = text.split('\n').map(line => line.trim()).filter(line => line !== '');
+
+                if (lines.length === 0 || !lines[0].includes('REPORT ORE LAVORO')) {
+                    return null;
+                }
+
+                const entries = [];
+                let currentEntry = null;
+
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i];
+
+                    // Date line (📅 Day DD/MM/YYYY)
+                    const dateMatch = line.match(/^📅\s+(.+)\s+(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+                    if (dateMatch) {
+                        // Save previous entry if exists
+                        if (currentEntry) {
+                            entries.push(currentEntry);
+                        }
+
+                        // Create new entry
+                        const day = parseInt(dateMatch[2]);
+                        const month = parseInt(dateMatch[3]) - 1; // JS months are 0-based
+                        const year = parseInt(dateMatch[4]);
+                        const date = new Date(year, month, day);
+
+                        currentEntry = {
+                            dateStr: formatDateForInput(date),
+                            date: date,
+                            dayName: dateMatch[1],
+                            startTime: '',
+                            endTime: '',
+                            breakTime: 0,
+                            description: '',
+                            transferta: false,
+                            notturne: 0,
+                            totalHours: 0
+                        };
+                        continue;
+                    }
+
+                    if (!currentEntry) continue;
+
+                    // Time line (⏰ Ore: start-break-end)
+                    const timeMatch = line.match(/^⏰\s+Ore:\s+(.+)-(.+)-(.+)$/);
+                    if (timeMatch) {
+                        currentEntry.startTime = timeMatch[1].trim();
+                        currentEntry.breakTime = parseFloat(timeMatch[2].trim()) || 0;
+                        currentEntry.endTime = timeMatch[3].trim();
+                        continue;
+                    }
+
+                    // Description line (📍 text)
+                    const descMatch = line.match(/^📍\s+(.+)$/);
+                    if (descMatch) {
+                        currentEntry.description = descMatch[1].trim();
+                        continue;
+                    }
+
+                    // Trasferta line (🚗 Trasferta: Sì)
+                    if (line.match(/^🚗\s+Trasferta:\s+Sì$/)) {
+                        currentEntry.transferta = true;
+                        continue;
+                    }
+
+                    // Night hours line (🌙 Ore notturne: Xh)
+                    const nightMatch = line.match(/^🌙\s+Ore\s+notturne:\s+(\d+(?:\.\d+)?)h$/);
+                    if (nightMatch) {
+                        currentEntry.notturne = parseFloat(nightMatch[1]);
+                        continue;
+                    }
+
+                    // Total hours line (💼 Totale ore: Xh)
+                    const totalMatch = line.match(/^💼\s+Totale\s+ore:\s+(\d+(?:\.\d+)?)h$/);
+                    if (totalMatch) {
+                        currentEntry.totalHours = parseFloat(totalMatch[1]);
+                        continue;
+                    }
+                }
+
+                // Add last entry
+                if (currentEntry) {
+                    entries.push(currentEntry);
+                }
+
+                return {
+                    totalEntries: entries.length,
+                    entries: entries
+                };
+
+            } catch (error) {
+                console.error('Errore nel parsing:', error);
+                return null;
+            }
+        }
+
+        function showImportPreview(data) {
+            const modal = document.getElementById('importPreviewModal');
+            const summary = document.getElementById('importSummary');
+            const entriesList = document.getElementById('importEntriesList');
+
+            // Build summary
+            const totalDays = data.entries.length;
+            const totalHours = data.entries.reduce((sum, entry) => sum + entry.totalHours, 0);
+            const dateRange = getDateRange(data.entries);
+
+            summary.innerHTML = `
+                <h4>📊 Riepilogo Importazione</h4>
+                <p><strong>Giorni da importare:</strong> ${totalDays}</p>
+                <p><strong>Ore totali:</strong> ${totalHours.toFixed(1)}h</p>
+                <p><strong>Periodo:</strong> ${dateRange}</p>
+            `;
+
+            // Build entries list
+            entriesList.innerHTML = '';
+            data.entries.forEach(entry => {
+                const entryDiv = document.createElement('div');
+                entryDiv.className = 'import-entry-item';
+
+                const details = [];
+                if (entry.startTime && entry.endTime) {
+                    details.push(`⏰ ${entry.startTime}-${entry.breakTime}-${entry.endTime}`);
+                }
+                if (entry.description) {
+                    details.push(`📍 ${entry.description}`);
+                }
+                if (entry.transferta) {
+                    details.push('🚗 Trasferta');
+                }
+                if (entry.notturne > 0) {
+                    details.push(`🌙 ${entry.notturne}h notturne`);
+                }
+                if (entry.totalHours > 0) {
+                    details.push(`💼 ${entry.totalHours}h totali`);
+                }
+
+                entryDiv.innerHTML = `
+                    <div class="import-entry-date">${entry.dayName} ${entry.dateStr}</div>
+                    <div class="import-entry-details">${details.join(' • ')}</div>
+                `;
+
+                entriesList.appendChild(entryDiv);
+            });
+
+            // Check for conflicts
+            checkImportConflicts(data.entries);
+
+            // Show modal
+            modal.style.display = 'block';
+        }
+
+        function getDateRange(entries) {
+            if (entries.length === 0) return '';
+            if (entries.length === 1) return entries[0].dateStr;
+
+            const dates = entries.map(e => e.date).sort((a, b) => a - b);
+            const first = formatDateForInput(dates[0]);
+            const last = formatDateForInput(dates[dates.length - 1]);
+
+            return `${first} - ${last}`;
+        }
+
+        function checkImportConflicts(entries) {
+            const db = getDb();
+            const replaceBtn = document.getElementById('importReplaceBtn');
+            const mergeBtn = document.getElementById('importMergeBtn');
+
+            let hasConflicts = false;
+            let conflictDays = 0;
+
+            entries.forEach(entry => {
+                if (db.entries[entry.dateStr] && db.entries[entry.dateStr].length > 0) {
+                    hasConflicts = true;
+                    conflictDays++;
+                }
+            });
+
+            if (hasConflicts) {
+                replaceBtn.textContent = `Sostituisci (${conflictDays} conflitti)`;
+                replaceBtn.style.display = 'block';
+                mergeBtn.textContent = 'Aggiungi';
+            } else {
+                replaceBtn.style.display = 'none';
+                mergeBtn.textContent = 'Importa';
+            }
+        }
+
+        function importWorkHours(mode) {
+            if (!pendingImportData) {
+                showToast('Nessun dato da importare', 'error');
+                return;
+            }
+
+            const db = getDb();
+            let importedCount = 0;
+            let replacedCount = 0;
+
+            pendingImportData.entries.forEach(entry => {
+                const dateStr = entry.dateStr;
+
+                // Check if date already has entries
+                const existingEntries = db.entries[dateStr] || [];
+
+                if (mode === 'replace' && existingEntries.length > 0) {
+                    // Replace existing entries
+                    db.entries[dateStr] = [];
+                    replacedCount++;
+                }
+
+                // Ensure entries array exists
+                if (!db.entries[dateStr]) {
+                    db.entries[dateStr] = [];
+                }
+
+                // Create new entry object
+                const newEntry = {
+                    startTime: entry.startTime,
+                    endTime: entry.endTime,
+                    breakTime: entry.breakTime,
+                    description: entry.description,
+                    transferta: entry.transferta,
+                    notturne: entry.notturne,
+                    totalHours: entry.totalHours,
+                    id: generateId(),
+                    timestamp: Date.now()
+                };
+
+                db.entries[dateStr].push(newEntry);
+                importedCount++;
+            });
+
+            // Save to database
+            saveDb(db);
+
+            // Show success message
+            let message = `${importedCount} giorni importati`;
+            if (replacedCount > 0) {
+                message += `, ${replacedCount} sostituiti`;
+            }
+            showToast(message, 'success');
+
+            // Close modal and refresh views
+            closeImportPreviewModal();
+
+            // Refresh calendar and other views
+            if (typeof loadCalendarData === 'function') {
+                loadCalendarData();
+            }
+            if (typeof loadTimeEntries === 'function') {
+                loadTimeEntries();
+            }
+        }
+
+        function closeImportPreviewModal() {
+            const modal = document.getElementById('importPreviewModal');
+            modal.style.display = 'none';
+            pendingImportData = null;
+        }
+
+        function resetPasteButton() {
+            const btn = document.getElementById('calendar-paste-btn');
+            btn.classList.remove('processing', 'success', 'error');
+            btn.querySelector('.paste-text').textContent = 'Incolla';
+            btn.querySelector('.material-symbols-outlined').textContent = 'content_paste';
+        }
+
+        // Helper function to generate unique IDs
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
         }
 
 
@@ -19158,6 +19702,37 @@ END:VCARD`;
         // Inizializza il PIN Admin quando il documento è pronto
         document.addEventListener('DOMContentLoaded', initAdminPin);
     </script>
+
+    <!-- Import Preview Modal -->
+    <div id="importPreviewModal" class="import-preview-modal">
+        <div class="import-preview-content">
+            <div class="import-preview-header">
+                <h3 class="import-preview-title">Anteprima Importazione Ore</h3>
+                <button class="import-close-btn" onclick="closeImportPreviewModal()">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="import-preview-body">
+                <div class="import-summary" id="importSummary">
+                    <!-- Summary will be populated by JS -->
+                </div>
+                <div class="import-entries-list" id="importEntriesList">
+                    <!-- Entries will be populated by JS -->
+                </div>
+            </div>
+            <div class="import-preview-actions">
+                <button class="import-action-btn import-btn-cancel" onclick="closeImportPreviewModal()">
+                    Annulla
+                </button>
+                <button class="import-action-btn import-btn-replace" onclick="importWorkHours('replace')" id="importReplaceBtn">
+                    Sostituisci
+                </button>
+                <button class="import-action-btn import-btn-merge" onclick="importWorkHours('merge')" id="importMergeBtn">
+                    Aggiungi
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Finestra di Benvenuto e Sicurezza -->
     <div id="welcomeModal" class="welcome-modal" style="display: none;">
