@@ -376,7 +376,7 @@ async function refreshTokenWithVercel(refreshToken) {
   }
 }
 
-// Effettua il login con Google (con fix iOS migliorato)
+// Effettua il login con Google (con fallback per mobile)
 function loginWithGoogle() {
   if (!tokenClient) {
     console.error('Client di token non inizializzato');
@@ -384,32 +384,21 @@ function loginWithGoogle() {
     return;
   }
 
-  console.log('🔐 Richiesta token di accesso...');
+  console.log('Richiesta token di accesso...');
 
-  // 🍎 iOS Detection migliorato (tutti i browser iOS usano WebKit)
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  
   // Rileva se siamo su mobile o se i popup sono bloccati
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   const isPopupBlocked = checkPopupBlocked();
 
-  // 🍎 FORZA SEMPRE REDIRECT SU iOS (Safari + Chrome + tutti i browser iOS)
-  if (isIOS) {
-    console.log('🍎 iOS rilevato (Safari/Chrome/altri) - forzo redirect per evitare problemi tastiera');
-    loginWithGoogleRedirect();
-    return;
-  }
-
   if (isMobile || isPopupBlocked) {
-    console.log('📱 Popup bloccato o dispositivo mobile, uso redirect...');
+    console.log('Popup bloccato o dispositivo mobile, uso redirect...');
     loginWithGoogleRedirect();
   } else {
-    console.log('💻 Desktop - uso popup per login...');
+    console.log('Uso popup per login...');
     try {
       tokenClient.requestAccessToken();
     } catch (error) {
-      console.error('❌ Popup fallito, provo con redirect:', error);
+      console.error('Popup fallito, provo con redirect:', error);
       loginWithGoogleRedirect();
     }
   }
