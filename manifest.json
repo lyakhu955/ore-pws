@@ -1,0 +1,82 @@
+{
+  "_comment": "Manifest configurato per funzionare su domini multipli: ore-pws.meme e domini Vercel",
+  "name": "Ore PWS Group",
+  "short_name": "Ore PWS",
+  "description": "Applicazione per la gestione delle ore di lavoro",
+  "id": "/?source=pwa",
+  "start_url": "./index.html?source=pwa",
+  "display": "standalone",
+  "background_color": "#FAFDFC",
+  "theme_color": "#006A6A",
+  "orientation": "portrait-primary",
+  "permissions": ["notifications"],
+  "gcm_sender_id": "103953800507",
+  "scope": "./",
+  "categories": ["productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Aggiungi Ore",
+      "short_name": "Aggiungi",
+      "description": "Aggiungi nuove ore di lavoro",
+      "url": "./index.html#home-section",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Calendario",
+      "short_name": "Calendario",
+      "description": "Visualizza il calendario",
+      "url": "./index.html#calendar-section",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
+    }
+  ],
+  "icons": [
+    {
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
