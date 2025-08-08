@@ -70,6 +70,49 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         /* Material Design 3 Inspired Theme - Android 2025 */
+        /* Fix iOS Safari Datepicker Issues */
+@supports (-webkit-touch-callout: none) {
+    /* iOS specific styles */
+    .flatpickr-calendar {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        -webkit-perspective: 1000;
+        perspective: 1000;
+        touch-action: manipulation;
+    }
+    
+    .flatpickr-day {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        padding: 10px; /* Larger touch target */
+    }
+    
+    /* Prevent iOS zoom on focus */
+    input.datepicker, input.datepicker-ferie {
+        font-size: 16px !important;
+    }
+    
+    /* Fix for Google login keyboard issue */
+    .cloud-login-btn {
+        -webkit-user-select: text;
+        user-select: text;
+        touch-action: manipulation;
+    }
+}
+
+/* iOS Safari Keyboard Fix */
+.ios-keyboard-fix {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 1px;
+    width: 1px;
+    opacity: 0.01;
+    pointer-events: none;
+}
+
 
         /* iOS Safari Compatibility Fixes */
         html {
@@ -5050,7 +5093,7 @@
                             <div class="form-group">
                                 <!-- Label hidden via CSS, Date indicator shown below -->
                                 <label for="date">Data:</label>
-                                <input type="text" id="date" class="form-control datepicker" required>
+                                <input type="text" id="date" class="form-control datepicker">
                                 <div id="dateIndicator" title="Clicca per cambiare data">
                                     <!-- Indicator content set by JS -->
                                     <div>
@@ -5144,6 +5187,19 @@
                                 </button>
                             </div>
                         </form>
+                        <!-- Istruzioni per iOS (inizialmente nascoste) -->
+<div id="ios-instructions" class="ios-instructions" style="display: none;">
+    <div class="alert alert-info">
+        <h4><span class="material-symbols-outlined">info</span> Suggerimenti per utenti iOS</h4>
+        <p>Se riscontri problemi con il calendario:</p>
+        <ul>
+            <li>Tocca una sola volta sul giorno desiderato</li>
+            <li>Evita di cambiare mese e anno contemporaneamente</li>
+            <li>Se il calendario si blocca, ricarica la pagina</li>
+        </ul>
+    </div>
+</div>
+
                     </div>
                 </div>
 
@@ -6099,6 +6155,15 @@
 
         // Fixed initDatepicker definition to prevent ReferenceError
         function initDatepicker() {
+            // Rileva iOS per mostrare istruzioni speciali
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+if (isIOS) {
+    const iosInstructions = document.getElementById('ios-instructions');
+    if (iosInstructions) {
+        iosInstructions.style.display = 'block';
+    }
+}
+
             const dateInput = document.getElementById('date');
             if (!dateInput) return;
 
@@ -6241,7 +6306,13 @@
                          console.log("Flatpickr pronto.");
                      },
                     // onClose needed? Maybe not if onChange handles everything
-                });
+                errorHandler: (error) => {
+    console.error("Errore Flatpickr:", error);
+    if (typeof showToast === 'function') {
+        showToast(`Errore calendario: ${error.message || 'Errore sconosciuto'}`, "error");
+    }
+},
+});
 
                 // Make the date indicator clickable to open the datepicker
                 const dateIndicator = document.getElementById('dateIndicator');
@@ -12133,6 +12204,16 @@
         }
 
         function initFerieMalattieDatepickers() {
+            // Rileva iOS per gestione speciale
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+if (isIOS) {
+    // Aggiungi un elemento invisibile per prevenire problemi con la tastiera iOS
+    const keyboardFix = document.createElement('input');
+    keyboardFix.className = 'ios-keyboard-fix';
+    keyboardFix.type = 'text';
+    document.body.appendChild(keyboardFix);
+}
+
              // Ensure flatpickr is loaded
              if (typeof flatpickr !== 'function') {
                  console.error("Flatpickr non caricato. Impossibile inizializzare datepicker Ferie/Malattie.");
