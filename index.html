@@ -72,7 +72,7 @@
         /* Material Design 3 Inspired Theme - Android 2025 */
         /* Fix iOS Safari Datepicker Issues */
 @supports (-webkit-touch-callout: none) {
-    /* iOS specific styles */
+    /* 🍎 iOS specific styles - Fix per stabilità */
     .flatpickr-calendar {
         -webkit-transform: translateZ(0);
         transform: translateZ(0);
@@ -81,12 +81,19 @@
         -webkit-perspective: 1000;
         perspective: 1000;
         touch-action: manipulation;
+        /* 🍎 Previene problemi di rendering iOS */
+        will-change: transform;
+        isolation: isolate;
     }
     
     .flatpickr-day {
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
         padding: 10px; /* Larger touch target */
+        /* 🍎 Migliora la responsività touch */
+        cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
     }
     
     /* Prevent iOS zoom on focus */
@@ -94,32 +101,44 @@
         font-size: 16px !important;
     }
 
+    /* 🍎 iOS Arrow Buttons - Ultra-stable */
     .date-navigator button.date-arrow-btn {
         background: none;
         border: none;
         cursor: pointer;
-    padding: 10px 21px;
-    border-radius: 50%;
-    transition: background 0.2s;
-    color: var(--md-sys-color-primary, #006A6A);
-    font-size: 2.4em;
-    min-width: 62px;
-    min-height: 62px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+        padding: 12px 24px;
+        border-radius: 50%;
+        transition: background 0.2s;
+        color: var(--md-sys-color-primary, #006A6A);
+        font-size: 2.4em;
+        min-width: 64px;
+        min-height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /* 🍎 Prevenzione crash iOS */
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+        will-change: transform, background-color;
+        /* 🍎 Isolamento per prevenire problemi di event bubbling */
+        isolation: isolate;
+        z-index: 1;
     }
+    
     .date-navigator button.date-arrow-btn .material-symbols-outlined {
         font-size: 2em !important;
         line-height: 1;
-    }
-    }
-    .date-navigator button.date-arrow-btn:hover {
-        background: var(--md-sys-color-primary-container, #e0f7fa);
-    }
+        pointer-events: none; /* 🍎 Previene conflitti eventi */
     }
     
-    /* Fix for Google login keyboard issue */
+    .date-navigator button.date-arrow-btn:hover,
+    .date-navigator button.date-arrow-btn:active {
+        background: var(--md-sys-color-primary-container, #e0f7fa);
+        transform: scale(0.95);
+    }
+}    /* Fix for Google login keyboard issue */
     .cloud-login-btn {
         -webkit-user-select: text;
         user-select: text;
@@ -6180,14 +6199,20 @@
 
         // Fixed initDatepicker definition to prevent ReferenceError
         function initDatepicker() {
-            // Rileva iOS per mostrare istruzioni speciali
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-if (isIOS) {
-    const iosInstructions = document.getElementById('ios-instructions');
-    if (iosInstructions) {
-        iosInstructions.style.display = 'block';
-    }
-}
+            // 🍎 Rilevamento iOS per fix specifici
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            if (isIOS) {
+                console.log('🍎 iOS rilevato - applicando fix per stabilità');
+                // Mostra eventuali istruzioni iOS
+                const iosInstructions = document.getElementById('ios-instructions');
+                if (iosInstructions) {
+                    iosInstructions.style.display = 'block';
+                }
+                // 🍎 Per iOS, aggiungi gestione eventi touch-safe
+                setTimeout(() => {
+                    addIOSEventsFix();
+                }, 500);
+            }
 
             const dateInput = document.getElementById('date');
             if (!dateInput) return;
@@ -20110,6 +20135,72 @@ END:VCARD`;
                 }, 500);
             });
         });
+
+        // 🍎 FIX SPECIFICO PER iOS - Gestione eventi touch-safe
+        function addIOSEventsFix() {
+            console.log('🍎 Applicando fix iOS per eventi touch');
+            
+            // Fix per i bottoni freccia che causano crash su iOS
+            const prevBtn = document.getElementById('prevDayBtn');
+            const nextBtn = document.getElementById('nextDayBtn');
+            
+            if (prevBtn) {
+                // Rimuovi eventi esistenti e aggiungi gestione iOS-safe
+                prevBtn.removeEventListener('click', handleArrowClick);
+                prevBtn.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    handleIOSSafeArrowClick(-1);
+                }, { passive: false });
+                prevBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    handleIOSSafeArrowClick(-1);
+                }, { passive: false });
+            }
+            
+            if (nextBtn) {
+                nextBtn.removeEventListener('click', handleArrowClick);
+                nextBtn.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    handleIOSSafeArrowClick(1);
+                }, { passive: false });
+                nextBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    handleIOSSafeArrowClick(1);
+                }, { passive: false });
+            }
+        }
+
+        // 🍎 Gestione iOS-safe per le frecce
+        function handleIOSSafeArrowClick(direction) {
+            try {
+                const dateInput = document.getElementById('date');
+                if (!dateInput || !dateInput._flatpickr) {
+                    console.warn('🍎 DateInput o Flatpickr non disponibile');
+                    return;
+                }
+
+                // Ottieni la data corrente
+                const currentDate = dateInput._flatpickr.selectedDates[0] || new Date();
+                
+                // Calcola la nuova data
+                const newDate = new Date(currentDate);
+                newDate.setDate(newDate.getDate() + direction);
+                
+                // Aggiorna iOS-safe
+                setTimeout(() => {
+                    dateInput._flatpickr.setDate(newDate, true);
+                    console.log('🍎 Data aggiornata iOS-safe:', newDate.toLocaleDateString('it-IT'));
+                }, 10);
+                
+            } catch (error) {
+                console.error('🍎 Errore iOS arrow click:', error);
+                // Fallback: ricarica la pagina se c'è un errore critico
+                if (error.message.includes('flatpickr')) {
+                    console.log('🍎 Errore critico - fallback sicuro');
+                    location.reload();
+                }
+            }
+        }
     </script>
 
 </body>
