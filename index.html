@@ -175,17 +175,17 @@
         color: var(--md-sys-color-on-primary, #FFFFFF);
     }
     
-    /* iOS-specific: Riduce le frecce del 50% */
+    /* iOS-specific: Frecce ridimensionate ottimali */
     @supports (-webkit-touch-callout: none) {
         .date-navigator button.date-arrow-btn {
-            font-size: 1.2em !important; /* 50% di 2.4em */
-            min-width: 31px !important; /* 50% di 62px */
-            min-height: 31px !important; /* 50% di 62px */
-            padding: 5px 10px !important; /* 50% di 10px 21px */
+            font-size: 1.44em !important; /* Era 1.2em, +20% = 1.44em */
+            min-width: 37px !important; /* Era 31px, +20% = 37px */
+            min-height: 37px !important; /* Era 31px, +20% = 37px */
+            padding: 6px 12px !important; /* Era 5px 10px, +20% = 6px 12px */
         }
         
         .date-navigator button.date-arrow-btn .material-symbols-outlined {
-            font-size: 1em !important; /* 50% di 2em */
+            font-size: 1.2em !important; /* Era 1em, +20% = 1.2em */
         }
     }
     
@@ -251,6 +251,15 @@
         transition: all 0.2s ease;
         letter-spacing: 0.5px;
         text-transform: capitalize;
+        /* Nascosto su Android, visibile solo su iOS */
+        display: none;
+    }
+
+    /* iOS-specific: Mostra nome giorno solo su iOS */
+    @supports (-webkit-touch-callout: none) {
+        #dayNameIndicator {
+            display: block !important;
+        }
     }
 
     /* Date navigator container improvements */
