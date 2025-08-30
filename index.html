@@ -6272,8 +6272,20 @@
                 // Setup indicatore cliccabile
                 setupIOSDateIndicator(dateInput);
 
-                // Aggiorna indicatore iniziale
-                const currentDate = dateInput.value ? new Date(dateInput.value) : new Date();
+                // 🔧 Fix: Aggiorna indicatore iniziale con validazione corretta
+                let currentDate;
+                if (dateInput.value) {
+                    // Prova a parsare il valore dal dateInput (formato YYYY-MM-DD per HTML5)
+                    const inputDate = new Date(dateInput.value);
+                    if (!isNaN(inputDate.getTime())) {
+                        currentDate = inputDate;
+                    } else {
+                        console.warn('🍎 Valore dateInput non valido:', dateInput.value);
+                        currentDate = new Date();
+                    }
+                } else {
+                    currentDate = new Date();
+                }
                 updateDateIndicator(currentDate);
 
                 console.log('✅ Sistema iOS inizializzato con successo');
@@ -6319,20 +6331,8 @@
                 // Store a global reference to track the last selected date
                 window.lastSelectedDate = dateInput.value;
                 console.log("Data iniziale salvata globalmente:", window.lastSelectedDate);
-                                // --- Inizializza le frecce giorno avanti/indietro ---
-                function parseDate(str) {
-                    if (!str) return new Date();
-                    if (str.includes('/')) {
-                        const [d, m, y] = str.split('/').map(Number);
-                        return new Date(y, m - 1, d);
-                    } else if (str.includes('-')) {
-                        return new Date(str);
-                    }
-                    return new Date(str);
-                }
-                function formatDateForInput(d) {
-                    return d.toLocaleDateString('it-IT').replace(/\//g, '/');
-                }
+                
+                // --- Inizializza le frecce giorno avanti/indietro ---
                 function updateDateByArrow(delta) {
                     let current = parseDate(dateInput.value);
                     if (isNaN(current)) current = new Date();
@@ -6360,19 +6360,7 @@
                 setTimeout(function() {
                     const prevBtn = document.getElementById('prevDayBtn');
                     const nextBtn = document.getElementById('nextDayBtn');
-                    function parseDate(str) {
-                        if (!str) return new Date();
-                        if (str.includes('/')) {
-                            const [d, m, y] = str.split('/').map(Number);
-                            return new Date(y, m - 1, d);
-                        } else if (str.includes('-')) {
-                            return new Date(str);
-                        }
-                        return new Date(str);
-                    }
-                    function formatDateForInput(d) {
-                        return d.toLocaleDateString('it-IT').replace(/\//g, '/');
-                    }
+                    
                     function updateDate(delta) {
                         let current = parseDate(dateInput.value);
                         if (isNaN(current)) current = new Date();
@@ -6543,46 +6531,66 @@
 
         // Helper to update the visual date indicator
         function updateDateIndicator(date) {
-    const dateIndicator = document.getElementById('dateIndicator');
-    if (!dateIndicator || !date || isNaN(date.getTime())) {
-        console.warn("updateDateIndicator: Indicatore non trovato o data non valida");
-        if(dateIndicator) {
-            dateIndicator.innerHTML = `<div class="date-navigator">
-                <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
-                <span id="dateIndicatorContent" style="display: flex; align-items: center; gap: 4px;">
-                    <span class='material-symbols-outlined'>calendar_today</span>
-                    <span>Data non valida</span>
-                </span>
-                <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
-            </div>`;
-        }
-        return;
-    }
+            const dateIndicator = document.getElementById('dateIndicator');
+            
+            // 🔧 Fix: Validazione robusta della data
+            let validDate;
+            if (!date) {
+                validDate = new Date();
+            } else if (typeof date === 'string') {
+                // Se è una stringa, prova a parsarla
+                if (date.includes('/')) {
+                    // Formato italiano DD/MM/YYYY
+                    const [day, month, year] = date.split('/').map(Number);
+                    validDate = new Date(year, month - 1, day);
+                } else if (date.includes('-')) {
+                    // Formato ISO YYYY-MM-DD
+                    validDate = new Date(date);
+                } else {
+                    validDate = new Date(date);
+                }
+            } else if (date instanceof Date) {
+                validDate = date;
+            } else {
+                validDate = new Date();
+            }
+            
+            // Verifica che la data sia valida
+            if (isNaN(validDate.getTime())) {
+                console.warn("updateDateIndicator: Data non valida, uso oggi");
+                validDate = new Date();
+            }
+            
+            if (!dateIndicator) {
+                console.warn("updateDateIndicator: Indicatore non trovato");
+                return;
+            }
 
-    try {
-        const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-        const italianDate = date.toLocaleDateString('it-IT', options);
-        dateIndicator.innerHTML = `
-            <div class="date-navigator" title="Clicca per cambiare data" style="display: flex; align-items: center; gap: 8px; justify-content: center;">
-                <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
-                <span id="dateIndicatorContent" style="display: flex; align-items: center; gap: 4px;">
-                    <span class="material-symbols-outlined">calendar_month</span>
-                    <span style="font-weight: 500;">${italianDate}</span>
-                </span>
-                <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
-            </div>
-        `;
-    } catch (e) {
-        console.error("Errore nell'aggiornamento dell'indicatore:", e);
-        dateIndicator.innerHTML = `<div class="date-navigator">
-            <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
-            <span id="dateIndicatorContent" style="display: flex; align-items: center; gap: 4px;">
-                <span class='material-symbols-outlined'>calendar_today</span>
-                <span>Errore data</span>
-            </span>
-            <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
-        </div>`;
-    }
+            try {
+                const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+                const italianDate = validDate.toLocaleDateString('it-IT', options);
+                dateIndicator.innerHTML = `
+                    <div class="date-navigator" title="Clicca per cambiare data" style="display: flex; align-items: center; gap: 8px; justify-content: center;">
+                        <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
+                        <span id="dateIndicatorContent" style="display: flex; align-items: center; gap: 4px;">
+                            <span class="material-symbols-outlined">calendar_month</span>
+                            <span style="font-weight: 500;">${italianDate}</span>
+                        </span>
+                        <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
+                    </div>
+                `;
+                console.log('✅ Date indicator aggiornato:', italianDate);
+            } catch (e) {
+                console.error("Errore nell'aggiornamento dell'indicatore:", e);
+                dateIndicator.innerHTML = `<div class="date-navigator">
+                    <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
+                    <span id="dateIndicatorContent" style="display: flex; align-items: center; gap: 4px;">
+                        <span class='material-symbols-outlined'>calendar_today</span>
+                        <span>Data: ${validDate.toLocaleDateString('it-IT')}</span>
+                    </span>
+                    <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
+                </div>`;
+            }
 }
 
         // Function to show toast notification - Material Design 3 Style
