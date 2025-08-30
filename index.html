@@ -81,17 +81,36 @@
         -webkit-perspective: 1000;
         perspective: 1000;
         touch-action: manipulation;
+        /* Enhanced iOS stability */
+        will-change: transform;
+        position: fixed !important;
+        z-index: 9999 !important;
     }
     
     .flatpickr-day {
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
         padding: 10px; /* Larger touch target */
+        /* Enhanced iOS touch handling */
+        -webkit-user-select: none;
+        user-select: none;
+        will-change: auto;
     }
     
     /* Prevent iOS zoom on focus */
     input.datepicker, input.datepicker-ferie {
         font-size: 16px !important;
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+    }
+
+    /* Enhanced iOS-safe date indicator */
+    #dateIndicator {
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        -webkit-user-select: none;
+        user-select: none;
+        will-change: auto;
     }
 
     .date-navigator button.date-arrow-btn {
@@ -6180,19 +6199,21 @@
 
         // Fixed initDatepicker definition to prevent ReferenceError
         function initDatepicker() {
-            // Rileva iOS per mostrare istruzioni speciali
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-if (isIOS) {
-    const iosInstructions = document.getElementById('ios-instructions');
-    if (iosInstructions) {
-        iosInstructions.style.display = 'block';
-    }
-}
+            // Rileva iOS per mostrare istruzioni speciali e gestione crash-safe
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent) && !/CriOS/.test(navigator.userAgent);
+            
+            if (isIOS) {
+                const iosInstructions = document.getElementById('ios-instructions');
+                if (iosInstructions) {
+                    iosInstructions.style.display = 'block';
+                }
+            }
 
             const dateInput = document.getElementById('date');
             if (!dateInput) return;
 
-            console.log("Inizializzazione datepicker Material Design");
+            console.log("Inizializzazione datepicker Material Design - iOS Safe Mode:", isIOSSafari);
 
             try {
                 // Hide the date input field visually using CSS added earlier
@@ -6294,7 +6315,7 @@ if (isIOS) {
                     if (nextBtn) nextBtn.onclick = function(e) { e.preventDefault(); updateDate(1); };
                 }, 0);
 
-                // Configure flatpickr
+                // Configure flatpickr with iOS-safe settings
                 const fp = flatpickr(dateInput, {
                     dateFormat: "d/m/Y",
                     locale: {
@@ -6303,10 +6324,14 @@ if (isIOS) {
                     },
                     allowInput: false, // Disable direct input, use picker only
                     defaultDate: dateInput.value,
-                    disableMobile: true, // Use custom mobile handling & style
-                    appendTo: document.body, // Append to body to avoid layout issues
-                    // ++ Add dropdown for month only ++
-                    dropdowns: {
+                    // iOS-specific optimizations to prevent crashes
+                    disableMobile: !isIOSSafari, // Enable mobile mode for iOS Safari to prevent crashes
+                    static: isIOSSafari, // Use static positioning on iOS Safari
+                    appendTo: isIOSSafari ? dateInput.parentElement : document.body, // Safer positioning on iOS
+                    clickOpens: !isIOSSafari, // Disable auto-open on iOS Safari to prevent touch conflicts
+                    
+                    // ++ Add dropdown for month only (disabled on iOS for stability) ++
+                    dropdowns: isIOSSafari ? false : {
                         months: true,
                         years: false
                     },
@@ -6382,25 +6407,56 @@ if (isIOS) {
                     onChange: function(selectedDates, dateStr, instance) {
                         console.log("Datepicker onChange:", dateStr);
 
-                        // Sometimes dateStr might be empty if cleared, handle it
-                        if(dateStr && selectedDates.length > 0) {
-                            window.lastSelectedDate = dateStr;
-                            dateInput.value = dateStr; // Update hidden input
-                            updateDateIndicator(selectedDates[0]); // Update visual indicator
+                        // iOS-safe date change handler with error prevention
+                        try {
+                            // Sometimes dateStr might be empty if cleared, handle it
+                            if(dateStr && selectedDates.length > 0) {
+                                window.lastSelectedDate = dateStr;
+                                dateInput.value = dateStr; // Update hidden input
+                                
+                                // Delay updateDateIndicator on iOS to prevent layout issues
+                                if (isIOSSafari) {
+                                    setTimeout(() => {
+                                        updateDateIndicator(selectedDates[0]);
+                                    }, 100);
+                                } else {
+                                    updateDateIndicator(selectedDates[0]); // Update visual indicator
+                                }
 
-                            if (typeof loadExistingEntry === 'function') {
-                                loadExistingEntry(dateStr);
+                                if (typeof loadExistingEntry === 'function') {
+                                    // Delay loadExistingEntry on iOS to prevent crashes
+                                    if (isIOSSafari) {
+                                        setTimeout(() => {
+                                            loadExistingEntry(dateStr);
+                                        }, 150);
+                                    } else {
+                                        loadExistingEntry(dateStr);
+                                    }
+                                }
+                            } else if (!dateStr) {
+                                // Handle case where date is cleared (if allowInput was true)
+                                 const today = new Date();
+                                 instance.setDate(today, true); // Reset to today if cleared
+                                 console.log("Data cancellata, reimpostata a oggi.");
                             }
-                        } else if (!dateStr) {
-                            // Handle case where date is cleared (if allowInput was true)
-                             const today = new Date();
-                             instance.setDate(today, true); // Reset to today if cleared
-                             console.log("Data cancellata, reimpostata a oggi.");
+                        } catch (error) {
+                            console.error("Errore iOS-safe nella gestione cambio data:", error);
+                            // Fallback sicuro per iOS
+                            if (typeof showToast === 'function') {
+                                showToast("Errore nel cambio data, riprova", "error");
+                            }
                         }
                     },
                     onReady: function(selectedDates, dateStr, instance) {
-                         updateDateIndicator(instance.selectedDates[0] || new Date()); // Initial update
-                         console.log("Flatpickr pronto.");
+                         // iOS-safe onReady with delayed execution
+                         if (isIOSSafari) {
+                             setTimeout(() => {
+                                 updateDateIndicator(instance.selectedDates[0] || new Date());
+                             }, 200);
+                         } else {
+                             updateDateIndicator(instance.selectedDates[0] || new Date()); // Initial update
+                         }
+                         console.log("Flatpickr pronto - iOS Safe Mode:", isIOSSafari);
                      },
                     // onClose needed? Maybe not if onChange handles everything
                 errorHandler: (error) => {
@@ -6411,24 +6467,63 @@ if (isIOS) {
 },
 });
 
-                // Make the date indicator clickable to open the datepicker
+                // Make the date indicator clickable to open the datepicker with iOS-safe handling
                 const dateIndicator = document.getElementById('dateIndicator');
                 if (dateIndicator) {
                     dateIndicator.style.cursor = 'pointer';
                     dateIndicator.title = 'Clicca per cambiare data';
 
-                    dateIndicator.addEventListener('click', function(e) {
+                    // iOS-safe click handler with touch event management
+                    const handleDateIndicatorClick = function(e) {
                         // Se il click è su una delle frecce, non aprire il calendario
                         if (e.target.closest('#prevDayBtn') || e.target.closest('#nextDayBtn')) {
                             return;
                         }
-                        console.log("Click sull'indicatore data - apertura datepicker");
-                        if (fp && !fp.isOpen) { // Prevent opening if already open
-                            fp.open();
-                        } else if (fp && fp.isOpen) {
-                            fp.close(); // Allow closing by clicking again
+                        
+                        console.log("Click sull'indicatore data - apertura datepicker iOS-safe");
+                        
+                        // Prevent multiple rapid clicks on iOS
+                        if (window._datePickerOpening) {
+                            return;
                         }
-                    });
+                        
+                        try {
+                            window._datePickerOpening = true;
+                            
+                            if (isIOSSafari) {
+                                // iOS Safari: delayed opening to prevent crashes
+                                setTimeout(() => {
+                                    if (fp && !fp.isOpen) {
+                                        fp.open();
+                                    } else if (fp && fp.isOpen) {
+                                        fp.close();
+                                    }
+                                    window._datePickerOpening = false;
+                                }, 50);
+                            } else {
+                                // Other browsers: immediate opening
+                                if (fp && !fp.isOpen) {
+                                    fp.open();
+                                } else if (fp && fp.isOpen) {
+                                    fp.close();
+                                }
+                                window._datePickerOpening = false;
+                            }
+                        } catch (error) {
+                            console.error("Errore apertura calendario:", error);
+                            window._datePickerOpening = false;
+                        }
+                    };
+
+                    // Use touchstart for iOS, click for others
+                    if (isIOSSafari) {
+                        dateIndicator.addEventListener('touchstart', function(e) {
+                            e.preventDefault(); // Prevent default touch behavior
+                            handleDateIndicatorClick(e);
+                        }, { passive: false });
+                    } else {
+                        dateIndicator.addEventListener('click', handleDateIndicatorClick);
+                    }
                 }
 
                 console.log("Datepicker inizializzato con successo - input nascosto e indicatore data cliccabile");
@@ -6443,49 +6538,65 @@ if (isIOS) {
             }
         }
 
-        // Helper to update the visual date indicator
+        // Helper to update the visual date indicator with iOS-safe error handling
         function updateDateIndicator(date) {
-    const dateIndicator = document.getElementById('dateIndicator');
-    if (!dateIndicator || !date || isNaN(date.getTime())) {
-        console.warn("updateDateIndicator: Indicatore non trovato o data non valida");
-        if(dateIndicator) {
-            dateIndicator.innerHTML = `<div class="date-navigator">
-                <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
-                <span id="dateIndicatorContent" style="display: flex; align-items: center; gap: 4px;">
-                    <span class='material-symbols-outlined'>calendar_today</span>
-                    <span>Data non valida</span>
-                </span>
-                <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
-            </div>`;
-        }
-        return;
-    }
+            // iOS-safe updateDateIndicator with comprehensive error handling
+            try {
+                const dateIndicator = document.getElementById('dateIndicator');
+                if (!dateIndicator || !date || isNaN(date.getTime())) {
+                    console.warn("updateDateIndicator: Indicatore non trovato o data non valida");
+                    if(dateIndicator) {
+                        dateIndicator.innerHTML = `<div class="date-navigator">
+                            <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
+                            <span id="dateIndicatorContent" style="display: flex; align-items: center; gap: 4px;">
+                                <span class='material-symbols-outlined'>calendar_today</span>
+                                <span>Data non valida</span>
+                            </span>
+                            <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
+                        </div>`;
+                    }
+                    return;
+                }
 
-    try {
-        const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-        const italianDate = date.toLocaleDateString('it-IT', options);
-        dateIndicator.innerHTML = `
-            <div class="date-navigator" title="Clicca per cambiare data" style="display: flex; align-items: center; gap: 8px; justify-content: center;">
-                <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
-                <span id="dateIndicatorContent" style="display: flex; align-items: center; gap: 4px;">
-                    <span class="material-symbols-outlined">calendar_month</span>
-                    <span style="font-weight: 500;">${italianDate}</span>
-                </span>
-                <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
-            </div>
-        `;
-    } catch (e) {
-        console.error("Errore nell'aggiornamento dell'indicatore:", e);
-        dateIndicator.innerHTML = `<div class="date-navigator">
-            <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
-            <span id="dateIndicatorContent" style="display: flex; align-items: center; gap: 4px;">
-                <span class='material-symbols-outlined'>calendar_today</span>
-                <span>Errore data</span>
-            </span>
-            <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
-        </div>`;
-    }
-}
+                const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+                const italianDate = date.toLocaleDateString('it-IT', options);
+                
+                // iOS-safe DOM manipulation with requestAnimationFrame
+                const updateDOM = () => {
+                    dateIndicator.innerHTML = `
+                        <div class="date-navigator" title="Clicca per cambiare data" style="display: flex; align-items: center; gap: 8px; justify-content: center;">
+                            <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
+                            <span id="dateIndicatorContent" style="display: flex; align-items: center; gap: 4px;">
+                                <span class="material-symbols-outlined">calendar_month</span>
+                                <span style="font-weight: 500;">${italianDate}</span>
+                            </span>
+                            <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
+                        </div>
+                    `;
+                };
+
+                // Use requestAnimationFrame for smoother updates on iOS
+                if (window.requestAnimationFrame) {
+                    requestAnimationFrame(updateDOM);
+                } else {
+                    updateDOM();
+                }
+                
+            } catch (e) {
+                console.error("Errore iOS-safe nell'aggiornamento dell'indicatore:", e);
+                const dateIndicator = document.getElementById('dateIndicator');
+                if(dateIndicator) {
+                    dateIndicator.innerHTML = `<div class="date-navigator">
+                        <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
+                        <span id="dateIndicatorContent" style="display: flex; align-items: center; gap: 4px;">
+                            <span class='material-symbols-outlined'>calendar_today</span>
+                            <span>Errore data</span>
+                        </span>
+                        <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
+                    </div>`;
+                }
+            }
+        }
 
         // Function to show toast notification - Material Design 3 Style
         function showToast(message, type = 'info', duration = 3000, actions = null) {
@@ -7597,46 +7708,59 @@ if (isIOS) {
 
 
          function loadExistingEntry(date) {
-             console.log(`Caricamento voce esistente per ${date}...`);
-             const db = getDb();
-             const entries = db.entries[date] || [];
-             const form = document.getElementById('timeEntryForm');
-             const submitBtn = document.getElementById('submitBtn');
+             // iOS-safe loadExistingEntry with comprehensive error handling
+             try {
+                 console.log(`Caricamento voce esistente per ${date}...`);
+                 const db = getDb();
+                 const entries = db.entries[date] || [];
+                 const form = document.getElementById('timeEntryForm');
+                 const submitBtn = document.getElementById('submitBtn');
 
-             if (!form || !submitBtn) {
-                  console.error("Form o pulsante submit non trovati per loadExistingEntry.");
-                  return;
-             }
-
-             if (entries.length > 0) {
-                 // Load the *last* entry for the day if multiple exist.
-                 const entryToLoad = entries[entries.length - 1];
-                 console.log("Trovata voce da caricare:", entryToLoad);
-
-                 form.elements.startTime.value = entryToLoad.startTime || '';
-                 form.elements.endTime.value = entryToLoad.endTime || '';
-                 form.elements.breakTime.value = entryToLoad.breakTime ?? 0.5; // Default to 0.5 if undefined
-                 form.elements.notturne.value = entryToLoad.notturne || '';
-
-                 // Gestione del pulsante di trasferta
-                 const trasfertaButton = form.elements.transferta;
-                 const textElement = trasfertaButton.querySelector('.trasferta-text');
-
-                 if (typeof entryToLoad.transferta === 'boolean' && entryToLoad.transferta) {
-                     // Nuovo formato (boolean)
-                     trasfertaButton.classList.add('active');
-                     trasfertaButton.setAttribute('data-active', 'true');
-                     if (textElement) textElement.textContent = 'Trasferta attiva';
-                 } else if (typeof entryToLoad.transferta === 'number' && entryToLoad.transferta > 0) {
-                     // Vecchio formato (numero di ore)
-                     trasfertaButton.classList.add('active');
-                     trasfertaButton.setAttribute('data-active', 'true');
-                     if (textElement) textElement.textContent = 'Trasferta attiva';
-                 } else {
-                     trasfertaButton.classList.remove('active');
-                     trasfertaButton.setAttribute('data-active', 'false');
-                     if (textElement) textElement.textContent = 'Seleziona trasferta';
+                 if (!form || !submitBtn) {
+                      console.error("Form o pulsante submit non trovati per loadExistingEntry.");
+                      return;
                  }
+
+                 if (entries.length > 0) {
+                     // Load the *last* entry for the day if multiple exist.
+                     const entryToLoad = entries[entries.length - 1];
+                     console.log("Trovata voce da caricare:", entryToLoad);
+
+                     // iOS-safe form field population with error handling
+                     try {
+                         form.elements.startTime.value = entryToLoad.startTime || '';
+                         form.elements.endTime.value = entryToLoad.endTime || '';
+                         form.elements.breakTime.value = entryToLoad.breakTime ?? 0.5; // Default to 0.5 if undefined
+                         form.elements.notturne.value = entryToLoad.notturne || '';
+                     } catch (fieldError) {
+                         console.error("Errore nel popolamento campi form:", fieldError);
+                     }
+
+                     // Gestione del pulsante di trasferta con error handling
+                     try {
+                         const trasfertaButton = form.elements.transferta;
+                         const textElement = trasfertaButton ? trasfertaButton.querySelector('.trasferta-text') : null;
+
+                         if (trasfertaButton) {
+                             if (typeof entryToLoad.transferta === 'boolean' && entryToLoad.transferta) {
+                                 // Nuovo formato (boolean)
+                                 trasfertaButton.classList.add('active');
+                                 trasfertaButton.setAttribute('data-active', 'true');
+                                 if (textElement) textElement.textContent = 'Trasferta attiva';
+                             } else if (typeof entryToLoad.transferta === 'number' && entryToLoad.transferta > 0) {
+                                 // Vecchio formato (numero di ore)
+                                 trasfertaButton.classList.add('active');
+                                 trasfertaButton.setAttribute('data-active', 'true');
+                                 if (textElement) textElement.textContent = 'Trasferta attiva';
+                             } else {
+                                 trasfertaButton.classList.remove('active');
+                                 trasfertaButton.setAttribute('data-active', 'false');
+                                 if (textElement) textElement.textContent = 'Seleziona trasferta';
+                             }
+                         }
+                     } catch (trasfertaError) {
+                         console.error("Errore nella gestione trasferta:", trasfertaError);
+                     }
 
                  // Gestione delle righe di lavoro multiple
                  const description = entryToLoad.description || '';
@@ -7710,6 +7834,12 @@ if (isIOS) {
              }
              // Recalculate hours after loading/resetting
              calculateTotalHours();
+         } catch (error) {
+             console.error("Errore iOS-safe in loadExistingEntry:", error);
+             if (typeof showToast === 'function') {
+                 showToast("Errore nel caricamento dati, riprova", "error");
+             }
+         }
          }
 
          function editEntry(date, entryId) {
