@@ -6752,29 +6752,90 @@
                 
                 // iOS-safe DOM manipulation with requestAnimationFrame
                 const updateDOM = () => {
-                    dateIndicator.innerHTML = `
-                        <div class="date-navigator" title="Clicca per cambiare data" style="display: flex; align-items: center; gap: 8px; justify-content: center;">
-                            <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
-                            <span id="dateIndicatorContent" style="display: flex; align-items: center; gap: 4px;">
-                                <span class="material-symbols-outlined">calendar_month</span>
-                                <span style="font-weight: 500;">${italianDate}</span>
-                            </span>
-                            <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
-                        </div>
-                    `;
+                    // Detect iOS Safari
+                    const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent);
+                    
+                    if (isIOSSafari) {
+                        // iOS: Sposta input funzionante al centro, elimina data problematica
+                        dateIndicator.innerHTML = `
+                            <div class="date-navigator" style="display: flex; align-items: center; gap: 8px; justify-content: center;">
+                                <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
+                                <input type="text" id="dateInputCentral" class="form-control datepicker" value="${dateIndicator.closest('form') ? dateIndicator.closest('form').querySelector('#date').value : ''}" style="border: none; background: transparent; text-align: center; font-weight: 500; width: auto; min-width: 200px; cursor: pointer;" readonly title="Clicca per cambiare data">
+                                <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
+                            </div>
+                        `;
+                        
+                        // Sincronizza il nuovo input con l'originale nascosto e applica Flatpickr
+                        setTimeout(() => {
+                            const originalInput = document.getElementById('date');
+                            const centralInput = document.getElementById('dateInputCentral');
+                            
+                            if (originalInput && centralInput) {
+                                // Copia valore
+                                centralInput.value = originalInput.value;
+                                
+                                // Applica Flatpickr al nuovo input centrale
+                                if (window.flatpickr && !centralInput._flatpickr) {
+                                    const fp = flatpickr(centralInput, {
+                                        dateFormat: "d/m/Y",
+                                        locale: { ...flatpickr.l10ns.it, firstDayOfWeek: 1 },
+                                        allowInput: false,
+                                        defaultDate: centralInput.value,
+                                        disableMobile: false,
+                                        static: true,
+                                        clickOpens: true,
+                                        onChange: function(selectedDates) {
+                                            if (selectedDates[0]) {
+                                                // Sincronizza con input originale
+                                                originalInput.value = centralInput.value;
+                                                if (originalInput._flatpickr) {
+                                                    originalInput._flatpickr.setDate(selectedDates[0], false);
+                                                }
+                                                // Trigger eventi necessari
+                                                const event = new Event('change', { bubbles: true });
+                                                originalInput.dispatchEvent(event);
+                                            }
+                                        }
+                                    });
+                                }
+                                
+                                // Nascondi input originale
+                                originalInput.style.display = 'none';
+                            }
+                        }, 100);
+                        
+                    } else {
+                        // Android/Desktop: Layout normale con data centrale cliccabile
+                        dateIndicator.innerHTML = `
+                            <div class="date-navigator" title="Clicca per cambiare data" style="display: flex; align-items: center; gap: 8px; justify-content: center;">
+                                <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
+                                <span id="dateIndicatorContent" style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                                    <span class="material-symbols-outlined">calendar_month</span>
+                                    <span style="font-weight: 500;">${italianDate}</span>
+                                </span>
+                                <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
+                            </div>
+                        `;
+                    }
                 };
 
                 // Use requestAnimationFrame for smoother updates on iOS
                 if (window.requestAnimationFrame) {
                     requestAnimationFrame(() => {
                         updateDOM();
-                        // Attacca event listener DOPO aver creato l'HTML
-                        attachDateClickListener();
+                        // Attacca event listener SOLO per Android (iOS usa input centrale)
+                        const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent);
+                        if (!isIOSSafari) {
+                            attachDateClickListener();
+                        }
                     });
                 } else {
                     updateDOM();
-                    // Attacca event listener DOPO aver creato l'HTML
-                    attachDateClickListener();
+                    // Attacca event listener SOLO per Android (iOS usa input centrale)  
+                    const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent);
+                    if (!isIOSSafari) {
+                        attachDateClickListener();
+                    }
                 }
                 
             } catch (e) {
