@@ -6819,61 +6819,26 @@
                         window._datePickerOpening = true;
                         const dateInput = document.getElementById('date');
                         
-                        if (dateInput && dateInput._flatpickr) {
-                            console.log("📅 Apertura calendario tramite Flatpickr");
-                            // iOS-safe calendar opening - APPROCCIO FINALE: Reindirizzamento fisico click
-                            const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent);
+                        console.log("�️ Click su data centrale - triggerando click su data in alto");
+                        
+                        // SOLUZIONE SEMPLICE: Trigger click sulla data in alto che funziona
+                        if (dateInput) {
+                            console.log("📅 Triggering click su input data in alto");
                             
+                            // Simula un click diretto sull'input che funziona
+                            dateInput.click();
+                            
+                            // Per iOS: anche focus se necessario
+                            const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent);
                             if (isIOSSafari) {
-                                // iOS: APPROCCIO FINALE - Rendi visibile input e reindirizza click
-                                console.log("📱 iOS FINALE - reindirizzamento fisico click");
-                                
-                                // Salva lo stile originale dell'input
-                                const originalStyle = {
-                                    position: dateInput.style.position,
-                                    left: dateInput.style.left,
-                                    top: dateInput.style.top,
-                                    width: dateInput.style.width,
-                                    height: dateInput.style.height,
-                                    opacity: dateInput.style.opacity,
-                                    zIndex: dateInput.style.zIndex,
-                                    pointerEvents: dateInput.style.pointerEvents
-                                };
-                                
-                                // Rendi l'input temporaneamente visibile e cliccabile nella stessa posizione
-                                dateInput.style.position = 'absolute';
-                                dateInput.style.left = e.target.getBoundingClientRect().left + 'px';
-                                dateInput.style.top = e.target.getBoundingClientRect().top + 'px';
-                                dateInput.style.width = e.target.getBoundingClientRect().width + 'px';
-                                dateInput.style.height = e.target.getBoundingClientRect().height + 'px';
-                                dateInput.style.opacity = '0.01'; // Quasi invisibile ma funzionale
-                                dateInput.style.zIndex = '99999';
-                                dateInput.style.pointerEvents = 'auto';
-                                
-                                // Simula un click fisico sull'input ora visibile
-                                setTimeout(() => {
-                                    dateInput.click();
-                                    
-                                    // Ripristina stile originale dopo apertura
-                                    setTimeout(() => {
-                                        Object.keys(originalStyle).forEach(key => {
-                                            dateInput.style[key] = originalStyle[key];
-                                        });
-                                    }, 200);
-                                    
-                                    window._datePickerOpening = false;
-                                }, 50);
-                            } else {
-                                // Other browsers: immediate opening
-                                dateInput._flatpickr.open();
-                                setTimeout(() => {
-                                    window._datePickerOpening = false;
-                                }, 500);
+                                dateInput.focus();
                             }
+                            
                         } else {
-                            console.warn("❌ Flatpickr non disponibile");
-                            window._datePickerOpening = false;
+                            console.warn("❌ Input data non trovato");
                         }
+                        
+                        window._datePickerOpening = false;
                         
                     } catch (error) {
                         console.error("❌ Errore apertura calendario dalla data centrale:", error);
