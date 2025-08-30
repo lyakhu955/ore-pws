@@ -185,6 +185,141 @@
         font-size: 16px !important;
     }
     
+    /* === 📅 COMPONENTE DATE SELECTOR UNIFICATO === */
+    .unified-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--md-sys-color-primary, #006A6A);
+    }
+
+    .unified-date-selector {
+        display: flex;
+        align-items: center;
+        background: var(--md-sys-color-surface, #fff);
+        border: 2px solid var(--md-sys-color-outline, #ddd);
+        border-radius: 12px;
+        padding: 16px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .unified-date-selector:hover {
+        border-color: var(--md-sys-color-primary, #006A6A);
+        box-shadow: 0 4px 12px rgba(0,106,106,0.15);
+        transform: translateY(-1px);
+    }
+
+    .unified-date-selector:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(0,106,106,0.2);
+    }
+
+    .date-icon {
+        margin-right: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        background: var(--md-sys-color-primary-container, #e0f7fa);
+        border-radius: 50%;
+        color: var(--md-sys-color-primary, #006A6A);
+    }
+
+    .date-icon .material-symbols-outlined {
+        font-size: 24px;
+    }
+
+    .date-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .date-label {
+        font-size: 12px;
+        color: var(--md-sys-color-on-surface-variant, #666);
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .date-value {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--md-sys-color-on-surface, #333);
+    }
+
+    .date-arrows {
+        display: flex;
+        gap: 8px;
+        margin-left: 16px;
+    }
+
+    .date-arrow-btn {
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: var(--md-sys-color-secondary-container, #e8f5e8);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: var(--md-sys-color-on-secondary-container, #333);
+    }
+
+    .date-arrow-btn:hover {
+        background: var(--md-sys-color-primary, #006A6A);
+        color: var(--md-sys-color-on-primary, #fff);
+        transform: scale(1.1);
+    }
+
+    .date-arrow-btn:active {
+        transform: scale(0.95);
+    }
+
+    .date-arrow-btn .material-symbols-outlined {
+        font-size: 20px;
+    }
+
+    /* Input nativo iOS nascosto */
+    .ios-native-date-input {
+        display: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .unified-date-selector {
+            padding: 12px;
+        }
+        
+        .date-icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 12px;
+        }
+        
+        .date-icon .material-symbols-outlined {
+            font-size: 20px;
+        }
+        
+        .date-value {
+            font-size: 16px;
+        }
+        
+        .date-arrow-btn {
+            width: 36px;
+            height: 36px;
+        }
+    }
+    
     /* iOS native date input styling */
     input[type="date"].form-control {
         font-size: 16px !important;
@@ -5228,16 +5363,31 @@
                     <div class="form-container">
                         <form id="timeEntryForm">
                             <div class="form-group">
-                                <!-- Label hidden via CSS, Date indicator shown below -->
-                                <label for="date">Data:</label>
-                                <input type="text" id="date" class="form-control datepicker">
-                                <div id="dateIndicator" title="Clicca per cambiare data">
-                                    <!-- Indicator content set by JS -->
-                                    <div>
+                                <!-- Date Selector Unificato per tutte le piattaforme -->
+                                <label for="date" class="unified-label">Data:</label>
+                                <input type="text" id="date" class="form-control datepicker" style="display: none;">
+                                
+                                <!-- Pulsante/Indicatore Data Unificato -->
+                                <div id="unifiedDateSelector" class="unified-date-selector" role="button" tabindex="0" aria-label="Seleziona data">
+                                    <div class="date-icon">
                                         <span class="material-symbols-outlined">calendar_today</span>
-                                        <span>Seleziona una data</span>
+                                    </div>
+                                    <div class="date-content">
+                                        <div class="date-label">Data selezionata</div>
+                                        <div class="date-value" id="selectedDateDisplay">30/08/2025</div>
+                                    </div>
+                                    <div class="date-arrows">
+                                        <button type="button" id="prevDayBtn" class="date-arrow-btn prev" aria-label="Giorno precedente">
+                                            <span class="material-symbols-outlined">chevron_left</span>
+                                        </button>
+                                        <button type="button" id="nextDayBtn" class="date-arrow-btn next" aria-label="Giorno successivo">
+                                            <span class="material-symbols-outlined">chevron_right</span>
+                                        </button>
                                     </div>
                                 </div>
+                                
+                                <!-- Input Date Nascosto per iOS -->
+                                <input type="date" id="iosNativeDateInput" class="ios-native-date-input" style="display: none;">
                             </div>
 
                             <div class="form-group">
@@ -7131,16 +7281,39 @@
              }
 
 
-            // --- Initialize datepicker ---
-            if (typeof initDatepicker === 'function') {
-                initDatepicker();
+            // === 🎯 INIZIALIZZAZIONE COMPONENTE DATE SELECTOR UNIFICATO ===
+            console.log('🚀 Inizializzazione componente date selector unificato...');
+            
+            // Inizializza il date selector principale
+            if (typeof setupUnifiedDateSelector === 'function') {
+                setTimeout(() => {
+                    setupUnifiedDateSelector('unified-date-selector', 'date', 'Data', function(date) {
+                        console.log('📅 Data principale cambiata:', date);
+                        // Aggiorna il dateIndicator se necessario
+                        const dateObj = new Date(date + 'T00:00:00');
+                        updateDateIndicator(dateObj);
+                    });
+                }, 100);
             } else {
-                console.error("initDatepicker function not found!");
+                console.error('❌ setupUnifiedDateSelector function not found!');
             }
 
-             // --- Initialize other pickers ---
-             if (typeof initFerieMalattieDatepickers === 'function') {
-                 initFerieMalattieDatepickers();
+             // === 🎯 INIZIALIZZAZIONE DATE SELECTOR FERIE/MALATTIE ===
+             console.log('🏥 Inizializzazione date selector ferie/malattie...');
+             
+             if (typeof setupUnifiedDateSelector === 'function') {
+                 setTimeout(() => {
+                     // Trova tutti i date selector per ferie/malattie
+                     const ferieSelectors = document.querySelectorAll('[id*="ferie"], [id*="malattie"]');
+                     ferieSelectors.forEach(selector => {
+                         if (selector.classList.contains('unified-date-selector')) {
+                             const hiddenInputId = selector.id.replace('-selector', '');
+                             setupUnifiedDateSelector(selector.id, hiddenInputId, 'Data', function(date) {
+                                 console.log('🏥 Data ferie/malattie cambiata:', date);
+                             });
+                         }
+                     });
+                 }, 200);
              }
 
 
@@ -20097,6 +20270,166 @@ END:VCARD`;
                     el.style.willChange = 'transform';
                     el.style.transform = 'translateZ(0)';
                 });
+            };
+
+            // === 🎯 UNIFIED DATE SELECTOR LOGIC ===
+            window.setupUnifiedDateSelector = function(selectorId, hiddenInputId, label, onDateChange) {
+                const selector = document.getElementById(selectorId);
+                const hiddenInput = document.getElementById(hiddenInputId);
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                
+                if (!selector || !hiddenInput) {
+                    console.error('[UNIFIED-DATE] Selettore non trovato:', selectorId, hiddenInputId);
+                    return;
+                }
+                
+                console.log('[UNIFIED-DATE] 🚀 Inizializzazione per:', selectorId, 'iOS:', isIOS);
+                
+                // Aggiorna display della data
+                function updateDateDisplay(date) {
+                    const dateValueEl = selector.querySelector('.date-value');
+                    if (dateValueEl) {
+                        dateValueEl.textContent = formatDate(date);
+                    }
+                    hiddenInput.value = date;
+                    if (onDateChange) onDateChange(date);
+                }
+                
+                // Click handler principale
+                selector.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('[UNIFIED-DATE] 📱 Click su selector, iOS:', isIOS);
+                    
+                    if (isIOS) {
+                        // iOS: usa input nativo
+                        showIOSDatePicker(hiddenInput.value, updateDateDisplay);
+                    } else {
+                        // Desktop/Android: usa Flatpickr
+                        showDesktopDatePicker(hiddenInput.value, updateDateDisplay);
+                    }
+                });
+                
+                // Frecce di navigazione
+                const prevBtn = selector.querySelector('.date-arrow-btn[data-direction="prev"]');
+                const nextBtn = selector.querySelector('.date-arrow-btn[data-direction="next"]');
+                
+                if (prevBtn) {
+                    prevBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const currentDate = new Date(hiddenInput.value || Date.now());
+                        const prevDate = new Date(currentDate);
+                        prevDate.setDate(currentDate.getDate() - 1);
+                        updateDateDisplay(prevDate.toISOString().split('T')[0]);
+                    });
+                }
+                
+                if (nextBtn) {
+                    nextBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const currentDate = new Date(hiddenInput.value || Date.now());
+                        const nextDate = new Date(currentDate);
+                        nextDate.setDate(currentDate.getDate() + 1);
+                        updateDateDisplay(nextDate.toISOString().split('T')[0]);
+                    });
+                }
+                
+                // Inizializza con data corrente se vuoto
+                if (!hiddenInput.value) {
+                    const today = new Date().toISOString().split('T')[0];
+                    updateDateDisplay(today);
+                } else {
+                    updateDateDisplay(hiddenInput.value);
+                }
+            };
+
+            // === 📱 iOS NATIVE DATE PICKER ===
+            window.showIOSDatePicker = function(currentValue, onDateSelected) {
+                console.log('[IOS-DATE] 🍎 Apertura picker nativo iOS');
+                
+                // Crea input temporaneo
+                const tempInput = document.createElement('input');
+                tempInput.type = 'date';
+                tempInput.value = currentValue || new Date().toISOString().split('T')[0];
+                tempInput.style.position = 'absolute';
+                tempInput.style.top = '-9999px';
+                tempInput.style.left = '-9999px';
+                tempInput.style.opacity = '0';
+                tempInput.style.pointerEvents = 'none';
+                
+                document.body.appendChild(tempInput);
+                
+                // Event listener per la selezione
+                tempInput.addEventListener('change', function() {
+                    console.log('[IOS-DATE] ✅ Data selezionata:', tempInput.value);
+                    onDateSelected(tempInput.value);
+                    if (document.body.contains(tempInput)) {
+                        document.body.removeChild(tempInput);
+                    }
+                });
+                
+                // Event listener per la chiusura senza selezione
+                tempInput.addEventListener('blur', function() {
+                    setTimeout(() => {
+                        if (document.body.contains(tempInput)) {
+                            console.log('[IOS-DATE] ❌ Picker chiuso senza selezione');
+                            document.body.removeChild(tempInput);
+                        }
+                    }, 300);
+                });
+                
+                // Trigger del picker
+                tempInput.focus();
+                tempInput.click();
+            };
+
+            // === 🖥️ DESKTOP/ANDROID FLATPICKR ===
+            window.showDesktopDatePicker = function(currentValue, onDateSelected) {
+                console.log('[DESKTOP-DATE] 🖥️ Apertura Flatpickr');
+                
+                // Crea container temporaneo
+                const tempInput = document.createElement('input');
+                tempInput.type = 'text';
+                tempInput.value = currentValue || new Date().toISOString().split('T')[0];
+                tempInput.style.position = 'absolute';
+                tempInput.style.top = '-9999px';
+                tempInput.style.left = '-9999px';
+                
+                document.body.appendChild(tempInput);
+                
+                // Inizializza Flatpickr
+                const fp = flatpickr(tempInput, {
+                    dateFormat: "Y-m-d",
+                    defaultDate: currentValue || new Date(),
+                    position: "auto",
+                    onClose: function(selectedDates, dateStr) {
+                        if (selectedDates.length > 0) {
+                            console.log('[DESKTOP-DATE] ✅ Data selezionata:', dateStr);
+                            onDateSelected(dateStr);
+                        }
+                        fp.destroy();
+                        if (document.body.contains(tempInput)) {
+                            document.body.removeChild(tempInput);
+                        }
+                    }
+                });
+                
+                // Apri subito
+                fp.open();
+            };
+
+            // === 🎨 FORMATO DATA DISPLAY ===
+            window.formatDate = function(dateString) {
+                if (!dateString) return 'Seleziona data';
+                
+                const date = new Date(dateString + 'T00:00:00');
+                const options = { 
+                    weekday: 'short', 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric'
+                };
+                
+                return date.toLocaleDateString('it-IT', options);
             };
 
             // Esegui le ottimizzazioni
