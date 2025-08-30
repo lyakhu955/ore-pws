@@ -252,7 +252,7 @@
         letter-spacing: 0.5px;
         text-transform: capitalize;
         /* Nascosto su Android, visibile solo su iOS */
-        display: none;
+        display: none !important;
     }
 
     /* iOS-specific: Mostra nome giorno solo su iOS */
@@ -5267,7 +5267,7 @@
                                 <label for="date">Data:</label>
                                 <input type="text" id="date" class="form-control datepicker">
                                 <!-- Nome giorno sopra il selettore -->
-                                <div id="dayNameIndicator" style="text-align: center; font-weight: 600; font-size: 1.1em; color: var(--md-sys-color-primary, #006A6A); margin-bottom: 8px;">
+                                <div id="dayNameIndicator">
                                     Oggi
                                 </div>
                                 <div id="dateIndicator" title="Clicca per cambiare data">
