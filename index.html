@@ -184,6 +184,27 @@
     input.datepicker, input.datepicker-ferie {
         font-size: 16px !important;
     }
+    
+    /* iOS native date input styling */
+    input[type="date"].form-control {
+        font-size: 16px !important;
+        -webkit-appearance: none;
+        appearance: none;
+        background: var(--card-bg, #fff);
+        border: 1px solid var(--border-color, #ddd);
+        border-radius: 8px;
+        padding: 12px;
+        width: 100%;
+        color: var(--text-color, #333);
+        font-family: inherit;
+    }
+    
+    input[type="date"].form-control::-webkit-calendar-picker-indicator {
+        background: var(--md-sys-color-primary, #006A6A);
+        border-radius: 4px;
+        cursor: pointer;
+        padding: 4px;
+    }
 
     .date-navigator button.date-arrow-btn {
         background: none;
@@ -6291,6 +6312,23 @@
                     dateInput.style.position = "relative";
                     dateInput.style.zIndex = "auto";
                     dateInput.style.pointerEvents = "auto";
+                    dateInput.style.width = "100%";
+                    dateInput.style.padding = "12px";
+                    dateInput.style.fontSize = "16px";
+                    dateInput.style.border = "1px solid #ddd";
+                    dateInput.style.borderRadius = "8px";
+                    dateInput.style.backgroundColor = "var(--card-bg, #fff)";
+                    dateInput.style.color = "var(--text-color, #333)";
+                    
+                    // Assicurati che sia nel contenitore corretto
+                    const label = dateInput.previousElementSibling;
+                    if (label && label.tagName === 'LABEL') {
+                        label.style.display = "block";
+                        label.style.marginBottom = "8px";
+                        label.style.color = "var(--text-color, #333)";
+                        label.style.fontSize = "14px";
+                        label.style.fontWeight = "500";
+                    }
                     
                     // Converti la data nel formato yyyy-mm-dd per il picker nativo
                     if (dateInput.value && dateInput.value.includes('/')) {
