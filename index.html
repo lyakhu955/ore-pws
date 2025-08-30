@@ -117,25 +117,62 @@
         background: none;
         border: none;
         cursor: pointer;
-    padding: 10px 21px;
-    border-radius: 50%;
-    transition: background 0.2s;
-    color: var(--md-sys-color-primary, #006A6A);
-    font-size: 2.4em;
-    min-width: 62px;
-    min-height: 62px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+        padding: 10px 21px;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+        color: var(--md-sys-color-primary, #006A6A);
+        font-size: 2.4em;
+        min-width: 62px;
+        min-height: 62px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /* iOS-safe touch handling */
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        -webkit-user-select: none;
+        user-select: none;
+        /* Enhanced visual feedback */
+        position: relative;
+        overflow: hidden;
     }
+    
+    .date-navigator button.date-arrow-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: var(--md-sys-color-primary-container, #e0f7fa);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.3s ease, height 0.3s ease;
+    }
+    
+    .date-navigator button.date-arrow-btn:hover::before,
+    .date-navigator button.date-arrow-btn:active::before {
+        width: 100%;
+        height: 100%;
+    }
+    
     .date-navigator button.date-arrow-btn .material-symbols-outlined {
         font-size: 2em !important;
         line-height: 1;
+        pointer-events: none;
+        position: relative;
+        z-index: 1;
     }
-    }
+    
     .date-navigator button.date-arrow-btn:hover {
         background: var(--md-sys-color-primary-container, #e0f7fa);
+        transform: scale(1.05);
     }
+    
+    .date-navigator button.date-arrow-btn:active {
+        transform: scale(0.95);
+        background: var(--md-sys-color-primary, #006A6A);
+        color: var(--md-sys-color-on-primary, #FFFFFF);
     }
     
     /* Fix for Google login keyboard issue */
@@ -143,6 +180,59 @@
         -webkit-user-select: text;
         user-select: text;
         touch-action: manipulation;
+    }
+
+    /* Enhanced date central click area */
+    #dateIndicatorContent {
+        cursor: pointer !important;
+        padding: 8px 16px;
+        border-radius: var(--border-radius-medium, 12px);
+        transition: all 0.2s ease;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        -webkit-user-select: none;
+        user-select: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    #dateIndicatorContent::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--md-sys-color-primary-container, #e0f7fa);
+        opacity: 0;
+        border-radius: var(--border-radius-medium, 12px);
+        transition: opacity 0.2s ease;
+        z-index: -1;
+    }
+
+    #dateIndicatorContent:hover::before {
+        opacity: 0.5;
+    }
+
+    #dateIndicatorContent:active::before {
+        opacity: 0.8;
+        background: var(--md-sys-color-primary, #006A6A);
+    }
+
+    #dateIndicatorContent:active {
+        color: var(--md-sys-color-on-primary, #FFFFFF);
+        transform: scale(0.98);
+    }
+
+    /* Date navigator container improvements */
+    .date-navigator {
+        gap: 4px !important;
+        align-items: center;
+        padding: 4px;
+        border-radius: var(--border-radius-large, 16px);
+        background: var(--md-sys-color-surface-variant, #DAE5E4);
+        box-shadow: var(--elevation-1);
+        border: 1px solid var(--md-sys-color-outline-variant, #BFC9C8);
     }
 }
 
@@ -6279,41 +6369,205 @@
                     }
                 });
 
-                // --- Inizializza le frecce giorno avanti/indietro ---
+                // --- iOS-safe Inizializza le frecce giorno avanti/indietro ---
                 setTimeout(function() {
-                    const prevBtn = document.getElementById('prevDayBtn');
-                    const nextBtn = document.getElementById('nextDayBtn');
-                    function parseDate(str) {
-                        if (!str) return new Date();
-                        if (str.includes('/')) {
-                            const [d, m, y] = str.split('/').map(Number);
-                            return new Date(y, m - 1, d);
-                        } else if (str.includes('-')) {
+                    console.log("🔄 Inizializzazione frecce navigazione data...");
+                    
+                    const setupArrowButtons = () => {
+                        const prevBtn = document.getElementById('prevDayBtn');
+                        const nextBtn = document.getElementById('nextDayBtn');
+                        const dateIndicatorContent = document.getElementById('dateIndicatorContent');
+                        
+                        console.log("🎯 Elementi trovati:", {
+                            prevBtn: !!prevBtn,
+                            nextBtn: !!nextBtn,
+                            dateIndicatorContent: !!dateIndicatorContent
+                        });
+
+                        function parseDate(str) {
+                            if (!str) return new Date();
+                            if (str.includes('/')) {
+                                const [d, m, y] = str.split('/').map(Number);
+                                return new Date(y, m - 1, d);
+                            } else if (str.includes('-')) {
+                                return new Date(str);
+                            }
                             return new Date(str);
                         }
-                        return new Date(str);
-                    }
-                    function formatDateForInput(d) {
-                        return d.toLocaleDateString('it-IT').replace(/\//g, '/');
-                    }
-                    function updateDate(delta) {
-                        let current = parseDate(dateInput.value);
-                        if (isNaN(current)) current = new Date();
-                        current.setDate(current.getDate() + delta);
-                        const newDateStr = formatDateForInput(current);
-                        dateInput.value = newDateStr;
-                        if (dateInput._flatpickr) {
-                            dateInput._flatpickr.setDate(newDateStr, true);
+                        
+                        function formatDateForInput(d) {
+                            return d.toLocaleDateString('it-IT').replace(/\//g, '/');
                         }
-                        const indicator = document.getElementById('dateIndicatorContent');
-                        if (indicator) {
-                            indicator.querySelector('span:last-child').textContent = newDateStr;
+                        
+                        function updateDate(delta) {
+                            try {
+                                console.log(`📅 Aggiornamento data con delta: ${delta}`);
+                                let current = parseDate(dateInput.value || window.lastSelectedDate);
+                                if (isNaN(current)) current = new Date();
+                                
+                                current.setDate(current.getDate() + delta);
+                                const newDateStr = formatDateForInput(current);
+                                
+                                console.log(`📅 Nuova data: ${newDateStr}`);
+                                
+                                // Aggiorna input e flatpickr
+                                dateInput.value = newDateStr;
+                                window.lastSelectedDate = newDateStr;
+                                
+                                if (dateInput._flatpickr) {
+                                    // Su iOS usa delay per evitare problemi
+                                    if (isIOSSafari) {
+                                        setTimeout(() => {
+                                            dateInput._flatpickr.setDate(newDateStr, true);
+                                        }, 50);
+                                    } else {
+                                        dateInput._flatpickr.setDate(newDateStr, true);
+                                    }
+                                }
+                                
+                                // Aggiorna indicatore visuale
+                                if (isIOSSafari) {
+                                    setTimeout(() => {
+                                        updateDateIndicator(current);
+                                    }, 100);
+                                } else {
+                                    updateDateIndicator(current);
+                                }
+                                
+                                // Carica entry esistente per la nuova data
+                                if (typeof loadExistingEntry === 'function') {
+                                    if (isIOSSafari) {
+                                        setTimeout(() => {
+                                            loadExistingEntry(newDateStr);
+                                        }, 150);
+                                    } else {
+                                        loadExistingEntry(newDateStr);
+                                    }
+                                }
+                                
+                            } catch (error) {
+                                console.error("❌ Errore nell'aggiornamento data:", error);
+                                if (typeof showToast === 'function') {
+                                    showToast("Errore nel cambio data", "error");
+                                }
+                            }
                         }
-                        window.lastSelectedDate = newDateStr;
-                    }
-                    if (prevBtn) prevBtn.onclick = function(e) { e.preventDefault(); updateDate(-1); };
-                    if (nextBtn) nextBtn.onclick = function(e) { e.preventDefault(); updateDate(1); };
-                }, 0);
+
+                        // Setup freccia precedente
+                        if (prevBtn) {
+                            const handlePrevClick = function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                console.log("⬅️ Click freccia precedente");
+                                updateDate(-1);
+                            };
+                            
+                            // iOS-safe event handling
+                            if (isIOSSafari) {
+                                prevBtn.addEventListener('touchstart', handlePrevClick, { passive: false });
+                            } else {
+                                prevBtn.addEventListener('click', handlePrevClick);
+                            }
+                        }
+
+                        // Setup freccia successiva  
+                        if (nextBtn) {
+                            const handleNextClick = function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                console.log("➡️ Click freccia successiva");
+                                updateDate(1);
+                            };
+                            
+                            // iOS-safe event handling
+                            if (isIOSSafari) {
+                                nextBtn.addEventListener('touchstart', handleNextClick, { passive: false });
+                            } else {
+                                nextBtn.addEventListener('click', handleNextClick);
+                            }
+                        }
+
+                        // Setup click sulla data centrale per aprire calendario
+                        if (dateIndicatorContent) {
+                            const handleDateClick = function(e) {
+                                // Solo se il click è esattamente sulla data (non sulle frecce)
+                                if (e.target.closest('#prevDayBtn') || e.target.closest('#nextDayBtn')) {
+                                    return;
+                                }
+                                
+                                e.preventDefault();
+                                e.stopPropagation();
+                                console.log("📅 Click sulla data centrale - apertura calendario");
+                                
+                                // Prevent multiple rapid clicks on iOS
+                                if (window._datePickerOpening) {
+                                    return;
+                                }
+                                
+                                try {
+                                    window._datePickerOpening = true;
+                                    
+                                    if (isIOSSafari) {
+                                        // iOS Safari: delayed opening to prevent crashes
+                                        setTimeout(() => {
+                                            if (fp && !fp.isOpen) {
+                                                fp.open();
+                                            } else if (fp && fp.isOpen) {
+                                                fp.close();
+                                            }
+                                            window._datePickerOpening = false;
+                                        }, 50);
+                                    } else {
+                                        // Other browsers: immediate opening
+                                        if (fp && !fp.isOpen) {
+                                            fp.open();
+                                        } else if (fp && fp.isOpen) {
+                                            fp.close();
+                                        }
+                                        window._datePickerOpening = false;
+                                    }
+                                } catch (error) {
+                                    console.error("❌ Errore apertura calendario:", error);
+                                    window._datePickerOpening = false;
+                                }
+                            };
+
+                            // iOS-safe event handling for date central click
+                            if (isIOSSafari) {
+                                dateIndicatorContent.addEventListener('touchstart', handleDateClick, { passive: false });
+                            } else {
+                                dateIndicatorContent.addEventListener('click', handleDateClick);
+                            }
+                            
+                            // Aggiungi cursor pointer per indicare che è cliccabile
+                            dateIndicatorContent.style.cursor = 'pointer';
+                            dateIndicatorContent.style.userSelect = 'none';
+                            dateIndicatorContent.style.webkitUserSelect = 'none';
+                        }
+                    };
+
+                    // Esegui setup iniziale
+                    setupArrowButtons();
+                    
+                    // Re-setup dopo aggiornamenti dell'indicatore (con throttling)
+                    let setupThrottle = false;
+                    const originalUpdateDateIndicator = window.updateDateIndicator;
+                    window.updateDateIndicator = function(date) {
+                        if (originalUpdateDateIndicator) {
+                            originalUpdateDateIndicator(date);
+                        }
+                        
+                        // Re-setup buttons after DOM update (throttled)
+                        if (!setupThrottle) {
+                            setupThrottle = true;
+                            setTimeout(() => {
+                                setupArrowButtons();
+                                setupThrottle = false;
+                            }, 100);
+                        }
+                    };
+                    
+                }, 100); // Delay maggiore per assicurare che tutti gli elementi siano pronti
 
                 // Configure flatpickr with iOS-safe settings
                 const fp = flatpickr(dateInput, {
@@ -6467,64 +6721,9 @@
 },
 });
 
-                // Make the date indicator clickable to open the datepicker with iOS-safe handling
-                const dateIndicator = document.getElementById('dateIndicator');
-                if (dateIndicator) {
-                    dateIndicator.style.cursor = 'pointer';
-                    dateIndicator.title = 'Clicca per cambiare data';
-
-                    // iOS-safe click handler with touch event management
-                    const handleDateIndicatorClick = function(e) {
-                        // Se il click è su una delle frecce, non aprire il calendario
-                        if (e.target.closest('#prevDayBtn') || e.target.closest('#nextDayBtn')) {
-                            return;
-                        }
-                        
-                        console.log("Click sull'indicatore data - apertura datepicker iOS-safe");
-                        
-                        // Prevent multiple rapid clicks on iOS
-                        if (window._datePickerOpening) {
-                            return;
-                        }
-                        
-                        try {
-                            window._datePickerOpening = true;
-                            
-                            if (isIOSSafari) {
-                                // iOS Safari: delayed opening to prevent crashes
-                                setTimeout(() => {
-                                    if (fp && !fp.isOpen) {
-                                        fp.open();
-                                    } else if (fp && fp.isOpen) {
-                                        fp.close();
-                                    }
-                                    window._datePickerOpening = false;
-                                }, 50);
-                            } else {
-                                // Other browsers: immediate opening
-                                if (fp && !fp.isOpen) {
-                                    fp.open();
-                                } else if (fp && fp.isOpen) {
-                                    fp.close();
-                                }
-                                window._datePickerOpening = false;
-                            }
-                        } catch (error) {
-                            console.error("Errore apertura calendario:", error);
-                            window._datePickerOpening = false;
-                        }
-                    };
-
-                    // Use touchstart for iOS, click for others
-                    if (isIOSSafari) {
-                        dateIndicator.addEventListener('touchstart', function(e) {
-                            e.preventDefault(); // Prevent default touch behavior
-                            handleDateIndicatorClick(e);
-                        }, { passive: false });
-                    } else {
-                        dateIndicator.addEventListener('click', handleDateIndicatorClick);
-                    }
-                }
+                // Il click sul calendario è ora gestito specificamente dal dateIndicatorContent
+                // nell'inizializzazione delle frecce sopra - rimuoviamo questo gestore duplicato
+                console.log("✅ Click calendario gestito da dateIndicatorContent")
 
                 console.log("Datepicker inizializzato con successo - input nascosto e indicatore data cliccabile");
             } catch (error) {
