@@ -238,6 +238,21 @@
         transform: scale(0.98);
     }
 
+    /* Day name indicator styles */
+    #dayNameIndicator {
+        text-align: center;
+        font-weight: 600;
+        font-size: 1.1em;
+        color: var(--md-sys-color-primary, #006A6A);
+        margin-bottom: 8px;
+        padding: 4px 12px;
+        border-radius: var(--border-radius-medium, 12px);
+        background: var(--md-sys-color-primary-container, rgba(0, 106, 106, 0.1));
+        transition: all 0.2s ease;
+        letter-spacing: 0.5px;
+        text-transform: capitalize;
+    }
+
     /* Date navigator container improvements */
     .date-navigator {
         gap: 4px !important;
@@ -5242,6 +5257,10 @@
                                 <!-- Label hidden via CSS, Date indicator shown below -->
                                 <label for="date">Data:</label>
                                 <input type="text" id="date" class="form-control datepicker">
+                                <!-- Nome giorno sopra il selettore -->
+                                <div id="dayNameIndicator" style="text-align: center; font-weight: 600; font-size: 1.1em; color: var(--md-sys-color-primary, #006A6A); margin-bottom: 8px;">
+                                    Oggi
+                                </div>
                                 <div id="dateIndicator" title="Clicca per cambiare data">
                                     <!-- Indicator content set by JS -->
                                     <div>
@@ -6763,6 +6782,16 @@
 
                 const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
                 const italianDate = date.toLocaleDateString('it-IT', options);
+                
+                // Estrai solo il nome del giorno
+                const dayName = date.toLocaleDateString('it-IT', { weekday: 'long' });
+                const capitalizedDayName = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+                
+                // Aggiorna il nome del giorno
+                const dayNameIndicator = document.getElementById('dayNameIndicator');
+                if (dayNameIndicator) {
+                    dayNameIndicator.textContent = capitalizedDayName;
+                }
                 
                 // iOS-safe DOM manipulation with requestAnimationFrame
                 const updateDOM = () => {
