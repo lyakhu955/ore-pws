@@ -6572,7 +6572,7 @@
                     disableMobile: !isIOSSafari, // Enable mobile mode for iOS Safari to prevent crashes
                     static: isIOSSafari, // Use static positioning on iOS Safari
                     appendTo: isIOSSafari ? dateInput.parentElement : document.body, // Safer positioning on iOS
-                    clickOpens: !isIOSSafari, // Disable auto-open on iOS Safari to prevent touch conflicts
+                    clickOpens: true, // Riabilito clickOpens anche su iOS per permettere apertura programmatica
                     
                     // ++ Add dropdown for month only (disabled on iOS for stability) ++
                     dropdowns: isIOSSafari ? false : {
@@ -6821,34 +6821,38 @@
                         
                         if (dateInput && dateInput._flatpickr) {
                             console.log("📅 Apertura calendario tramite Flatpickr");
-                            // iOS-safe calendar opening
+                            // iOS-safe calendar opening - NUOVO APPROCCIO: Simula click diretto sull'input
                             const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent);
+                            
                             if (isIOSSafari) {
-                                // iOS: Simula click sull'input invece di .open() per compatibilità
-                                console.log("📱 iOS detected - simulando click su input");
+                                // iOS: Simula un click completo sull'input per triggerare clickOpens
+                                console.log("📱 iOS - simulando click diretto su input");
+                                
+                                // Focus sull'input per attivarlo
+                                dateInput.focus();
+                                
                                 setTimeout(() => {
-                                    // Simula un touch event sull'input per triggerare l'apertura
-                                    const touchEvent = new TouchEvent('touchstart', {
+                                    // Simula mouse click event
+                                    const clickEvent = new MouseEvent('click', {
                                         bubbles: true,
                                         cancelable: true,
-                                        touches: [{
-                                            identifier: 0,
-                                            target: dateInput,
-                                            clientX: 0,
-                                            clientY: 0
-                                        }]
+                                        view: window
                                     });
-                                    dateInput.dispatchEvent(touchEvent);
+                                    dateInput.dispatchEvent(clickEvent);
                                     
-                                    // Fallback con .open() se touch non funziona
+                                    // Fallback: touch event se mouse non funziona
                                     setTimeout(() => {
                                         if (dateInput._flatpickr && !dateInput._flatpickr.isOpen) {
-                                            dateInput._flatpickr.open();
+                                            const touchEvent = new TouchEvent('touchend', {
+                                                bubbles: true,
+                                                cancelable: true
+                                            });
+                                            dateInput.dispatchEvent(touchEvent);
                                         }
-                                    }, 100);
+                                    }, 50);
                                     
                                     window._datePickerOpening = false;
-                                }, 50);
+                                }, 100);
                             } else {
                                 // Other browsers: immediate opening
                                 dateInput._flatpickr.open();
