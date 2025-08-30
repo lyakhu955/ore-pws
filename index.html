@@ -72,7 +72,7 @@
         /* Material Design 3 Inspired Theme - Android 2025 */
         /* Fix iOS Safari Datepicker Issues */
 @supports (-webkit-touch-callout: none) {
-    /* 🍎 iOS specific styles - Fix per stabilità */
+    /* iOS specific styles */
     .flatpickr-calendar {
         -webkit-transform: translateZ(0);
         transform: translateZ(0);
@@ -81,19 +81,12 @@
         -webkit-perspective: 1000;
         perspective: 1000;
         touch-action: manipulation;
-        /* 🍎 Previene problemi di rendering iOS */
-        will-change: transform;
-        isolation: isolate;
     }
     
     .flatpickr-day {
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
         padding: 10px; /* Larger touch target */
-        /* 🍎 Migliora la responsività touch */
-        cursor: pointer;
-        user-select: none;
-        -webkit-user-select: none;
     }
     
     /* Prevent iOS zoom on focus */
@@ -101,44 +94,32 @@
         font-size: 16px !important;
     }
 
-    /* 🍎 iOS Arrow Buttons - Ultra-stable */
     .date-navigator button.date-arrow-btn {
         background: none;
         border: none;
         cursor: pointer;
-        padding: 12px 24px;
-        border-radius: 50%;
-        transition: background 0.2s;
-        color: var(--md-sys-color-primary, #006A6A);
-        font-size: 2.4em;
-        min-width: 64px;
-        min-height: 64px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        /* 🍎 Prevenzione crash iOS */
-        -webkit-tap-highlight-color: transparent;
-        touch-action: manipulation;
-        user-select: none;
-        -webkit-user-select: none;
-        will-change: transform, background-color;
-        /* 🍎 Isolamento per prevenire problemi di event bubbling */
-        isolation: isolate;
-        z-index: 1;
+    padding: 10px 21px;
+    border-radius: 50%;
+    transition: background 0.2s;
+    color: var(--md-sys-color-primary, #006A6A);
+    font-size: 2.4em;
+    min-width: 62px;
+    min-height: 62px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     }
-    
     .date-navigator button.date-arrow-btn .material-symbols-outlined {
         font-size: 2em !important;
         line-height: 1;
-        pointer-events: none; /* 🍎 Previene conflitti eventi */
+    }
+    }
+    .date-navigator button.date-arrow-btn:hover {
+        background: var(--md-sys-color-primary-container, #e0f7fa);
+    }
     }
     
-    .date-navigator button.date-arrow-btn:hover,
-    .date-navigator button.date-arrow-btn:active {
-        background: var(--md-sys-color-primary-container, #e0f7fa);
-        transform: scale(0.95);
-    }
-}    /* Fix for Google login keyboard issue */
+    /* Fix for Google login keyboard issue */
     .cloud-login-btn {
         -webkit-user-select: text;
         user-select: text;
@@ -6199,120 +6180,17 @@
 
         // Fixed initDatepicker definition to prevent ReferenceError
         function initDatepicker() {
-            // 🍎 Rilevamento iOS avanzato
-            const isIOS = (() => {
-                const userAgent = navigator.userAgent || '';
-                const platform = navigator.platform || '';
-                
-                // Test per tutti i dispositivi iOS
-                const iosRegex = /iPad|iPhone|iPod/i;
-                const isMobile = /Mobile/i.test(userAgent);
-                const isWebKit = /WebKit/i.test(userAgent);
-                const isPossibleIPad = platform === 'MacIntel' && navigator.maxTouchPoints > 1;
-                
-                return iosRegex.test(userAgent) || 
-                       iosRegex.test(platform) || 
-                       isPossibleIPad ||
-                       (isWebKit && isMobile && !window.MSStream);
-            })();
+            // Rileva iOS per mostrare istruzioni speciali
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+if (isIOS) {
+    const iosInstructions = document.getElementById('ios-instructions');
+    if (iosInstructions) {
+        iosInstructions.style.display = 'block';
+    }
+}
 
-            if (isIOS) {
-                console.log('🍎 iOS rilevato - usando sistema nativo HTML5');
-                initIOSNativeDateSystem();
-                return;
-            }
-
-            // 📱 Sistema standard per Android/Desktop
-            console.log('📱 Sistema standard Android/Desktop');
-            initStandardDateSystem();
-        }
-
-        // 🍎 Sistema nativo iOS (HTML5 date inputs)
-        function initIOSNativeDateSystem() {
             const dateInput = document.getElementById('date');
-            if (!dateInput) {
-                console.error('🍎 Date input non trovato');
-                return;
-            }
-
-            try {
-                console.log('🍎 Inizializzazione sistema iOS nativo');
-                
-                // 🔧 Fix: Pulizia di eventuali istanze Flatpickr esistenti
-                if (dateInput._flatpickr) {
-                    dateInput._flatpickr.destroy();
-                    delete dateInput._flatpickr;
-                    console.log('🧹 Flatpickr instance rimossa per iOS');
-                }
-                if (window.flatpickrInstance) {
-                    window.flatpickrInstance.destroy();
-                    delete window.flatpickrInstance;
-                    console.log('🧹 Global Flatpickr instance rimossa per iOS');
-                }
-
-                // Converte in input nativo HTML5
-                dateInput.type = 'date';
-                dateInput.style.position = 'absolute';
-                dateInput.style.left = '-9999px';
-                dateInput.style.opacity = '0';
-                dateInput.style.pointerEvents = 'none';
-
-                // Imposta data corrente se non presente
-                if (!dateInput.value) {
-                    const today = new Date();
-                    dateInput.value = formatDateForHTML5(today);
-                }
-
-                // Event listener per cambio data
-                dateInput.addEventListener('change', function(e) {
-                    console.log('🍎 iOS data cambiata:', e.target.value);
-                    const selectedDate = new Date(e.target.value);
-                    if (!isNaN(selectedDate.getTime())) {
-                        updateDateIndicator(selectedDate);
-                        
-                        // Carica entry esistente
-                        if (typeof loadExistingEntry === 'function') {
-                            const italianDate = formatDateForInput(selectedDate);
-                            loadExistingEntry(italianDate);
-                        }
-                    }
-                });
-
-                // Setup frecce iOS-safe
-                setupIOSArrows(dateInput);
-                
-                // Setup indicatore cliccabile
-                setupIOSDateIndicator(dateInput);
-
-                // 🔧 Fix: Aggiorna indicatore iniziale con validazione corretta
-                let currentDate;
-                if (dateInput.value) {
-                    // Prova a parsare il valore dal dateInput (formato YYYY-MM-DD per HTML5)
-                    const inputDate = new Date(dateInput.value);
-                    if (!isNaN(inputDate.getTime())) {
-                        currentDate = inputDate;
-                    } else {
-                        console.warn('🍎 Valore dateInput non valido:', dateInput.value);
-                        currentDate = new Date();
-                    }
-                } else {
-                    currentDate = new Date();
-                }
-                updateDateIndicator(currentDate);
-
-                console.log('✅ Sistema iOS inizializzato con successo');
-
-            } catch (error) {
-                console.error('❌ Errore inizializzazione iOS:', error);
-                // Fallback
-                const today = new Date();
-                updateDateIndicator(today);
-            }
-        }
-
-        // 📱 Sistema standard per Android/Desktop
-        function initStandardDateSystem() {
-            const dateInput = document.getElementById('date');
+            if (!dateInput) return;
 
             console.log("Inizializzazione datepicker Material Design");
 
@@ -6343,8 +6221,20 @@
                 // Store a global reference to track the last selected date
                 window.lastSelectedDate = dateInput.value;
                 console.log("Data iniziale salvata globalmente:", window.lastSelectedDate);
-                
-                // --- Inizializza le frecce giorno avanti/indietro ---
+                                // --- Inizializza le frecce giorno avanti/indietro ---
+                function parseDate(str) {
+                    if (!str) return new Date();
+                    if (str.includes('/')) {
+                        const [d, m, y] = str.split('/').map(Number);
+                        return new Date(y, m - 1, d);
+                    } else if (str.includes('-')) {
+                        return new Date(str);
+                    }
+                    return new Date(str);
+                }
+                function formatDateForInput(d) {
+                    return d.toLocaleDateString('it-IT').replace(/\//g, '/');
+                }
                 function updateDateByArrow(delta) {
                     let current = parseDate(dateInput.value);
                     if (isNaN(current)) current = new Date();
@@ -6372,7 +6262,19 @@
                 setTimeout(function() {
                     const prevBtn = document.getElementById('prevDayBtn');
                     const nextBtn = document.getElementById('nextDayBtn');
-                    
+                    function parseDate(str) {
+                        if (!str) return new Date();
+                        if (str.includes('/')) {
+                            const [d, m, y] = str.split('/').map(Number);
+                            return new Date(y, m - 1, d);
+                        } else if (str.includes('-')) {
+                            return new Date(str);
+                        }
+                        return new Date(str);
+                    }
+                    function formatDateForInput(d) {
+                        return d.toLocaleDateString('it-IT').replace(/\//g, '/');
+                    }
                     function updateDate(delta) {
                         let current = parseDate(dateInput.value);
                         if (isNaN(current)) current = new Date();
@@ -6499,11 +6401,15 @@
                     onReady: function(selectedDates, dateStr, instance) {
                          updateDateIndicator(instance.selectedDates[0] || new Date()); // Initial update
                          console.log("Flatpickr pronto.");
-                     }
-                });
-                
-                // 🔧 Fix: Assegna l'istanza per accesso globale nel click handler
-                window.flatpickrInstance = fp;
+                     },
+                    // onClose needed? Maybe not if onChange handles everything
+                errorHandler: (error) => {
+    console.error("Errore Flatpickr:", error);
+    if (typeof showToast === 'function') {
+        showToast(`Errore calendario: ${error.message || 'Errore sconosciuto'}`, "error");
+    }
+},
+});
 
                 // Make the date indicator clickable to open the datepicker
                 const dateIndicator = document.getElementById('dateIndicator');
@@ -6517,14 +6423,10 @@
                             return;
                         }
                         console.log("Click sull'indicatore data - apertura datepicker");
-                        // 🔧 Fix: Usa l'istanza globale o quella assegnata al dateInput
-                        const fpInstance = window.flatpickrInstance || dateInput._flatpickr;
-                        if (fpInstance && !fpInstance.isOpen) { // Prevent opening if already open
-                            fpInstance.open();
-                        } else if (fpInstance && fpInstance.isOpen) {
-                            fpInstance.close(); // Allow closing by clicking again
-                        } else {
-                            console.warn("🔧 Flatpickr instance non trovata");
+                        if (fp && !fp.isOpen) { // Prevent opening if already open
+                            fp.open();
+                        } else if (fp && fp.isOpen) {
+                            fp.close(); // Allow closing by clicking again
                         }
                     });
                 }
@@ -6543,66 +6445,46 @@
 
         // Helper to update the visual date indicator
         function updateDateIndicator(date) {
-            const dateIndicator = document.getElementById('dateIndicator');
-            
-            // 🔧 Fix: Validazione robusta della data
-            let validDate;
-            if (!date) {
-                validDate = new Date();
-            } else if (typeof date === 'string') {
-                // Se è una stringa, prova a parsarla
-                if (date.includes('/')) {
-                    // Formato italiano DD/MM/YYYY
-                    const [day, month, year] = date.split('/').map(Number);
-                    validDate = new Date(year, month - 1, day);
-                } else if (date.includes('-')) {
-                    // Formato ISO YYYY-MM-DD
-                    validDate = new Date(date);
-                } else {
-                    validDate = new Date(date);
-                }
-            } else if (date instanceof Date) {
-                validDate = date;
-            } else {
-                validDate = new Date();
-            }
-            
-            // Verifica che la data sia valida
-            if (isNaN(validDate.getTime())) {
-                console.warn("updateDateIndicator: Data non valida, uso oggi");
-                validDate = new Date();
-            }
-            
-            if (!dateIndicator) {
-                console.warn("updateDateIndicator: Indicatore non trovato");
-                return;
-            }
+    const dateIndicator = document.getElementById('dateIndicator');
+    if (!dateIndicator || !date || isNaN(date.getTime())) {
+        console.warn("updateDateIndicator: Indicatore non trovato o data non valida");
+        if(dateIndicator) {
+            dateIndicator.innerHTML = `<div class="date-navigator">
+                <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
+                <span id="dateIndicatorContent" style="display: flex; align-items: center; gap: 4px;">
+                    <span class='material-symbols-outlined'>calendar_today</span>
+                    <span>Data non valida</span>
+                </span>
+                <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
+            </div>`;
+        }
+        return;
+    }
 
-            try {
-                const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-                const italianDate = validDate.toLocaleDateString('it-IT', options);
-                dateIndicator.innerHTML = `
-                    <div class="date-navigator" title="Clicca per cambiare data" style="display: flex; align-items: center; gap: 8px; justify-content: center;">
-                        <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
-                        <span id="dateIndicatorContent" style="display: flex; align-items: center; gap: 4px;">
-                            <span class="material-symbols-outlined">calendar_month</span>
-                            <span style="font-weight: 500;">${italianDate}</span>
-                        </span>
-                        <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
-                    </div>
-                `;
-                console.log('✅ Date indicator aggiornato:', italianDate);
-            } catch (e) {
-                console.error("Errore nell'aggiornamento dell'indicatore:", e);
-                dateIndicator.innerHTML = `<div class="date-navigator">
-                    <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
-                    <span id="dateIndicatorContent" style="display: flex; align-items: center; gap: 4px;">
-                        <span class='material-symbols-outlined'>calendar_today</span>
-                        <span>Data: ${validDate.toLocaleDateString('it-IT')}</span>
-                    </span>
-                    <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
-                </div>`;
-            }
+    try {
+        const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+        const italianDate = date.toLocaleDateString('it-IT', options);
+        dateIndicator.innerHTML = `
+            <div class="date-navigator" title="Clicca per cambiare data" style="display: flex; align-items: center; gap: 8px; justify-content: center;">
+                <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
+                <span id="dateIndicatorContent" style="display: flex; align-items: center; gap: 4px;">
+                    <span class="material-symbols-outlined">calendar_month</span>
+                    <span style="font-weight: 500;">${italianDate}</span>
+                </span>
+                <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
+            </div>
+        `;
+    } catch (e) {
+        console.error("Errore nell'aggiornamento dell'indicatore:", e);
+        dateIndicator.innerHTML = `<div class="date-navigator">
+            <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
+            <span id="dateIndicatorContent" style="display: flex; align-items: center; gap: 4px;">
+                <span class='material-symbols-outlined'>calendar_today</span>
+                <span>Errore data</span>
+            </span>
+            <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
+        </div>`;
+    }
 }
 
         // Function to show toast notification - Material Design 3 Style
@@ -8031,16 +7913,8 @@
                   } else {
                       dateInput.value = currentDateValue;
                   }
-                  // 🔧 Fix: Validazione robusta prima di updateDateIndicator
-                  if(typeof updateDateIndicator === 'function') {
-                      const parsedDate = parseDate(currentDateValue);
-                      if (!isNaN(parsedDate.getTime())) {
-                          updateDateIndicator(parsedDate);
-                      } else {
-                          console.warn('🔧 Reset: Data non valida, uso oggi');
-                          updateDateIndicator(new Date());
-                      }
-                  }
+                  // Manually update indicator since onChange wasn't triggered
+                  if(typeof updateDateIndicator === 'function') updateDateIndicator(parseDate(currentDateValue));
                    console.log(`Data ${currentDateValue} mantenuta dopo reset parziale.`);
              }
 
@@ -20236,174 +20110,6 @@ END:VCARD`;
                 }, 500);
             });
         });
-
-        // 🍎 FUNZIONI iOS NATIVE
-        
-        // Formatter per HTML5 date input (YYYY-MM-DD)
-        function formatDateForHTML5(date) {
-            if (!date || isNaN(date.getTime())) {
-                date = new Date();
-            }
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
-
-        // Setup frecce per iOS
-        function setupIOSArrows(dateInput) {
-            console.log('🍎 Setup frecce iOS');
-            
-            // Rimuovi listener esistenti
-            document.removeEventListener('click', handleIOSArrowClick);
-            
-            // Aggiungi listener iOS-safe
-            document.addEventListener('click', handleIOSArrowClick, { passive: false });
-            
-            function handleIOSArrowClick(e) {
-                const target = e.target.closest('#prevDayBtn, #nextDayBtn');
-                if (!target) return;
-                
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const direction = target.id === 'prevDayBtn' ? -1 : 1;
-                console.log(`🍎 Freccia iOS ${direction > 0 ? 'avanti' : 'indietro'}`);
-                
-                // Calcola nuova data
-                const currentDate = new Date(dateInput.value);
-                if (isNaN(currentDate.getTime())) {
-                    console.error('🍎 Data corrente non valida');
-                    return;
-                }
-                
-                currentDate.setDate(currentDate.getDate() + direction);
-                const newValue = formatDateForHTML5(currentDate);
-                
-                // Aggiorna con delay per iOS
-                setTimeout(() => {
-                    dateInput.value = newValue;
-                    // Trigger change event
-                    const changeEvent = new Event('change', { bubbles: true });
-                    dateInput.dispatchEvent(changeEvent);
-                }, 50);
-            }
-        }
-
-        // Setup indicatore data cliccabile per iOS
-        function setupIOSDateIndicator(dateInput) {
-            const dateIndicator = document.getElementById('dateIndicator');
-            if (!dateIndicator) return;
-
-            console.log('🍎 Setup indicatore iOS');
-            
-            dateIndicator.style.cursor = 'pointer';
-            dateIndicator.title = 'Tocca per cambiare data';
-            
-            // Rimuovi listener esistenti
-            const oldListener = dateIndicator.onclick;
-            if (oldListener) {
-                dateIndicator.removeEventListener('click', oldListener);
-            }
-            
-            dateIndicator.addEventListener('click', function(e) {
-                // Ignora click su frecce
-                if (e.target.closest('#prevDayBtn, #nextDayBtn')) {
-                    return;
-                }
-                
-                e.preventDefault();
-                e.stopPropagation();
-                
-                console.log('🍎 Click indicatore iOS - apertura picker');
-                
-                // Usa showPicker se disponibile (iOS 16+)
-                if (dateInput.showPicker && typeof dateInput.showPicker === 'function') {
-                    try {
-                        dateInput.showPicker();
-                    } catch (error) {
-                        console.warn('🍎 showPicker fallito:', error);
-                        fallbackDatePicker(dateInput);
-                    }
-                } else {
-                    fallbackDatePicker(dateInput);
-                }
-            }, { passive: false });
-        }
-
-        // Fallback per apertura date picker iOS
-        function fallbackDatePicker(dateInput) {
-            console.log('🍎 Fallback date picker');
-            
-            // Metodo 1: focus + click
-            try {
-                dateInput.style.position = 'absolute';
-                dateInput.style.left = '50%';
-                dateInput.style.top = '50%';
-                dateInput.style.transform = 'translate(-50%, -50%)';
-                dateInput.style.opacity = '1';
-                dateInput.style.pointerEvents = 'auto';
-                dateInput.style.zIndex = '9999';
-                
-                dateInput.focus();
-                dateInput.click();
-                
-                // Nascondi di nuovo dopo un po'
-                setTimeout(() => {
-                    dateInput.style.position = 'absolute';
-                    dateInput.style.left = '-9999px';
-                    dateInput.style.opacity = '0';
-                    dateInput.style.pointerEvents = 'none';
-                }, 100);
-                
-            } catch (error) {
-                console.error('🍎 Fallback picker error:', error);
-            }
-        }
-
-        // 🍎 FIX iOS EVENTI (vecchio sistema - mantenuto per compatibilità)
-        function addIOSEventsFix() {
-            console.log('🍎 Applicando fix iOS legacy');
-            // Questa funzione è mantenuta per compatibilità ma non dovrebbe essere necessaria
-            // con il nuovo sistema nativo
-        }
-
-        // 🍎 Gestione iOS-safe per le frecce (vecchio sistema)
-        function handleIOSSafeArrowClick(direction) {
-            console.log('🍎 Handling legacy arrow click:', direction);
-            // Questa funzione legacy è mantenuta per compatibilità
-            try {
-                const dateInput = document.getElementById('date');
-                if (!dateInput) return;
-
-                if (dateInput.type === 'date') {
-                    // Nuovo sistema iOS nativo
-                    const currentDate = new Date(dateInput.value);
-                    currentDate.setDate(currentDate.getDate() + direction);
-                    dateInput.value = formatDateForHTML5(currentDate);
-                    
-                    const changeEvent = new Event('change', { bubbles: true });
-                    dateInput.dispatchEvent(changeEvent);
-                } else if (dateInput._flatpickr) {
-                    // Sistema Flatpickr per Android
-                    const currentDate = dateInput._flatpickr.selectedDates[0] || new Date();
-                    const newDate = new Date(currentDate);
-                    newDate.setDate(newDate.getDate() + direction);
-                    
-                    setTimeout(() => {
-                        dateInput._flatpickr.setDate(newDate, true);
-                        console.log('🍎 Data aggiornata iOS-safe:', newDate.toLocaleDateString('it-IT'));
-                    }, 10);
-                }
-                
-            } catch (error) {
-                console.error('🍎 Errore iOS arrow click:', error);
-                if (error.message.includes('flatpickr')) {
-                    console.log('🍎 Errore critico - fallback sicuro');
-                    location.reload();
-                }
-            }
-        }
     </script>
 
 </body>
