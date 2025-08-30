@@ -175,6 +175,20 @@
         color: var(--md-sys-color-on-primary, #FFFFFF);
     }
     
+    /* iOS-specific: Riduce le frecce del 50% */
+    @supports (-webkit-touch-callout: none) {
+        .date-navigator button.date-arrow-btn {
+            font-size: 1.2em !important; /* 50% di 2.4em */
+            min-width: 31px !important; /* 50% di 62px */
+            min-height: 31px !important; /* 50% di 62px */
+            padding: 5px 10px !important; /* 50% di 10px 21px */
+        }
+        
+        .date-navigator button.date-arrow-btn .material-symbols-outlined {
+            font-size: 1em !important; /* 50% di 2em */
+        }
+    }
+    
     /* Fix for Google login keyboard issue */
     .cloud-login-btn {
         -webkit-user-select: text;
