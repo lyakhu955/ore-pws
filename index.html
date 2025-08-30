@@ -6473,20 +6473,44 @@ if (isIOS) {
                     onChange: function(selectedDates, dateStr, instance) {
                         console.log("Datepicker onChange:", dateStr);
 
-                        // Sometimes dateStr might be empty if cleared, handle it
-                        if(dateStr && selectedDates.length > 0) {
-                            window.lastSelectedDate = dateStr;
-                            dateInput.value = dateStr; // Update hidden input
-                            updateDateIndicator(selectedDates[0]); // Update visual indicator
+                        // === SUPER LOGGING PER CATTURARE IL CRASH ===
+                        try {
+                            console.log(`[CRASH-DEBUG] onChange START: dates=${selectedDates?.length}, dateStr="${dateStr}"`);
 
-                            if (typeof loadExistingEntry === 'function') {
-                                loadExistingEntry(dateStr);
+                            // Sometimes dateStr might be empty if cleared, handle it
+                            if(dateStr && selectedDates.length > 0) {
+                                console.log(`[CRASH-DEBUG] Processing date change to: ${dateStr}`);
+                                
+                                console.log(`[CRASH-DEBUG] Setting window.lastSelectedDate...`);
+                                window.lastSelectedDate = dateStr;
+                                console.log(`[CRASH-DEBUG] Setting dateInput.value...`);
+                                dateInput.value = dateStr; // Update hidden input
+                                
+                                console.log(`[CRASH-DEBUG] About to call updateDateIndicator...`);
+                                updateDateIndicator(selectedDates[0]); // Update visual indicator
+                                console.log(`[CRASH-DEBUG] updateDateIndicator completed`);
+
+                                console.log(`[CRASH-DEBUG] Checking loadExistingEntry function...`);
+                                if (typeof loadExistingEntry === 'function') {
+                                    console.log(`[CRASH-DEBUG] About to call loadExistingEntry with: ${dateStr}`);
+                                    loadExistingEntry(dateStr);
+                                    console.log(`[CRASH-DEBUG] loadExistingEntry completed`);
+                                } else {
+                                    console.log(`[CRASH-DEBUG] loadExistingEntry not available`);
+                                }
+                            } else if (!dateStr) {
+                                console.log(`[CRASH-DEBUG] Date cleared, resetting to today...`);
+                                // Handle case where date is cleared (if allowInput was true)
+                                 const today = new Date();
+                                 instance.setDate(today, true); // Reset to today if cleared
+                                 console.log("Data cancellata, reimpostata a oggi.");
                             }
-                        } else if (!dateStr) {
-                            // Handle case where date is cleared (if allowInput was true)
-                             const today = new Date();
-                             instance.setDate(today, true); // Reset to today if cleared
-                             console.log("Data cancellata, reimpostata a oggi.");
+                            
+                            console.log(`[CRASH-DEBUG] onChange END: successful completion`);
+                        } catch (error) {
+                            console.error(`[CRASH-DEBUG] FATAL ERROR in onChange:`, error);
+                            console.error(`[CRASH-DEBUG] Error stack:`, error.stack);
+                            // Non ri-lanciare l'errore per evitare il crash completo
                         }
                     },
                     onReady: function(selectedDates, dateStr, instance) {
@@ -6604,47 +6628,66 @@ if (isIOS) {
 
         // Helper to update the visual date indicator
         function updateDateIndicator(date) {
-    const dateIndicator = document.getElementById('dateIndicator');
-    if (!dateIndicator || !date || isNaN(date.getTime())) {
-        console.warn("updateDateIndicator: Indicatore non trovato o data non valida");
-        if(dateIndicator) {
-            dateIndicator.innerHTML = `<div class="date-navigator">
-                <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
-                <span id="dateIndicatorContent" style="display: flex; align-items: center; gap: 4px;">
-                    <span class='material-symbols-outlined'>calendar_today</span>
-                    <span>Data non valida</span>
-                </span>
-                <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
-            </div>`;
-        }
-        return;
-    }
+            // === SUPER LOGGING PER CATTURARE IL CRASH ===
+            try {
+                console.log(`[CRASH-DEBUG] updateDateIndicator START: date=${date}, type=${typeof date}`);
+                
+                const dateIndicator = document.getElementById('dateIndicator');
+                console.log(`[CRASH-DEBUG] dateIndicator element:`, dateIndicator ? 'found' : 'NOT FOUND');
+                
+                if (!dateIndicator || !date || isNaN(date.getTime())) {
+                    console.log(`[CRASH-DEBUG] Invalid conditions - dateIndicator:${!!dateIndicator}, date:${!!date}, validTime:${date ? !isNaN(date.getTime()) : 'N/A'}`);
+                    console.warn("updateDateIndicator: Indicatore non trovato o data non valida");
+                    if(dateIndicator) {
+                        console.log(`[CRASH-DEBUG] Setting fallback HTML...`);
+                        dateIndicator.innerHTML = `<div class="date-navigator">
+                            <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
+                            <span id="dateIndicatorContent" style="display: flex; align-items: center; gap: 4px;">
+                                <span class='material-symbols-outlined'>calendar_today</span>
+                                <span>Data non valida</span>
+                            </span>
+                            <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
+                        </div>`;
+                        console.log(`[CRASH-DEBUG] Fallback HTML set successfully`);
+                    }
+                    return;
+                }
 
-    try {
-        const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-        const italianDate = date.toLocaleDateString('it-IT', options);
-        dateIndicator.innerHTML = `
-            <div class="date-navigator" title="Clicca per cambiare data" style="display: flex; align-items: center; gap: 8px; justify-content: center;">
-                <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
-                <span id="dateIndicatorContent" style="display: flex; align-items: center; gap: 4px;">
-                    <span class="material-symbols-outlined">calendar_month</span>
-                    <span style="font-weight: 500;">${italianDate}</span>
-                </span>
-                <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
-            </div>
-        `;
-    } catch (e) {
-        console.error("Errore nell'aggiornamento dell'indicatore:", e);
-        dateIndicator.innerHTML = `<div class="date-navigator">
-            <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
-            <span id="dateIndicatorContent" style="display: flex; align-items: center; gap: 4px;">
-                <span class='material-symbols-outlined'>calendar_today</span>
-                <span>Errore data</span>
-            </span>
-            <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
-        </div>`;
-    }
-}
+                console.log(`[CRASH-DEBUG] About to format date...`);
+                const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+                const italianDate = date.toLocaleDateString('it-IT', options);
+                console.log(`[CRASH-DEBUG] Date formatted: ${italianDate}`);
+                
+                console.log(`[CRASH-DEBUG] About to set innerHTML...`);
+                dateIndicator.innerHTML = `
+                    <div class="date-navigator" title="Clicca per cambiare data" style="display: flex; align-items: center; gap: 8px; justify-content: center;">
+                        <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
+                        <span id="dateIndicatorContent" style="display: flex; align-items: center; gap: 4px;">
+                            <span class="material-symbols-outlined">calendar_month</span>
+                            <span style="font-weight: 500;">${italianDate}</span>
+                        </span>
+                        <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
+                    </div>
+                `;
+                console.log(`[CRASH-DEBUG] innerHTML set successfully`);
+                console.log(`[CRASH-DEBUG] updateDateIndicator END: successful completion`);
+            } catch (e) {
+                console.error(`[CRASH-DEBUG] FATAL ERROR in updateDateIndicator:`, e);
+                console.error(`[CRASH-DEBUG] Error stack:`, e.stack);
+                console.error("Errore nell'aggiornamento dell'indicatore:", e);
+                const dateIndicator = document.getElementById('dateIndicator');
+                if(dateIndicator) {
+                    dateIndicator.innerHTML = `<div class="date-navigator">
+                        <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
+                        <span id="dateIndicatorContent" style="display: flex; align-items: center; gap: 4px;">
+                            <span class='material-symbols-outlined'>calendar_today</span>
+                            <span>Errore data</span>
+                        </span>
+                        <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
+                    </div>`;
+                }
+            }
+        }
 
         // Function to show toast notification - Material Design 3 Style
         function showToast(message, type = 'info', duration = 3000, actions = null) {
@@ -7756,53 +7799,74 @@ if (isIOS) {
 
 
          function loadExistingEntry(date) {
-             console.log(`Caricamento voce esistente per ${date}...`);
-             const db = getDb();
-             const entries = db.entries[date] || [];
-             const form = document.getElementById('timeEntryForm');
-             const submitBtn = document.getElementById('submitBtn');
+             // === SUPER LOGGING PER CATTURARE IL CRASH ===
+             try {
+                 console.log(`[CRASH-DEBUG] loadExistingEntry START: date="${date}"`);
+                 console.log(`Caricamento voce esistente per ${date}...`);
+                 
+                 console.log(`[CRASH-DEBUG] Getting database...`);
+                 const db = getDb();
+                 console.log(`[CRASH-DEBUG] Database obtained, checking entries for date...`);
+                 const entries = db.entries[date] || [];
+                 console.log(`[CRASH-DEBUG] Found ${entries.length} entries for date`);
+                 
+                 console.log(`[CRASH-DEBUG] Getting form elements...`);
+                 const form = document.getElementById('timeEntryForm');
+                 const submitBtn = document.getElementById('submitBtn');
+                 console.log(`[CRASH-DEBUG] Form: ${form ? 'found' : 'NOT FOUND'}, SubmitBtn: ${submitBtn ? 'found' : 'NOT FOUND'}`);
 
-             if (!form || !submitBtn) {
-                  console.error("Form o pulsante submit non trovati per loadExistingEntry.");
-                  return;
-             }
+                 if (!form || !submitBtn) {
+                      console.error("Form o pulsante submit non trovati per loadExistingEntry.");
+                      console.log(`[CRASH-DEBUG] Early return due to missing elements`);
+                      return;
+                 }
 
-             if (entries.length > 0) {
-                 // Load the *last* entry for the day if multiple exist.
-                 const entryToLoad = entries[entries.length - 1];
-                 console.log("Trovata voce da caricare:", entryToLoad);
+                 if (entries.length > 0) {
+                     console.log(`[CRASH-DEBUG] Processing ${entries.length} entries...`);
+                     // Load the *last* entry for the day if multiple exist.
+                     const entryToLoad = entries[entries.length - 1];
+                     console.log("Trovata voce da caricare:", entryToLoad);
+                     console.log(`[CRASH-DEBUG] Loading entry data into form...`);
 
-                 form.elements.startTime.value = entryToLoad.startTime || '';
-                 form.elements.endTime.value = entryToLoad.endTime || '';
-                 form.elements.breakTime.value = entryToLoad.breakTime ?? 0.5; // Default to 0.5 if undefined
-                 form.elements.notturne.value = entryToLoad.notturne || '';
+                     form.elements.startTime.value = entryToLoad.startTime || '';
+                     form.elements.endTime.value = entryToLoad.endTime || '';
+                     form.elements.breakTime.value = entryToLoad.breakTime ?? 0.5; // Default to 0.5 if undefined
+                     form.elements.notturne.value = entryToLoad.notturne || '';
+                     console.log(`[CRASH-DEBUG] Basic form fields populated`);
 
-                 // Gestione del pulsante di trasferta
-                 const trasfertaButton = form.elements.transferta;
-                 const textElement = trasfertaButton.querySelector('.trasferta-text');
+                     console.log(`[CRASH-DEBUG] Processing trasferta button...`);
+                     // Gestione del pulsante di trasferta
+                     const trasfertaButton = form.elements.transferta;
+                     const textElement = trasfertaButton.querySelector('.trasferta-text');
+                     console.log(`[CRASH-DEBUG] TrasfertaButton: ${trasfertaButton ? 'found' : 'NOT FOUND'}, TextElement: ${textElement ? 'found' : 'NOT FOUND'}`);
 
-                 if (typeof entryToLoad.transferta === 'boolean' && entryToLoad.transferta) {
-                     // Nuovo formato (boolean)
-                     trasfertaButton.classList.add('active');
-                     trasfertaButton.setAttribute('data-active', 'true');
+                     if (typeof entryToLoad.transferta === 'boolean' && entryToLoad.transferta) {
+                         console.log(`[CRASH-DEBUG] Setting trasferta active (boolean)`);
+                         // Nuovo formato (boolean)
+                         trasfertaButton.classList.add('active');
+                         trasfertaButton.setAttribute('data-active', 'true');
                      if (textElement) textElement.textContent = 'Trasferta attiva';
                  } else if (typeof entryToLoad.transferta === 'number' && entryToLoad.transferta > 0) {
+                     console.log(`[CRASH-DEBUG] Setting trasferta active (number)`);
                      // Vecchio formato (numero di ore)
                      trasfertaButton.classList.add('active');
                      trasfertaButton.setAttribute('data-active', 'true');
                      if (textElement) textElement.textContent = 'Trasferta attiva';
                  } else {
+                     console.log(`[CRASH-DEBUG] Setting trasferta inactive`);
                      trasfertaButton.classList.remove('active');
                      trasfertaButton.setAttribute('data-active', 'false');
                      if (textElement) textElement.textContent = 'Seleziona trasferta';
                  }
 
+                 console.log(`[CRASH-DEBUG] Processing work descriptions...`);
                  // Gestione delle righe di lavoro multiple
                  const description = entryToLoad.description || '';
 
                  // Pulisci le righe di lavoro esistenti tranne la prima
                  const container = document.getElementById('work-descriptions-container');
                  if (container) {
+                     console.log(`[CRASH-DEBUG] Container found, cleaning existing rows...`);
                      const rows = container.querySelectorAll('.work-description-row');
                      // Mantieni solo la prima riga
                      for (let i = 1; i < rows.length; i++) {
@@ -7817,6 +7881,7 @@ if (isIOS) {
 
                      // Se ci sono descrizioni multiple separate da virgole, crea righe aggiuntive
                      if (description) {
+                         console.log(`[CRASH-DEBUG] Processing description: ${description}`);
                          const descriptions = description.split(',').map(d => d.trim()).filter(d => d);
 
                          // Imposta la prima descrizione nella riga esistente
@@ -7862,13 +7927,22 @@ if (isIOS) {
 
                  form.dataset.editingId = entryToLoad.id; // Set editing ID
                  submitBtn.innerHTML = '<span class="material-symbols-outlined">update</span> Aggiorna';
+                 console.log(`[CRASH-DEBUG] Form populated successfully`);
              } else {
+                 console.log(`[CRASH-DEBUG] No entries found for date`);
                  console.log(`Nessuna voce trovata per ${date}, reset parziale del form.`);
                  // Reset form fields but keep the date
                  resetForm(false); // false = Don't reset date
              }
+             console.log(`[CRASH-DEBUG] About to calculate total hours...`);
              // Recalculate hours after loading/resetting
              calculateTotalHours();
+             console.log(`[CRASH-DEBUG] loadExistingEntry END: successful completion`);
+         } catch (error) {
+             console.error(`[CRASH-DEBUG] FATAL ERROR in loadExistingEntry:`, error);
+             console.error(`[CRASH-DEBUG] Error stack:`, error.stack);
+             // Non ri-lanciare l'errore per evitare il crash completo
+         }
          }
 
          function editEntry(date, entryId) {
