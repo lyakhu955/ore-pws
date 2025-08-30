@@ -6760,7 +6760,7 @@
                         dateIndicator.innerHTML = `
                             <div class="date-navigator" style="display: flex; align-items: center; gap: 8px; justify-content: center;">
                                 <button type="button" id="prevDayBtn" class="date-arrow-btn" title="Giorno precedente"><span class="material-symbols-outlined">chevron_left</span></button>
-                                <input type="text" id="dateInputCentral" class="form-control datepicker" value="${dateIndicator.closest('form') ? dateIndicator.closest('form').querySelector('#date').value : ''}" style="border: none; background: transparent; text-align: center; font-weight: 500; width: auto; min-width: 200px; cursor: pointer;" readonly title="Clicca per cambiare data">
+                                <input type="text" id="dateInputCentral" class="form-control datepicker" value="${italianDate}" style="border: none; background: transparent; text-align: center; font-weight: 500; width: auto; min-width: 250px; cursor: pointer;" readonly title="Clicca per cambiare data">
                                 <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
                             </div>
                         `;
@@ -6771,8 +6771,8 @@
                             const centralInput = document.getElementById('dateInputCentral');
                             
                             if (originalInput && centralInput) {
-                                // Copia valore
-                                centralInput.value = originalInput.value;
+                                // Il centralInput mostra la data formattata completa, ma Flatpickr usa quella originale
+                                const originalDate = originalInput.value;
                                 
                                 // Applica Flatpickr al nuovo input centrale
                                 if (window.flatpickr && !centralInput._flatpickr) {
@@ -6780,17 +6780,34 @@
                                         dateFormat: "d/m/Y",
                                         locale: { ...flatpickr.l10ns.it, firstDayOfWeek: 1 },
                                         allowInput: false,
-                                        defaultDate: centralInput.value,
+                                        defaultDate: originalDate, // Usa la data originale per inizializzazione
                                         disableMobile: false,
                                         static: true,
                                         clickOpens: true,
                                         onChange: function(selectedDates) {
                                             if (selectedDates[0]) {
-                                                // Sincronizza con input originale
-                                                originalInput.value = centralInput.value;
+                                                // Aggiorna input originale con formato d/m/Y
+                                                const shortFormat = selectedDates[0].toLocaleDateString('it-IT', {
+                                                    day: '2-digit',
+                                                    month: '2-digit', 
+                                                    year: 'numeric'
+                                                });
+                                                originalInput.value = shortFormat;
+                                                
+                                                // Aggiorna display con formato completo
+                                                const longFormat = selectedDates[0].toLocaleDateString('it-IT', {
+                                                    weekday: 'long',
+                                                    day: 'numeric',
+                                                    month: 'long',
+                                                    year: 'numeric'
+                                                });
+                                                centralInput.value = longFormat;
+                                                
+                                                // Sincronizza Flatpickr originale se esiste
                                                 if (originalInput._flatpickr) {
                                                     originalInput._flatpickr.setDate(selectedDates[0], false);
                                                 }
+                                                
                                                 // Trigger eventi necessari
                                                 const event = new Event('change', { bubbles: true });
                                                 originalInput.dispatchEvent(event);
