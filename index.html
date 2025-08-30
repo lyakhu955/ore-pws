@@ -6237,6 +6237,18 @@
 
             try {
                 console.log('🍎 Inizializzazione sistema iOS nativo');
+                
+                // 🔧 Fix: Pulizia di eventuali istanze Flatpickr esistenti
+                if (dateInput._flatpickr) {
+                    dateInput._flatpickr.destroy();
+                    delete dateInput._flatpickr;
+                    console.log('🧹 Flatpickr instance rimossa per iOS');
+                }
+                if (window.flatpickrInstance) {
+                    window.flatpickrInstance.destroy();
+                    delete window.flatpickrInstance;
+                    console.log('🧹 Global Flatpickr instance rimossa per iOS');
+                }
 
                 // Converte in input nativo HTML5
                 dateInput.type = 'date';
@@ -6487,15 +6499,11 @@
                     onReady: function(selectedDates, dateStr, instance) {
                          updateDateIndicator(instance.selectedDates[0] || new Date()); // Initial update
                          console.log("Flatpickr pronto.");
-                     },
-                    // onClose needed? Maybe not if onChange handles everything
-                errorHandler: (error) => {
-    console.error("Errore Flatpickr:", error);
-    if (typeof showToast === 'function') {
-        showToast(`Errore calendario: ${error.message || 'Errore sconosciuto'}`, "error");
-    }
-},
-});
+                     }
+                });
+                
+                // 🔧 Fix: Assegna l'istanza per accesso globale nel click handler
+                window.flatpickrInstance = fp;
 
                 // Make the date indicator clickable to open the datepicker
                 const dateIndicator = document.getElementById('dateIndicator');
@@ -6509,10 +6517,14 @@
                             return;
                         }
                         console.log("Click sull'indicatore data - apertura datepicker");
-                        if (fp && !fp.isOpen) { // Prevent opening if already open
-                            fp.open();
-                        } else if (fp && fp.isOpen) {
-                            fp.close(); // Allow closing by clicking again
+                        // 🔧 Fix: Usa l'istanza globale o quella assegnata al dateInput
+                        const fpInstance = window.flatpickrInstance || dateInput._flatpickr;
+                        if (fpInstance && !fpInstance.isOpen) { // Prevent opening if already open
+                            fpInstance.open();
+                        } else if (fpInstance && fpInstance.isOpen) {
+                            fpInstance.close(); // Allow closing by clicking again
+                        } else {
+                            console.warn("🔧 Flatpickr instance non trovata");
                         }
                     });
                 }
@@ -8019,8 +8031,16 @@
                   } else {
                       dateInput.value = currentDateValue;
                   }
-                  // Manually update indicator since onChange wasn't triggered
-                  if(typeof updateDateIndicator === 'function') updateDateIndicator(parseDate(currentDateValue));
+                  // 🔧 Fix: Validazione robusta prima di updateDateIndicator
+                  if(typeof updateDateIndicator === 'function') {
+                      const parsedDate = parseDate(currentDateValue);
+                      if (!isNaN(parsedDate.getTime())) {
+                          updateDateIndicator(parsedDate);
+                      } else {
+                          console.warn('🔧 Reset: Data non valida, uso oggi');
+                          updateDateIndicator(new Date());
+                      }
+                  }
                    console.log(`Data ${currentDateValue} mantenuta dopo reset parziale.`);
              }
 
