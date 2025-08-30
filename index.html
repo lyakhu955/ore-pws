@@ -6315,19 +6315,26 @@
                     dateInput.style.width = "100%";
                     dateInput.style.padding = "12px";
                     dateInput.style.fontSize = "16px";
-                    dateInput.style.border = "1px solid #ddd";
+                    dateInput.style.border = "2px solid var(--md-sys-color-primary, #006A6A)";
                     dateInput.style.borderRadius = "8px";
                     dateInput.style.backgroundColor = "var(--card-bg, #fff)";
                     dateInput.style.color = "var(--text-color, #333)";
+                    dateInput.style.boxShadow = "0 2px 4px rgba(0,106,106,0.1)";
+                    dateInput.style.transition = "all 0.2s ease";
+                    
+                    // Rimuovi le classi che potrebbero nascondere l'input
+                    dateInput.classList.remove('datepicker');
+                    dateInput.classList.add('ios-native-date');
                     
                     // Assicurati che sia nel contenitore corretto
                     const label = dateInput.previousElementSibling;
                     if (label && label.tagName === 'LABEL') {
                         label.style.display = "block";
                         label.style.marginBottom = "8px";
-                        label.style.color = "var(--text-color, #333)";
+                        label.style.color = "var(--md-sys-color-primary, #006A6A)";
                         label.style.fontSize = "14px";
-                        label.style.fontWeight = "500";
+                        label.style.fontWeight = "600";
+                        label.textContent = "📅 Seleziona Data:";
                     }
                     
                     // Converti la data nel formato yyyy-mm-dd per il picker nativo
@@ -6369,10 +6376,15 @@
                         }
                     });
                     
-                    // Nascondi l'indicatore data customizzato per iOS
+                    // Nascondi l'indicatore data customizzato per iOS e mostra l'input nativo
                     const dateIndicator = document.getElementById('dateIndicator');
                     if (dateIndicator) {
-                        dateIndicator.style.display = 'none';
+                        // Invece di nascondere, sostituisci il contenuto con l'input nativo
+                        dateIndicator.innerHTML = '';
+                        dateIndicator.appendChild(dateInput);
+                        dateIndicator.style.padding = '0';
+                        dateIndicator.style.border = 'none';
+                        dateIndicator.style.background = 'transparent';
                     }
                     
                     // Mostra istruzioni iOS se esistono
