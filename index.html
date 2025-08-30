@@ -6396,6 +6396,24 @@ if (isIOS) {
                     defaultDate: dateInput.value,
                     disableMobile: true, // Use custom mobile handling & style
                     appendTo: document.body, // Append to body to avoid layout issues
+                    
+                    // === 🛡️ PROTEZIONE ANTI-CRASH iOS ===
+                    clickOpens: false, // Disabilito il click automatico per gestirlo manualmente
+                    
+                    // Intercetto l'apertura per gestirla in sicurezza
+                    onOpen: function(selectedDates, dateStr, instance) {
+                        try {
+                            console.log(`[iOS-SAFE] Calendar opened safely`);
+                            // Forza il reflow per evitare problemi di layout su iOS
+                            if (instance.calendarContainer) {
+                                instance.calendarContainer.style.visibility = 'hidden';
+                                void instance.calendarContainer.offsetHeight; // Trigger reflow
+                                instance.calendarContainer.style.visibility = 'visible';
+                            }
+                        } catch (error) {
+                            console.error(`[iOS-SAFE] Error in onOpen:`, error);
+                        }
+                    },
                     // ++ Add dropdown for month only ++
                     dropdowns: {
                         months: true,
@@ -6605,11 +6623,39 @@ if (isIOS) {
                         if (e.target.closest('#prevDayBtn') || e.target.closest('#nextDayBtn')) {
                             return;
                         }
+                        
                         console.log("Click sull'indicatore data - apertura datepicker");
-                        if (fp && !fp.isOpen) { // Prevent opening if already open
-                            fp.open();
-                        } else if (fp && fp.isOpen) {
-                            fp.close(); // Allow closing by clicking again
+                        
+                        // === 🛡️ APERTURA SICURA PER iOS ===
+                        try {
+                            // Prevengo eventi multipli
+                            if (window.__opening_calendar) {
+                                console.log("[iOS-SAFE] Apertura già in corso, ignorando...");
+                                return;
+                            }
+                            window.__opening_calendar = true;
+                            
+                            // Delay sicuro per iOS
+                            setTimeout(() => {
+                                try {
+                                    if (fp && !fp.isOpen) {
+                                        console.log("[iOS-SAFE] Tentativo apertura calendario...");
+                                        fp.open();
+                                        console.log("[iOS-SAFE] Calendario aperto con successo");
+                                    } else if (fp && fp.isOpen) {
+                                        console.log("[iOS-SAFE] Chiusura calendario...");
+                                        fp.close();
+                                    }
+                                } catch (openError) {
+                                    console.error("[iOS-SAFE] Errore durante apertura:", openError);
+                                } finally {
+                                    window.__opening_calendar = false;
+                                }
+                            }, 10); // Piccolo delay per evitare race conditions
+                            
+                        } catch (clickError) {
+                            console.error("[iOS-SAFE] Errore nel gestore click:", clickError);
+                            window.__opening_calendar = false;
                         }
                     });
                 }
