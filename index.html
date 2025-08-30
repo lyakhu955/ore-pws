@@ -6532,17 +6532,7 @@
                                 }
                             };
 
-                            // iOS-safe event handling for date central click (usando dateIndicator container)
-                            if (isIOSSafari) {
-                                dateIndicatorContent.addEventListener('touchstart', handleDateClick, { passive: false });
-                            } else {
-                                dateIndicatorContent.addEventListener('click', handleDateClick);
-                            }
-                            
-                            // Aggiungi cursor pointer per indicare che è cliccabile
-                            dateIndicatorContent.style.cursor = 'pointer';
-                            dateIndicatorContent.style.userSelect = 'none';
-                            dateIndicatorContent.style.webkitUserSelect = 'none';
+                            // Note: Event listener per data centrale ora gestito da attachDateClickListener()
                         }
                     };
 
@@ -6776,9 +6766,15 @@
 
                 // Use requestAnimationFrame for smoother updates on iOS
                 if (window.requestAnimationFrame) {
-                    requestAnimationFrame(updateDOM);
+                    requestAnimationFrame(() => {
+                        updateDOM();
+                        // Attacca event listener DOPO aver creato l'HTML
+                        attachDateClickListener();
+                    });
                 } else {
                     updateDOM();
+                    // Attacca event listener DOPO aver creato l'HTML
+                    attachDateClickListener();
                 }
                 
             } catch (e) {
@@ -6794,6 +6790,86 @@
                         <button type="button" id="nextDayBtn" class="date-arrow-btn" title="Giorno successivo"><span class="material-symbols-outlined">chevron_right</span></button>
                     </div>`;
                 }
+            }
+        }
+
+        // Function to attach click listener to central date after DOM update
+        function attachDateClickListener() {
+            try {
+                const dateIndicatorContent = document.getElementById('dateIndicatorContent');
+                if (!dateIndicatorContent) {
+                    console.warn("⚠️ dateIndicatorContent non trovato per event listener");
+                    return;
+                }
+
+                console.log("🎯 Attaching event listener alla data centrale...");
+
+                const handleDateClick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    console.log("🗓️ Click su data centrale - apertura calendario");
+                    
+                    try {
+                        if (window._datePickerOpening) {
+                            console.log("⏳ Apertura calendario già in corso...");
+                            return;
+                        }
+                        
+                        window._datePickerOpening = true;
+                        const dateInput = document.getElementById('date');
+                        
+                        if (dateInput && dateInput._flatpickr) {
+                            console.log("📅 Apertura calendario tramite Flatpickr");
+                            // iOS-safe calendar opening
+                            const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent);
+                            if (isIOSSafari) {
+                                // iOS: delayed opening to prevent conflicts
+                                setTimeout(() => {
+                                    if (dateInput._flatpickr && !dateInput._flatpickr.isOpen) {
+                                        dateInput._flatpickr.open();
+                                    }
+                                    window._datePickerOpening = false;
+                                }, 100);
+                            } else {
+                                // Other browsers: immediate opening
+                                dateInput._flatpickr.open();
+                                setTimeout(() => {
+                                    window._datePickerOpening = false;
+                                }, 500);
+                            }
+                        } else {
+                            console.warn("❌ Flatpickr non disponibile");
+                            window._datePickerOpening = false;
+                        }
+                        
+                    } catch (error) {
+                        console.error("❌ Errore apertura calendario dalla data centrale:", error);
+                        window._datePickerOpening = false;
+                    }
+                };
+
+                // Remove existing listeners to avoid duplicates
+                const newElement = dateIndicatorContent.cloneNode(true);
+                dateIndicatorContent.parentNode.replaceChild(newElement, dateIndicatorContent);
+
+                // iOS-safe event handling
+                const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent);
+                if (isIOSSafari) {
+                    newElement.addEventListener('touchstart', handleDateClick, { passive: false });
+                } else {
+                    newElement.addEventListener('click', handleDateClick);
+                }
+                
+                // Visual feedback
+                newElement.style.cursor = 'pointer';
+                newElement.style.userSelect = 'none';
+                newElement.style.webkitUserSelect = 'none';
+                
+                console.log("✅ Event listener per data centrale attaccato correttamente!");
+                
+            } catch (error) {
+                console.error("❌ Errore nell'attaching event listener data centrale:", error);
             }
         }
 
