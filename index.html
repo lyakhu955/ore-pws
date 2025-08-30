@@ -6492,6 +6492,74 @@ if (isIOS) {
                     onReady: function(selectedDates, dateStr, instance) {
                          updateDateIndicator(instance.selectedDates[0] || new Date()); // Initial update
                          console.log("Flatpickr pronto.");
+                         // === Date Debug Hook (solo se ?debug=1&dateDebug=1) ===
+                         (function(){
+                            try {
+                                const qs = new URLSearchParams(location.search);
+                                if(!qs.has('debug') || !qs.has('dateDebug')) return;
+                                if(window.__DATE_DEBUG_INSTALLED__) return; // evita doppio
+                                window.__DATE_DEBUG_INSTALLED__ = true;
+                                let seq=0; let lastVal=null; const MAX=200; let count=0;
+                                function dlog(type, extra){
+                                    if(count>=MAX) return; count++; try{ console.info('[DateDebug]', ++seq, type, extra||{});}catch(e){}
+                                }
+                                const input = document.querySelector('input.datepicker');
+                                if(!input){ dlog('NO_INPUT_FOUND'); return; }
+                                function attach(fp){
+                                    if(!fp){ dlog('NO_INSTANCE'); return; }
+                                    lastVal = fp.input.value;
+                                    dlog('INIT',{ value:lastVal });
+                                    // wrap setDate
+                                    const originalSetDate = fp.setDate.bind(fp);
+                                    fp.setDate = function(date, triggerChange, format){
+                                        const before = fp.input.value;
+                                        const r = originalSetDate(date, triggerChange, format);
+                                        const after = fp.input.value;
+                                        dlog('PROGRAMMATIC_SET',{ from:before, to:after, args:[date, triggerChange, format]});
+                                        return r;
+                                    };
+                                    function addCb(name, fn){
+                                        const existing = fp.config[name];
+                                        if(Array.isArray(existing)) existing.push(fn); else if(typeof existing==='function') fp.config[name]=[existing, fn]; else fp.config[name]=[fn];
+                                    }
+                                    addCb('onChange', function(sel){
+                                        const newVal = fp.input.value;
+                                        if(newVal===lastVal){ dlog('ON_CHANGE_NO_DIFF',{ value:newVal }); }
+                                        else { dlog('ON_CHANGE',{ from:lastVal, to:newVal, selected: sel.map(d=>fp.formatDate(d,'d/m/Y')) }); lastVal=newVal; }
+                                    });
+                                    addCb('onValueUpdate', function(sel){ dlog('ON_VALUE_UPDATE',{ selected: sel.map(d=>fp.formatDate(d,'d/m/Y')) }); });
+                                    addCb('onMonthChange', function(){ dlog('MONTH_CHANGE',{ month: fp.currentMonth+1, year: fp.currentYear }); });
+                                    addCb('onYearChange', function(){ dlog('YEAR_CHANGE',{ month: fp.currentMonth+1, year: fp.currentYear }); });
+                                    addCb('onOpen', function(){ dlog('OPEN'); });
+                                    addCb('onClose', function(){ dlog('CLOSE'); });
+                                    // Giorni & navigazione calendario
+                                    if(fp.calendarContainer){
+                                        fp.calendarContainer.addEventListener('click', function(e){
+                                            const t = e.target;
+                                            if(!t || !t.classList) return;
+                                            if(t.classList.contains('flatpickr-day')){
+                                                dlog('DAY_CLICK',{ day: t.textContent, dateAttr: t.dateObj? fp.formatDate(t.dateObj,'Y-m-d'):null });
+                                            }
+                                            if(t.classList.contains('flatpickr-prev-month')) dlog('CAL_NAV',{ dir:'prev' });
+                                            if(t.classList.contains('flatpickr-next-month')) dlog('CAL_NAV',{ dir:'next' });
+                                        });
+                                    }
+                                    // Bottoni frecce custom
+                                    document.querySelectorAll('.date-navigator button.date-arrow-btn').forEach(btn=>{
+                                        btn.addEventListener('click', function(){
+                                            dlog('CUSTOM_ARROW_CLICK',{ direction: btn.dataset.direction || btn.id || btn.textContent.trim() });
+                                            setTimeout(()=>{ dlog('POST_CUSTOM_ARROW',{ value: fp.input.value }); },35);
+                                        });
+                                    });
+                                    dlog('READY_FINAL',{ value: fp.input.value });
+                                }
+                                function wait(){
+                                    if(input._flatpickr) attach(input._flatpickr); else setTimeout(wait,100);
+                                }
+                                wait();
+                            } catch(err){ /* ignore */ }
+                         })();
+                         // === Fine Date Debug Hook ===
                      },
                     // onClose needed? Maybe not if onChange handles everything
                 errorHandler: (error) => {
