@@ -6271,19 +6271,98 @@
 
         // Fixed initDatepicker definition to prevent ReferenceError
         function initDatepicker() {
-            // Rileva iOS per mostrare istruzioni speciali
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-if (isIOS) {
-    const iosInstructions = document.getElementById('ios-instructions');
-    if (iosInstructions) {
-        iosInstructions.style.display = 'block';
-    }
-}
-
             const dateInput = document.getElementById('date');
             if (!dateInput) return;
 
             console.log("Inizializzazione datepicker Material Design");
+
+            // === 🍎 RILEVAMENTO iOS SAFARI PER FALLBACK NATIVO ===
+            const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && /WebKit/.test(navigator.userAgent) && !/CriOS/.test(navigator.userAgent);
+            
+            if (isIOSSafari) {
+                console.log("🍎 iOS Safari rilevato - usando picker nativo");
+                
+                try {
+                    // Trasforma l'input in type="date" nativo per iOS
+                    dateInput.type = "date";
+                    dateInput.style.display = "block";
+                    dateInput.style.visibility = "visible";
+                    dateInput.style.opacity = "1";
+                    dateInput.style.position = "relative";
+                    dateInput.style.zIndex = "auto";
+                    dateInput.style.pointerEvents = "auto";
+                    
+                    // Converti la data nel formato yyyy-mm-dd per il picker nativo
+                    if (dateInput.value && dateInput.value.includes('/')) {
+                        const [day, month, year] = dateInput.value.split('/');
+                        dateInput.value = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                    } else {
+                        const today = new Date();
+                        dateInput.value = today.toISOString().split('T')[0];
+                    }
+                    
+                    // Event listener per il picker nativo
+                    dateInput.addEventListener('change', function(e) {
+                        console.log("🍎 Cambio data picker nativo:", e.target.value);
+                        
+                        try {
+                            const nativeDate = e.target.value; // yyyy-mm-dd
+                            const [year, month, day] = nativeDate.split('-');
+                            const italianDate = `${day}/${month}/${year}`;
+                            
+                            console.log(`🍎 Data convertita: ${nativeDate} → ${italianDate}`);
+                            
+                            // Salva in formato italiano
+                            window.lastSelectedDate = italianDate;
+                            
+                            // Aggiorna l'indicatore visuale se esiste
+                            const selectedDate = new Date(year, month - 1, day);
+                            if (typeof updateDateIndicator === 'function') {
+                                updateDateIndicator(selectedDate);
+                            }
+                            
+                            // Carica entry esistente
+                            if (typeof loadExistingEntry === 'function') {
+                                loadExistingEntry(italianDate);
+                            }
+                            
+                        } catch (error) {
+                            console.error("🍎 Errore nel picker nativo:", error);
+                        }
+                    });
+                    
+                    // Nascondi l'indicatore data customizzato per iOS
+                    const dateIndicator = document.getElementById('dateIndicator');
+                    if (dateIndicator) {
+                        dateIndicator.style.display = 'none';
+                    }
+                    
+                    // Mostra istruzioni iOS se esistono
+                    const iosInstructions = document.getElementById('ios-instructions');
+                    if (iosInstructions) {
+                        iosInstructions.style.display = 'block';
+                    }
+                    
+                    console.log("🍎 Picker nativo iOS attivato con successo!");
+                    return; // Esci dalla funzione, non inizializzare Flatpickr
+                    
+                } catch (iosError) {
+                    console.error("🍎 Errore nel setup iOS, fallback a Flatpickr:", iosError);
+                    // Continua con Flatpickr se il setup iOS fallisce
+                }
+            }
+
+            // === 💻 FLATPICKR PER TUTTI GLI ALTRI BROWSER ===
+            console.log("💻 Browser desktop/Android - usando Flatpickr");
+            
+            // Rileva iOS per mostrare istruzioni speciali (solo se Flatpickr fallback)
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            if (isIOS && !isIOSSafari) {
+                const iosInstructions = document.getElementById('ios-instructions');
+                if (iosInstructions) {
+                    iosInstructions.style.display = 'block';
+                }
+            }
 
             try {
                 // Hide the date input field visually using CSS added earlier
