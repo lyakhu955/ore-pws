@@ -1,6 +1,97 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+    <!-- Early Remote Logger Hook (attivo solo con ?debug=1) -->
+    <script>
+    (function remote_logger_hook(){
+        try {
+            var qs = new URLSearchParams(location.search);
+            if(!qs.has('debug')) return; // disattivo se manca debug
+            if(window.__REMOTE_LOGGER__) return; // evita doppia installazione
+            window.__REMOTE_LOGGER__ = true;
+            var mode = (qs.get('mode')||'full').toLowerCase();
+            var flushEach = mode !== 'batch'; // default full = invio immediato
+            var ONLY = (qs.get('only')||'').trim();
+            var onlyLevels = ONLY ? ONLY.split(',').map(function(s){return s.trim();}).filter(Boolean) : null;
+            var ENDPOINT = '/api/log';
+            var SESSION = Math.random().toString(36).slice(2);
+            var seq = 0, sent = 0, MAX = 800;
+            var queue = []; var TIMER = null; var BATCH_INTERVAL = 4000; var MAX_BATCH = 50;
+            function shouldSkip(msg){ return /authorization|bearer|password|token|secret/i.test(msg); }
+            function now(){ return Date.now(); }
+            function parseLoc(stack){
+                if(!stack) return '';
+                var lines = stack.split('\n').slice(1);
+                for(var i=0;i<lines.length;i++){
+                    var l = lines[i].trim();
+                    if(!l) continue;
+                    if(l.indexOf('remote_logger_hook')!==-1) continue;
+                    // Estraggo pattern file:line:col
+                    var m = l.match(/(\w+:\/\/[^)\s]+|[^(@\s]+):(\d+):(\d+)/);
+                    if(m){
+                        return m[1].split(/[\/\\]/).pop()+':'+m[2];
+                    }
+                }
+                return '';
+            }
+            function serialize(args){
+                return args.map(function(a){
+                    try {
+                        if(a instanceof Error){ return a.name+': '+a.message; }
+                        if(typeof a === 'object'){ return JSON.stringify(a).slice(0,2000); }
+                        return String(a);
+                    } catch(e){ return '[Unserializable]'; }
+                }).join(' ');
+            }
+            function send(payload){
+                try {
+                    var body = JSON.stringify(payload);
+                    if(navigator.sendBeacon){
+                        try { var blob = new Blob([body], {type:'application/json'}); if(navigator.sendBeacon(ENDPOINT, blob)) return; } catch(e){}
+                    }
+                    fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:body,keepalive:true}).catch(function(){});
+                } catch(e){}
+            }
+            function flush(){
+                if(!queue.length){ TIMER=null; return; }
+                send({session:SESSION, ua:navigator.userAgent, page:location.pathname||location.href, ts:now(), logs: queue.splice(0, queue.length)});
+                TIMER=null;
+            }
+            function schedule(){ if(TIMER) return; TIMER = setTimeout(flush, BATCH_INTERVAL); }
+            function push(entry){
+                if(sent>=MAX) return;
+                queue.push(entry); sent++; if(flushEach) flush(); else if(queue.length>=MAX_BATCH) flush(); else schedule();
+            }
+            function makeWrapper(level){
+                var original = console[level];
+                console[level] = function(){
+                    original && original.apply(console, arguments);
+                    try {
+                        if(onlyLevels && onlyLevels.indexOf(level)===-1) return;
+                        var msg = serialize([].slice.call(arguments));
+                        if(shouldSkip(msg)) return;
+                        var stack = new Error().stack;
+                        var loc = parseLoc(stack);
+                        push({seq: ++seq, level: level, message: msg, loc: loc, ts: now()});
+                    } catch(e){}
+                };
+            }
+            ['log','info','warn','error'].forEach(makeWrapper);
+            window.addEventListener('error', function(e){
+                try {
+                    push({seq: ++seq, level:'window.error', message: (e.message||'')+' @'+e.filename+':'+e.lineno+':'+e.colno, loc:'', ts:now(), stack: e.error && e.error.stack || ''});
+                } catch(err){}
+            });
+            window.addEventListener('unhandledrejection', function(e){
+                try {
+                    var reason = e.reason; var msg = reason && reason.message ? reason.message : String(reason);
+                    push({seq: ++seq, level:'promise', message: msg, loc:'', ts:now(), stack: reason && reason.stack || ''});
+                } catch(err){}
+            });
+            console.log('[RemoteLog][early] Avviato session='+SESSION+' mode='+mode);
+        } catch(err){ /* silenzioso */ }
+    })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Ore PWS Group (Modern)</title>
