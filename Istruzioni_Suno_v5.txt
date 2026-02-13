@@ -1,47 +1,65 @@
-SUNO v5 — UNIVERSAL META-TAGS & RULES (COPY-PASTE INSTRUCTIONS)
+SUNO v5 — UNIVERSAL META-TAGS & RULES (COPY-PASTE)
 
 IMPORTANT
 - I ALWAYS use Suno v5.
-- All meta-tags and descriptors are written in ENGLISH.
-- Keep tags minimal: Structure + 2–4 Key:Value tags at the top.
+- ALL meta-tags and descriptors MUST use square brackets: [ ... ].
+- Do NOT use ( ) or { } for tags. Only [ ].
+- Keep tags minimal: Structure + 2–4 Key:Value control tags at the top (in the DESCRIPTION/PROMPT, not inside Lyrics).
 - Use 1 main Genre (max 2 if fusion) and 1–3 anchor instruments.
-- Reinforce only near key moments (e.g., before Chorus add [Energy: High]) instead of adding many tags.
+- Reinforce only near key moments (e.g., add [Energy: High] right before the Chorus) instead of adding many tags.
 
-A) CONTROL TAGS
+0) FIELD SEPARATION (DESCRIPTION vs LYRICS)
+A) DESCRIPTION / PROMPT FIELD (recommended place for control tags)
+- Put your control meta-tags here (Key:Value), plus any useful production notes.
+- Keep it minimal.
+
+B) LYRICS FIELD (NO top control tags)
+- In the LYRICS field, do NOT include top-of-song control meta-tags like:
+  [Genre: ...], [Mood: ...], [Energy: ...], [Instrument: ...], [Vocal Style: ...], [Language: ...], [Tempo: ...], [Production: ...]
+- The LYRICS must contain ONLY:
+  1) the song text, and
+  2) only the necessary in-song tags that directly affect performance/structure, such as:
+     - Structure: [Intro], [Verse 1], [Pre-Chorus], [Chorus], [Bridge], [Outro], [End]
+     - Dynamics (sparingly): [Build], [Build-Up], [Drop], [Break], [Breakdown]
+     - Vocal/Performance (inside lines where needed): [Male Vocal], [Female Vocal], [Duo], [Spoken], [Talk-singing], [Whisper], [Harmonies], [Back vocals], [Choir], [Ad-libs]
+     - SFX/Ambience (rare): [Rain], [Vinyl crackle], [Crowd cheering], [Applause], [Static], [Silence], [City noise]
+
+1) BRACKET RULES (HOW TO USE [ ])
+A) CONTROL TAGS (Key:Value) — use in DESCRIPTION/PROMPT (not at top of Lyrics)
 Use 2–4 of these:
 [Genre: ...]
 [Mood: ...]
 [Energy: ...]
 [Instrument: ..., ..., ...]
-Optional when needed:
+Optional only when needed:
 [Vocal Style: ...]
 [Language: ...]
 [Tempo: ...]
 [Production: ...]
 
-B) STRUCTURE TAGS (arrangement / sections)
+B) STRUCTURE TAGS (sections) — use in Lyrics, always in [ ]
 Core:
 [Intro]
 [Verse 1] / [Verse 2] / [Verse 3]
 [Pre-Chorus]
 [Chorus]
-[Post-Chorus] (optional)
 [Bridge]
-[Interlude] (optional)
-[Instrumental] (optional)
-[Solo] (optional)
-[Final Chorus] (optional)
 [Outro]
-[End] (optional hard stop)
+Optional:
+[Post-Chorus]
+[Interlude]
+[Instrumental]
+[Solo]
+[Final Chorus]
+[End] (hard stop)
 
-C) DYNAMICS / ARRANGEMENT TAGS (use sparingly)
-Place right before the change:
+C) DYNAMICS / ARRANGEMENT TAGS — use in Lyrics sparingly, place right BEFORE the change
 [Build] or [Build-Up]
 [Drop]
 [Break]
 [Breakdown]
 
-D) VOCAL / PERFORMANCE TAGS (use inside lyrics where relevant)
+D) VOCAL / PERFORMANCE TAGS — use inside Lyrics where relevant
 Voice type:
 [Male Vocal] / [Female Vocal] / [Duo]
 Delivery:
@@ -51,7 +69,7 @@ Layering:
 Flavor:
 [Ad-libs]
 
-E) SOUND FX / AMBIENCE TAGS (rare, only if essential)
+E) SOUND FX / AMBIENCE TAGS — use in Lyrics rarely, only if essential
 [Vinyl crackle]
 [Crowd cheering] / [Applause]
 [Audience laughing]
@@ -60,9 +78,9 @@ E) SOUND FX / AMBIENCE TAGS (rare, only if essential)
 [Static]
 [Silence]
 
-F) UNIVERSAL DICTIONARIES (PICK SHORT VALUES)
+2) UNIVERSAL DICTIONARIES (PICK SHORT VALUES)
 
-1) GENRE (pick 1, max 2)
+A) GENRE (pick 1, max 2)
 Pop / Mainstream:
 Pop, Electropop, Synthpop, Indie Pop, Dance Pop
 Rap / Urban:
@@ -82,7 +100,7 @@ Lo-fi, Chillhop, Ambient, Downtempo
 World:
 Afrobeat, Amapiano, Dancehall, Flamenco, Bossa Nova
 
-2) MOOD (pick 1–2)
+B) MOOD (pick 1–2)
 Romantic, Sensual, Dreamy, Nostalgic, Melancholic, Heartbroken
 Uplifting, Euphoric, Hopeful, Triumphant
 Dark, Gritty, Mysterious, Haunting
@@ -91,10 +109,10 @@ Aggressive, Intense, Angry, Defiant
 Calm, Peaceful, Cozy, Warm
 Futuristic, Cyber, Retro, Vintage
 
-3) ENERGY (pick 1)
+C) ENERGY (pick 1)
 Low, Medium, High, Explosive, Minimal
 
-4) INSTRUMENT (pick 1–3 anchor instruments)
+D) INSTRUMENT (pick 1–3 anchor instruments)
 Core:
 Drums, Bass, Piano, Rhodes, Electric Guitar, Acoustic Guitar, Synth Pads, Strings
 Urban/EDM:
@@ -106,13 +124,13 @@ Dem Bow Drums, Latin Percussion, Nylon Guitar, Brass Section
 Rock/Metal:
 Distorted Guitars, Live Drums, Bass Guitar
 
-5) VOCAL STYLE (pick 1–2)
+E) VOCAL STYLE (pick 1–2)
 Warm, Breathier, Intimate, Clean, Powerful, Raspy
 Soulful, Gospel-inspired, Smooth, Emotional
 Aggressive, Hype, Whispery, Spoken, Talk-singing
 Auto-tuned, Choir-like, Harmonized
 
-6) LANGUAGE (use if you want to force it)
+F) LANGUAGE (use only if you want to force it — in DESCRIPTION/PROMPT, not in Lyrics)
 [Language: Italian]
 [Language: Spanish]
 [Language: English]
@@ -120,14 +138,18 @@ Auto-tuned, Choir-like, Harmonized
 [Language: Ukrainian]
 [Language: Russian]
 
-G) UNIVERSAL BEST-PRACTICE TEMPLATE
+3) UNIVERSAL BEST-PRACTICE TEMPLATE
+
+DESCRIPTION / PROMPT (Control Tags)
 [Genre: ...]
 [Mood: ...]
 [Energy: ...]
 [Instrument: ..., ..., ...]
 [Vocal Style: ...]
 [Language: ...]
+(Optional: short production note)
 
+LYRICS (Only Structure/Dynamics/Performance/SFX tags + the actual lyrics)
 [Intro]
 
 [Verse 1]
@@ -150,7 +172,8 @@ G) UNIVERSAL BEST-PRACTICE TEMPLATE
 
 [Outro] or [End]
 
-H) QUICK PRESETS (optional)
+4) QUICK PRESETS (optional) — use in DESCRIPTION/PROMPT
+
 1) Pop Romantic
 [Genre: Pop]
 [Mood: Romantic, Warm]
@@ -171,6 +194,7 @@ H) QUICK PRESETS (optional)
 [Energy: High]
 [Instrument: Dem Bow Drums, Latin Percussion, Synth Lead]
 [Vocal Style: Hype, Ad-libs]
+(optional SFX in Lyrics: [Audience laughing])
 
 4) Lo-fi Love
 [Genre: Lo-fi]
@@ -206,4 +230,4 @@ H) QUICK PRESETS (optional)
 [Energy: High]
 [Instrument: Drums, Synth Lead, Bass]
 [Vocal Style: Talk-singing, Ad-libs]
-(optional SFX: [Audience laughing])
+(optional SFX in Lyrics: [Audience laughing])
