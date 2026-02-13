@@ -7,7 +7,7 @@ IMPORTANT
 - Use 1 main Genre (max 2 if fusion) and 1–3 anchor instruments.
 - Reinforce only near key moments (e.g., before Chorus add [Energy: High]) instead of adding many tags.
 
-A) TOP CONTROL TAGS (place BEFORE [Intro] or [Verse 1])
+A) CONTROL TAGS
 Use 2–4 of these:
 [Genre: ...]
 [Mood: ...]
