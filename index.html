@@ -13115,9 +13115,12 @@
                     // Leggi il valore nella colonna A (giorno)
                     const dayValue = row.getCell(1).value;
                     
+                    // DEBUG: Mostra cosa legge dalla colonna A
+                    console.log(`🔍 Riga ${rowIndex} (${dateStr}): ${isSaturday ? 'SABATO' : isSunday ? 'DOMENICA' : 'FERIALE'}, dayValue: "${dayValue}"`);
+                    
                     // Colora SOLO se è sabato/domenica E la riga ha dati (colonna A non è vuota)
                     if ((isSaturday || isSunday) && dayValue) {
-                        console.log(`🎨 Colorando ${isSaturday ? 'SABATO' : 'DOMENICA'} ${dateStr} (riga ${rowIndex})`);
+                        console.log(`🎨 ✅ Colorando ${isSaturday ? 'SABATO' : 'DOMENICA'} ${dateStr} (riga ${rowIndex})`);
                         const grayColor = 'FFE8E8E8'; // Grigio chiaro
                         
                         // Colora A-H
