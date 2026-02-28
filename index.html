@@ -12953,6 +12953,19 @@
                 const worksheet = workbook.worksheets[0]; // Prendi il primo foglio
                 console.log(`📝 Template caricato, foglio: ${worksheet.name}, righe: ${worksheet.rowCount}`);
                 
+                // RESET: Pulisci formattazione di tutte le righe dati (6-36) per rimuovere colori dal template
+                console.log(`🧹 Ripulendo formattazione righe 6-36...`);
+                for (let row = 6; row <= 36; row++) {
+                    const dataRow = worksheet.getRow(row);
+                    for (let col = 1; col <= 22; col++) {
+                        const cell = dataRow.getCell(col);
+                        cell.fill = {
+                            type: 'pattern',
+                            pattern: 'none'
+                        };
+                    }
+                }
+                
                 // Itera tutti i giorni del mese
                 const daysInMonth = new Date(year, month, 0).getDate();
                 console.log(`📆 Giorni nel mese: ${daysInMonth}`);
