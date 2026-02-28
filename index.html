@@ -11644,7 +11644,8 @@
                 }
                 
                 // === PASSAGGIO SEPARATO: COLORAZIONE WEEKEND ===
-                // Scorre le righe da 5 a 35 e colora SOLO sabato e domenica
+                // Scorre le righe da 5 a 35 e colora SOLO sabato e domenica in grigio
+                // Forza bianco su tutti i giorni feriali
                 console.log('🎨 Inizio passaggio separato colorazione weekend...');
                 const grigioFill = {
                     type: 'pattern',
@@ -11652,18 +11653,24 @@
                     fgColor: { argb: 'FFD9D9D9' },
                     bgColor: { argb: 'FFD9D9D9' }
                 };
+                const biancoFill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FFFFFFFF' },
+                    bgColor: { argb: 'FFFFFFFF' }
+                };
                 for (let rowNum = 5; rowNum <= 35; rowNum++) {
                     const cellA = worksheet.getRow(rowNum).getCell(1);
                     const cellAText = (cellA.value || '').toString().toLowerCase().trim();
                     const isSab = cellAText.startsWith('sabato');
                     const isDom = cellAText.startsWith('domenica');
-                    console.log(`📋 Riga ${rowNum}: "${cellAText.substring(0, 25)}" → sab:${isSab} dom:${isDom}`);
                     
+                    const fillToApply = (isSab || isDom) ? grigioFill : biancoFill;
+                    for (let c = 1; c <= 22; c++) {
+                        worksheet.getRow(rowNum).getCell(c).fill = fillToApply;
+                    }
                     if (isSab || isDom) {
-                        for (let c = 1; c <= 22; c++) {
-                            worksheet.getRow(rowNum).getCell(c).fill = grigioFill;
-                        }
-                        console.log(`🔘 Riga ${rowNum} COLORATA grigio`);
+                        console.log(`🔘 Riga ${rowNum}: weekend → GRIGIO`);
                     }
                 }
                 console.log('✅ Colorazione weekend completata');
