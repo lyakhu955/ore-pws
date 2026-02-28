@@ -11644,11 +11644,11 @@
                 }
                 
                 // === COLORAZIONE WEEKEND (calcolata dal calendario, senza leggere celle) ===
-                const [cYear, cMonth] = yearMonth.split('-').map(Number);
-                const daysInMonth = new Date(cYear, cMonth, 0).getDate();
+                const [cwYear, cwMonth] = yearMonth.split('-').map(Number);
+                const totalDaysInMonth = new Date(cwYear, cwMonth, 0).getDate();
                 const weekendRows = [];
-                for (let d = 1; d <= daysInMonth; d++) {
-                    const dow = new Date(cYear, cMonth - 1, d).getDay(); // 0=dom, 6=sab
+                for (let d = 1; d <= totalDaysInMonth; d++) {
+                    const dow = new Date(cwYear, cwMonth - 1, d).getDay(); // 0=dom, 6=sab
                     if (dow === 0 || dow === 6) {
                         weekendRows.push(4 + d); // riga 5 = giorno 1
                     }
