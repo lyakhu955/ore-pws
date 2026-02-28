@@ -11481,23 +11481,21 @@
                     const rowIndex = 5 + day; // riga 6 per day 1, riga 7 per day 2, ecc.
                     const row = worksheet.getRow(rowIndex);
 
-                    // Evidenzia sabato e domenica su A-H e J-V
+                    // Evidenzia solo sabato e domenica su A-H e J-V
                     const isWeekend = dayOfWeek === 6 || dayOfWeek === 0;
-                    if (isWeekend) {
-                        const weekendFill = {
-                            type: 'pattern',
-                            pattern: 'solid',
-                            fgColor: { argb: 'FFEEEEEE' }
-                        };
-                        const weekendCols = [
-                            1, 2, 3, 4, 5, 6, 7, 8, // A-H
-                            10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22 // J-V
-                        ];
-                        weekendCols.forEach(col => {
-                            const cell = row.getCell(col);
-                            cell.fill = weekendFill;
-                        });
-                    }
+                    const weekendFill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FFEEEEEE' }
+                    };
+                    const weekendCols = [
+                        1, 2, 3, 4, 5, 6, 7, 8, // A-H
+                        10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22 // J-V
+                    ];
+                    weekendCols.forEach(col => {
+                        const cell = row.getCell(col);
+                        cell.fill = isWeekend ? weekendFill : null;
+                    });
 
                     // Formato corretto per cercare nel DB: DD/MM/YYYY
                     const dateStr = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
