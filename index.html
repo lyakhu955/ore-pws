@@ -7894,6 +7894,14 @@
             const totalHours = parseFloat(totalHoursInput.value) || 0;
             const selectedVehicle = vehicleSelect.value; // Get selected vehicle ID or name
 
+            // === RICONOSCIMENTO AUTOMATICO ORE NOTTURNE ===
+            // Se l'orario di inizio è >= 17:00, tutte le ore sono notturne
+            let finalNotturne = notturne;
+            if (startTime && parseInt(startTime.split(':')[0]) >= 17 && notturne === 0 && totalHours > 0) {
+                finalNotturne = totalHours;
+                console.log(`🌙 Ore notturne auto-riconosciute: inizio ${startTime} → ${finalNotturne}h notturne`);
+            }
+
              // Basic validation
              if (!date) {
                  showToast("La data è obbligatoria.", "error");
@@ -7928,7 +7936,7 @@
                 startTime,
                 endTime,
                 breakTime,
-                notturne,
+                notturne: finalNotturne,
                 transferta,
                 description,
                 totalHours,
