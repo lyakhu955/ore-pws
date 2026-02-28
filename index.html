@@ -13088,7 +13088,7 @@
                     
                     // --- COLORA SABATO E DOMENICA (solo se ci sono dati) ---
                     if ((isSaturday || isSunday) && (entries.length > 0 || isFerie || isMalattia)) {
-                        console.log(`🎨 Colorando ${isSaturday ? 'SABATO' : 'DOMENICA'} ${dateStr} (riga ${rowIndex}): ${entries.length} entries`);
+                        console.log(`🎨 Colorando ${isSaturday ? 'SABATO' : 'DOMENICA'} ${dateStr} (riga ${rowIndex}): ${entries.length} entries, ferie: ${isFerie}, malattia: ${isMalattia}`);
                         const grayColor = 'FFE8E8E8'; // Grigio chiaro
                         
                         // Colora A-H
