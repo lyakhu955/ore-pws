@@ -11608,47 +11608,6 @@
                     }
                 }
                 
-                // === SECONDO LOOP: COLORA SABATI E DOMENICHE ===
-                console.log(`🎨 Inizio colorazione sabati e domeniche...`);
-                for (let day = 1; day <= daysInMonth; day++) {
-                    // Usa il dayOfWeek memorizzato nel primo loop (NO ricalcolo!)
-                    const dayOfWeek = dayOfWeekMap[day]; // 0 = domenica, 6 = sabato
-                    const isSaturday = dayOfWeek === 6;
-                    const isSunday = dayOfWeek === 0;
-                    
-                    const dateStr = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
-                    const rowIndex = 5 + day;
-                    const row = worksheet.getRow(rowIndex);
-                    
-                    console.log(`🔍 Riga ${rowIndex} (${dateStr}): getDay()=${dayOfWeek} -> ${isSaturday ? 'SABATO' : isSunday ? 'DOMENICA' : 'FERIALE'}`);
-                    
-                    // Colora SOLO sabati (6) e domeniche (0)
-                    if (isSaturday || isSunday) {
-                        console.log(`🎨 ✅ Colorando ${isSaturday ? 'SABATO' : 'DOMENICA'} ${dateStr} (riga ${rowIndex})`);
-                        const grayColor = 'FFE8E8E8'; // Grigio chiaro
-                        
-                        // Colora A-H
-                        for (let col = 1; col <= 8; col++) {
-                            row.getCell(col).fill = {
-                                type: 'pattern',
-                                pattern: 'solid',
-                                fgColor: { argb: grayColor }
-                            };
-                        }
-                        
-                        // Salta I (colonna 9)
-                        
-                        // Colora J-V (colonne 10-22)
-                        for (let col = 10; col <= 22; col++) {
-                            row.getCell(col).fill = {
-                                type: 'pattern',
-                                pattern: 'solid',
-                                fgColor: { argb: grayColor }
-                            };
-                        }
-                    }
-                }
-                
                 // Genera il buffer e scarica
                 const buffer = await workbook.xlsx.writeBuffer();
                 const blob = new Blob([buffer], {
