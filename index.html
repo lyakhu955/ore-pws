@@ -13086,8 +13086,8 @@
                         row.getCell(17).value = 'X'; // Q = 17
                     }
                     
-                    // --- COLORA SABATO E DOMENICA ---
-                    if (isSaturday || isSunday) {
+                    // --- COLORA SABATO E DOMENICA (solo se ci sono dati) ---
+                    if ((isSaturday || isSunday) && (entries.length > 0 || isFerie || isMalattia)) {
                         const grayColor = 'FFE8E8E8'; // Grigio chiaro
                         
                         // Colora A-H
