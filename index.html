@@ -11509,8 +11509,8 @@
                     // Formato corretto per cercare nel DB: DD/MM/YYYY
                     const dateStr = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
                     
-                    // Calcola la riga (righe da 6 a 36)
-                    const rowIndex = 5 + day; // riga 6 per day 1, riga 7 per day 2, ecc.
+                    // Calcola la riga (righe da 5 a 35)
+                    const rowIndex = 4 + day; // riga 5 per day 1, riga 6 per day 2, ecc.
                     const row = worksheet.getRow(rowIndex);
                     
                     // --- COLONNA A: Giorno ---
