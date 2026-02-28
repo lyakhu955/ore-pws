@@ -11643,12 +11643,15 @@
                     }
                 }
                 
-                // === COLORAZIONE WEEKEND tramite FORMATTAZIONE CONDIZIONALE ===
+                // === COLORAZIONE WEEKEND + FESTIVITÀ tramite FORMATTAZIONE CONDIZIONALE ===
                 const [cwYear, cwMonth] = yearMonth.split('-').map(Number);
                 const totalDaysInMonth = new Date(cwYear, cwMonth, 0).getDate();
                 for (let d = 1; d <= totalDaysInMonth; d++) {
-                    const dow = new Date(cwYear, cwMonth - 1, d).getDay();
-                    if (dow === 0 || dow === 6) {
+                    const dateCheck = new Date(cwYear, cwMonth - 1, d);
+                    const dow = dateCheck.getDay();
+                    const isWeekend = (dow === 0 || dow === 6);
+                    const isFestivo = isItalianHoliday(dateCheck);
+                    if (isWeekend || isFestivo) {
                         const rowNum = 4 + d;
                         // Due range separati: A-H e J-V (salta colonna I)
                         const greyRule = [{
@@ -11671,10 +11674,10 @@
                             ref: `J${rowNum}:V${rowNum}`,
                             rules: greyRule
                         });
-                        console.log(`🔘 Riga ${rowNum} (giorno ${d}) → GRIGIO condizionale`);
+                        console.log(`🔘 Riga ${rowNum} (giorno ${d}) → GRIGIO ${isWeekend ? '(weekend)' : '(festività)'}`);
                     }
                 }
-                console.log('✅ Colorazione weekend completata (conditional formatting)');
+                console.log('✅ Colorazione weekend + festività completata');
                 
                 // Genera il buffer e scarica
                 const buffer = await workbook.xlsx.writeBuffer();
