@@ -13098,10 +13098,26 @@
                     if (hasTransfer) {
                         row.getCell(17).value = 'X'; // Q = 17
                     }
+                }
+                
+                // === SECONDO LOOP: COLORA SABATI E DOMENICHE ===
+                console.log(`🎨 Inizio colorazione sabati e domeniche...`);
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateObj = new Date(year, month - 1, day);
+                    const dateStr = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
+                    const rowIndex = 5 + day;
+                    const row = worksheet.getRow(rowIndex);
                     
-                    // --- COLORA SABATO E DOMENICA (solo se ci sono dati) ---
-                    if ((isSaturday || isSunday) && (entries.length > 0 || isFerie || isMalattia)) {
-                        console.log(`🎨 Colorando ${isSaturday ? 'SABATO' : 'DOMENICA'} ${dateStr} (riga ${rowIndex}): ${entries.length} entries, ferie: ${isFerie}, malattia: ${isMalattia}`);
+                    const dayOfWeek = dateObj.getDay();
+                    const isSaturday = dayOfWeek === 6;
+                    const isSunday = dayOfWeek === 0;
+                    
+                    // Leggi il valore nella colonna A (giorno)
+                    const dayValue = row.getCell(1).value;
+                    
+                    // Colora SOLO se è sabato/domenica E la riga ha dati (colonna A non è vuota)
+                    if ((isSaturday || isSunday) && dayValue) {
+                        console.log(`🎨 Colorando ${isSaturday ? 'SABATO' : 'DOMENICA'} ${dateStr} (riga ${rowIndex})`);
                         const grayColor = 'FFE8E8E8'; // Grigio chiaro
                         
                         // Colora A-H
