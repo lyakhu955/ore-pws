@@ -11643,39 +11643,30 @@
                     }
                 }
                 
-                // --- COLORAZIONE WEEKEND: Grigio chiaro per sabato e domenica ---
-                const weekendFill = {
-                    type: 'pattern',
-                    pattern: 'solid',
-                    fgColor: { argb: 'FFD9D9D9' },
-                    bgColor: { argb: 'FFD9D9D9' }
-                };
-                const whiteFill = {
-                    type: 'pattern',
-                    pattern: 'solid',
-                    fgColor: { argb: 'FFFFFFFF' },
-                    bgColor: { argb: 'FFFFFFFF' }
-                };
-                
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const dateObj = new Date(year, month - 1, day);
-                    const dayOfWeek = dateObj.getDay();
-                    const rowIndex = 4 + day;
-                    const row = worksheet.getRow(rowIndex);
+                // === PASSAGGIO SEPARATO: COLORAZIONE WEEKEND ===
+                // Legge colonna A di ogni riga da 5 a 35 per trovare "Sabato" o "Domenica"
+                // e colora SOLO quelle righe in grigio chiaro
+                console.log('🎨 Inizio passaggio separato colorazione weekend...');
+                for (let rowNum = 5; rowNum <= 35; rowNum++) {
+                    const row = worksheet.getRow(rowNum);
+                    const cellAValue = (row.getCell(1).value || '').toString().toLowerCase();
+                    const isWeekendRow = cellAValue.startsWith('sabato') || cellAValue.startsWith('domenica');
                     
-                    // Prima forza bianco su tutte le celle
-                    for (let col = 1; col <= 22; col++) {
-                        row.getCell(col).fill = whiteFill;
-                    }
-                    
-                    // Poi sovrascrivi con grigio solo per weekend
-                    if (dayOfWeek === 0 || dayOfWeek === 6) {
-                        for (let col = 1; col <= 22; col++) {
-                            row.getCell(col).fill = weekendFill;
-                        }
-                        console.log(`🔘 Riga ${rowIndex} (giorno ${day}): weekend → grigio chiaro`);
+                    if (isWeekendRow) {
+                        console.log(`🔘 Riga ${rowNum}: "${cellAValue.substring(0, 20)}" → GRIGIO`);
+                        row.eachCell({ includeEmpty: true }, function(cell, colNumber) {
+                            if (colNumber >= 1 && colNumber <= 22) {
+                                cell.fill = {
+                                    type: 'pattern',
+                                    pattern: 'solid',
+                                    fgColor: { argb: 'FFD9D9D9' },
+                                    bgColor: { argb: 'FFD9D9D9' }
+                                };
+                            }
+                        });
                     }
                 }
+                console.log('✅ Colorazione weekend completata');
                 
                 // Genera il buffer e scarica
                 const buffer = await workbook.xlsx.writeBuffer();
