@@ -11644,33 +11644,22 @@
                 }
                 
                 // === PASSAGGIO SEPARATO: COLORAZIONE WEEKEND ===
-                // Scorre le righe da 5 a 35 e colora SOLO sabato e domenica in grigio
-                // Forza bianco su tutti i giorni feriali
-                console.log('🎨 Inizio passaggio separato colorazione weekend...');
-                const grigioFill = {
-                    type: 'pattern',
-                    pattern: 'solid',
-                    fgColor: { argb: 'FFD9D9D9' },
-                    bgColor: { argb: 'FFD9D9D9' }
-                };
-                const biancoFill = {
-                    type: 'pattern',
-                    pattern: 'solid',
-                    fgColor: { argb: 'FFFFFFFF' },
-                    bgColor: { argb: 'FFFFFFFF' }
-                };
+                // Colora SOLO le righe di sabato e domenica in grigio chiaro
+                // Non tocca i giorni feriali (li lascia come nel template)
+                console.log('🎨 Inizio colorazione weekend...');
                 for (let rowNum = 5; rowNum <= 35; rowNum++) {
-                    const cellA = worksheet.getRow(rowNum).getCell(1);
-                    const cellAText = (cellA.value || '').toString().toLowerCase().trim();
-                    const isSab = cellAText.startsWith('sabato');
-                    const isDom = cellAText.startsWith('domenica');
-                    
-                    const fillToApply = (isSab || isDom) ? grigioFill : biancoFill;
-                    for (let c = 1; c <= 22; c++) {
-                        worksheet.getRow(rowNum).getCell(c).fill = fillToApply;
-                    }
-                    if (isSab || isDom) {
-                        console.log(`🔘 Riga ${rowNum}: weekend → GRIGIO`);
+                    const cellAText = (worksheet.getRow(rowNum).getCell(1).value || '').toString().toLowerCase().trim();
+                    if (cellAText.startsWith('sabato') || cellAText.startsWith('domenica')) {
+                        for (let c = 1; c <= 22; c++) {
+                            const cell = worksheet.getRow(rowNum).getCell(c);
+                            cell.fill = {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: 'FFD9D9D9' },
+                                bgColor: { argb: 'FFD9D9D9' }
+                            };
+                        }
+                        console.log(`🔘 Riga ${rowNum}: "${cellAText.substring(0, 15)}" → GRIGIO`);
                     }
                 }
                 console.log('✅ Colorazione weekend completata');
