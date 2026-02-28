@@ -10676,12 +10676,11 @@
             // Inizializziamo il toggle per la sezione dei file Excel
             initExcelFilesToggle();
              const monthSelect = document.getElementById('exportMonthSelect');
-             const exportExcelBtn = document.getElementById('exportMonthlyExcel');
-              const reportContent = document.getElementById('monthlyReportContent');
-              const reportSection = document.getElementById('monthly-report-section');
+             const reportContent = document.getElementById('monthlyReportContent');
+             const reportSection = document.getElementById('monthly-report-section');
 
               // Check if elements exist
-              if (!monthSelect || !exportExcelBtn || !reportContent || !reportSection) {
+              if (!monthSelect || !reportContent || !reportSection) {
                    console.warn("Elementi del report mensile non trovati. Skip inizializzazione.");
                   return;
               }
@@ -10698,15 +10697,14 @@
 
              // Remove previous listeners before adding new ones to prevent duplicates
              monthSelect.replaceWith(monthSelect.cloneNode(true)); // Clone to remove listeners
-             exportExcelBtn.replaceWith(exportExcelBtn.cloneNode(true));
              const exportPdfBtn = document.getElementById('exportMonthlyPdf');
              if (exportPdfBtn) {
                  exportPdfBtn.replaceWith(exportPdfBtn.cloneNode(true));
              }
 
-             const exportExcelNewBtn = document.getElementById('exportMonthlyExcelNew');
-             if (exportExcelNewBtn) {
-                 exportExcelNewBtn.replaceWith(exportExcelNewBtn.cloneNode(true));
+             const exportTemplateBtn = document.getElementById('exportMonthlyExcelTemplate');
+             if (exportTemplateBtn) {
+                 exportTemplateBtn.replaceWith(exportTemplateBtn.cloneNode(true));
              }
 
              // Re-acquire elements after cloning
