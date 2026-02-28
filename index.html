@@ -11649,16 +11649,25 @@
                     pattern: 'solid',
                     fgColor: { argb: 'FFD9D9D9' } // Grigio chiaro
                 };
+                const noFill = {
+                    type: 'pattern',
+                    pattern: 'none'
+                };
                 for (let day = 1; day <= daysInMonth; day++) {
                     const dateObj = new Date(year, month - 1, day);
                     const dayOfWeek = dateObj.getDay();
+                    const rowIndex = 4 + day;
+                    const row = worksheet.getRow(rowIndex);
                     if (dayOfWeek === 0 || dayOfWeek === 6) { // Domenica o Sabato
-                        const rowIndex = 4 + day;
-                        const row = worksheet.getRow(rowIndex);
                         for (let col = 1; col <= 22; col++) { // A(1) fino a V(22)
                             row.getCell(col).fill = weekendFill;
                         }
-                        console.log(`🔘 Riga ${rowIndex} (giorno ${day}): weekend → grigio chiaro A-V`);
+                        console.log(`🔘 Riga ${rowIndex} (giorno ${day}): weekend → grigio chiaro`);
+                    } else {
+                        // Feriale: rimuovi eventuale fill ereditato dal template
+                        for (let col = 1; col <= 22; col++) {
+                            row.getCell(col).fill = noFill;
+                        }
                     }
                 }
                 
