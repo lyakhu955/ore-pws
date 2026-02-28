@@ -5931,12 +5931,6 @@
                             <div class="month-selector">
                                 <select id="exportMonthSelect"></select>
                             </div>
-                            <button id="exportMonthlyExcel" class="export-btn excel-btn">
-                                <span class="material-symbols-outlined">download_for_offline</span> Esporta Excel
-                            </button>
-                            <button id="exportMonthlyExcelNew" class="export-btn excel-btn" style="background-color: #4CAF50;">
-                                <span class="material-symbols-outlined">download_for_offline</span> Esporta Excel (Nuovo)
-                            </button>
                             <button id="exportMonthlyExcelTemplate" class="export-btn excel-btn" style="background-color: #FF9800;">
                                 <span class="material-symbols-outlined">download_for_offline</span> Esporta da Template
                             </button>
@@ -10717,8 +10711,6 @@
 
              // Re-acquire elements after cloning
              const newMonthSelect = document.getElementById('exportMonthSelect');
-             const newExportExcelBtn = document.getElementById('exportMonthlyExcel');
-             const newExportExcelNewBtn = document.getElementById('exportMonthlyExcelNew');
              const newExportExcelTemplateBtn = document.getElementById('exportMonthlyExcelTemplate');
              const newExportPdfBtn = document.getElementById('exportMonthlyPdf');
              const newReportContent = document.getElementById('monthlyReportContent'); // Content div doesn't need cloning
@@ -10727,16 +10719,6 @@
              newMonthSelect.addEventListener('change', () => {
                  console.log(`Selezione mese cambiata a: ${newMonthSelect.value}`);
                  displayMonthlyReport(newMonthSelect.value, newReportContent);
-             });
-
-             newExportExcelBtn.addEventListener('click', () => {
-                 console.log(`Richiesta esportazione Excel per: ${newMonthSelect.value}`);
-                 exportMonthlyReportToExcel(newMonthSelect.value);
-             });
-
-             newExportExcelNewBtn.addEventListener('click', () => {
-                 console.log(`Richiesta esportazione Excel (NUOVO) per: ${newMonthSelect.value}`);
-                 exportMonthlyReportToExcelNew(newMonthSelect.value);
              });
 
              newExportExcelTemplateBtn.addEventListener('click', () => {
@@ -11438,7 +11420,25 @@
             return bytes.buffer;
         }
 
-        function exportMonthlyReportToExcel(yearMonth) {
+        // Helper function per convertire time string in formato Excel
+        function parseTimeToExcel(timeStr) {
+            if (!timeStr) return null;
+
+            // Se è già un numero (ore decimali)
+            if (!isNaN(timeStr) && timeStr !== "") {
+                const hours = parseFloat(timeStr);
+                // Converti in minuti per il formato Excel time
+                return new Date(1900, 0, 1, Math.floor(hours), Math.round((hours % 1) * 60), 0);
+            }
+
+            // Se è nel formato HH:MM
+            if (timeStr.includes(':')) {
+                const [hours, minutes] = timeStr.split(':').map(Number);
+                return new Date(1900, 0, 1, hours, minutes, 0);
+            }
+
+            return null;
+        }
             console.log(`Inizio esportazione Excel per ${yearMonth}...`);
             if (!yearMonth) {
                 showToast("Seleziona un mese da esportare.", "warning");
@@ -12905,26 +12905,6 @@
                 console.error("Errore durante la generazione del report Excel NUOVO:", error);
                 showToast("Errore durante la generazione del report Excel: " + error.message, "error");
             }
-        }
-
-        // Helper function per convertire time string in formato Excel
-        function parseTimeToExcel(timeStr) {
-            if (!timeStr) return null;
-
-            // Se è già un numero (ore decimali)
-            if (!isNaN(timeStr) && timeStr !== "") {
-                const hours = parseFloat(timeStr);
-                // Converti in minuti per il formato Excel time
-                return new Date(1900, 0, 1, Math.floor(hours), Math.round((hours % 1) * 60), 0);
-            }
-
-            // Se è nel formato HH:MM
-            if (timeStr.includes(':')) {
-                const [hours, minutes] = timeStr.split(':').map(Number);
-                return new Date(1900, 0, 1, hours, minutes, 0);
-            }
-
-            return null;
         }
 
         // Funzione per esportare da template
