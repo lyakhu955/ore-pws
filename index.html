@@ -12958,8 +12958,10 @@
                 console.log(`📆 Giorni nel mese: ${daysInMonth}`);
                 
                 for (let day = 1; day <= daysInMonth; day++) {
-                    const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                     const dateObj = new Date(year, month - 1, day);
+                    
+                    // Formato corretto per cercare nel DB: DD/MM/YYYY
+                    const dateStr = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
                     
                     // Calcola la riga (righe da 6 a 36)
                     const rowIndex = 5 + day; // riga 6 per day 1, riga 7 per day 2, ecc.
