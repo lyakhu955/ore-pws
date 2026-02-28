@@ -5934,6 +5934,12 @@
                             <button id="exportMonthlyExcel" class="export-btn excel-btn">
                                 <span class="material-symbols-outlined">download_for_offline</span> Esporta Excel
                             </button>
+                            <button id="exportMonthlyExcelNew" class="export-btn excel-btn" style="background-color: #4CAF50;">
+                                <span class="material-symbols-outlined">download_for_offline</span> Esporta Excel (Nuovo)
+                            </button>
+                            <button id="exportMonthlyExcelTemplate" class="export-btn excel-btn" style="background-color: #FF9800;">
+                                <span class="material-symbols-outlined">download_for_offline</span> Esporta da Template
+                            </button>
                             <button id="exportMonthlyPdf" class="export-btn pdf-btn">
                                 <span class="material-symbols-outlined">picture_as_pdf</span> Converti PDF
                             </button>
@@ -10704,9 +10710,16 @@
                  exportPdfBtn.replaceWith(exportPdfBtn.cloneNode(true));
              }
 
+             const exportExcelNewBtn = document.getElementById('exportMonthlyExcelNew');
+             if (exportExcelNewBtn) {
+                 exportExcelNewBtn.replaceWith(exportExcelNewBtn.cloneNode(true));
+             }
+
              // Re-acquire elements after cloning
              const newMonthSelect = document.getElementById('exportMonthSelect');
              const newExportExcelBtn = document.getElementById('exportMonthlyExcel');
+             const newExportExcelNewBtn = document.getElementById('exportMonthlyExcelNew');
+             const newExportExcelTemplateBtn = document.getElementById('exportMonthlyExcelTemplate');
              const newExportPdfBtn = document.getElementById('exportMonthlyPdf');
              const newReportContent = document.getElementById('monthlyReportContent'); // Content div doesn't need cloning
 
@@ -10719,6 +10732,16 @@
              newExportExcelBtn.addEventListener('click', () => {
                  console.log(`Richiesta esportazione Excel per: ${newMonthSelect.value}`);
                  exportMonthlyReportToExcel(newMonthSelect.value);
+             });
+
+             newExportExcelNewBtn.addEventListener('click', () => {
+                 console.log(`Richiesta esportazione Excel (NUOVO) per: ${newMonthSelect.value}`);
+                 exportMonthlyReportToExcelNew(newMonthSelect.value);
+             });
+
+             newExportExcelTemplateBtn.addEventListener('click', () => {
+                 console.log(`Richiesta esportazione Excel da Template per: ${newMonthSelect.value}`);
+                 exportMonthlyReportFromTemplate(newMonthSelect.value);
              });
 
              newExportPdfBtn.addEventListener('click', () => {
@@ -12586,6 +12609,493 @@
             }
         }
 
+        // --- NEW EXCEL EXPORT FUNCTION (A3 LANDSCAPE WITH 35 COLUMNS) ---
+
+        async function exportMonthlyReportToExcelNew(yearMonth) {
+            console.log(`Inizio esportazione Excel NUOVO per ${yearMonth}...`);
+            if (!yearMonth) {
+                showToast("Seleziona un mese da esportare.", "warning");
+                return;
+            }
+            if (typeof ExcelJS === 'undefined') {
+                showToast("Libreria per export Excel non caricata.", "error");
+                console.error("Libreria ExcelJS non trovata.");
+                return;
+            }
+
+            try {
+                const workbook = new ExcelJS.Workbook();
+                const worksheet = workbook.addWorksheet("Foglio1");
+
+                // --------------------------------------------------
+                // IMPOSTAZIONI STAMPA A3 ORIZZONTALE PROFESSIONALI
+                // --------------------------------------------------
+                worksheet.pageSetup = {
+                    paperSize: 8,                // 8 = A3
+                    orientation: 'landscape',
+                    fitToPage: true,
+                    fitToWidth: 1,
+                    fitToHeight: 0,
+                    horizontalCentered: true,
+                    verticalCentered: false,
+                    margins: {
+                        left: 0.4,
+                        right: 0.4,
+                        top: 0.4,
+                        bottom: 0.4,
+                        header: 0.3,
+                        footer: 0.3
+                    }
+                };
+
+                worksheet.views = [{
+                    state: 'frozen',
+                    ySplit: 3
+                }];
+
+                // --------------------------------------------------
+                // DEFINIZIONE 35 COLONNE (PROPORZIONATE PER A3)
+                // --------------------------------------------------
+
+                worksheet.columns = [
+                    { width: 14 }, // A DATA
+                    { width: 10 }, // B INIZIO
+                    { width: 8 },  // C PAUSA
+                    { width: 10 }, // D FINE
+                    { width: 12 }, // E TOTALE
+                    { width: 6 },  // F PWS
+                    { width: 10 }, { width: 10 }, { width: 10 }, { width: 10 },
+                    { width: 10 }, { width: 10 }, { width: 10 }, { width: 10 },
+                    { width: 10 }, { width: 10 }, { width: 10 }, { width: 10 },
+                    { width: 10 }, { width: 10 }, { width: 10 }, { width: 10 },
+                    { width: 10 }, { width: 10 }, { width: 10 }, { width: 10 },
+                    { width: 10 }, { width: 10 }, { width: 10 }, { width: 10 },
+                    { width: 10 }, { width: 10 }, { width: 10 }, { width: 10 },
+                    { width: 10 }
+                ];
+
+                // --------------------------------------------------
+                // TITOLO
+                // --------------------------------------------------
+
+                worksheet.mergeCells("A1:AI1");
+                const title = worksheet.getCell("A1");
+                title.value = "FAC SIMILE ORE MESE";
+                title.font = { bold: true, size: 16 };
+                title.alignment = { horizontal: "center", vertical: "middle" };
+                worksheet.getRow(1).height = 28;
+
+                // --------------------------------------------------
+                // MACRO CATEGORIE
+                // --------------------------------------------------
+
+                worksheet.mergeCells("A2:E2");
+                worksheet.getCell("A2").value = "DATA";
+
+                worksheet.mergeCells("F2:F3");
+                worksheet.getCell("F2").value = "PWS SEDE";
+
+                worksheet.mergeCells("G2:L2");
+                worksheet.getCell("G2").value = "ALTRE LOCALITÀ LAVORI";
+
+                worksheet.mergeCells("M2:R2");
+                worksheet.getCell("M2").value = "ORE ORDINARIE";
+
+                worksheet.mergeCells("S2:AI2");
+                worksheet.getCell("S2").value = "TRATTAMENTI AGGIUNTIVI DIFFERENZIATI";
+
+                // --------------------------------------------------
+                // SOTTO HEADER
+                // --------------------------------------------------
+
+                const headers = [
+                    "Data","Inizio","Pausa","Fine","Totale",
+                    "X",
+                    "Trasferta1","Trasferta2","Trasferta3","Trasferta4","Trasferta5","Trasferta6",
+                    "Ordinario","Straordinario","Notturno","Festivo","Altro1","Altro2",
+                    "TA1","TA2","TA3","TA4","TA5","TA6","TA7","TA8","TA9","TA10",
+                    "TA11","TA12","TA13","TA14","TA15","TA16","TA17"
+                ];
+
+                worksheet.getRow(3).values = headers;
+
+                // --------------------------------------------------
+                // STILE HEADER PROFESSIONALE
+                // --------------------------------------------------
+
+                [2,3].forEach(r => {
+                    const row = worksheet.getRow(r);
+                    row.height = 24;
+                    row.font = { bold: true };
+                    row.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+
+                    row.eachCell({ includeEmpty: true }, cell => {
+                        cell.fill = {
+                            type: "pattern",
+                            pattern: "solid",
+                            fgColor: { argb: "FFD9D9D9" }
+                        };
+                        cell.border = {
+                            top: { style: "thin" },
+                            left: { style: "thin" },
+                            bottom: { style: "thin" },
+                            right: { style: "thin" }
+                        };
+                    });
+                });
+
+                // --------------------------------------------------
+                // GENERAZIONE GIORNI E POPOLAZIONE DATI
+                // --------------------------------------------------
+
+                const [year, month] = yearMonth.split("-");
+                const daysInMonth = new Date(year, month, 0).getDate();
+                const db = getDb();
+
+                for (let day = 1; day <= daysInMonth; day++) {
+
+                    const rowIndex = day + 3;
+                    const row = worksheet.getRow(rowIndex);
+                    row.height = 20;
+
+                    const dateValue = new Date(year, month - 1, day);
+                    const dateStr = formatDateForInput(dateValue);
+
+                    // COLONNA A: DATA
+                    row.getCell(1).value = dateValue;
+                    row.getCell(1).numFmt = "yyyy-mm-dd";
+
+                    // COLONNE B, D: ORARI (formato tempo)
+                    row.getCell(2).numFmt = "hh:mm";
+                    row.getCell(4).numFmt = "hh:mm";
+
+                    // COLONNA E: FORMULA TOTALE
+                    row.getCell(5).value = {
+                        formula: `(D${rowIndex}-B${rowIndex})-C${rowIndex}`
+                    };
+                    row.getCell(5).numFmt = "[h]:mm";
+
+                    // POPOLA DATI DA DB
+                    if (db.entries && db.entries[dateStr] && db.entries[dateStr].length > 0) {
+                        const entries = db.entries[dateStr];
+                        const firstEntry = entries[0];
+
+                        // Colonna B: INIZIO
+                        if (firstEntry.startTime) {
+                            row.getCell(2).value = parseTimeToExcel(firstEntry.startTime);
+                        }
+
+                        // Colonna C: PAUSA
+                        if (firstEntry.breakTime) {
+                            row.getCell(3).value = firstEntry.breakTime;
+                        }
+
+                        // Colonna D: FINE
+                        if (firstEntry.endTime) {
+                            row.getCell(4).value = parseTimeToExcel(firstEntry.endTime);
+                        }
+
+                        // Colonna E: TOTALE (dalla formula)
+                        // La formula calcola automaticamente
+
+                        // COLONNA F: PWS (marcatore)
+                        row.getCell(6).value = ""; // Vuoto per ora
+
+                        // COLONNE G-L: TRASFERTA (colonne 7-12)
+                        // COLONNE M-R: ORE ORDINARIE (colonne 13-18)
+                        // COLONNE S-AI: TRATTAMENTI AGGIUNTIVI (colonne 19-35)
+
+                        // Popola descrizione lavori nelle colonne disponibili
+                        if (firstEntry.description) {
+                            const descriptions = firstEntry.description
+                                .split(/[,.\-\/:]+|\n+/)
+                                .map(d => d.trim())
+                                .filter(d => d.length > 0);
+
+                            // Distribuisci descrizioni nelle colonne di trasferta (G-L: 7-12)
+                            for (let i = 0; i < Math.min(descriptions.length, 6); i++) {
+                                row.getCell(7 + i).value = descriptions[i];
+                            }
+                        }
+
+                        // Popola trasferta se presente
+                        if (firstEntry.transferta) {
+                            row.getCell(7).value = "TRASFERTA";
+                        }
+
+                        // Popola notturne se presente
+                        if (firstEntry.notturne && firstEntry.notturne > 0) {
+                            row.getCell(15).value = firstEntry.notturne;
+                        }
+                    }
+
+                    // STILE RIGHE DATI
+                    row.eachCell({ includeEmpty: true }, cell => {
+                        cell.border = {
+                            top: { style: "thin" },
+                            left: { style: "thin" },
+                            bottom: { style: "thin" },
+                            right: { style: "thin" }
+                        };
+                        cell.alignment = { horizontal: "center", vertical: "middle" };
+                    });
+
+                    // COLORA WEEKEND DI GRIGIO
+                    if (dateValue.getDay() === 0 || dateValue.getDay() === 6) {
+                        row.eachCell({ includeEmpty: true }, cell => {
+                            cell.fill = {
+                                type: "pattern",
+                                pattern: "solid",
+                                fgColor: { argb: "FFE8E8E8" }
+                            };
+                        });
+                    }
+                }
+
+                // --------------------------------------------------
+                // RIGA TOTALI
+                // --------------------------------------------------
+
+                const totalRowIndex = daysInMonth + 4;
+
+                worksheet.mergeCells(`A${totalRowIndex}:D${totalRowIndex}`);
+                worksheet.getCell(`A${totalRowIndex}`).value = "TOTALE ORE DICHIARATE";
+                worksheet.getCell(`A${totalRowIndex}`).font = { bold: true };
+
+                worksheet.getCell(`E${totalRowIndex}`).value = {
+                    formula: `SUM(E4:E${daysInMonth+3})`
+                };
+                worksheet.getCell(`E${totalRowIndex}`).numFmt = "[h]:mm";
+                worksheet.getCell(`E${totalRowIndex}`).font = { bold: true };
+
+                worksheet.getRow(totalRowIndex).eachCell({ includeEmpty: true }, cell => {
+                    cell.border = {
+                        top: { style: "thin" },
+                        left: { style: "thin" },
+                        bottom: { style: "thin" },
+                        right: { style: "thin" }
+                    };
+                    cell.fill = {
+                        type: "pattern",
+                        pattern: "solid",
+                        fgColor: { argb: "FFFFFF99" }
+                    };
+                });
+
+                // --------------------------------------------------
+                // DOWNLOAD FILE
+                // --------------------------------------------------
+
+                const buffer = await workbook.xlsx.writeBuffer();
+
+                const blob = new Blob([buffer], {
+                    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                });
+
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = `FAC_SIMILE_ORE_${yearMonth}_A3.xlsx`;
+                link.click();
+                URL.revokeObjectURL(link.href);
+
+                showToast('Report Excel (NUOVO) generato con successo!', 'success');
+                console.log(`Esportazione Excel completata: FAC_SIMILE_ORE_${yearMonth}_A3.xlsx`);
+
+            } catch (error) {
+                console.error("Errore durante la generazione del report Excel NUOVO:", error);
+                showToast("Errore durante la generazione del report Excel: " + error.message, "error");
+            }
+        }
+
+        // Helper function per convertire time string in formato Excel
+        function parseTimeToExcel(timeStr) {
+            if (!timeStr) return null;
+
+            // Se è già un numero (ore decimali)
+            if (!isNaN(timeStr) && timeStr !== "") {
+                const hours = parseFloat(timeStr);
+                // Converti in minuti per il formato Excel time
+                return new Date(1900, 0, 1, Math.floor(hours), Math.round((hours % 1) * 60), 0);
+            }
+
+            // Se è nel formato HH:MM
+            if (timeStr.includes(':')) {
+                const [hours, minutes] = timeStr.split(':').map(Number);
+                return new Date(1900, 0, 1, hours, minutes, 0);
+            }
+
+            return null;
+        }
+
+        // Funzione per esportare da template
+        async function exportMonthlyReportFromTemplate(yearMonth) {
+            try {
+                console.log(`Iniziando esportazione da template per mese: ${yearMonth}`);
+                
+                const [year, month] = yearMonth.split('-');
+                const db = getDb();
+                
+                // Carica il template
+                const response = await fetch('./templates/template.xlsx');
+                if (!response.ok) {
+                    throw new Error(`Errore nel caricamento del template: ${response.statusText}`);
+                }
+                
+                const arrayBuffer = await response.arrayBuffer();
+                
+                // Leggi il workbook dal template
+                const workbook = new ExcelJS.Workbook();
+                await workbook.xlsx.load(arrayBuffer);
+                
+                const worksheet = workbook.worksheets[0]; // Prendi il primo foglio
+                
+                // Itera tutti i giorni del mese
+                const daysInMonth = new Date(year, month, 0).getDate();
+                
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const dateObj = new Date(year, month - 1, day);
+                    
+                    // Calcola la riga (righe da 6 a 36)
+                    const rowIndex = 5 + day; // riga 6 per day 1, riga 7 per day 2, ecc.
+                    const row = worksheet.getRow(rowIndex);
+                    
+                    // --- COLONNA A: Giorno ---
+                    const dayName = dateObj.toLocaleDateString('it-IT', { weekday: 'long' });
+                    const dayFormatted = dateObj.toLocaleDateString('it-IT', { month: 'long', day: 'numeric', year: 'numeric' });
+                    row.getCell(1).value = `${dayName.charAt(0).toUpperCase() + dayName.slice(1)}, ${dayFormatted}`;
+                    
+                    // Recupera i dati per questo giorno
+                    const entries = db.entries[dateStr] || [];
+                    const holidayInfo = db.holidays ? db.holidays[dateStr] : null;
+                    
+                    // Controlla se è ferie o malattia
+                    const isFerie = holidayInfo?.type === 'ferie';
+                    const isMalattia = holidayInfo?.type === 'malattia';
+                    
+                    // --- COLONNA S: Ferie ---
+                    if (isFerie) {
+                        row.getCell(19).value = 8; // S = 19
+                        continue; // Salta agli altri giorni
+                    }
+                    
+                    // --- COLONNA U: Malattia ---
+                    if (isMalattia) {
+                        row.getCell(21).value = 8; // U = 21
+                        continue; // Salta agli altri giorni
+                    }
+                    
+                    // Se non ci sono entry, salta
+                    if (entries.length === 0) continue;
+                    
+                    // Usa la prima entry del giorno
+                    const firstEntry = entries[0];
+                    
+                    // --- COLONNA B: PWS Sede ---
+                    const description = (firstEntry.description || '').toLowerCase();
+                    const hasPWS = description.includes('pws');
+                    const hasUfficio = description.includes('ufficio');
+                    if (hasPWS || hasUfficio) {
+                        row.getCell(2).value = 'X'; // B = 2
+                    }
+                    
+                    // --- COLONNE C-D: Località Lavori ---
+                    const locations = firstEntry.description
+                        ? firstEntry.description
+                            .split(/[,.\-\/:]+|\n+/)
+                            .map(d => d.trim())
+                            .filter(d => d.length > 0 && !d.toLowerCase().includes('pws') && !d.toLowerCase().includes('ufficio'))
+                        : [];
+                    
+                    if (locations.length > 0) {
+                        row.getCell(3).value = locations[0]; // C = 3
+                    }
+                    if (locations.length > 1) {
+                        row.getCell(4).value = locations.slice(1).join(' -- '); // D = 4
+                    }
+                    
+                    // --- COLONNE E-G: Orari (inizio, pausa, fine) ---
+                    if (firstEntry.startTime) {
+                        row.getCell(5).value = firstEntry.startTime; // E = 5
+                    }
+                    if (firstEntry.breakTime) {
+                        row.getCell(6).value = firstEntry.breakTime; // F = 6
+                    }
+                    if (firstEntry.endTime) {
+                        row.getCell(7).value = firstEntry.endTime; // G = 7
+                    }
+                    
+                    // Calcola le ore totali
+                    let totalHours = firstEntry.totalHours || 0;
+                    
+                    // Controlla il tipo di giorno e le notturne
+                    const dayOfWeek = dateObj.getDay(); // 0 = domenica, 6 = sabato
+                    const isSaturday = dayOfWeek === 6;
+                    const isSunday = dayOfWeek === 0;
+                    const isHoliday = isHolidayDate(dateObj);
+                    
+                    const hasNightHours = firstEntry.notturne && firstEntry.notturne > 0;
+                    const nightHours = hasNightHours ? parseFloat(firstEntry.notturne) : 0;
+                    const hasTransfer = firstEntry.transferta === true || firstEntry.transferta === 'true';
+                    const hasIGPBrescia = hasNightHours && description.includes('igp brescia');
+                    
+                    // --- LOGICA DISTRIBUZIONE ORE ---
+                    if (isFerie || isMalattia) {
+                        // Già gestito sopra
+                    } else if (hasNightHours) {
+                        // Se ha ore notturne, vanno nelle colonne M/N/O/P (non in H)
+                        if (hasIGPBrescia) {
+                            row.getCell(16).value = nightHours; // P = 16
+                        } else if (isSaturday) {
+                            row.getCell(14).value = nightHours; // N = 14
+                        } else if (isSunday || isHoliday) {
+                            row.getCell(15).value = nightHours; // O = 15
+                        } else {
+                            row.getCell(13).value = nightHours; // M = 13
+                        }
+                    } else if (isSaturday) {
+                        // Sabato: ore in colonna K (non in H)
+                        row.getCell(11).value = totalHours; // K = 11
+                    } else if (isSunday || isHoliday) {
+                        // Domenica/Festivo: ore in colonna L (non in H)
+                        row.getCell(12).value = totalHours; // L = 12
+                    } else {
+                        // Feriale ordinario: dividi tra ore ordinarie (H) e straordinari (J)
+                        const ordinaryHours = Math.min(totalHours, 8);
+                        const overtimeHours = Math.max(0, totalHours - 8);
+                        
+                        row.getCell(8).value = ordinaryHours; // H = 8
+                        if (overtimeHours > 0) {
+                            row.getCell(10).value = overtimeHours; // J = 10
+                        }
+                    }
+                    
+                    // --- COLONNA Q: Trasferta ---
+                    if (hasTransfer) {
+                        row.getCell(17).value = 'X'; // Q = 17
+                    }
+                }
+                
+                // Genera il buffer e scarica
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], {
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                });
+                
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `FAC_SIMILE_ORE_${yearMonth}_DA_TEMPLATE.xlsx`;
+                link.click();
+                URL.revokeObjectURL(link.href);
+                
+                showToast('Report Excel da Template generato con successo!', 'success');
+                console.log(`Esportazione da template completata: FAC_SIMILE_ORE_${yearMonth}_DA_TEMPLATE.xlsx`);
+                
+            } catch (error) {
+                console.error('Errore durante la generazione del report da template:', error);
+                showToast('Errore durante la generazione del report da template: ' + error.message, 'error');
+            }
+        }
 
         // --- Cash Functions ---
 
