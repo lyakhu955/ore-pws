@@ -12935,6 +12935,9 @@
                 const [year, month] = yearMonth.split('-');
                 const db = getDb();
                 
+                console.log(`📊 Database entries:`, db.entries);
+                console.log(`📅 Cercando dati per mese: ${year}-${month}`);
+                
                 // Carica il template
                 const response = await fetch('./templates/template.xlsx');
                 if (!response.ok) {
@@ -12948,9 +12951,11 @@
                 await workbook.xlsx.load(arrayBuffer);
                 
                 const worksheet = workbook.worksheets[0]; // Prendi il primo foglio
+                console.log(`📝 Template caricato, foglio: ${worksheet.name}, righe: ${worksheet.rowCount}`);
                 
                 // Itera tutti i giorni del mese
                 const daysInMonth = new Date(year, month, 0).getDate();
+                console.log(`📆 Giorni nel mese: ${daysInMonth}`);
                 
                 for (let day = 1; day <= daysInMonth; day++) {
                     const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -12968,6 +12973,10 @@
                     // Recupera i dati per questo giorno
                     const entries = db.entries[dateStr] || [];
                     const holidayInfo = db.holidays ? db.holidays[dateStr] : null;
+                    
+                    if (entries.length > 0 || holidayInfo) {
+                        console.log(`🗓️ ${dateStr}: ${entries.length} entries, holiday: ${holidayInfo?.type || 'none'}`);
+                    }
                     
                     // Controlla se è ferie o malattia
                     const isFerie = holidayInfo?.type === 'ferie';
