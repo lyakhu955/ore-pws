@@ -11644,26 +11644,26 @@
                 }
                 
                 // === PASSAGGIO SEPARATO: COLORAZIONE WEEKEND ===
-                // Legge colonna A di ogni riga da 5 a 35 per trovare "Sabato" o "Domenica"
-                // e colora SOLO quelle righe in grigio chiaro
+                // Scorre le righe da 5 a 35 e colora SOLO sabato e domenica
                 console.log('🎨 Inizio passaggio separato colorazione weekend...');
+                const grigioFill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FFD9D9D9' },
+                    bgColor: { argb: 'FFD9D9D9' }
+                };
                 for (let rowNum = 5; rowNum <= 35; rowNum++) {
-                    const row = worksheet.getRow(rowNum);
-                    const cellAValue = (row.getCell(1).value || '').toString().toLowerCase();
-                    const isWeekendRow = cellAValue.startsWith('sabato') || cellAValue.startsWith('domenica');
+                    const cellA = worksheet.getRow(rowNum).getCell(1);
+                    const cellAText = (cellA.value || '').toString().toLowerCase().trim();
+                    const isSab = cellAText.startsWith('sabato');
+                    const isDom = cellAText.startsWith('domenica');
+                    console.log(`📋 Riga ${rowNum}: "${cellAText.substring(0, 25)}" → sab:${isSab} dom:${isDom}`);
                     
-                    if (isWeekendRow) {
-                        console.log(`🔘 Riga ${rowNum}: "${cellAValue.substring(0, 20)}" → GRIGIO`);
-                        row.eachCell({ includeEmpty: true }, function(cell, colNumber) {
-                            if (colNumber >= 1 && colNumber <= 22) {
-                                cell.fill = {
-                                    type: 'pattern',
-                                    pattern: 'solid',
-                                    fgColor: { argb: 'FFD9D9D9' },
-                                    bgColor: { argb: 'FFD9D9D9' }
-                                };
-                            }
-                        });
+                    if (isSab || isDom) {
+                        for (let c = 1; c <= 22; c++) {
+                            worksheet.getRow(rowNum).getCell(c).fill = grigioFill;
+                        }
+                        console.log(`🔘 Riga ${rowNum} COLORATA grigio`);
                     }
                 }
                 console.log('✅ Colorazione weekend completata');
