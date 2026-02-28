@@ -12667,6 +12667,19 @@ if (isIOS) {
 
                      // Update the totalHours field, formatted to one decimal place
                      totalHoursInput.value = totalHours.toFixed(1);
+
+                     // === AUTO-RICONOSCIMENTO ORE NOTTURNE ===
+                     // Se inizio >= 17, tutte le ore sono notturne
+                     const notturneInput = document.getElementById('notturne');
+                     if (notturneInput && start >= 17 && totalHours > 0) {
+                         notturneInput.value = totalHours.toFixed(1);
+                         console.log(`🌙 Ore notturne auto: inizio ${start} → ${totalHours.toFixed(1)}h`);
+                     } else if (notturneInput && start < 17) {
+                         // Se inizio < 17, azzera le notturne (solo se erano state auto-compilate)
+                         if (parseFloat(notturneInput.value) > 0 && !notturneInput.dataset.manuallySet) {
+                             notturneInput.value = '';
+                         }
+                     }
                  } else {
                      // If start or end time is not a valid number, clear the total
                      totalHoursInput.value = '';
