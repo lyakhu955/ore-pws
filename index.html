@@ -11574,8 +11574,7 @@
                     // Calcola le ore totali
                     let totalHours = firstEntry.totalHours || 0;
                     
-                    // Controlla il tipo di giorno e le notturne
-                    const dayOfWeek = dateObj.getDay(); // 0 = domenica, 6 = sabato
+                    // Usa il dayOfWeek già salvato (no redichiaro!)
                     const isSaturday = dayOfWeek === 6;
                     const isSunday = dayOfWeek === 0;
                     const isHoliday = isHolidayDate(dateObj);
