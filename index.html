@@ -11477,12 +11477,12 @@
                     
                     const dayOfWeek = dateObj.getDay(); // 0 = domenica, 6 = sabato
                     
+                    // Formato corretto per cercare nel DB: DD/MM/YYYY
+                    const dateStr = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
+                    
                     // Calcola la riga (righe da 6 a 36)
                     const rowIndex = 5 + day; // riga 6 per day 1, riga 7 per day 2, ecc.
                     const row = worksheet.getRow(rowIndex);
-
-                    // Formato corretto per cercare nel DB: DD/MM/YYYY
-                    const dateStr = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
                     
                     // --- COLONNA A: Giorno ---
                     const dayName = dateObj.toLocaleDateString('it-IT', { weekday: 'long' });
@@ -11600,52 +11600,6 @@
                     // --- COLONNA Q: Trasferta ---
                     if (hasTransfer) {
                         row.getCell(17).value = 'X'; // Q = 17
-                    }
-                }
-
-                // --- SECONDO PASSAGGIO: Colora righe weekend leggendo colonna A ---
-                // Prima salva il fill originale del template per ogni cella
-                // poi applica il grigio SOLO a sabato/domenica
-                const weekendFill = {
-                    type: 'pattern',
-                    pattern: 'solid',
-                    fgColor: { argb: 'FFD9D9D9' }
-                };
-                const weekendCols = [
-                    1, 2, 3, 4, 5, 6, 7, 8, // A-H
-                    10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22 // J-V
-                ];
-                // Salva i fill originali del template PRIMA di modificare
-                const originalFills = {};
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const ri = 5 + day;
-                    originalFills[ri] = {};
-                    const r = worksheet.getRow(ri);
-                    weekendCols.forEach(col => {
-                        const cell = r.getCell(col);
-                        if (cell.fill && cell.fill.type) {
-                            originalFills[ri][col] = JSON.parse(JSON.stringify(cell.fill));
-                        }
-                    });
-                }
-                // Applica grigio solo a sabato/domenica, ripristina originale per gli altri
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const ri = 5 + day;
-                    const r = worksheet.getRow(ri);
-                    const cellAValue = (r.getCell(1).value || '').toString().toLowerCase();
-                    const isSabDom = cellAValue.startsWith('sabato') || cellAValue.startsWith('domenica');
-                    console.log(`🔍 Riga ${ri}: "${cellAValue.substring(0,20)}" => weekend: ${isSabDom}`);
-                    if (isSabDom) {
-                        weekendCols.forEach(col => {
-                            r.getCell(col).fill = weekendFill;
-                        });
-                    } else {
-                        // Ripristina fill originale del template
-                        weekendCols.forEach(col => {
-                            if (originalFills[ri][col]) {
-                                r.getCell(col).fill = originalFills[ri][col];
-                            }
-                        });
                     }
                 }
                 
