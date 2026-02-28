@@ -11687,12 +11687,13 @@
                 
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
-                link.download = `FAC_SIMILE_ORE_${yearMonth}_DA_TEMPLATE.xlsx`;
+                const nomeFile = `${userName}-${meseAnnoLabel.replace(' ', '-')}.xlsx`;
+                link.download = nomeFile;
                 link.click();
                 URL.revokeObjectURL(link.href);
                 
                 showToast('Report Excel da Template generato con successo!', 'success');
-                console.log(`Esportazione da template completata: FAC_SIMILE_ORE_${yearMonth}_DA_TEMPLATE.xlsx`);
+                console.log(`Esportazione da template completata: ${nomeFile}`);
                 
             } catch (error) {
                 console.error('Errore durante la generazione del report da template:', error);
