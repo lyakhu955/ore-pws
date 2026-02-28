@@ -11513,6 +11513,17 @@
                         continue; // Salta agli altri giorni
                     }
                     
+                    // --- COLONNA V: Festività non lavorativa (rosse nel calendario) ---
+                    // Controlla se è una festività italiana (esclusi weekend normali)
+                    const isFestivitaItaliana = (dayOfWeek !== 0 && dayOfWeek !== 6) && isItalianHoliday(dateObj);
+                    if (isFestivitaItaliana && entries.length === 0) {
+                        // Festività rossa e NON ho lavorato → 8 ore in colonna V
+                        row.getCell(22).value = 8; // V = 22
+                        console.log(`🔴 ${dateStr}: Festività non lavorativa → V=8`);
+                        continue; // Salta agli altri giorni
+                    }
+                    // Se è festività ma HO lavorato, le ore finiranno in colonna L (gestito sotto da isHoliday)
+                    
                     // Se non ci sono entry, salta
                     if (entries.length === 0) continue;
                     
