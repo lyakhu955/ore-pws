@@ -11469,10 +11469,10 @@
                 console.log(`📝 Template caricato, foglio: ${worksheet.name}, righe: ${worksheet.rowCount}`);
                 
                 // --- INTESTAZIONE: Nome utente e Mese/Anno ---
-                const userName = localStorage.getItem('userName') || '';
+                const userName = (localStorage.getItem('userName') || '').toUpperCase();
                 const mesiItaliani = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
                     'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
-                const meseAnnoLabel = `${mesiItaliani[month - 1]} ${year}`;
+                const meseAnnoLabel = `${mesiItaliani[month - 1]} ${year}`.toUpperCase();
                 
                 // Riga 1, colonne A-D: Nome utente
                 worksheet.getRow(1).getCell(1).value = userName; // A1
