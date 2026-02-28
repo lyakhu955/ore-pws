@@ -11472,9 +11472,17 @@
                 console.log(`🧹 Ripulendo formattazione righe 6-36...`);
                 for (let row = 6; row <= 36; row++) {
                     const dataRow = worksheet.getRow(row);
+                    // Pulisci TUTTE le colonne da A a V (1-22)
                     for (let col = 1; col <= 22; col++) {
                         const cell = dataRow.getCell(col);
+                        // Rimuovi colore di sfondo
                         cell.fill = {
+                            type: 'pattern',
+                            pattern: 'none'
+                        };
+                        // Rimuovi anche qualsiasi altro attributo di formattazione che potrebbe contenere colore
+                        cell.style = cell.style || {};
+                        cell.style.fill = {
                             type: 'pattern',
                             pattern: 'none'
                         };
