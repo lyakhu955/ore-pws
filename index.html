@@ -11647,26 +11647,41 @@
                 const weekendFill = {
                     type: 'pattern',
                     pattern: 'solid',
-                    fgColor: { argb: 'FFD9D9D9' } // Grigio chiaro
+                    fgColor: { argb: 'FFD9D9D9' },
+                    bgColor: { argb: 'FFD9D9D9' }
                 };
-                const noFill = {
-                    type: 'pattern',
-                    pattern: 'none'
-                };
+                
+                // Prima salva i fill originali del template
+                const originalFills = {};
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const rowIndex = 4 + day;
+                    const row = worksheet.getRow(rowIndex);
+                    originalFills[rowIndex] = {};
+                    for (let col = 1; col <= 22; col++) {
+                        const cell = row.getCell(col);
+                        if (cell.fill && cell.fill.type) {
+                            originalFills[rowIndex][col] = JSON.parse(JSON.stringify(cell.fill));
+                        }
+                    }
+                }
+                
+                // Applica grigio solo ai weekend, ripristina originale per i feriali
                 for (let day = 1; day <= daysInMonth; day++) {
                     const dateObj = new Date(year, month - 1, day);
                     const dayOfWeek = dateObj.getDay();
                     const rowIndex = 4 + day;
                     const row = worksheet.getRow(rowIndex);
                     if (dayOfWeek === 0 || dayOfWeek === 6) { // Domenica o Sabato
-                        for (let col = 1; col <= 22; col++) { // A(1) fino a V(22)
+                        for (let col = 1; col <= 22; col++) {
                             row.getCell(col).fill = weekendFill;
                         }
                         console.log(`🔘 Riga ${rowIndex} (giorno ${day}): weekend → grigio chiaro`);
                     } else {
-                        // Feriale: rimuovi eventuale fill ereditato dal template
+                        // Feriale: ripristina fill originale del template
                         for (let col = 1; col <= 22; col++) {
-                            row.getCell(col).fill = noFill;
+                            if (originalFills[rowIndex] && originalFills[rowIndex][col]) {
+                                row.getCell(col).fill = originalFills[rowIndex][col];
+                            }
                         }
                     }
                 }
