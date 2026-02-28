@@ -11643,6 +11643,25 @@
                     }
                 }
                 
+                // --- COLORAZIONE WEEKEND: Grigio chiaro per sabato e domenica ---
+                const weekendFill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FFD9D9D9' } // Grigio chiaro
+                };
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateObj = new Date(year, month - 1, day);
+                    const dayOfWeek = dateObj.getDay();
+                    if (dayOfWeek === 0 || dayOfWeek === 6) { // Domenica o Sabato
+                        const rowIndex = 4 + day;
+                        const row = worksheet.getRow(rowIndex);
+                        for (let col = 1; col <= 22; col++) { // A(1) fino a V(22)
+                            row.getCell(col).fill = weekendFill;
+                        }
+                        console.log(`🔘 Riga ${rowIndex} (giorno ${day}): weekend → grigio chiaro A-V`);
+                    }
+                }
+                
                 // Genera il buffer e scarica
                 const buffer = await workbook.xlsx.writeBuffer();
                 const blob = new Blob([buffer], {
