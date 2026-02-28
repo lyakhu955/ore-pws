@@ -11468,6 +11468,35 @@
                 const worksheet = workbook.worksheets[0]; // Prendi il primo foglio
                 console.log(`📝 Template caricato, foglio: ${worksheet.name}, righe: ${worksheet.rowCount}`);
                 
+                // --- INTESTAZIONE: Nome utente e Mese/Anno ---
+                const userName = localStorage.getItem('userName') || '';
+                const mesiItaliani = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
+                    'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+                const meseAnnoLabel = `${mesiItaliani[month - 1]} ${year}`;
+                
+                // Riga 1, colonne A-D: Nome utente
+                worksheet.getRow(1).getCell(1).value = userName; // A1
+                worksheet.getRow(1).getCell(2).value = userName; // B1
+                worksheet.getRow(1).getCell(3).value = userName; // C1
+                worksheet.getRow(1).getCell(4).value = userName; // D1
+                console.log(`👤 Nome utente inserito in A1:D1: "${userName}"`);
+                
+                // Righe 1-10, colonne AI(35)-AV(48): Nome utente
+                for (let r = 1; r <= 10; r++) {
+                    for (let c = 35; c <= 48; c++) {
+                        worksheet.getRow(r).getCell(c).value = userName;
+                    }
+                }
+                console.log(`👤 Nome utente inserito in AI1:AV10: "${userName}"`);
+                
+                // Righe 11-14, colonne AL(38)-AS(45): Mese/Anno
+                for (let r = 11; r <= 14; r++) {
+                    for (let c = 38; c <= 45; c++) {
+                        worksheet.getRow(r).getCell(c).value = meseAnnoLabel;
+                    }
+                }
+                console.log(`📅 Mese/Anno inserito in AL11:AS14: "${meseAnnoLabel}"`);
+                
                 // Itera tutti i giorni del mese
                 const daysInMonth = new Date(year, month, 0).getDate();
                 console.log(`📆 Giorni nel mese: ${daysInMonth}`);
