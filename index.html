@@ -11475,16 +11475,11 @@
                     // Pulisci TUTTE le colonne da A a V (1-22)
                     for (let col = 1; col <= 22; col++) {
                         const cell = dataRow.getCell(col);
-                        // Rimuovi colore di sfondo
+                        // Rimuovi colore di sfondo impostando sfondo bianco
                         cell.fill = {
                             type: 'pattern',
-                            pattern: 'none'
-                        };
-                        // Rimuovi anche qualsiasi altro attributo di formattazione che potrebbe contenere colore
-                        cell.style = cell.style || {};
-                        cell.style.fill = {
-                            type: 'pattern',
-                            pattern: 'none'
+                            pattern: 'solid',
+                            fgColor: { argb: 'FFFFFFFF' }
                         };
                     }
                 }
