@@ -11643,9 +11643,29 @@
                     }
                 }
                 
-                // === TEST DIAGNOSTICO: colorazione weekend RIMOSSA ===
-                // Se l'Excel esce comunque grigio, il problema è nel loop di scrittura valori
-                console.log('🧪 TEST: Nessuna colorazione weekend applicata');
+                // === COLORAZIONE WEEKEND (calcolata dal calendario, senza leggere celle) ===
+                const [cYear, cMonth] = yearMonth.split('-').map(Number);
+                const daysInMonth = new Date(cYear, cMonth, 0).getDate();
+                const weekendRows = [];
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const dow = new Date(cYear, cMonth - 1, d).getDay(); // 0=dom, 6=sab
+                    if (dow === 0 || dow === 6) {
+                        weekendRows.push(4 + d); // riga 5 = giorno 1
+                    }
+                }
+                console.log('🎨 Righe weekend calcolate:', weekendRows);
+                for (const rowNum of weekendRows) {
+                    const wkRow = worksheet.getRow(rowNum);
+                    for (let c = 1; c <= 22; c++) {
+                        wkRow.getCell(c).fill = {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: { argb: 'FFD9D9D9' },
+                            bgColor: { argb: 'FFD9D9D9' }
+                        };
+                    }
+                }
+                console.log('✅ Colorazione weekend completata');
                 
                 // Genera il buffer e scarica
                 const buffer = await workbook.xlsx.writeBuffer();
