@@ -11445,7 +11445,9 @@
             try {
                 console.log(`Iniziando esportazione da template per mese: ${yearMonth}`);
                 
-                const [year, month] = yearMonth.split('-');
+                const [yearStr, monthStr] = yearMonth.split('-');
+                const year = parseInt(yearStr); // Converti a numero
+                const month = parseInt(monthStr); // Converti a numero
                 const db = getDb();
                 
                 console.log(`📊 Database entries:`, db.entries);
