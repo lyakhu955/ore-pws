@@ -13085,6 +13085,31 @@
                     if (hasTransfer) {
                         row.getCell(17).value = 'X'; // Q = 17
                     }
+                    
+                    // --- COLORA SABATO E DOMENICA ---
+                    if (isSaturday || isSunday) {
+                        const grayColor = 'FFE8E8E8'; // Grigio chiaro
+                        
+                        // Colora A-H
+                        for (let col = 1; col <= 8; col++) {
+                            row.getCell(col).fill = {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: grayColor }
+                            };
+                        }
+                        
+                        // Salta I (colonna 9)
+                        
+                        // Colora J-V (colonne 10-22)
+                        for (let col = 10; col <= 22; col++) {
+                            row.getCell(col).fill = {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: grayColor }
+                            };
+                        }
+                    }
                 }
                 
                 // Genera il buffer e scarica
