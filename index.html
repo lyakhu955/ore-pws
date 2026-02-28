@@ -11650,20 +11650,26 @@
                     const dow = new Date(cwYear, cwMonth - 1, d).getDay();
                     if (dow === 0 || dow === 6) {
                         const rowNum = 4 + d;
+                        // Due range separati: A-H e J-V (salta colonna I)
+                        const greyRule = [{
+                            type: 'expression',
+                            formulae: ['TRUE'],
+                            style: {
+                                fill: {
+                                    type: 'pattern',
+                                    pattern: 'solid',
+                                    bgColor: { argb: 'FFD9D9D9' }
+                                }
+                            },
+                            priority: 1
+                        }];
                         worksheet.addConditionalFormatting({
-                            ref: `A${rowNum}:V${rowNum}`,
-                            rules: [{
-                                type: 'expression',
-                                formulae: ['TRUE'],
-                                style: {
-                                    fill: {
-                                        type: 'pattern',
-                                        pattern: 'solid',
-                                        bgColor: { argb: 'FFD9D9D9' }
-                                    }
-                                },
-                                priority: 1
-                            }]
+                            ref: `A${rowNum}:H${rowNum}`,
+                            rules: greyRule
+                        });
+                        worksheet.addConditionalFormatting({
+                            ref: `J${rowNum}:V${rowNum}`,
+                            rules: greyRule
                         });
                         console.log(`🔘 Riga ${rowNum} (giorno ${d}) → GRIGIO condizionale`);
                     }
