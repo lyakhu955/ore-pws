@@ -13103,22 +13103,21 @@
                 // === SECONDO LOOP: COLORA SABATI E DOMENICHE ===
                 console.log(`🎨 Inizio colorazione sabati e domeniche...`);
                 for (let day = 1; day <= daysInMonth; day++) {
-                    const dateObj = new Date(year, month - 1, day);
                     const dateStr = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
                     const rowIndex = 5 + day;
                     const row = worksheet.getRow(rowIndex);
                     
-                    const dayOfWeek = dateObj.getDay();
-                    const isSaturday = dayOfWeek === 6;
-                    const isSunday = dayOfWeek === 0;
+                    // Leggi il valore nella colonna A (giorno) - QUESTO è affidabile!
+                    const dayValue = row.getCell(1).value || '';
+                    const dayValueLower = String(dayValue).toLowerCase();
                     
-                    // Leggi il valore nella colonna A (giorno)
-                    const dayValue = row.getCell(1).value;
+                    // Controlla se il testo contiene "sabato" o "domenica"
+                    const isSaturday = dayValueLower.includes('sabato');
+                    const isSunday = dayValueLower.includes('domenica');
                     
-                    // DEBUG: Mostra cosa legge dalla colonna A
-                    console.log(`🔍 Riga ${rowIndex} (${dateStr}): ${isSaturday ? 'SABATO' : isSunday ? 'DOMENICA' : 'FERIALE'}, dayValue: "${dayValue}"`);
+                    console.log(`🔍 Riga ${rowIndex} (${dateStr}): "${dayValue}" -> ${isSaturday ? 'SABATO' : isSunday ? 'DOMENICA' : 'FERIALE'}`);
                     
-                    // Colora TUTTI i sabati e domeniche (indipendentemente da dayValue)
+                    // Colora SOLO sabati e domeniche (usando il testo della colonna A come riferimento)
                     if (isSaturday || isSunday) {
                         console.log(`🎨 ✅ Colorando ${isSaturday ? 'SABATO' : 'DOMENICA'} ${dateStr} (riga ${rowIndex})`);
                         const grayColor = 'FFE8E8E8'; // Grigio chiaro
