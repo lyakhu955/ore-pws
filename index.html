@@ -11643,26 +11643,24 @@
                     }
                 }
                 
-                // === COLORAZIONE WEEKEND (calcolata dal calendario, senza leggere celle) ===
+                // === COLORAZIONE WEEKEND (accesso diretto per cella, senza getRow) ===
                 const [cwYear, cwMonth] = yearMonth.split('-').map(Number);
                 const totalDaysInMonth = new Date(cwYear, cwMonth, 0).getDate();
-                const weekendRows = [];
+                const colLetters = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V'];
+                const greyFill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FFD9D9D9' },
+                    bgColor: { argb: 'FFD9D9D9' }
+                };
                 for (let d = 1; d <= totalDaysInMonth; d++) {
                     const dow = new Date(cwYear, cwMonth - 1, d).getDay(); // 0=dom, 6=sab
                     if (dow === 0 || dow === 6) {
-                        weekendRows.push(4 + d); // riga 5 = giorno 1
-                    }
-                }
-                console.log('🎨 Righe weekend calcolate:', weekendRows);
-                for (const rowNum of weekendRows) {
-                    const wkRow = worksheet.getRow(rowNum);
-                    for (let c = 1; c <= 22; c++) {
-                        wkRow.getCell(c).fill = {
-                            type: 'pattern',
-                            pattern: 'solid',
-                            fgColor: { argb: 'FFD9D9D9' },
-                            bgColor: { argb: 'FFD9D9D9' }
-                        };
+                        const rowNum = 4 + d;
+                        for (const col of colLetters) {
+                            worksheet.getCell(`${col}${rowNum}`).fill = greyFill;
+                        }
+                        console.log(`🔘 Riga ${rowNum} (giorno ${d}) → GRIGIO`);
                     }
                 }
                 console.log('✅ Colorazione weekend completata');
