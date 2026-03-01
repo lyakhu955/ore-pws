@@ -1853,12 +1853,18 @@
             flex-wrap: wrap; gap: 1rem;
         }
         .section-header h2 { margin: 0; flex-grow: 1; }
-        .section-controls { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
-        .month-selector select { min-width: 150px; }
-        .export-btn.excel-btn { background: var(--neo-bg); color: #1D6F42; box-shadow: var(--neo-out-sm); }
-        .export-btn.excel-btn:hover { box-shadow: var(--neo-out); }
-        .export-btn.pdf-btn { background: var(--neo-bg); color: #D93025; box-shadow: var(--neo-out-sm); }
-        .export-btn.pdf-btn:hover { box-shadow: var(--neo-out); }
+        .section-controls { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; width: 100%; }
+        .month-selector { flex: 1; min-width: 0; }
+        .month-selector select { width: 100%; min-width: 150px; }
+        .export-btn.excel-btn {
+            flex: 1; min-width: 0;
+            background: var(--neo-bg); color: #1D6F42;
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+            padding: 0.7rem 1rem;
+            font-size: 0.95rem; font-weight: 600;
+            border-radius: var(--border-radius-medium);
+        }
+        .export-btn.excel-btn:hover { transform: translateY(-1px); }
         .monthly-report-content { max-height: 60vh; overflow-y: auto; }
         .monthly-report-item {
             padding: 1rem; margin-bottom: 0.5rem;
@@ -3578,11 +3584,8 @@
                             <div class="month-selector">
                                 <select id="exportMonthSelect"></select>
                             </div>
-                            <button id="exportMonthlyExcelTemplate" class="export-btn excel-btn" style="background-color: #FF9800;">
+                            <button id="exportMonthlyExcelTemplate" class="export-btn excel-btn">
                                 <span class="material-symbols-outlined">download_for_offline</span> Genera Excel
-                            </button>
-                            <button id="exportMonthlyPdf" class="export-btn pdf-btn">
-                                <span class="material-symbols-outlined">picture_as_pdf</span> Converti PDF
                             </button>
                         </div>
                     </div>
@@ -8361,10 +8364,6 @@
 
              // Remove previous listeners before adding new ones to prevent duplicates
              monthSelect.replaceWith(monthSelect.cloneNode(true)); // Clone to remove listeners
-             const exportPdfBtn = document.getElementById('exportMonthlyPdf');
-             if (exportPdfBtn) {
-                 exportPdfBtn.replaceWith(exportPdfBtn.cloneNode(true));
-             }
 
              const exportTemplateBtn = document.getElementById('exportMonthlyExcelTemplate');
              if (exportTemplateBtn) {
@@ -8374,8 +8373,7 @@
              // Re-acquire elements after cloning
              const newMonthSelect = document.getElementById('exportMonthSelect');
              const newExportExcelTemplateBtn = document.getElementById('exportMonthlyExcelTemplate');
-             const newExportPdfBtn = document.getElementById('exportMonthlyPdf');
-             const newReportContent = document.getElementById('monthlyReportContent'); // Content div doesn't need cloning
+             const newReportContent = document.getElementById('monthlyReportContent');
 
 
              newMonthSelect.addEventListener('change', () => {
@@ -8386,11 +8384,6 @@
              newExportExcelTemplateBtn.addEventListener('click', () => {
                  console.log(`Richiesta esportazione Excel da Template per: ${newMonthSelect.value}`);
                  exportMonthlyReportFromTemplate(newMonthSelect.value);
-             });
-
-             newExportPdfBtn.addEventListener('click', () => {
-                 console.log(`Richiesta esportazione PDF per: ${newMonthSelect.value}`);
-                 exportMonthlyReportToPdf(newMonthSelect.value);
              });
 
              // Display report for the initially selected (current) month
