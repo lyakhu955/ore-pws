@@ -2987,8 +2987,10 @@
 
                             <div class="form-group">
                                 <label for="transferta">Trasferta:</label>
-                                <button type="button" id="transferta" class="trasferta-button">
+                                <button type="button" id="transferta" class="trasferta-button" role="switch" aria-checked="false">
                                     <span class="material-symbols-outlined">local_shipping</span>
+                                    <span class="switch" aria-hidden="true"><span class="knob"></span></span>
+                                    <span class="trasferta-badge" aria-hidden="true">OFF</span>
                                     <span class="trasferta-text">Seleziona trasferta</span>
                                 </button>
                             </div>
@@ -3645,6 +3647,36 @@
                                 <label for="holidayHourRate">Tariffa Ore Festive (€/h)</label>
                                 <input type="number" id="holidayHourRate" step="0.01" min="0" placeholder="0.00">
                             </div>
+                            <div class="form-group-inline">
+                                <label for="holidayDayRate">Tariffa Giorno Festivo non lavorato (€/giorno)</label>
+                                <input type="number" id="holidayDayRate" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group-inline">
+                                <label for="saturdayHourRate">Tariffa Ore Sabato (€/h)</label>
+                                <input type="number" id="saturdayHourRate" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                            <div class="form-group-inline">
+                                <label for="saturdayNightRate">Tariffa Notturne Sabato (€/h)</label>
+                                <input type="number" id="saturdayNightRate" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group-inline">
+                                <label for="sundayHourRate">Tariffa Ore Domenica (€/h)</label>
+                                <input type="number" id="sundayHourRate" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                            <div class="form-group-inline">
+                                <label for="sundayNightRate">Tariffa Notturne Domenica (€/h)</label>
+                                <input type="number" id="sundayNightRate" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group-inline">
+                                <label for="holidayNightRate">Tariffa Notturne Giorni Festivi (€/h)</label>
+                                <input type="number" id="holidayNightRate" step="0.01" min="0" placeholder="0.00">
+                            </div>
                         </div>
                         <button id="saveRatesBtn" class="btn">
                             <span class="material-symbols-outlined">save</span>
@@ -3669,6 +3701,36 @@
                                 <div class="cash-result-label">Ore Festive</div>
                                 <div class="cash-result-hours" id="holidayHours">0h</div>
                                 <div class="cash-result-amount" id="holidayAmount">€0.00</div>
+                            </div>
+                            <div class="cash-result-item">
+                                <div class="cash-result-label">Giorni Festivi Pagati (8h)</div>
+                                <div class="cash-result-hours" id="paidHolidayDays">0g</div>
+                                <div class="cash-result-amount" id="paidHolidayAmount">€0.00</div>
+                            </div>
+                            <div class="cash-result-item">
+                                <div class="cash-result-label">Ore Sabato</div>
+                                <div class="cash-result-hours" id="saturdayHours">0h</div>
+                                <div class="cash-result-amount" id="saturdayAmount">€0.00</div>
+                            </div>
+                            <div class="cash-result-item">
+                                <div class="cash-result-label">Notturne Sabato</div>
+                                <div class="cash-result-hours" id="saturdayNightHours">0h</div>
+                                <div class="cash-result-amount" id="saturdayNightAmount">€0.00</div>
+                            </div>
+                            <div class="cash-result-item">
+                                <div class="cash-result-label">Ore Domenica</div>
+                                <div class="cash-result-hours" id="sundayHours">0h</div>
+                                <div class="cash-result-amount" id="sundayAmount">€0.00</div>
+                            </div>
+                            <div class="cash-result-item">
+                                <div class="cash-result-label">Notturne Domenica</div>
+                                <div class="cash-result-hours" id="sundayNightHours">0h</div>
+                                <div class="cash-result-amount" id="sundayNightAmount">€0.00</div>
+                            </div>
+                            <div class="cash-result-item">
+                                <div class="cash-result-label">Notturne Festive</div>
+                                <div class="cash-result-hours" id="holidayNightHours">0h</div>
+                                <div class="cash-result-amount" id="holidayNightAmount">€0.00</div>
                             </div>
                             <div class="cash-result-item">
                                 <div class="cash-result-label">Giorni Trasferta</div>
@@ -5157,21 +5219,25 @@
                  });
                  calculateTotalHours(); // Initial calculation
 
-                 // Gestione del pulsante di trasferta
+                 // Gestione del pulsante di trasferta (toggle + aria)
                  const trasfertaButton = document.getElementById('transferta');
                  if (trasfertaButton) {
                      trasfertaButton.addEventListener('click', function() {
                          // Toggle della classe active
                          this.classList.toggle('active');
-                         // Aggiungiamo un attributo data-active per tenere traccia dello stato
+                         // Aggiungiamo un attributo data-active e aria-checked per tenere traccia dello stato
                          const textElement = this.querySelector('.trasferta-text');
+                         const badgeElement = this.querySelector('.trasferta-badge');
+                         const isActive = this.classList.contains('active');
+                         this.setAttribute('data-active', isActive ? 'true' : 'false');
+                         this.setAttribute('aria-checked', isActive ? 'true' : 'false');
 
-                         if (this.classList.contains('active')) {
-                             this.setAttribute('data-active', 'true');
+                         if (isActive) {
                              if (textElement) textElement.textContent = 'Trasferta attiva';
+                             if (badgeElement) badgeElement.textContent = 'ON';
                          } else {
-                             this.setAttribute('data-active', 'false');
                              if (textElement) textElement.textContent = 'Seleziona trasferta';
+                             if (badgeElement) badgeElement.textContent = 'OFF';
                          }
                      });
                  } else {
@@ -5816,22 +5882,29 @@
                      try {
                          const trasfertaButton = form.elements.transferta;
                          const textElement = trasfertaButton ? trasfertaButton.querySelector('.trasferta-text') : null;
+                         const badgeElement = trasfertaButton ? trasfertaButton.querySelector('.trasferta-badge') : null;
 
                          if (trasfertaButton) {
                              if (typeof entryToLoad.transferta === 'boolean' && entryToLoad.transferta) {
                                  // Nuovo formato (boolean)
                                  trasfertaButton.classList.add('active');
                                  trasfertaButton.setAttribute('data-active', 'true');
+                                 trasfertaButton.setAttribute('aria-checked', 'true');
                                  if (textElement) textElement.textContent = 'Trasferta attiva';
+                                 if (badgeElement) badgeElement.textContent = 'ON';
                              } else if (typeof entryToLoad.transferta === 'number' && entryToLoad.transferta > 0) {
                                  // Vecchio formato (numero di ore)
                                  trasfertaButton.classList.add('active');
                                  trasfertaButton.setAttribute('data-active', 'true');
+                                 trasfertaButton.setAttribute('aria-checked', 'true');
                                  if (textElement) textElement.textContent = 'Trasferta attiva';
+                                 if (badgeElement) badgeElement.textContent = 'ON';
                              } else {
                                  trasfertaButton.classList.remove('active');
                                  trasfertaButton.setAttribute('data-active', 'false');
+                                 trasfertaButton.setAttribute('aria-checked', 'false');
                                  if (textElement) textElement.textContent = 'Seleziona trasferta';
+                                 if (badgeElement) badgeElement.textContent = 'OFF';
                              }
                          }
                      } catch (trasfertaError) {
@@ -5955,21 +6028,28 @@
                  // Gestione del pulsante di trasferta
                  const trasfertaButton = form.elements.transferta;
                  const textElement = trasfertaButton.querySelector('.trasferta-text');
+                 const badgeElement = trasfertaButton.querySelector('.trasferta-badge');
 
-                 if (typeof entry.transferta === 'boolean' && entry.transferta) {
+                     if (typeof entry.transferta === 'boolean' && entry.transferta) {
                      // Nuovo formato (boolean)
                      trasfertaButton.classList.add('active');
                      trasfertaButton.setAttribute('data-active', 'true');
-                     if (textElement) textElement.textContent = 'Trasferta attiva';
+                     trasfertaButton.setAttribute('aria-checked', 'true');
+                         if (textElement) textElement.textContent = 'Trasferta attiva';
+                         if (badgeElement) badgeElement.textContent = 'ON';
                  } else if (typeof entry.transferta === 'number' && entry.transferta > 0) {
                      // Vecchio formato (numero di ore)
                      trasfertaButton.classList.add('active');
                      trasfertaButton.setAttribute('data-active', 'true');
-                     if (textElement) textElement.textContent = 'Trasferta attiva';
+                     trasfertaButton.setAttribute('aria-checked', 'true');
+                         if (textElement) textElement.textContent = 'Trasferta attiva';
+                         if (badgeElement) badgeElement.textContent = 'ON';
                  } else {
                      trasfertaButton.classList.remove('active');
                      trasfertaButton.setAttribute('data-active', 'false');
-                     if (textElement) textElement.textContent = 'Seleziona trasferta';
+                     trasfertaButton.setAttribute('aria-checked', 'false');
+                         if (textElement) textElement.textContent = 'Seleziona trasferta';
+                         if (badgeElement) badgeElement.textContent = 'OFF';
                  }
 
                  form.elements.description.value = entry.description || '';
@@ -6070,8 +6150,11 @@
              if (trasfertaButton) {
                  trasfertaButton.classList.remove('active');
                  trasfertaButton.setAttribute('data-active', 'false');
+                 trasfertaButton.setAttribute('aria-checked', 'false');
                  const textElement = trasfertaButton.querySelector('.trasferta-text');
+                 const badgeElement = trasfertaButton.querySelector('.trasferta-badge');
                  if (textElement) textElement.textContent = 'Seleziona trasferta';
+                 if (badgeElement) badgeElement.textContent = 'OFF';
              }
 
              // Reset delle righe di lavoro multiple
@@ -7128,6 +7211,12 @@
                          rawStartTime = '00';
                      }
 
+                     // Get vehicle name for this entry (if any)
+                     let vehicleName = '';
+                     if (typeof getVehicleNameById === 'function') {
+                         try { vehicleName = getVehicleNameById(entry.vehicle); } catch (e) { console.warn('Errore getVehicleNameById', e); }
+                     }
+
                      // Function to format raw time (string number, decimal, or HH:MM) into HH:MM
                      const formatToHHMM = (rawTime) => {
                          if (String(rawTime).match(/^\d{1,2}:\d{2}$/)) {
@@ -7169,7 +7258,9 @@
                      totalTransferta += Number(entry.transferta) || 0;
                      totalNotturne += Number(entry.notturne) || 0;
                      totalBreakTime += Number(entry.breakTime) || 0; // Add break time to total
-                     return `
+                     const vehicleHtml = vehicleName ? `<p class="day-entry-vehicle"><span class="material-symbols-outlined">directions_car</span> ${escapeHtml(vehicleName)}</p>` : '';
+
+                            return `
                          <div class="modal-entry">
                              <span>${formatTime(start)}-${Number(entry.breakTime || 0).toFixed(1).replace('.', ',')}-${formatTime(end)}</span>
                              <span title="${escapeHtml(entry.description || '')}">${escapeHtml(entry.description || '-')}</span>
@@ -7182,7 +7273,8 @@
                                  <span class="material-symbols-outlined">delete</span>
                              </button>
                              </div>
-                         </div>
+                                     ${vehicleHtml}
+                                 </div>
                      `;
                  }).join('');
 
@@ -7609,15 +7701,22 @@
              console.log("Struttura del database:", JSON.stringify(db, null, 2));
 
              // Assicuriamoci che le tariffe siano numeri validi
-             const rates = {
-                 normalHour: parseFloat(db.rates?.normalHour) || 0,
-                 nightHour: parseFloat(db.rates?.nightHour) || 0,
-                 holidayHour: parseFloat(db.rates?.holidayHour) || 0,
-                 transferDay: parseFloat(db.rates?.transferDay) || 0,
-                 sickDay: parseFloat(db.rates?.sickDay) || 0,
-                 vacationDay: parseFloat(db.rates?.vacationDay) || 0,
-                 igpBrescia: parseFloat(db.rates?.igpBrescia) || 0
-             };
+            const rates = {
+                normalHour: parseFloat(db.rates?.normalHour) || 0,
+                nightHour: parseFloat(db.rates?.nightHour) || 0,
+                holidayHour: parseFloat(db.rates?.holidayHour) || 0,
+                transferDay: parseFloat(db.rates?.transferDay) || 0,
+                sickDay: parseFloat(db.rates?.sickDay) || 0,
+                vacationDay: parseFloat(db.rates?.vacationDay) || 0,
+                igpBrescia: parseFloat(db.rates?.igpBrescia) || 0,
+                // Nuove tariffe
+                holidayDay: parseFloat(db.rates?.holidayDay) || 0, // €/giorno per giorni rossi non lavorati (8h)
+                saturdayHour: parseFloat(db.rates?.saturdayHour) || 0,
+                saturdayNight: parseFloat(db.rates?.saturdayNight) || 0,
+                sundayHour: parseFloat(db.rates?.sundayHour) || 0,
+                sundayNight: parseFloat(db.rates?.sundayNight) || 0,
+                holidayNight: parseFloat(db.rates?.holidayNight) || 0
+            };
 
              console.log("Tariffe utilizzate:", rates);
 
@@ -7626,12 +7725,66 @@
 
              // Inizializza i contatori
              let normalHours = 0;
-             let nightHours = 0;
-             let holidayHours = 0;
+             let nightHours = 0; // notturne giorni feriali
+             let holidayHours = 0; // ore festive diurne (lavorate nei giorni rossi)
+             // Nuovi accumulatori per le specifiche richieste
+             let paidHolidayDays = 0; // giorni rossi non lavorati (Lun-Ven) conteggiati come 8h/giorno
+             let saturdayHours = 0;
+             let saturdayNightHours = 0;
+             let sundayHours = 0;
+             let sundayNightHours = 0;
+             let holidayNightHours = 0; // notturne lavorate in giorni festivi
              let transferDays = new Set(); // Usa un Set per contare giorni unici
              let sickDays = 0;
              let vacationDays = 0;
              let igpBresciaDays = new Set(); // Usa un Set per contare giorni unici
+
+            // Helper per distribuire ore (diurne e notturne) nelle categorie corrette
+            function distributeDayAndNight(dayH, nightH, currentDate) {
+                const dow = currentDate.getDay(); // 0=Sun,6=Sat
+                const isHoliday = isHolidayDate(currentDate);
+
+                if (dayH && dayH > 0) {
+                    if (isHoliday) {
+                        if (dow === 6) {
+                            saturdayHours += dayH;
+                        } else if (dow === 0) {
+                            sundayHours += dayH;
+                        } else {
+                            // Festività L-V lavorata: ore festive diurne
+                            holidayHours += dayH;
+                        }
+                    } else {
+                        if (dow === 6) {
+                            saturdayHours += dayH;
+                        } else if (dow === 0) {
+                            sundayHours += dayH;
+                        } else {
+                            normalHours += dayH;
+                        }
+                    }
+                }
+
+                if (nightH && nightH > 0) {
+                    if (isHoliday) {
+                        if (dow === 6) {
+                            saturdayNightHours += nightH;
+                        } else if (dow === 0) {
+                            sundayNightHours += nightH;
+                        } else {
+                            holidayNightHours += nightH;
+                        }
+                    } else {
+                        if (dow === 6) {
+                            saturdayNightHours += nightH;
+                        } else if (dow === 0) {
+                            sundayNightHours += nightH;
+                        } else {
+                            nightHours += nightH;
+                        }
+                    }
+                }
+            }
 
              // Calcola il primo e l'ultimo giorno del mese
              const firstDay = new Date(year, month - 1, 1);
@@ -7679,30 +7832,19 @@
 
                              console.log(`Usando ore totali già calcolate: ${totalHours}`);
 
-                             // Controlla se è un giorno festivo
-                             console.log(`Controllo se ${dateStr} è festivo, giorno della settimana: ${currentDate.getDay()} (0=domenica, 6=sabato)`);
-                             const isHoliday = isHolidayDate(currentDate);
-                             console.log(`Risultato controllo festività per ${dateStr}: ${isHoliday}`);
-
-                             if (isHoliday) {
-                                 // Se è un giorno festivo, tutte le ore sono festive
-                                 holidayHours += totalHours;
-                                 console.log(`Aggiunto ${totalHours} ore festive (giorno festivo: ${dateStr})`);
-                             } else if (entry.isNightShift || entry.notturne === 'true' || entry.notturne === true) {
-                                 // Se è un turno notturno, tutte le ore sono notturne
-                                 nightHours += totalHours;
-                                 console.log(`Aggiunto ${totalHours} ore notturne (turno notturno)`);
+                             // Determiniamo eventuali ore notturne
+                             let nightPart = 0;
+                             let dayPart = totalHours;
+                             if (entry.isNightShift || entry.notturne === 'true' || entry.notturne === true) {
+                                 nightPart = totalHours;
+                                 dayPart = 0;
                              } else if (entry.notturne && typeof entry.notturne === 'number' && entry.notturne > 0) {
-                                 // Se ci sono ore notturne specificate come numero
-                                 const notturneHours = parseFloat(entry.notturne);
-                                 nightHours += notturneHours;
-                                 normalHours += (totalHours - notturneHours);
-                                 console.log(`Aggiunto ${notturneHours} ore notturne e ${totalHours - notturneHours} ore normali`);
-                             } else {
-                                 // Altrimenti, tutte le ore sono normali
-                                 normalHours += totalHours;
-                                 console.log(`Aggiunto ${totalHours} ore normali`);
+                                 nightPart = parseFloat(entry.notturne);
+                                 dayPart = totalHours - nightPart;
                              }
+
+                             distributeDayAndNight(dayPart, nightPart, currentDate);
+                             console.log(`Distribuite ore: giorno ${dayPart}h, notturne ${nightPart}h`);
                          } else if (entry.startTime && entry.endTime) {
                              // Altrimenti, calcoliamo le ore dai tempi di inizio e fine
                              const startTime = parseTimeString(entry.startTime);
@@ -7725,25 +7867,19 @@
                                  const isHoliday = isHolidayDate(currentDate);
                                  console.log(`Risultato controllo festività per ${dateStr}: ${isHoliday}`);
 
-                                 if (isHoliday) {
-                                     // Se è un giorno festivo, tutte le ore sono festive
-                                     holidayHours += totalHours;
-                                     console.log(`Aggiunto ${totalHours} ore festive (giorno festivo: ${dateStr})`);
-                                 } else if (entry.isNightShift || entry.notturne === 'true' || entry.notturne === true) {
-                                     // Se è un turno notturno, tutte le ore sono notturne
-                                     nightHours += totalHours;
-                                     console.log(`Aggiunto ${totalHours} ore notturne (turno notturno)`);
+                                 // Determiniamo eventuali ore notturne
+                                 let nightPart = 0;
+                                 let dayPart = totalHours;
+                                 if (entry.isNightShift || entry.notturne === 'true' || entry.notturne === true) {
+                                     nightPart = totalHours;
+                                     dayPart = 0;
                                  } else if (entry.notturne && typeof entry.notturne === 'number' && entry.notturne > 0) {
-                                     // Se ci sono ore notturne specificate come numero
-                                     const notturneHours = parseFloat(entry.notturne);
-                                     nightHours += notturneHours;
-                                     normalHours += (totalHours - notturneHours);
-                                     console.log(`Aggiunto ${notturneHours} ore notturne e ${totalHours - notturneHours} ore normali`);
-                                 } else {
-                                     // Altrimenti, tutte le ore sono normali
-                                     normalHours += totalHours;
-                                     console.log(`Aggiunto ${totalHours} ore normali`);
+                                     nightPart = parseFloat(entry.notturne);
+                                     dayPart = totalHours - nightPart;
                                  }
+
+                                 distributeDayAndNight(dayPart, nightPart, currentDate);
+                                 console.log(`Distribuite ore: giorno ${dayPart}h, notturne ${nightPart}h`);
                              }
                          }
 
@@ -7768,17 +7904,27 @@
                      });
                  }
 
-                 // Controlla se ci sono ferie o malattie per questa data
-                 if (db.holidays && db.holidays[dateStr]) {
-                     const holiday = db.holidays[dateStr];
-                     if (holiday.type === 'ferie') {
-                         vacationDays++;
-                         console.log(`Aggiunto giorno di ferie: ${dateStr}`);
-                     } else if (holiday.type === 'malattia') {
-                         sickDays++;
-                         console.log(`Aggiunto giorno di malattia: ${dateStr}`);
-                     }
-                 }
+                // Controlla se ci sono ferie o malattie per questa data
+                if (db.holidays && db.holidays[dateStr]) {
+                    const holiday = db.holidays[dateStr];
+                    if (holiday.type === 'ferie') {
+                        vacationDays++;
+                        console.log(`Aggiunto giorno di ferie: ${dateStr}`);
+                    } else if (holiday.type === 'malattia') {
+                        sickDays++;
+                        console.log(`Aggiunto giorno di malattia: ${dateStr}`);
+                    }
+                }
+
+                // Se è una festività standard (non segnata come ferie/malattia) e NON ho lavorato,
+                // e cade Lun-Ven, allora lo considero come giorno festivo pagato (8h)
+                const dow = currentDate.getDay();
+                const hasEntries = db.entries && db.entries[dateStr] && db.entries[dateStr].length > 0;
+                const isStdHoliday = isHolidayDate(currentDate) && !(db.holidays && db.holidays[dateStr]);
+                if (isStdHoliday && !hasEntries && dow !== 0 && dow !== 6) {
+                    paidHolidayDays++;
+                    console.log(`Giorno festivo non lavorato pagato: ${dateStr}`);
+                }
              }
 
              // Converti i Set in conteggi
@@ -7793,24 +7939,37 @@
              // Riepilogo
              console.log(`Riepilogo: Ore normali: ${normalHours}, Ore notturne: ${nightHours}, Ore festive: ${holidayHours}, Trasferte: ${transferDaysCount}, Malattie: ${sickDays}, Ferie: ${vacationDays}, IGP Brescia: ${igpBresciaDaysCount}`);
 
-             // Assicurati che le tariffe siano numeri
-             const normalHourRate = parseFloat(rates.normalHour) || 0;
-             const nightHourRate = parseFloat(rates.nightHour) || 0;
-             const holidayHourRate = parseFloat(rates.holidayHour) || 0;
-             const transferDayRate = parseFloat(rates.transferDay) || 0;
-             const sickDayRate = parseFloat(rates.sickDay) || 0;
-             const vacationDayRate = parseFloat(rates.vacationDay) || 0;
-             const igpBresciaRate = parseFloat(rates.igpBrescia) || 0;
+            // Assicurati che le tariffe siano numeri
+            const normalHourRate = parseFloat(rates.normalHour) || 0;
+            const nightHourRate = parseFloat(rates.nightHour) || 0;
+            const holidayHourRate = parseFloat(rates.holidayHour) || 0;
+            const transferDayRate = parseFloat(rates.transferDay) || 0;
+            const sickDayRate = parseFloat(rates.sickDay) || 0;
+            const vacationDayRate = parseFloat(rates.vacationDay) || 0;
+            const igpBresciaRate = parseFloat(rates.igpBrescia) || 0;
+            const holidayDayRate = parseFloat(rates.holidayDay) || 0;
+            const saturdayHourRate = parseFloat(rates.saturdayHour) || 0;
+            const saturdayNightRate = parseFloat(rates.saturdayNight) || 0;
+            const sundayHourRate = parseFloat(rates.sundayHour) || 0;
+            const sundayNightRate = parseFloat(rates.sundayNight) || 0;
+            const holidayNightRate = parseFloat(rates.holidayNight) || 0;
 
              // Calcola gli importi
              const normalAmount = normalHours * normalHourRate;
              const nightAmount = nightHours * nightHourRate;
-             const holidayAmount = holidayHours * holidayHourRate;
+            const holidayAmount = holidayHours * holidayHourRate;
+            // Calcoli per le nuove categorie
+            const paidHolidayAmount = paidHolidayDays * holidayDayRate; // giorni rossi non lavorati pagati
+            const saturdayAmount = saturdayHours * saturdayHourRate;
+            const saturdayNightAmount = saturdayNightHours * saturdayNightRate;
+            const sundayAmount = sundayHours * sundayHourRate;
+            const sundayNightAmount = sundayNightHours * sundayNightRate;
+            const holidayNightAmount = holidayNightHours * holidayNightRate;
              const transferAmount = transferDaysCount * transferDayRate;
              const sickAmount = sickDays * sickDayRate;
              const vacationAmount = vacationDays * vacationDayRate;
              const igpBresciaAmount = igpBresciaDaysCount * igpBresciaRate;
-             const totalAmount = normalAmount + nightAmount + holidayAmount + transferAmount + sickAmount + vacationAmount + igpBresciaAmount;
+            const totalAmount = normalAmount + nightAmount + holidayAmount + transferAmount + sickAmount + vacationAmount + igpBresciaAmount + paidHolidayAmount + saturdayAmount + saturdayNightAmount + sundayAmount + sundayNightAmount + holidayNightAmount;
 
              console.log(`Tariffe: Normale: €${normalHourRate}, Notturno: €${nightHourRate}, Festivo: €${holidayHourRate}, Trasferta: €${transferDayRate}, Malattia: €${sickDayRate}, Ferie: €${vacationDayRate}, IGP Brescia: €${igpBresciaRate}`);
              console.log(`Importi: Normale: €${normalAmount.toFixed(2)}, Notturno: €${nightAmount.toFixed(2)}, Festivo: €${holidayAmount.toFixed(2)}, Trasferta: €${transferAmount.toFixed(2)}, Malattia: €${sickAmount.toFixed(2)}, Ferie: €${vacationAmount.toFixed(2)}, IGP Brescia: €${igpBresciaAmount.toFixed(2)}, Totale: €${totalAmount.toFixed(2)}`);
@@ -7818,7 +7977,19 @@
              // Aggiorna l'interfaccia
              document.getElementById('normalHours').textContent = `${normalHours.toFixed(1)}h`;
              document.getElementById('nightHours').textContent = `${nightHours.toFixed(1)}h`;
-             document.getElementById('holidayHours').textContent = `${holidayHours.toFixed(1)}h`;
+            document.getElementById('holidayHours').textContent = `${holidayHours.toFixed(1)}h`;
+            document.getElementById('paidHolidayDays').textContent = `${paidHolidayDays}g`;
+            document.getElementById('paidHolidayAmount').textContent = `€${paidHolidayAmount.toFixed(2)}`;
+            document.getElementById('saturdayHours').textContent = `${saturdayHours.toFixed(1)}h`;
+            document.getElementById('saturdayAmount').textContent = `€${saturdayAmount.toFixed(2)}`;
+            document.getElementById('saturdayNightHours').textContent = `${saturdayNightHours.toFixed(1)}h`;
+            document.getElementById('saturdayNightAmount').textContent = `€${saturdayNightAmount.toFixed(2)}`;
+            document.getElementById('sundayHours').textContent = `${sundayHours.toFixed(1)}h`;
+            document.getElementById('sundayAmount').textContent = `€${sundayAmount.toFixed(2)}`;
+            document.getElementById('sundayNightHours').textContent = `${sundayNightHours.toFixed(1)}h`;
+            document.getElementById('sundayNightAmount').textContent = `€${sundayNightAmount.toFixed(2)}`;
+            document.getElementById('holidayNightHours').textContent = `${holidayNightHours.toFixed(1)}h`;
+            document.getElementById('holidayNightAmount').textContent = `€${holidayNightAmount.toFixed(2)}`;
              document.getElementById('transferDays').textContent = `${transferDaysCount}g`;
              document.getElementById('sickDays').textContent = `${sickDays}g`;
              document.getElementById('vacationDays').textContent = `${vacationDays}g`;
@@ -8218,13 +8389,16 @@
 
         function addVehicle() {
              console.log("Tentativo aggiunta mezzo...");
-            const vehicleNameInput = document.getElementById('newVehicleName');
+            // Use the vehicle inputs present in the settings UI
+            const vehicleNameInput = document.getElementById('vehicleName') || document.getElementById('newVehicleName');
+            const vehiclePlateInput = document.getElementById('vehiclePlate');
             if (!vehicleNameInput) {
                 console.error("Input nome nuovo mezzo non trovato.");
                 showToast("Errore interno: impossibile trovare l'input.", "error");
                 return;
             }
             const vehicleName = vehicleNameInput.value.trim();
+            const vehiclePlate = vehiclePlateInput ? vehiclePlateInput.value.trim() : '';
 
             if (!vehicleName) {
                 showToast("Inserisci il nome del mezzo.", "error");
@@ -8250,14 +8424,16 @@
 
             const newVehicle = {
                 id: `user_${Date.now()}`,
-                name: vehicleName
+                name: vehicleName,
+                plate: vehiclePlate || ''
             };
             db.vehicles.push(newVehicle);
             saveDb(db);
             showToast(`Mezzo "${escapeHtml(vehicleName)}" aggiunto.`, 'success');
             console.log("Mezzo aggiunto:", newVehicle);
-
-            vehicleNameInput.value = ''; // Clear input
+            // Clear inputs
+            vehicleNameInput.value = '';
+            if (vehiclePlateInput) vehiclePlateInput.value = '';
             updateVehicleUI(); // Call the new update function
         }
 
@@ -9052,6 +9228,12 @@
             const normalHourRateInput = document.getElementById('normalHourRate');
             const nightHourRateInput = document.getElementById('nightHourRate');
             const holidayHourRateInput = document.getElementById('holidayHourRate');
+            const holidayDayRateInput = document.getElementById('holidayDayRate');
+            const saturdayHourRateInput = document.getElementById('saturdayHourRate');
+            const saturdayNightRateInput = document.getElementById('saturdayNightRate');
+            const sundayHourRateInput = document.getElementById('sundayHourRate');
+            const sundayNightRateInput = document.getElementById('sundayNightRate');
+            const holidayNightRateInput = document.getElementById('holidayNightRate');
             const transferDayRateInput = document.getElementById('transferDayRate');
             const sickDayRateInput = document.getElementById('sickDayRate');
             const vacationDayRateInput = document.getElementById('vacationDayRate');
@@ -9060,7 +9242,7 @@
             // Verifica che tutti gli elementi esistano
             if (!cashMonthSelect || !saveRatesBtn || !normalHourRateInput || !nightHourRateInput ||
                 !holidayHourRateInput || !transferDayRateInput || !sickDayRateInput ||
-                !vacationDayRateInput || !igpBresciaRateInput) {
+                !vacationDayRateInput || !igpBresciaRateInput || !holidayDayRateInput || !saturdayHourRateInput || !saturdayNightRateInput || !sundayHourRateInput || !sundayNightRateInput || !holidayNightRateInput) {
                 console.warn("Elementi Cash mancanti. Skip inizializzazione.");
                 return;
             }
@@ -9148,7 +9330,13 @@
                         transferDay: 0,
                         sickDay: 0,
                         vacationDay: 0,
-                        igpBrescia: 0
+                        igpBrescia: 0,
+                        holidayDay: 0,
+                        saturdayHour: 0,
+                        saturdayNight: 0,
+                        sundayHour: 0,
+                        sundayNight: 0,
+                        holidayNight: 0
                     };
                     saveDb(db);
                 }
@@ -9161,7 +9349,13 @@
                     transferDay: parseFloat(db.rates.transferDay) || 0,
                     sickDay: parseFloat(db.rates.sickDay) || 0,
                     vacationDay: parseFloat(db.rates.vacationDay) || 0,
-                    igpBrescia: parseFloat(db.rates.igpBrescia) || 0
+                    igpBrescia: parseFloat(db.rates.igpBrescia) || 0,
+                    holidayDay: parseFloat(db.rates.holidayDay) || 0,
+                    saturdayHour: parseFloat(db.rates.saturdayHour) || 0,
+                    saturdayNight: parseFloat(db.rates.saturdayNight) || 0,
+                    sundayHour: parseFloat(db.rates.sundayHour) || 0,
+                    sundayNight: parseFloat(db.rates.sundayNight) || 0,
+                    holidayNight: parseFloat(db.rates.holidayNight) || 0
                 };
 
                 // Aggiorniamo il db con i valori convertiti
@@ -9177,6 +9371,12 @@
                 db.rates.sickDay = rates.sickDay;
                 db.rates.vacationDay = rates.vacationDay;
                 db.rates.igpBrescia = rates.igpBrescia;
+                db.rates.holidayDay = rates.holidayDay;
+                db.rates.saturdayHour = rates.saturdayHour;
+                db.rates.saturdayNight = rates.saturdayNight;
+                db.rates.sundayHour = rates.sundayHour;
+                db.rates.sundayNight = rates.sundayNight;
+                db.rates.holidayNight = rates.holidayNight;
 
                 // Salviamo il database
                 saveDb(db);
@@ -9185,6 +9385,12 @@
                 normalHourRateInput.value = rates.normalHour;
                 nightHourRateInput.value = rates.nightHour;
                 holidayHourRateInput.value = rates.holidayHour;
+                holidayDayRateInput.value = rates.holidayDay;
+                saturdayHourRateInput.value = rates.saturdayHour;
+                saturdayNightRateInput.value = rates.saturdayNight;
+                sundayHourRateInput.value = rates.sundayHour;
+                sundayNightRateInput.value = rates.sundayNight;
+                holidayNightRateInput.value = rates.holidayNight;
                 transferDayRateInput.value = rates.transferDay;
                 sickDayRateInput.value = rates.sickDay;
                 vacationDayRateInput.value = rates.vacationDay;
@@ -9202,6 +9408,12 @@
                     normalHour: parseFloat(normalHourRateInput.value) || 0,
                     nightHour: parseFloat(nightHourRateInput.value) || 0,
                     holidayHour: parseFloat(holidayHourRateInput.value) || 0,
+                    holidayDay: parseFloat(holidayDayRateInput.value) || 0,
+                    saturdayHour: parseFloat(saturdayHourRateInput.value) || 0,
+                    saturdayNight: parseFloat(saturdayNightRateInput.value) || 0,
+                    sundayHour: parseFloat(sundayHourRateInput.value) || 0,
+                    sundayNight: parseFloat(sundayNightRateInput.value) || 0,
+                    holidayNight: parseFloat(holidayNightRateInput.value) || 0,
                     transferDay: parseFloat(transferDayRateInput.value) || 0,
                     sickDay: parseFloat(sickDayRateInput.value) || 0,
                     vacationDay: parseFloat(vacationDayRateInput.value) || 0,
@@ -9212,6 +9424,12 @@
                 normalHourRateInput.value = rates.normalHour;
                 nightHourRateInput.value = rates.nightHour;
                 holidayHourRateInput.value = rates.holidayHour;
+                holidayDayRateInput.value = rates.holidayDay;
+                saturdayHourRateInput.value = rates.saturdayHour;
+                saturdayNightRateInput.value = rates.saturdayNight;
+                sundayHourRateInput.value = rates.sundayHour;
+                sundayNightRateInput.value = rates.sundayNight;
+                holidayNightRateInput.value = rates.holidayNight;
                 transferDayRateInput.value = rates.transferDay;
                 sickDayRateInput.value = rates.sickDay;
                 vacationDayRateInput.value = rates.vacationDay;
@@ -9226,6 +9444,12 @@
                 db.rates.normalHour = rates.normalHour;
                 db.rates.nightHour = rates.nightHour;
                 db.rates.holidayHour = rates.holidayHour;
+                db.rates.holidayDay = rates.holidayDay;
+                db.rates.saturdayHour = rates.saturdayHour;
+                db.rates.saturdayNight = rates.saturdayNight;
+                db.rates.sundayHour = rates.sundayHour;
+                db.rates.sundayNight = rates.sundayNight;
+                db.rates.holidayNight = rates.holidayNight;
                 db.rates.transferDay = rates.transferDay;
                 db.rates.sickDay = rates.sickDay;
                 db.rates.vacationDay = rates.vacationDay;
@@ -14342,7 +14566,7 @@ END:VCARD`;
                 /* Stile per il pulsante di trasferta */
                 .trasferta-button {
                     width: 100%;
-                    padding: 0.875rem 1rem;
+                    padding: 0.75rem 0.75rem;
                     border: 1px solid var(--md-sys-color-outline);
                     border-radius: var(--border-radius-small);
                     background-color: var(--md-sys-color-surface);
@@ -14350,34 +14574,77 @@ END:VCARD`;
                     font-size: 1rem;
                     font-family: var(--body-font-family);
                     cursor: pointer;
-                    transition: all 0.3s ease;
+                    transition: all 0.22s ease;
                     display: flex;
                     align-items: center;
-                    justify-content: center;
-                    gap: 0.5rem;
+                    justify-content: flex-start;
+                    gap: 0.6rem;
                     height: 48px; /* Stessa altezza degli altri input */
                     text-transform: none;
                     letter-spacing: normal;
                     box-shadow: none;
+                    padding-right: 1rem;
                 }
 
                 .trasferta-button .material-symbols-outlined {
                     font-size: 1.2rem;
                 }
 
-                .trasferta-button.active {
-                    background-color: var(--md-sys-color-primary);
-                    color: var(--md-sys-color-on-primary);
-                    border-color: var(--md-sys-color-primary);
-                    font-weight: 500;
-                    box-shadow: var(--elevation-2);
+                /* Visual switch */
+                .trasferta-button .switch {
+                    width: 44px;
+                    height: 24px;
+                    border-radius: 999px;
+                    background: var(--md-sys-color-surface-variant, #e6e6e6);
+                    display: inline-block;
+                    position: relative;
+                    flex: 0 0 auto;
+                    margin-left: 6px;
+                    transition: background 0.18s ease;
                 }
 
-                /* Aggiungiamo un indicatore visivo per lo stato attivo */
-                .trasferta-button.active::before {
-                    content: "✓";
-                    margin-right: 5px;
-                    font-weight: bold;
+                .trasferta-button .switch .knob {
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 50%;
+                    background: var(--md-sys-color-surface);
+                    position: absolute;
+                    top: 2px;
+                    left: 2px;
+                    transition: transform 0.18s ease, background 0.18s ease;
+                    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+                }
+
+                /* ON/OFF badge */
+                .trasferta-button .trasferta-badge {
+                    font-weight: 600;
+                    font-size: 0.9rem;
+                    padding: 0.15rem 0.5rem;
+                    border-radius: 12px;
+                    background: rgba(0,0,0,0.06);
+                    color: var(--md-sys-color-on-surface);
+                    margin-left: 6px;
+                    flex: 0 0 auto;
+                }
+
+                .trasferta-button.active .trasferta-badge {
+                    background: var(--md-sys-color-primary, #0b74ff);
+                    color: var(--md-sys-color-on-primary, #fff);
+                }
+
+                .trasferta-button.active {
+                    background-color: rgba(0,0,0,0.02);
+                    color: var(--md-sys-color-on-surface);
+                    border-color: var(--md-sys-color-primary);
+                }
+
+                .trasferta-button.active .switch {
+                    background: var(--md-sys-color-primary, #0b74ff);
+                }
+
+                .trasferta-button.active .switch .knob {
+                    transform: translateX(20px);
+                    background: var(--md-sys-color-on-primary, #fff);
                 }
 
                 .trasferta-button:hover {
