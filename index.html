@@ -923,16 +923,7 @@
             display: none !important;
         }
 
-        .nav-item.active::after {
-            content: '';
-            position: absolute;
-            bottom: 4px; left: 50%;
-            transform: translateX(-50%);
-            width: 6px; height: 6px;
-            border-radius: 50%;
-            background: var(--neo-primary);
-            box-shadow: 0 0 8px var(--neo-primary-glow);
-        }
+        /* Removed dot indicator for nav items */
 
         /* ===== SECTIONS ===== */
         .section {
@@ -2408,18 +2399,7 @@
                 display: none !important;
             }
 
-            .nav-item.active::after {
-                content: '';
-                position: absolute;
-                bottom: 4px;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 6px;
-                height: 6px;
-                border-radius: 50%;
-                background: var(--neo-primary);
-                box-shadow: 0 0 8px var(--neo-primary-glow);
-            }
+            /* Removed dot indicator for nav items */
 
             @media (max-width: 768px) {
                 .bottom-nav { padding: 0.3rem 0.1rem; }
@@ -2672,10 +2652,7 @@
         body.dark-theme .nav-item.active .material-symbols-outlined {
             filter: drop-shadow(0 0 6px rgba(0, 229, 204, 0.4)) !important;
         }
-        body.dark-theme .nav-item.active::after {
-            background: linear-gradient(135deg, #00E5CC, #B794F6) !important;
-            box-shadow: 0 0 8px rgba(0, 229, 204, 0.3) !important;
-        }
+        /* Removed dark-theme dot indicator for nav items */
         body.dark-theme .nav-item .material-symbols-outlined {
             color: inherit !important;
         }
@@ -2870,9 +2847,7 @@
         body.dark-theme .switch input:checked + .slider {
             box-shadow: 0 0 12px rgba(0, 229, 204, 0.25) !important;
         }
-        body.dark-theme .nav-item.active::after {
-            box-shadow: 0 0 6px rgba(0, 229, 204, 0.3) !important;
-        }
+        /* Removed dark-theme dot indicator override */
 
         /* ===== FIX — neo primary color ===== */
         body.dark-theme .neo-primary,
