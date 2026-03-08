@@ -2223,7 +2223,7 @@
         @media (max-width: 768px) {
             html { font-size: 15px; }
             .container { padding: 0.75rem; }
-            main { padding: 0.75rem; margin-top: var(--header-height, 65px); }
+            main { padding: 0.75rem; margin-top: calc(var(--header-height, 65px) - 8px); }
             .card { padding: 1rem; margin-bottom: 1rem; }
             .nav-item { font-size: 0.6rem; min-height: 48px; padding: 0.35rem 0.45rem; min-width: 42px; }
             .nav-item .material-symbols-outlined { font-size: 1.25rem; }
@@ -2260,7 +2260,7 @@
         @media (max-width: 480px) {
             html { font-size: 14px; }
             .container { padding: 0.5rem; }
-            main { padding: 0.5rem; margin-top: var(--header-height, 60px); }
+            main { padding: 0.5rem; margin-top: calc(var(--header-height, 60px) - 8px); }
             .card { padding: 0.75rem; }
             button, .btn { padding: 0.6rem 1.2rem; font-size: 0.8rem; }
             .nav-item { font-size: 0.55rem; }
@@ -2837,6 +2837,13 @@
         body.dark-theme main {
             position: relative;
             z-index: 1;
+        }
+
+        /* Small visual compensation for dark theme where header visual
+           effects (borders/shadows) can make the page appear lower.
+           Subtract a few pixels from the computed header height. */
+        body.dark-theme main {
+            margin-top: calc(var(--header-height, 70px) - 8px);
         }
 
         /* ===== CALENDAR DAYS — DARK ===== */
