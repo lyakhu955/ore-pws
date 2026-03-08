@@ -7796,87 +7796,91 @@
                      console.log(`Voci per ${dateStr}:`, JSON.stringify(db.entries[dateStr], null, 2));
 
                      // Itera su tutte le voci della data
-                     db.entries[dateStr].forEach(entry => {
-                         // Debug
-                         console.log(`Voce: ${JSON.stringify(entry)}`);
+                    db.entries[dateStr].forEach(entry => {
+                        // Debug
+                        console.log(`Voce: ${JSON.stringify(entry)}`);
 
-                         // Calcola le ore normali e notturne
-                         if (entry.totalHours && typeof entry.totalHours === 'number' && entry.totalHours > 0) {
-                             // Se abbiamo già il totale delle ore, usiamo quello direttamente
-                             const totalHours = parseFloat(entry.totalHours);
+                        // Controlla se la voce è IGP Brescia — se sì, aggiungi il giorno
+                        // e salta la distribuzione delle ore per evitare doppio conteggio.
+                        const description = entry.description || entry.note || '';
+                        console.log(`Controllo IGP Brescia per ${dateStr}, descrizione: "${description}"`);
+                        const descLower = description.toLowerCase();
+                        const isIgpBrescia = descLower.includes('igp brescia') || (descLower.includes('igp') && descLower.includes('brescia'));
+                        if (isIgpBrescia) {
+                            igpBresciaDays.add(dateStr);
+                            console.log(`Aggiunto giorno IGP Brescia (skip ore): ${dateStr}`);
+                        }
 
-                             console.log(`Usando ore totali già calcolate: ${totalHours}`);
+                        // Se la voce NON è IGP Brescia, procedi con il calcolo/distribuzione delle ore
+                        if (!isIgpBrescia) {
+                            // Calcola le ore normali e notturne
+                            if (entry.totalHours && typeof entry.totalHours === 'number' && entry.totalHours > 0) {
+                                // Se abbiamo già il totale delle ore, usiamo quello direttamente
+                                const totalHours = parseFloat(entry.totalHours);
 
-                             // Determiniamo eventuali ore notturne
-                             let nightPart = 0;
-                             let dayPart = totalHours;
-                             if (entry.isNightShift || entry.notturne === 'true' || entry.notturne === true) {
-                                 nightPart = totalHours;
-                                 dayPart = 0;
-                             } else if (entry.notturne && typeof entry.notturne === 'number' && entry.notturne > 0) {
-                                 nightPart = parseFloat(entry.notturne);
-                                 dayPart = totalHours - nightPart;
-                             }
+                                console.log(`Usando ore totali già calcolate: ${totalHours}`);
 
-                             distributeDayAndNight(dayPart, nightPart, currentDate);
-                             console.log(`Distribuite ore: giorno ${dayPart}h, notturne ${nightPart}h`);
-                         } else if (entry.startTime && entry.endTime) {
-                             // Altrimenti, calcoliamo le ore dai tempi di inizio e fine
-                             const startTime = parseTimeString(entry.startTime);
-                             const endTime = parseTimeString(entry.endTime);
+                                // Determiniamo eventuali ore notturne
+                                let nightPart = 0;
+                                let dayPart = totalHours;
+                                if (entry.isNightShift || entry.notturne === 'true' || entry.notturne === true) {
+                                    nightPart = totalHours;
+                                    dayPart = 0;
+                                } else if (entry.notturne && typeof entry.notturne === 'number' && entry.notturne > 0) {
+                                    nightPart = parseFloat(entry.notturne);
+                                    dayPart = totalHours - nightPart;
+                                }
 
-                             if (startTime && endTime) {
-                                 // Calcola le ore totali considerando la pausa
-                                 let totalHours = calculateHoursBetween(startTime, endTime);
+                                distributeDayAndNight(dayPart, nightPart, currentDate);
+                                console.log(`Distribuite ore: giorno ${dayPart}h, notturne ${nightPart}h`);
+                            } else if (entry.startTime && entry.endTime) {
+                                // Altrimenti, calcoliamo le ore dai tempi di inizio e fine
+                                const startTime = parseTimeString(entry.startTime);
+                                const endTime = parseTimeString(entry.endTime);
 
-                                 // Sottrai la pausa se presente
-                                 if (entry.breakTime && !isNaN(parseFloat(entry.breakTime))) {
-                                     totalHours -= parseFloat(entry.breakTime);
-                                 }
+                                if (startTime && endTime) {
+                                    // Calcola le ore totali considerando la pausa
+                                    let totalHours = calculateHoursBetween(startTime, endTime);
 
-                                 // Debug
-                                 console.log(`Ore calcolate: ${totalHours} (${entry.startTime}-${entry.endTime})`);
+                                    // Sottrai la pausa se presente
+                                    if (entry.breakTime && !isNaN(parseFloat(entry.breakTime))) {
+                                        totalHours -= parseFloat(entry.breakTime);
+                                    }
 
-                                 // Controlla se è un giorno festivo
-                                 console.log(`Controllo se ${dateStr} è festivo, giorno della settimana: ${currentDate.getDay()} (0=domenica, 6=sabato)`);
-                                 const isHoliday = isHolidayDate(currentDate);
-                                 console.log(`Risultato controllo festività per ${dateStr}: ${isHoliday}`);
+                                    // Debug
+                                    console.log(`Ore calcolate: ${totalHours} (${entry.startTime}-${entry.endTime})`);
 
-                                 // Determiniamo eventuali ore notturne
-                                 let nightPart = 0;
-                                 let dayPart = totalHours;
-                                 if (entry.isNightShift || entry.notturne === 'true' || entry.notturne === true) {
-                                     nightPart = totalHours;
-                                     dayPart = 0;
-                                 } else if (entry.notturne && typeof entry.notturne === 'number' && entry.notturne > 0) {
-                                     nightPart = parseFloat(entry.notturne);
-                                     dayPart = totalHours - nightPart;
-                                 }
+                                    // Controlla se è un giorno festivo
+                                    console.log(`Controllo se ${dateStr} è festivo, giorno della settimana: ${currentDate.getDay()} (0=domenica, 6=sabato)`);
+                                    const isHoliday = isHolidayDate(currentDate);
+                                    console.log(`Risultato controllo festività per ${dateStr}: ${isHoliday}`);
 
-                                 distributeDayAndNight(dayPart, nightPart, currentDate);
-                                 console.log(`Distribuite ore: giorno ${dayPart}h, notturne ${nightPart}h`);
-                             }
-                         }
+                                    // Determiniamo eventuali ore notturne
+                                    let nightPart = 0;
+                                    let dayPart = totalHours;
+                                    if (entry.isNightShift || entry.notturne === 'true' || entry.notturne === true) {
+                                        nightPart = totalHours;
+                                        dayPart = 0;
+                                    } else if (entry.notturne && typeof entry.notturne === 'number' && entry.notturne > 0) {
+                                        nightPart = parseFloat(entry.notturne);
+                                        dayPart = totalHours - nightPart;
+                                    }
 
-                         // Controlla se è una trasferta
-                         if (entry.isTransfer || entry.transferta === 'true' || entry.transferta === true ||
-                             (typeof entry.transferta === 'boolean' && entry.transferta)) {
-                             transferDays.add(dateStr); // Aggiungi la data al set per contare giorni unici
-                             console.log(`Aggiunto giorno di trasferta: ${dateStr}`);
-                         }
+                                    distributeDayAndNight(dayPart, nightPart, currentDate);
+                                    console.log(`Distribuite ore: giorno ${dayPart}h, notturne ${nightPart}h`);
+                                }
+                            }
+                        } else {
+                            // isIgpBrescia === true -> non distribuire ore (evita doppio conteggio)
+                        }
 
-                         // Controlla se è IGP Brescia
-                         const description = entry.description || entry.note || '';
-                         console.log(`Controllo IGP Brescia per ${dateStr}, descrizione: "${description}"`);
-
-                         // Verifica se è IGP Brescia (deve contenere entrambe le parole o la frase esatta)
-                         const descLower = description.toLowerCase();
-                         if (descLower.includes('igp brescia') ||
-                             (descLower.includes('igp') && descLower.includes('brescia'))) {
-                             igpBresciaDays.add(dateStr); // Aggiungi la data al set per contare giorni unici
-                             console.log(`Aggiunto giorno IGP Brescia: ${dateStr}`);
-                         }
-                     });
+                        // Controlla se è una trasferta (manteniamo questo conteggio anche per IGP)
+                        if (entry.isTransfer || entry.transferta === 'true' || entry.transferta === true ||
+                            (typeof entry.transferta === 'boolean' && entry.transferta)) {
+                            transferDays.add(dateStr); // Aggiungi la data al set per contare giorni unici
+                            console.log(`Aggiunto giorno di trasferta: ${dateStr}`);
+                        }
+                    });
                  }
 
                 // Controlla se ci sono ferie o malattie per questa data
