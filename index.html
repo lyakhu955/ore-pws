@@ -62,33 +62,7 @@
         document.head.appendChild(ogUrlMeta);
     </script>
 
-    <script>
-        // Aggiorna dinamicamente la variabile CSS --header-height in base
-        // all'altezza reale dell'elemento header per mantenere allineati
-        // i margini top di `main` nei diversi temi (dark / light).
-        (function() {
-            function updateHeaderHeight() {
-                const header = document.querySelector('header');
-                if (!header) return;
-                const height = header.offsetHeight;
-                document.documentElement.style.setProperty('--header-height', height + 'px');
-            }
-
-            document.addEventListener('DOMContentLoaded', updateHeaderHeight);
-            window.addEventListener('resize', updateHeaderHeight);
-
-            if (window.ResizeObserver) {
-                const hdr = document.querySelector('header');
-                if (hdr) new ResizeObserver(updateHeaderHeight).observe(hdr);
-            }
-
-            // Se esiste il pulsante per cambiare tema, aggiorna dopo il toggle
-            const themeToggle = document.querySelector('.theme-toggle-btn');
-            if (themeToggle) {
-                themeToggle.addEventListener('click', () => setTimeout(updateHeaderHeight, 120));
-            }
-        })();
-    </script>
+    <!-- Dynamic header height script removed to keep CSS-controlled --header-height -->
     <!-- Google Fonts: Roboto and Material Symbols Outlined -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2234,7 +2208,7 @@
         @media (max-width: 768px) {
             html { font-size: 15px; }
             .container { padding: 0.75rem; }
-            main { padding: 0.75rem; margin-top: calc(var(--header-height, 65px) - 8px); }
+            main { padding: 0.75rem; margin-top: var(--header-height, 65px); }
             .card { padding: 1rem; margin-bottom: 1rem; }
             .nav-item { font-size: 0.6rem; min-height: 48px; padding: 0.35rem 0.45rem; min-width: 42px; }
             .nav-item .material-symbols-outlined { font-size: 1.25rem; }
@@ -2271,7 +2245,7 @@
         @media (max-width: 480px) {
             html { font-size: 14px; }
             .container { padding: 0.5rem; }
-            main { padding: 0.5rem; margin-top: calc(var(--header-height, 60px) - 8px); }
+            main { padding: 0.5rem; margin-top: var(--header-height, 60px); }
             .card { padding: 0.75rem; }
             button, .btn { padding: 0.6rem 1.2rem; font-size: 0.8rem; }
             .nav-item { font-size: 0.55rem; }
@@ -2850,11 +2824,8 @@
             z-index: 1;
         }
 
-        /* Small visual compensation for dark theme where header visual
-           effects (borders/shadows) can make the page appear lower.
-           Subtract a few pixels from the computed header height. */
         body.dark-theme main {
-            margin-top: calc(var(--header-height, 70px) - 8px);
+            margin-top: var(--header-height, 70px);
         }
 
         /* ===== CALENDAR DAYS — DARK ===== */
