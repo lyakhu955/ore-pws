@@ -131,6 +131,9 @@
             --neo-in-sm: inset 2px 2px 5px var(--neo-shadow-dark), inset -2px -2px 5px var(--neo-shadow-light);
             --neo-flat: 0 0 0 transparent;
 
+            /* Header height variable (includes safe-area on supported devices) */
+            --header-height: calc(70px + env(safe-area-inset-top, 0px));
+
             /* Compatibility aliases for old Material Design variable references */
             --md-sys-color-primary: #008B8B;
             --md-sys-color-on-primary: #FFFFFF;
@@ -369,11 +372,16 @@
                 padding-left: env(safe-area-inset-left, 0px);
                 padding-right: env(safe-area-inset-right, 0px);
                 padding-top: env(safe-area-inset-top, 0px);
+                /* Ensure header height variable includes safe-area inset on supported devices */
+                --header-height: calc(70px + env(safe-area-inset-top, 0px));
             }
             header {
                 padding-top: calc(0.8rem + env(safe-area-inset-top, 0px));
                 padding-left: calc(1rem + env(safe-area-inset-left, 0px));
                 padding-right: calc(1rem + env(safe-area-inset-right, 0px));
+                /* Keep explicit height consistent with --header-height when safe-area is supported */
+                height: var(--header-height, calc(70px + env(safe-area-inset-top, 0px)));
+                box-sizing: border-box;
             }
             main {
                 margin-top: var(--header-height, calc(70px + env(safe-area-inset-top, 0px)));
@@ -473,6 +481,9 @@
             width: 100%;
             z-index: 1000;
             background: var(--neo-bg);
+            /* Force consistent header height and include padding inside height */
+            box-sizing: border-box;
+            height: var(--header-height, 70px);
             padding: 0.8rem 1.25rem;
             box-shadow: 0 4px 12px var(--neo-shadow-dark);
             transition: all 0.4s var(--smooth);
