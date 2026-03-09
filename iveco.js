@@ -1590,7 +1590,7 @@
 
         const BUS_W    = 80;    // larghezza elemento wrap in px (aggiornato)
         const PAUSE_MS = 1000; // sosta al capolinea in ms
-        const MAX_SPEED = 80;  // px/s velocità massima
+        const MAX_SPEED = 120;  // px/s velocità massima (+50%)
 
         let pos       = 0;      // posizione px corrente
         let dir       = 1;      // 1=destra, -1=sinistra
