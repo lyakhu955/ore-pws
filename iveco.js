@@ -407,7 +407,7 @@
                     showIvecoToast('↩️ Mezzo riaperto', 'info', 2000);
                 } else {
                     // Mostra popup per scegliere la data
-                    showVehicleDatePopup(v, (selectedDate) => {
+                    showVehicleDatePopup(v, null, (selectedDate) => {
                         v.done = true;
                         v.doneDate = selectedDate;
                         saveVehicles();
@@ -417,12 +417,30 @@
                 }
             });
         });
+
+        // Listener click sul badge data per modificarla
+        container.querySelectorAll('.iveco-done-date').forEach(badge => {
+            badge.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const item = badge.closest('.iveco-vehicle-item');
+                if (!item) return;
+                const id = item.dataset.id;
+                const v  = ivecoState.vehicles.find(x => x.id === id);
+                if (!v) return;
+                showVehicleDatePopup(v, v.doneDate, (selectedDate) => {
+                    v.doneDate = selectedDate;
+                    saveVehicles();
+                    renderElenco();
+                    showIvecoToast('📅 Data aggiornata!', 'success', 2000);
+                });
+            });
+        });
     }
 
     // ============================================================
     // POPUP DATA COMPLETAMENTO VEICOLO
     // ============================================================
-    function showVehicleDatePopup(vehicle, onConfirm) {
+    function showVehicleDatePopup(vehicle, initialDate, onConfirm) {
         // Rimuovi popup precedente se esiste
         const existing = document.getElementById('iveco-date-popup-overlay');
         if (existing) existing.remove();
@@ -430,6 +448,16 @@
         // Data di oggi nel formato YYYY-MM-DD per l'input
         const today = new Date();
         const todayStr = today.toISOString().split('T')[0];
+
+        // Converti initialDate da DD/MM/YYYY a YYYY-MM-DD se presente
+        let initialStr = todayStr;
+        if (initialDate) {
+            const parts = initialDate.split('/');
+            if (parts.length === 3) {
+                initialStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+        }
+
         // Data formattata in italiano per la visualizzazione
         const formatDate = (dateStr) => {
             const [y, m, d] = dateStr.split('-');
@@ -447,7 +475,7 @@
                 <p class="iveco-date-popup-sub">Vettura <strong>${escapeHtml(vehicle.vettura)}</strong> · Telaio <strong>${escapeHtml(vehicle.telaio)}</strong></p>
                 <div class="iveco-date-popup-input-wrap">
                     <label for="iveco-date-input">Seleziona data</label>
-                    <input type="date" id="iveco-date-input" value="${todayStr}" max="${todayStr}" />
+                    <input type="date" id="iveco-date-input" value="${initialStr}" max="${todayStr}" />
                 </div>
                 <div class="iveco-date-popup-actions">
                     <button id="iveco-date-cancel" class="iveco-date-btn cancel">Annulla</button>

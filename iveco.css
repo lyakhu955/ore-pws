@@ -442,6 +442,17 @@ body.dark-theme.iveco-mode > .bottom-nav {
     line-height: 1.2;
     flex-shrink: 0;
     text-align: center;
+    cursor: pointer;
+    transition: background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.iveco-done-date:hover {
+    background: rgba(46, 204, 113, 0.22);
+    box-shadow: 0 2px 8px rgba(46, 204, 113, 0.25);
+}
+
+.iveco-done-date:active {
+    transform: scale(0.95);
 }
 
 .iveco-done-date .material-symbols-outlined {
