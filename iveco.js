@@ -1195,37 +1195,37 @@
                         <rect x="68" y="7" width="18" height="6" rx="1" fill="#FFC107"/>
                         <text x="77" y="13" font-size="4.5" fill="#1A237E" text-anchor="middle" font-family="monospace" font-weight="bold">ATM</text>
 
-                        <!-- RUOTA ANTERIORE — cerchio + raggi + pneumatico -->
-                        <g id="bus-wheel-front" transform="translate(94,48)">
-                            <circle r="8.5" fill="#212121"/>
-                            <circle r="6" fill="#424242"/>
-                            <circle r="3.5" fill="#616161"/>
-                            <circle r="1.8" fill="#9E9E9E"/>
-                            <!-- Raggi -->
-                            <line x1="0" y1="-5.8" x2="0" y2="-3" stroke="#9E9E9E" stroke-width="1.2"/>
-                            <line x1="0" y1="3" x2="0" y2="5.8" stroke="#9E9E9E" stroke-width="1.2"/>
-                            <line x1="-5.8" y1="0" x2="-3" y2="0" stroke="#9E9E9E" stroke-width="1.2"/>
-                            <line x1="3" y1="0" x2="5.8" y2="0" stroke="#9E9E9E" stroke-width="1.2"/>
-                            <line x1="-4.1" y1="-4.1" x2="-2.1" y2="-2.1" stroke="#9E9E9E" stroke-width="1.2"/>
-                            <line x1="2.1" y1="2.1" x2="4.1" y2="4.1" stroke="#9E9E9E" stroke-width="1.2"/>
-                            <line x1="4.1" y1="-4.1" x2="2.1" y2="-2.1" stroke="#9E9E9E" stroke-width="1.2"/>
-                            <line x1="-2.1" y1="2.1" x2="-4.1" y2="4.1" stroke="#9E9E9E" stroke-width="1.2"/>
+                        <!-- RUOTA ANTERIORE — cerchi centrati su (94,48) nel viewBox -->
+                        <g id="bus-wheel-front">
+                            <circle cx="94" cy="48" r="8.5" fill="#212121"/>
+                            <circle cx="94" cy="48" r="6" fill="#424242"/>
+                            <circle cx="94" cy="48" r="3.5" fill="#616161"/>
+                            <circle cx="94" cy="48" r="1.8" fill="#9E9E9E"/>
+                            <!-- Raggi: coordinate assolute dal centro (94,48) -->
+                            <line x1="94" y1="42.2" x2="94" y2="45" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="94" y1="51" x2="94" y2="53.8" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="88.2" y1="48" x2="91" y2="48" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="97" y1="48" x2="99.8" y2="48" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="89.9" y1="43.9" x2="91.9" y2="45.9" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="96.1" y1="50.1" x2="98.1" y2="52.1" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="98.1" y1="43.9" x2="96.1" y2="45.9" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="91.9" y1="50.1" x2="89.9" y2="52.1" stroke="#9E9E9E" stroke-width="1.2"/>
                         </g>
 
-                        <!-- RUOTA POSTERIORE -->
-                        <g id="bus-wheel-rear" transform="translate(26,48)">
-                            <circle r="8.5" fill="#212121"/>
-                            <circle r="6" fill="#424242"/>
-                            <circle r="3.5" fill="#616161"/>
-                            <circle r="1.8" fill="#9E9E9E"/>
-                            <line x1="0" y1="-5.8" x2="0" y2="-3" stroke="#9E9E9E" stroke-width="1.2"/>
-                            <line x1="0" y1="3" x2="0" y2="5.8" stroke="#9E9E9E" stroke-width="1.2"/>
-                            <line x1="-5.8" y1="0" x2="-3" y2="0" stroke="#9E9E9E" stroke-width="1.2"/>
-                            <line x1="3" y1="0" x2="5.8" y2="0" stroke="#9E9E9E" stroke-width="1.2"/>
-                            <line x1="-4.1" y1="-4.1" x2="-2.1" y2="-2.1" stroke="#9E9E9E" stroke-width="1.2"/>
-                            <line x1="2.1" y1="2.1" x2="4.1" y2="4.1" stroke="#9E9E9E" stroke-width="1.2"/>
-                            <line x1="4.1" y1="-4.1" x2="2.1" y2="-2.1" stroke="#9E9E9E" stroke-width="1.2"/>
-                            <line x1="-2.1" y1="2.1" x2="-4.1" y2="4.1" stroke="#9E9E9E" stroke-width="1.2"/>
+                        <!-- RUOTA POSTERIORE — cerchi centrati su (26,48) nel viewBox -->
+                        <g id="bus-wheel-rear">
+                            <circle cx="26" cy="48" r="8.5" fill="#212121"/>
+                            <circle cx="26" cy="48" r="6" fill="#424242"/>
+                            <circle cx="26" cy="48" r="3.5" fill="#616161"/>
+                            <circle cx="26" cy="48" r="1.8" fill="#9E9E9E"/>
+                            <line x1="26" y1="42.2" x2="26" y2="45" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="26" y1="51" x2="26" y2="53.8" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="20.2" y1="48" x2="23" y2="48" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="29" y1="48" x2="31.8" y2="48" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="21.9" y1="43.9" x2="23.9" y2="45.9" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="28.1" y1="50.1" x2="30.1" y2="52.1" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="30.1" y1="43.9" x2="28.1" y2="45.9" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="23.9" y1="50.1" x2="21.9" y2="52.1" stroke="#9E9E9E" stroke-width="1.2"/>
                         </g>
                     </svg>
                 </div>
@@ -1562,122 +1562,145 @@
     }
 
     // ============================================================
-    // 🚌 BUS ANIMATO — Guida realistica con JS
+    // 🚌 BUS ANIMATO — tutto gestito via requestAnimationFrame
     // ============================================================
     function setupBusAnimation() {
-        const wrap = document.getElementById('iveco-bus-wrap');
+        const wrap  = document.getElementById('iveco-bus-wrap');
         const track = document.getElementById('iveco-bus-track');
         const svg   = document.getElementById('iveco-bus-svg');
         if (!wrap || !track || !svg) return;
 
-        const BUS_W   = 70;    // larghezza bus in px
-        const PAUSE   = 900;   // ms di sosta al capolinea
-        const SPEED   = 42;    // px al secondo velocità crociera
+        // Riferimenti agli elementi SVG delle ruote e ombra
+        const wf  = svg.getElementById ? svg.getElementById('bus-wheel-front')
+                  : document.getElementById('bus-wheel-front');
+        const wr  = svg.getElementById ? svg.getElementById('bus-wheel-rear')
+                  : document.getElementById('bus-wheel-rear');
+        const shd = svg.getElementById ? svg.getElementById('bus-shadow')
+                  : document.getElementById('bus-shadow');
 
-        // Easing: accelerazione/frenata realistica (ease-in-out cubica)
-        function easeInOutCubic(t) {
-            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        // Le ruote sono posizionate tramite translate nel viewBox:
+        // anteriore: translate(94,48), posteriore: translate(26,48)
+        // Quando JS fa setAttribute('transform','rotate(...)') SOVRASCRIVE il translate.
+        // Soluzione: usare rotate(angle, cx, cy) nel sistema viewBox assoluto,
+        // togliendo il translate originale dal <g> e centrando via rotate.
+        const WF_CX = 94, WF_CY = 48;  // centro ruota anteriore nel viewBox
+        const WR_CX = 26, WR_CY = 48;  // centro ruota posteriore nel viewBox
+
+        const BUS_W   = 70;    // larghezza elemento wrap in px
+        const PAUSE_MS = 1000; // sosta al capolinea in ms
+        const MAX_SPEED = 45;  // px/s velocità massima
+
+        let pos       = 0;      // posizione px corrente
+        let dir       = 1;      // 1=destra, -1=sinistra
+        let phase     = 'drive'; // 'drive' | 'pause'
+        let tripDone  = 0;      // px percorsi nel tratto corrente
+        let tripLen   = 0;
+        let lastTs    = null;
+        let wheelAngle = 0;    // angolo ruote in gradi
+        let pauseStart = null;
+        let bounceT    = 0;    // timer sospensioni indipendente
+
+        function easeInOut(t) {
+            return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
         }
 
-        let pos        = 0;        // posizione corrente (px)
-        let dir        = 1;        // 1 = destra, -1 = sinistra
-        let phase      = 'drive';  // 'drive' | 'pause'
-        let pauseTimer = null;
-        let animId     = null;
-        let lastTime   = null;
-        let tripLength = 0;        // lunghezza del percorso (px)
-        let tripDone   = 0;        // percorso già fatto in questo tratto (px)
+        // Ruota un gruppo SVG attorno a (cx,cy) nel sistema di coordinate del viewBox.
+        // rotate(angle, cx, cy) è SVG standard e non richiede transform-box.
+        // IMPORTANTE: il <g> originale deve avere il translate rimosso (gestito sotto).
+        function rotateGroup(el, cx, cy, angle) {
+            if (!el) return;
+            el.setAttribute('transform', `rotate(${angle.toFixed(2)},${cx},${cy})`);
+        }
 
-        // Elementi ruote per controllo velocità
-        const wheelFront = document.getElementById('bus-wheel-front');
-        const wheelRear  = document.getElementById('bus-wheel-rear');
-        const shadow     = document.getElementById('bus-shadow');
-
-        function getTripLength() {
+        function getTrackLen() {
             return Math.max(0, track.offsetWidth - BUS_W);
         }
 
-        function setWheelSpeed(speedFactor) {
-            // speedFactor 0=fermo, 1=velocità normale
-            const dur = speedFactor < 0.05 ? '99s' : (0.5 / speedFactor) + 's';
-            if (wheelFront) wheelFront.style.animationDuration = dur;
-            if (wheelRear)  wheelRear.style.animationDuration  = dur;
-        }
+        function loop(ts) {
+            if (!lastTs) lastTs = ts;
+            const dt = Math.min(ts - lastTs, 50);
+            lastTs = ts;
 
-        function applyFlip() {
-            // scaleX(-1) = guarda a sinistra, scaleX(1) = guarda a destra
-            svg.style.transform = dir === 1 ? 'scaleX(1)' : 'scaleX(-1)';
-        }
+            tripLen = getTrackLen();
+            bounceT += dt;
 
-        function startPause() {
-            phase = 'pause';
-            setWheelSpeed(0);
-            // Animazione frenata: piccola oscillazione
-            wrap.style.transition = 'left 0.18s ease-out';
-            if (pauseTimer) clearTimeout(pauseTimer);
-            pauseTimer = setTimeout(() => {
-                // Cambia direzione
-                dir = dir === 1 ? -1 : 1;
-                tripDone   = 0;
-                tripLength = getTripLength();
-                applyFlip();
-                phase    = 'drive';
-                lastTime = null;
-                wrap.style.transition = '';
-                animate();
-            }, PAUSE);
-        }
+            if (phase === 'pause') {
+                if (!pauseStart) pauseStart = ts;
+                // Ruote ferme
+                rotateGroup(wf, WF_CX, WF_CY, wheelAngle);
+                rotateGroup(wr, WR_CX, WR_CY, wheelAngle);
+                // Applica bounce anche da fermo (piccolo tremolio motore)
+                const b = Math.sin(bounceT * 0.018) * 0.4;
+                wrap.style.transform = `translateY(${b}px)`;
 
-        function animate(timestamp) {
-            if (!timestamp) { animId = requestAnimationFrame(animate); return; }
-            if (!lastTime) lastTime = timestamp;
-
-            const dt = Math.min(timestamp - lastTime, 50); // max 50ms per frame
-            lastTime = timestamp;
-
-            tripLength = getTripLength();
-            if (tripLength <= 0) { animId = requestAnimationFrame(animate); return; }
-
-            // Progresso del tratto [0..1]
-            const progress = Math.min(tripDone / tripLength, 1);
-
-            // Velocità modulata dall'easing: accelera all'inizio, frena alla fine
-            // Derivata dell'easeInOutCubic ≈ velocità istantanea
-            let easedPrev = easeInOutCubic(Math.max(0, progress - 0.001));
-            let easedNext = easeInOutCubic(Math.min(1, progress + 0.001));
-            let speedFactor = Math.max(0, (easedNext - easedPrev) / 0.002);
-            speedFactor = Math.min(1, speedFactor * 1.5); // amplifica per renderlo visibile
-
-            const step = SPEED * speedFactor * (dt / 1000) * dir;
-            pos      = Math.max(0, Math.min(tripLength, pos + step));
-            tripDone = dir === 1 ? pos : (tripLength - pos);
-
-            wrap.style.left = pos + 'px';
-            setWheelSpeed(speedFactor);
-
-            // Ombra si schiaccia in base alla velocità
-            if (shadow) {
-                const sx = 1 + speedFactor * 0.08;
-                shadow.setAttribute('rx', 44 * sx);
-            }
-
-            if (progress >= 1) {
-                startPause();
+                if (ts - pauseStart >= PAUSE_MS) {
+                    // Riparte in direzione opposta
+                    dir      = -dir;
+                    tripDone = 0;
+                    phase    = 'drive';
+                    pauseStart = null;
+                    lastTs = ts;
+                    // Flip del SVG
+                    svg.style.transform = dir === 1 ? 'scaleX(1)' : 'scaleX(-1)';
+                }
+                requestAnimationFrame(loop);
                 return;
             }
 
-            animId = requestAnimationFrame(animate);
+            // === FASE DRIVE ===
+            const progress = tripLen > 0 ? Math.min(tripDone / tripLen, 1) : 0;
+
+            // Velocità istantanea dalla derivata dell'easing
+            const eps  = 0.001;
+            const dEase = (easeInOut(Math.min(1, progress + eps)) -
+                           easeInOut(Math.max(0, progress - eps))) / (2 * eps);
+            // dEase vale ~0 agli estremi (fermo) e ~1.5 al centro
+            const speedFactor = Math.max(0, Math.min(1, dEase / 1.5));
+            const speed       = MAX_SPEED * speedFactor;
+
+            // Aggiorna posizione
+            const step = speed * (dt / 1000);
+            tripDone += step;
+            pos = dir === 1 ? tripDone : (tripLen - tripDone);
+            pos = Math.max(0, Math.min(tripLen, pos));
+            wrap.style.left = pos + 'px';
+
+            // === RUOTE — angolo proporzionale alla distanza percorsa ===
+            // circonferenza ruota in viewBox ≈ 2π*8.5 ≈ 53.4 unità
+            // Scala: il bus è largo 70px nel DOM ma 120 unità nel viewBox → ratio
+            const viewboxRatio = 120 / BUS_W;
+            wheelAngle += step * viewboxRatio * (360 / 53.4);
+            wheelAngle %= 360;
+            rotateGroup(wf, WF_CX, WF_CY, wheelAngle);
+            rotateGroup(wr, WR_CX, WR_CY, wheelAngle);
+
+            // === SOSPENSIONI — bounce sinusoidale multi-frequenza ===
+            const b1 = Math.sin(bounceT * 0.022) * 1.6 * speedFactor;
+            const b2 = Math.sin(bounceT * 0.041) * 0.7 * speedFactor;
+            const bounce = b1 + b2;
+            wrap.style.transform = `translateY(${bounce}px)`;
+
+            // === OMBRA — si schiaccia con la velocità ===
+            if (shd) {
+                const sx = 1 + speedFactor * 0.1;
+                const sy = Math.max(0.5, 1 - speedFactor * 0.35);
+                shd.setAttribute('rx', 44 * sx);
+                shd.setAttribute('ry', 3 * sy);
+                shd.setAttribute('opacity', 0.55 - speedFactor * 0.2);
+            }
+
+            if (progress >= 1) {
+                phase = 'pause';
+                requestAnimationFrame(loop);
+                return;
+            }
+
+            requestAnimationFrame(loop);
         }
 
-        // Avvio
-        tripLength = getTripLength();
-        applyFlip();
-        animate();
-
-        // Aggiorna dimensioni se la finestra cambia
-        window.addEventListener('resize', () => {
-            tripLength = getTripLength();
-        });
+        // Avvio: flip iniziale e primo frame
+        svg.style.transform = 'scaleX(1)';
+        requestAnimationFrame(loop);
     }
 
     // ============================================================
