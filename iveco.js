@@ -23,7 +23,8 @@
         excelData  : null, // dati Excel raw
         excelColTelaio : 0,
         excelColVettura: 1,
-        atmFilter  : 'all'
+        atmFilter  : 'all',
+        elencoFilter: 'all'  // 'all' | 'done' | 'todo'
     };
 
     // ============================================================
@@ -351,6 +352,15 @@
 
         const query = searchInput ? searchInput.value.toLowerCase() : '';
 
+        // Mostra/nascondi pulsante X nella search bar
+        const clearBtn = document.getElementById('iveco-search-clear');
+        if (clearBtn) clearBtn.style.display = query ? 'flex' : 'none';
+
+        // Aggiorna chip attivi
+        document.querySelectorAll('.iveco-stat-chip').forEach(chip => {
+            chip.classList.toggle('active', chip.dataset.filter === ivecoState.elencoFilter);
+        });
+
         // Filtra e ordina per numero vettura crescente
         let list = [...ivecoState.vehicles];
         if (query) {
@@ -358,6 +368,13 @@
                 v.vettura.toLowerCase().includes(query) ||
                 v.telaio.toLowerCase().includes(query)
             );
+        }
+
+        // Applica filtro completato/da fare
+        if (ivecoState.elencoFilter === 'done') {
+            list = list.filter(v => v.done);
+        } else if (ivecoState.elencoFilter === 'todo') {
+            list = list.filter(v => !v.done);
         }
 
         // Ordina per N. Vettura numericamente
@@ -1147,19 +1164,22 @@
 
                     <div class="iveco-search-bar">
                         <input type="text" id="iveco-search" placeholder="Cerca telaio o vettura...">
+                        <button id="iveco-search-clear" class="iveco-search-clear" style="display:none" title="Cancella ricerca">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
                         <span class="material-symbols-outlined search-icon">search</span>
                     </div>
 
                     <div class="iveco-stats-bar">
-                        <div class="iveco-stat-chip">
+                        <div class="iveco-stat-chip active" data-filter="all">
                             <span class="stat-num" id="iveco-stat-total">0</span>
                             Totale
                         </div>
-                        <div class="iveco-stat-chip done">
+                        <div class="iveco-stat-chip done" data-filter="done">
                             <span class="stat-num" id="iveco-stat-done">0</span>
                             Completati
                         </div>
-                        <div class="iveco-stat-chip todo">
+                        <div class="iveco-stat-chip todo" data-filter="todo">
                             <span class="stat-num" id="iveco-stat-todo">0</span>
                             Da fare
                         </div>
@@ -1396,6 +1416,24 @@
         if (searchInput) {
             searchInput.addEventListener('input', () => renderElenco());
         }
+
+        // Pulsante X cancella ricerca
+        const searchClear = document.getElementById('iveco-search-clear');
+        if (searchClear) {
+            searchClear.addEventListener('click', () => {
+                const inp = document.getElementById('iveco-search');
+                if (inp) { inp.value = ''; inp.focus(); }
+                renderElenco();
+            });
+        }
+
+        // Chip filtro elenco (Totale / Completati / Da fare)
+        document.querySelectorAll('.iveco-stat-chip[data-filter]').forEach(chip => {
+            chip.addEventListener('click', () => {
+                ivecoState.elencoFilter = chip.dataset.filter;
+                renderElenco();
+            });
+        });
 
         // Theme toggle Iveco
         const themeToggleIveco = document.getElementById('iveco-theme-toggle');
