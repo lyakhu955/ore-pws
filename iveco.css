@@ -1500,3 +1500,616 @@ body.dark-theme #iveco-header .iveco-header-logo.pressing .press-ring {
 .iveco-atm-note-item.removing {
     animation: fadeSlideOut 0.4s ease forwards;
 }
+
+/* ================================================================ */
+/* 📸 GALLERIA ALLEGATI — Bottone card                              */
+/* ================================================================ */
+.iveco-gallery-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, rgba(100, 180, 255, 0.15), rgba(140, 120, 255, 0.15));
+    color: #5b9bd5;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    outline: none;
+}
+
+.iveco-gallery-btn:hover {
+    background: linear-gradient(135deg, rgba(100, 180, 255, 0.28), rgba(140, 120, 255, 0.28));
+    box-shadow: 0 3px 12px rgba(91, 155, 213, 0.35);
+    transform: scale(1.07);
+}
+
+.iveco-gallery-btn:active {
+    transform: scale(0.93);
+}
+
+.iveco-gallery-btn .material-symbols-outlined {
+    font-size: 1.35rem;
+}
+
+/* Badge contatore allegati */
+.iveco-gallery-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    background: #e74c3c;
+    color: #fff;
+    font-size: 0.6rem;
+    font-weight: 700;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3px;
+    line-height: 1;
+    border: 1.5px solid var(--bg-primary, #fff);
+}
+
+/* ================================================================ */
+/* 📸 GALLERIA ALLEGATI — Popup                                     */
+/* ================================================================ */
+#iveco-gallery-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 99998;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.28s ease;
+}
+
+#iveco-gallery-overlay.visible {
+    opacity: 1;
+}
+
+#iveco-gallery-popup {
+    background: var(--bg-card, #f0f4f8);
+    border-radius: 24px 24px 0 0;
+    width: 100%;
+    max-width: 520px;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: translateY(60px);
+    transition: transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 -8px 40px rgba(0,0,0,0.22);
+}
+
+#iveco-gallery-overlay.visible #iveco-gallery-popup {
+    transform: translateY(0);
+}
+
+/* Header */
+.iveco-gallery-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.2rem 0.8rem;
+    border-bottom: 1px solid rgba(0,0,0,0.07);
+    flex-shrink: 0;
+}
+
+.iveco-gallery-title {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.iveco-gallery-title .material-symbols-outlined {
+    font-size: 1.8rem;
+    color: #5b9bd5;
+    background: rgba(91, 155, 213, 0.12);
+    border-radius: 10px;
+    padding: 6px;
+}
+
+.iveco-gallery-title h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary, #333);
+}
+
+.iveco-gallery-title small {
+    font-size: 0.72rem;
+    color: var(--text-secondary, #777);
+}
+
+.iveco-gallery-close {
+    background: rgba(0,0,0,0.07);
+    border: none;
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary, #666);
+    transition: background 0.18s;
+}
+
+.iveco-gallery-close:hover { background: rgba(0,0,0,0.13); }
+
+/* Body — griglia */
+.iveco-gallery-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+.iveco-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.7rem;
+}
+
+.iveco-gallery-thumb {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    cursor: pointer;
+}
+
+.iveco-gallery-thumb-inner {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 1;
+    background: rgba(0,0,0,0.06);
+}
+
+.iveco-gallery-thumb-inner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.2s ease;
+}
+
+.iveco-gallery-thumb-inner:hover img {
+    transform: scale(1.05);
+}
+
+.iveco-gallery-thumb-video-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #2d3748, #1a202c);
+    gap: 0.4rem;
+    padding: 0.5rem;
+}
+
+.iveco-gallery-thumb-video-placeholder .material-symbols-outlined {
+    font-size: 2.2rem;
+    color: rgba(255,255,255,0.85);
+}
+
+.iveco-gallery-thumb-label {
+    font-size: 0.55rem;
+    color: rgba(255,255,255,0.6);
+    text-align: center;
+    word-break: break-all;
+    max-height: 2.5em;
+    overflow: hidden;
+}
+
+.iveco-gallery-thumb-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0);
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 6px;
+    transition: background 0.18s;
+}
+
+.iveco-gallery-thumb-inner:hover .iveco-gallery-thumb-overlay {
+    background: rgba(0,0,0,0.25);
+}
+
+.iveco-gallery-thumb-delete {
+    background: rgba(231, 76, 60, 0.85);
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.18s, background 0.18s;
+}
+
+.iveco-gallery-thumb-inner:hover .iveco-gallery-thumb-delete {
+    opacity: 1;
+}
+
+.iveco-gallery-thumb-delete .material-symbols-outlined {
+    font-size: 1rem;
+}
+
+.iveco-gallery-thumb-name {
+    font-size: 0.6rem;
+    color: var(--text-secondary, #777);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Empty state */
+.iveco-gallery-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    padding: 3rem 1rem;
+    color: var(--text-secondary, #999);
+}
+
+.iveco-gallery-empty .material-symbols-outlined {
+    font-size: 3rem;
+    opacity: 0.4;
+}
+
+.iveco-gallery-empty p {
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Footer — upload */
+.iveco-gallery-footer {
+    padding: 0.8rem 1rem;
+    border-top: 1px solid rgba(0,0,0,0.07);
+    flex-shrink: 0;
+}
+
+.iveco-gallery-upload-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #5b9bd5, #7c6fc4);
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.18s, transform 0.15s;
+}
+
+.iveco-gallery-upload-btn:hover { opacity: 0.9; transform: scale(1.01); }
+.iveco-gallery-upload-btn:active { transform: scale(0.97); }
+
+.iveco-gallery-upload-btn .material-symbols-outlined {
+    font-size: 1.2rem;
+}
+
+/* Progress bar galleria */
+#iveco-gallery-progress-wrap {
+    padding: 0 1rem 0.8rem;
+    flex-shrink: 0;
+}
+
+.iveco-gallery-progress-bar {
+    background: rgba(0,0,0,0.08);
+    border-radius: 99px;
+    height: 6px;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+
+.iveco-gallery-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #5b9bd5, #2ecc71);
+    border-radius: 99px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+#iveco-gallery-progress-wrap small {
+    font-size: 0.7rem;
+    color: var(--text-secondary, #777);
+}
+
+/* ================================================================ */
+/* 🖼️ LIGHTBOX                                                      */
+/* ================================================================ */
+#iveco-lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+#iveco-lightbox.visible { opacity: 1; }
+
+#iveco-lightbox-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#iveco-lightbox-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255,255,255,0.15);
+    border: none;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    cursor: pointer;
+    z-index: 10;
+    transition: background 0.18s;
+}
+
+#iveco-lightbox-close:hover { background: rgba(255,255,255,0.28); }
+#iveco-lightbox-close .material-symbols-outlined { font-size: 1.4rem; }
+
+#iveco-lightbox-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    color: rgba(255,255,255,0.7);
+}
+
+.iveco-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255,255,255,0.2);
+    border-top-color: #5b9bd5;
+    border-radius: 50%;
+    animation: iveco-spin 0.8s linear infinite;
+}
+
+@keyframes iveco-spin {
+    to { transform: rotate(360deg); }
+}
+
+#iveco-lightbox-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 96vw;
+    max-height: 86vh;
+}
+
+#iveco-lightbox-content img {
+    max-width: 100%;
+    max-height: 82vh;
+    border-radius: 8px;
+    object-fit: contain;
+}
+
+#iveco-lightbox-content video {
+    max-width: 96vw;
+    max-height: 82vh;
+    border-radius: 8px;
+}
+
+#iveco-lightbox-name {
+    position: absolute;
+    bottom: 1.2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.55);
+    color: rgba(255,255,255,0.85);
+    font-size: 0.75rem;
+    padding: 4px 12px;
+    border-radius: 99px;
+    white-space: nowrap;
+    max-width: 80vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ================================================================ */
+/* 📎 SEZIONE UPLOAD NEL POPUP DATA COMPLETAMENTO                   */
+/* ================================================================ */
+.iveco-date-popup-upload-section {
+    margin-top: 0.8rem;
+    padding-top: 0.8rem;
+}
+
+.iveco-date-popup-upload-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.7rem;
+}
+
+.iveco-date-popup-upload-divider::before,
+.iveco-date-popup-upload-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(0,0,0,0.1);
+}
+
+.iveco-date-popup-upload-divider span {
+    font-size: 0.7rem;
+    color: var(--text-secondary, #888);
+    white-space: nowrap;
+}
+
+.iveco-date-popup-upload-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    width: 100%;
+    padding: 0.6rem;
+    border-radius: 12px;
+    background: rgba(91, 155, 213, 0.12);
+    color: #5b9bd5;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px dashed rgba(91, 155, 213, 0.4);
+    transition: background 0.18s, border-color 0.18s;
+}
+
+.iveco-date-popup-upload-btn:hover {
+    background: rgba(91, 155, 213, 0.2);
+    border-color: rgba(91, 155, 213, 0.7);
+}
+
+.iveco-date-popup-upload-btn .material-symbols-outlined {
+    font-size: 1.1rem;
+}
+
+.iveco-date-progress-bar {
+    background: rgba(0,0,0,0.08);
+    border-radius: 99px;
+    height: 5px;
+    overflow: hidden;
+    margin: 0.5rem 0 0.2rem;
+}
+
+.iveco-date-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #5b9bd5, #2ecc71);
+    border-radius: 99px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+#iveco-date-upload-progress small {
+    font-size: 0.68rem;
+    color: var(--text-secondary, #777);
+}
+
+.iveco-date-upload-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 0.5rem;
+}
+
+.iveco-date-upload-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    color: var(--text-primary, #444);
+    background: rgba(46, 204, 113, 0.08);
+    border-radius: 8px;
+    padding: 4px 8px;
+}
+
+.iveco-date-upload-item.error {
+    background: rgba(231, 76, 60, 0.08);
+    color: #e74c3c;
+}
+
+.iveco-date-upload-item .material-symbols-outlined {
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.iveco-date-upload-ok {
+    margin-left: auto;
+    color: #27ae60;
+    font-weight: 700;
+}
+
+/* ================================================================ */
+/* 🌙 DARK THEME                                                    */
+/* ================================================================ */
+body.dark-theme .iveco-gallery-btn {
+    background: linear-gradient(135deg, rgba(91, 155, 213, 0.18), rgba(124, 111, 196, 0.18));
+    color: #7eb8e8;
+}
+
+body.dark-theme #iveco-gallery-popup {
+    background: var(--bg-card, #1e2433);
+}
+
+body.dark-theme .iveco-gallery-header,
+body.dark-theme .iveco-gallery-footer {
+    border-color: rgba(255,255,255,0.07);
+}
+
+body.dark-theme .iveco-gallery-close {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.6);
+}
+
+body.dark-theme .iveco-gallery-thumb-inner {
+    background: rgba(255,255,255,0.05);
+}
+
+body.dark-theme .iveco-gallery-thumb-name {
+    color: rgba(255,255,255,0.45);
+}
+
+body.dark-theme .iveco-gallery-upload-btn {
+    background: linear-gradient(135deg, #4a89c4, #6a5fb0);
+}
+
+body.dark-theme .iveco-gallery-progress-bar,
+body.dark-theme .iveco-date-progress-bar {
+    background: rgba(255,255,255,0.1);
+}
+
+body.dark-theme .iveco-date-popup-upload-divider::before,
+body.dark-theme .iveco-date-popup-upload-divider::after {
+    background: rgba(255,255,255,0.1);
+}
+
+body.dark-theme .iveco-date-popup-upload-divider span {
+    color: rgba(255,255,255,0.4);
+}
+
+body.dark-theme .iveco-date-popup-upload-btn {
+    background: rgba(91,155,213,0.1);
+    border-color: rgba(91,155,213,0.3);
+    color: #7eb8e8;
+}
+
+body.dark-theme .iveco-date-upload-item {
+    background: rgba(46,204,113,0.07);
+    color: rgba(255,255,255,0.75);
+}
+
+body.dark-theme .iveco-date-upload-item.error {
+    background: rgba(231,76,60,0.08);
+    color: #e87d6d;
+}

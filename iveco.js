@@ -55,6 +55,11 @@
         } catch(e) { ivecoState.atmNotes = {}; }
     }
 
+    // Esponi saveVehicles globalmente per iveco-attachments.js
+    window.ivecoSaveVehicles = function() {
+        saveVehicles();
+    };
+
     // Esponi loadData globalmente per permettere al restore backup di ricaricare i dati Iveco
     window.ivecoLoadData = function() {
         loadData();
@@ -396,6 +401,10 @@
                         <span>${v.vettura}</span>
                     </div>
                 </div>
+                <button class="iveco-gallery-btn" data-id="${v.id}" title="Foto e video allegati">
+                    <span class="material-symbols-outlined">photo_library</span>
+                    <span class="iveco-gallery-badge" style="display:${(v.attachments && v.attachments.length > 0) ? 'flex' : 'none'}">${(v.attachments && v.attachments.length) || 0}</span>
+                </button>
                 ${v.done && v.doneDate ? `<div class="iveco-done-date" title="Data completamento"><span class="material-symbols-outlined">event</span>${v.doneDate}</div>` : ''}
                 <div class="iveco-check ${v.done ? 'checked' : ''}" data-id="${v.id}" title="${v.done ? 'Lavoro completato' : 'Segna come completato'}">
                     <span class="material-symbols-outlined">${v.done ? 'check' : ''}</span>
@@ -427,6 +436,19 @@
                         renderElenco();
                         showIvecoToast('✅ Mezzo completato!', 'success', 2000);
                     });
+                }
+            });
+        });
+
+        // Listener bottone galleria
+        container.querySelectorAll('.iveco-gallery-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = btn.dataset.id;
+                const v  = ivecoState.vehicles.find(x => x.id === id);
+                if (!v) return;
+                if (window.ivecoAttachments) {
+                    window.ivecoAttachments.openGallery(v);
                 }
             });
         });
@@ -496,6 +518,22 @@
                         <span class="material-symbols-outlined">check</span> Conferma
                     </button>
                 </div>
+
+                <div class="iveco-date-popup-upload-section">
+                    <div class="iveco-date-popup-upload-divider">
+                        <span>Vuoi allegare foto o video?</span>
+                    </div>
+                    <label class="iveco-date-popup-upload-btn">
+                        <span class="material-symbols-outlined">add_photo_alternate</span>
+                        Aggiungi foto/video
+                        <input type="file" id="iveco-date-file-input" accept="image/*,video/*" multiple style="display:none">
+                    </label>
+                    <div id="iveco-date-upload-progress" style="display:none">
+                        <div class="iveco-date-progress-bar"><div class="iveco-date-progress-fill" id="iveco-date-progress-fill"></div></div>
+                        <small id="iveco-date-progress-label">Caricamento...</small>
+                    </div>
+                    <div id="iveco-date-upload-list" class="iveco-date-upload-list"></div>
+                </div>
             </div>
         `;
         document.body.appendChild(overlay);
@@ -521,6 +559,54 @@
             closePopup();
             onConfirm(formatDate(selected));
         });
+
+        // Upload rapido dal popup data
+        const fileInput = document.getElementById('iveco-date-file-input');
+        if (fileInput) {
+            fileInput.addEventListener('change', async (e) => {
+                const files = Array.from(e.target.files);
+                if (!files.length || !window.ivecoAttachments) return;
+
+                const progressWrap = document.getElementById('iveco-date-upload-progress');
+                const progressFill = document.getElementById('iveco-date-progress-fill');
+                const progressLabel = document.getElementById('iveco-date-progress-label');
+                const uploadList   = document.getElementById('iveco-date-upload-list');
+
+                progressWrap.style.display = 'block';
+                if (!vehicle.attachments) vehicle.attachments = [];
+
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    progressLabel.textContent = `${i + 1}/${files.length}: ${file.name}`;
+                    progressFill.style.width = '0%';
+                    try {
+                        const driveId = await window.ivecoAttachments._uploadFile(file, vehicle.id, (pct) => {
+                            progressFill.style.width = pct + '%';
+                        });
+                        const att = { driveId, name: file.name, mimeType: file.type, uploadedAt: new Date().toISOString() };
+                        vehicle.attachments.push(att);
+                        window.ivecoSaveVehicles();
+                        window.ivecoAttachments.updateBadge(vehicle);
+
+                        // Mostra file caricato nella lista
+                        const item = document.createElement('div');
+                        item.className = 'iveco-date-upload-item';
+                        item.innerHTML = `<span class="material-symbols-outlined">${file.type.startsWith('video/') ? 'videocam' : 'image'}</span><span>${escapeHtml(file.name)}</span><span class="iveco-date-upload-ok">✓</span>`;
+                        uploadList.appendChild(item);
+                    } catch (err) {
+                        const item = document.createElement('div');
+                        item.className = 'iveco-date-upload-item error';
+                        item.innerHTML = `<span class="material-symbols-outlined">error</span><span>${escapeHtml(file.name)}: ${escapeHtml(err.message)}</span>`;
+                        uploadList.appendChild(item);
+                    }
+                }
+
+                progressFill.style.width = '100%';
+                progressLabel.textContent = 'Completato!';
+                setTimeout(() => { progressWrap.style.display = 'none'; }, 1500);
+                e.target.value = '';
+            });
+        }
     }
 
     // ============================================================
