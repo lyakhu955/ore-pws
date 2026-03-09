@@ -354,7 +354,12 @@
 
         // Mostra/nascondi pulsante X nella search bar
         const clearBtn = document.getElementById('iveco-search-clear');
-        if (clearBtn) clearBtn.style.display = query ? 'flex' : 'none';
+        if (clearBtn) {
+            clearBtn.style.display = query ? 'flex' : 'none';
+            // Aggiusta padding input per non sovrapporre il testo con la X
+            const inp = document.getElementById('iveco-search');
+            if (inp) inp.style.paddingRight = query ? '4.5rem' : '2.5rem';
+        }
 
         // Aggiorna chip attivi
         document.querySelectorAll('.iveco-stat-chip').forEach(chip => {
@@ -1417,15 +1422,14 @@
             searchInput.addEventListener('input', () => renderElenco());
         }
 
-        // Pulsante X cancella ricerca
-        const searchClear = document.getElementById('iveco-search-clear');
-        if (searchClear) {
-            searchClear.addEventListener('click', () => {
+        // Pulsante X cancella ricerca — event delegation (funziona anche se l'elemento è nascosto al bind)
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#iveco-search-clear')) {
                 const inp = document.getElementById('iveco-search');
                 if (inp) { inp.value = ''; inp.focus(); }
                 renderElenco();
-            });
-        }
+            }
+        });
 
         // Chip filtro elenco (Totale / Completati / Da fare)
         document.querySelectorAll('.iveco-stat-chip[data-filter]').forEach(chip => {
