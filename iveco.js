@@ -291,6 +291,7 @@
         if (overlay) {
             overlay.classList.add('active');
             setTimeout(() => {
+                restoreSettingsFromIveco();
                 document.body.classList.remove('iveco-mode');
                 showNativeUI();
                 overlay.classList.remove('active');
@@ -298,6 +299,7 @@
                 showIvecoToast('👋 Modalità PWS ripristinata!', 'info', 2000);
             }, 800);
         } else {
+            restoreSettingsFromIveco();
             document.body.classList.remove('iveco-mode');
             showNativeUI();
             localStorage.removeItem(STORAGE_KEY_MODE);
@@ -1224,20 +1226,43 @@
     }
 
     // ============================================================
-    // COPIA IMPOSTAZIONI DAL SITO PWS
+    // IMPOSTAZIONI PWS: sposta/ripristina il nodo reale (conserva i listener)
     // ============================================================
     function copySettingsToIveco() {
         const settingsSection = document.getElementById('settings-section');
         const ivecoSettings   = document.getElementById('iveco-settings-content');
         if (!settingsSection || !ivecoSettings) return;
 
-        // Clona il contenuto della sezione impostazioni PWS
-        const clone = settingsSection.cloneNode(true);
-        clone.id = 'iveco-settings-cloned';
-        clone.classList.remove('section');
-        clone.style.display = 'block';
+        // Segna il parent originale se non già fatto
+        if (!settingsSection.dataset.ivecoOriginalParent) {
+            settingsSection.dataset.ivecoOriginalParent = 'main > .container';
+        }
+
+        // Già dentro iveco-settings-content, niente da fare
+        if (settingsSection.parentElement === ivecoSettings) return;
+
+        // Sposta il nodo REALE (con tutti i listener già attaccati)
+        settingsSection.style.display = 'block';
+        settingsSection.classList.add('active');
         ivecoSettings.innerHTML = '';
-        ivecoSettings.appendChild(clone);
+        ivecoSettings.appendChild(settingsSection);
+    }
+
+    function restoreSettingsFromIveco() {
+        const settingsSection = document.getElementById('settings-section');
+        if (!settingsSection) return;
+
+        const ivecoSettings = document.getElementById('iveco-settings-content');
+        // Se il nodo è dentro il container Iveco, riportalo a main
+        if (ivecoSettings && settingsSection.parentElement === ivecoSettings) {
+            const mainContainer = document.querySelector('main > .container');
+            if (mainContainer) {
+                settingsSection.style.display = '';
+                settingsSection.classList.remove('active');
+                mainContainer.appendChild(settingsSection);
+                ivecoSettings.innerHTML = '';
+            }
+        }
     }
 
     // ============================================================
@@ -1248,9 +1273,15 @@
         document.querySelectorAll('#iveco-nav .iveco-nav-item').forEach(item => {
             item.addEventListener('click', (e) => {
                 e.preventDefault();
+
+                // Se si lascia la tab impostazioni, ripristina il nodo originale
+                if (ivecoState.activeSection === 'impostazioni' && item.dataset.section !== 'impostazioni') {
+                    restoreSettingsFromIveco();
+                }
+
                 navigateTo(item.dataset.section);
 
-                // Copia impostazioni quando si clicca su impostazioni
+                // Sposta le impostazioni reali quando si clicca su impostazioni
                 if (item.dataset.section === 'impostazioni') {
                     setTimeout(copySettingsToIveco, 50);
                 }
