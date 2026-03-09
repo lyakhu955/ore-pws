@@ -35,10 +35,12 @@
 
     function saveVehicles() {
         try { localStorage.setItem(STORAGE_KEY_VEHICLES, JSON.stringify(ivecoState.vehicles)); } catch(e) {}
+        if (typeof window.ivecoTriggerBackup === 'function') window.ivecoTriggerBackup();
     }
 
     function saveAtmNotes() {
         try { localStorage.setItem(STORAGE_KEY_ATM_NOTES, JSON.stringify(ivecoState.atmNotes)); } catch(e) {}
+        if (typeof window.ivecoTriggerBackup === 'function') window.ivecoTriggerBackup();
     }
 
     function loadData() {

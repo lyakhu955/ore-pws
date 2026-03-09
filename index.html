@@ -14382,6 +14382,8 @@ END:VCARD`;
                 if (window.originalSaveDb) {
                     window.saveDb = window.originalSaveDb;
                 }
+                // Disabilita anche l'hook Iveco
+                window.ivecoTriggerBackup = null;
                 return;
             }
 
@@ -14391,19 +14393,16 @@ END:VCARD`;
                 window.originalSaveDb = window.saveDb;
             }
 
-            window.saveDb = function(data) {
-                const result = window.originalSaveDb(data);
-
-                // Pianifica backup con un leggero ritardo per evitare troppe chiamate
+            // Funzione centralizzata di debounce per il backup automatico
+            function scheduleAutoBackup() {
                 if (window.backupDebounceTimer) {
                     clearTimeout(window.backupDebounceTimer);
                 }
-
                 window.backupDebounceTimer = setTimeout(async () => {
                     if (cloudManager.getCurrentProvider()) {
                         try {
                             console.log('Esecuzione backup automatico dopo modifica...');
-                            const currentData = getFullBackupData(); // Backup completo
+                            const currentData = getFullBackupData(); // Backup completo (ore + Iveco + impostazioni)
                             const backupResult = await cloudManager.backup(currentData, true); // silent = true
                             if (backupResult.success) {
                                 console.log('Backup automatico dopo modifica completato');
@@ -14416,9 +14415,17 @@ END:VCARD`;
                         }
                     }
                 }, 2000); // Attendi 2 secondi dopo l'ultima modifica
+            }
 
+            window.saveDb = function(data) {
+                const result = window.originalSaveDb(data);
+                // Pianifica backup con un leggero ritardo per evitare troppe chiamate
+                scheduleAutoBackup();
                 return result;
             };
+
+            // Hook per i salvataggi Iveco (saveVehicles / saveAtmNotes non passano per saveDb)
+            window.ivecoTriggerBackup = scheduleAutoBackup;
         }
 
         // Funzione per controllare se esistono dati locali significativi
