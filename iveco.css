@@ -1024,6 +1024,23 @@ body.dark-theme .iveco-check.checked {
     box-shadow: 0 0 10px rgba(46,204,113,0.4);
 }
 
+/* Miglioramenti visibilità in tema scuro: bordo leggero, icona più grande e ombra */
+body.dark-theme .iveco-check {
+    border: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.18s ease, box-shadow 0.18s ease;
+}
+
+body.dark-theme .iveco-check .material-symbols-outlined {
+    font-size: 1.2rem;
+    line-height: 1;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+
+body.dark-theme .iveco-check.checked .material-symbols-outlined {
+    color: white;
+    filter: drop-shadow(0 2px 6px rgba(46,204,113,0.35));
+}
+
 /* --- Note ATM --- */
 body.dark-theme .iveco-atm-vehicle-card {
     background: var(--neo-bg-light, #232342);
