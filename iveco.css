@@ -87,30 +87,37 @@ body.dark-theme.iveco-mode > .bottom-nav {
 /* Header Iveco */
 #iveco-header {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.8rem 1.2rem;
+    flex-direction: column;
+    padding: 0.6rem 1.2rem 0;
     background: var(--neo-bg, #E4E9F2);
     box-shadow: var(--neo-out, 4px 4px 10px rgba(0,0,0,0.1), -4px -4px 10px rgba(255,255,255,0.8));
     position: sticky;
     top: 0;
     z-index: 100;
-    min-height: 60px;
+    gap: 0;
+}
+
+/* Riga superiore: logo + pulsante tema */
+#iveco-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 48px;
 }
 
 /* ================================================================ */
 /* 🚌 BUS ANIMATO — Header Iveco                                    */
 /* ================================================================ */
 
-/* Track: area in cui si muove il bus, tra logo e tasto tema */
+/* Track: riga completa sotto logo+azioni */
 #iveco-bus-track {
-    flex: 1;
+    width: 100%;
     position: relative;
-    height: 46px;
+    height: 52px;
     overflow: hidden;
-    margin: 0 4px;
-    align-self: flex-end;
     border-bottom: 2px dashed rgba(0,0,0,0.08);
+    margin: 2px 0 0;
 }
 
 /* Wrapper del bus — posizionato da JS */
@@ -118,8 +125,8 @@ body.dark-theme.iveco-mode > .bottom-nav {
     position: absolute;
     bottom: 2px;
     left: 0;
-    width: 70px;
-    height: 44px;
+    width: 80px;
+    height: 50px;
     will-change: left;
 }
 

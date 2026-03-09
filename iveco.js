@@ -1142,17 +1142,26 @@
         return `
         <!-- Header Iveco -->
         <header id="iveco-header">
-            <div class="iveco-header-logo" id="iveco-logo-wrap" style="position:relative;">
-                <img src="icons/iveco.png" alt="Iveco Logo" draggable="false">
-                <div style="line-height:1.1;">
-                    <div class="iveco-header-title">
-                        Gestione Mezzi Iveco
+            <!-- Riga 1: logo + pulsante tema -->
+            <div id="iveco-header-top">
+                <div class="iveco-header-logo" id="iveco-logo-wrap" style="position:relative;">
+                    <img src="icons/iveco.png" alt="Iveco Logo" draggable="false">
+                    <div style="line-height:1.1;">
+                        <div class="iveco-header-title">
+                            Gestione Mezzi Iveco
+                        </div>
                     </div>
+                    <div class="press-ring"></div>
                 </div>
-                <div class="press-ring"></div>
+                <div class="iveco-header-actions">
+                    <button id="iveco-theme-toggle" title="Cambia tema">
+                        <span class="material-symbols-outlined theme-icon-light">light_mode</span>
+                        <span class="material-symbols-outlined theme-icon-dark" style="display:none;">dark_mode</span>
+                    </button>
+                </div>
             </div>
 
-            <!-- 🚌 BUS ANIMATO -->
+            <!-- Riga 2: bus animato a tutta larghezza -->
             <div id="iveco-bus-track">
                 <div id="iveco-bus-wrap">
                     <svg id="iveco-bus-svg" viewBox="0 0 120 58" xmlns="http://www.w3.org/2000/svg" fill="none">
@@ -1229,13 +1238,6 @@
                         </g>
                     </svg>
                 </div>
-            </div>
-
-            <div class="iveco-header-actions">
-                <button id="iveco-theme-toggle" title="Cambia tema">
-                    <span class="material-symbols-outlined theme-icon-light">light_mode</span>
-                    <span class="material-symbols-outlined theme-icon-dark" style="display:none;">dark_mode</span>
-                </button>
             </div>
         </header>
 
@@ -1586,7 +1588,7 @@
         const WF_CX = 94, WF_CY = 48;  // centro ruota anteriore nel viewBox
         const WR_CX = 26, WR_CY = 48;  // centro ruota posteriore nel viewBox
 
-        const BUS_W    = 70;    // larghezza elemento wrap in px
+        const BUS_W    = 80;    // larghezza elemento wrap in px (aggiornato)
         const PAUSE_MS = 1000; // sosta al capolinea in ms
         const MAX_SPEED = 80;  // px/s velocità massima
 
