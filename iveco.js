@@ -1151,6 +1151,86 @@
                 </div>
                 <div class="press-ring"></div>
             </div>
+
+            <!-- 🚌 BUS ANIMATO -->
+            <div id="iveco-bus-track">
+                <div id="iveco-bus-wrap">
+                    <svg id="iveco-bus-svg" viewBox="0 0 120 58" xmlns="http://www.w3.org/2000/svg" fill="none">
+                        <!-- Ombra a terra -->
+                        <ellipse id="bus-shadow" cx="60" cy="56" rx="44" ry="3" fill="rgba(0,0,0,0.13)"/>
+                        <!-- Carrozzeria principale -->
+                        <rect x="4" y="10" width="112" height="38" rx="7" fill="#1565C0"/>
+                        <!-- Fascia gialla laterale -->
+                        <rect x="4" y="28" width="112" height="6" fill="#FFC107"/>
+                        <!-- Tetto arrotondato -->
+                        <rect x="8" y="6" width="104" height="12" rx="6" fill="#1976D2"/>
+                        <!-- Parte anteriore (muso) -->
+                        <rect x="96" y="14" width="18" height="30" rx="5" fill="#0D47A1"/>
+                        <!-- Parte posteriore -->
+                        <rect x="6" y="14" width="14" height="30" rx="4" fill="#0D47A1"/>
+                        <!-- Parabrezza anteriore -->
+                        <rect x="99" y="15" width="12" height="14" rx="3" fill="#B3E5FC" opacity="0.9"/>
+                        <!-- Finestrino 1 -->
+                        <rect x="78" y="13" width="16" height="11" rx="3" fill="#B3E5FC" opacity="0.85"/>
+                        <!-- Finestrino 2 -->
+                        <rect x="58" y="13" width="16" height="11" rx="3" fill="#B3E5FC" opacity="0.85"/>
+                        <!-- Finestrino 3 -->
+                        <rect x="38" y="13" width="16" height="11" rx="3" fill="#B3E5FC" opacity="0.85"/>
+                        <!-- Finestrino 4 (piccolo posteriore) -->
+                        <rect x="20" y="13" width="12" height="11" rx="3" fill="#B3E5FC" opacity="0.85"/>
+                        <!-- Porta -->
+                        <rect x="62" y="30" width="14" height="16" rx="2" fill="#1A237E" opacity="0.6"/>
+                        <line x1="69" y1="30" x2="69" y2="46" stroke="#B3E5FC" stroke-width="0.8" opacity="0.5"/>
+                        <!-- Faro anteriore -->
+                        <ellipse cx="111" cy="38" rx="4" ry="3" fill="#FFF9C4"/>
+                        <ellipse cx="111" cy="38" rx="2.5" ry="2" fill="#FFEB3B"/>
+                        <!-- Fanale posteriore -->
+                        <rect x="6" y="34" width="6" height="8" rx="2" fill="#EF5350"/>
+                        <!-- Specchietto -->
+                        <rect x="112" y="18" width="5" height="3" rx="1" fill="#90CAF9"/>
+                        <!-- Dettagli tetto: aria condizionata -->
+                        <rect x="30" y="4" width="22" height="4" rx="2" fill="#1565C0"/>
+                        <rect x="55" y="3" width="30" height="4" rx="2" fill="#1565C0"/>
+                        <!-- Numero bus -->
+                        <rect x="68" y="7" width="18" height="6" rx="1" fill="#FFC107"/>
+                        <text x="77" y="13" font-size="4.5" fill="#1A237E" text-anchor="middle" font-family="monospace" font-weight="bold">ATM</text>
+
+                        <!-- RUOTA ANTERIORE — cerchio + raggi + pneumatico -->
+                        <g id="bus-wheel-front" transform="translate(94,48)">
+                            <circle r="8.5" fill="#212121"/>
+                            <circle r="6" fill="#424242"/>
+                            <circle r="3.5" fill="#616161"/>
+                            <circle r="1.8" fill="#9E9E9E"/>
+                            <!-- Raggi -->
+                            <line x1="0" y1="-5.8" x2="0" y2="-3" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="0" y1="3" x2="0" y2="5.8" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="-5.8" y1="0" x2="-3" y2="0" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="3" y1="0" x2="5.8" y2="0" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="-4.1" y1="-4.1" x2="-2.1" y2="-2.1" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="2.1" y1="2.1" x2="4.1" y2="4.1" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="4.1" y1="-4.1" x2="2.1" y2="-2.1" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="-2.1" y1="2.1" x2="-4.1" y2="4.1" stroke="#9E9E9E" stroke-width="1.2"/>
+                        </g>
+
+                        <!-- RUOTA POSTERIORE -->
+                        <g id="bus-wheel-rear" transform="translate(26,48)">
+                            <circle r="8.5" fill="#212121"/>
+                            <circle r="6" fill="#424242"/>
+                            <circle r="3.5" fill="#616161"/>
+                            <circle r="1.8" fill="#9E9E9E"/>
+                            <line x1="0" y1="-5.8" x2="0" y2="-3" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="0" y1="3" x2="0" y2="5.8" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="-5.8" y1="0" x2="-3" y2="0" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="3" y1="0" x2="5.8" y2="0" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="-4.1" y1="-4.1" x2="-2.1" y2="-2.1" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="2.1" y1="2.1" x2="4.1" y2="4.1" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="4.1" y1="-4.1" x2="2.1" y2="-2.1" stroke="#9E9E9E" stroke-width="1.2"/>
+                            <line x1="-2.1" y1="2.1" x2="-4.1" y2="4.1" stroke="#9E9E9E" stroke-width="1.2"/>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+
             <div class="iveco-header-actions">
                 <button id="iveco-theme-toggle" title="Cambia tema">
                     <span class="material-symbols-outlined theme-icon-light">light_mode</span>
@@ -1455,6 +1535,9 @@
         // Long press logo Iveco (per uscire)
         setupIvecoLongPress();
 
+        // Bus animato
+        setupBusAnimation();
+
         // Setup Excel upload
         setupExcelUpload();
 
@@ -1476,6 +1559,125 @@
             });
         });
         bodyObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    // ============================================================
+    // 🚌 BUS ANIMATO — Guida realistica con JS
+    // ============================================================
+    function setupBusAnimation() {
+        const wrap = document.getElementById('iveco-bus-wrap');
+        const track = document.getElementById('iveco-bus-track');
+        const svg   = document.getElementById('iveco-bus-svg');
+        if (!wrap || !track || !svg) return;
+
+        const BUS_W   = 70;    // larghezza bus in px
+        const PAUSE   = 900;   // ms di sosta al capolinea
+        const SPEED   = 42;    // px al secondo velocità crociera
+
+        // Easing: accelerazione/frenata realistica (ease-in-out cubica)
+        function easeInOutCubic(t) {
+            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
+
+        let pos        = 0;        // posizione corrente (px)
+        let dir        = 1;        // 1 = destra, -1 = sinistra
+        let phase      = 'drive';  // 'drive' | 'pause'
+        let pauseTimer = null;
+        let animId     = null;
+        let lastTime   = null;
+        let tripLength = 0;        // lunghezza del percorso (px)
+        let tripDone   = 0;        // percorso già fatto in questo tratto (px)
+
+        // Elementi ruote per controllo velocità
+        const wheelFront = document.getElementById('bus-wheel-front');
+        const wheelRear  = document.getElementById('bus-wheel-rear');
+        const shadow     = document.getElementById('bus-shadow');
+
+        function getTripLength() {
+            return Math.max(0, track.offsetWidth - BUS_W);
+        }
+
+        function setWheelSpeed(speedFactor) {
+            // speedFactor 0=fermo, 1=velocità normale
+            const dur = speedFactor < 0.05 ? '99s' : (0.5 / speedFactor) + 's';
+            if (wheelFront) wheelFront.style.animationDuration = dur;
+            if (wheelRear)  wheelRear.style.animationDuration  = dur;
+        }
+
+        function applyFlip() {
+            // scaleX(-1) = guarda a sinistra, scaleX(1) = guarda a destra
+            svg.style.transform = dir === 1 ? 'scaleX(1)' : 'scaleX(-1)';
+        }
+
+        function startPause() {
+            phase = 'pause';
+            setWheelSpeed(0);
+            // Animazione frenata: piccola oscillazione
+            wrap.style.transition = 'left 0.18s ease-out';
+            if (pauseTimer) clearTimeout(pauseTimer);
+            pauseTimer = setTimeout(() => {
+                // Cambia direzione
+                dir = dir === 1 ? -1 : 1;
+                tripDone   = 0;
+                tripLength = getTripLength();
+                applyFlip();
+                phase    = 'drive';
+                lastTime = null;
+                wrap.style.transition = '';
+                animate();
+            }, PAUSE);
+        }
+
+        function animate(timestamp) {
+            if (!timestamp) { animId = requestAnimationFrame(animate); return; }
+            if (!lastTime) lastTime = timestamp;
+
+            const dt = Math.min(timestamp - lastTime, 50); // max 50ms per frame
+            lastTime = timestamp;
+
+            tripLength = getTripLength();
+            if (tripLength <= 0) { animId = requestAnimationFrame(animate); return; }
+
+            // Progresso del tratto [0..1]
+            const progress = Math.min(tripDone / tripLength, 1);
+
+            // Velocità modulata dall'easing: accelera all'inizio, frena alla fine
+            // Derivata dell'easeInOutCubic ≈ velocità istantanea
+            let easedPrev = easeInOutCubic(Math.max(0, progress - 0.001));
+            let easedNext = easeInOutCubic(Math.min(1, progress + 0.001));
+            let speedFactor = Math.max(0, (easedNext - easedPrev) / 0.002);
+            speedFactor = Math.min(1, speedFactor * 1.5); // amplifica per renderlo visibile
+
+            const step = SPEED * speedFactor * (dt / 1000) * dir;
+            pos      = Math.max(0, Math.min(tripLength, pos + step));
+            tripDone = dir === 1 ? pos : (tripLength - pos);
+
+            wrap.style.left = pos + 'px';
+            setWheelSpeed(speedFactor);
+
+            // Ombra si schiaccia in base alla velocità
+            if (shadow) {
+                const sx = 1 + speedFactor * 0.08;
+                shadow.setAttribute('rx', 44 * sx);
+            }
+
+            if (progress >= 1) {
+                startPause();
+                return;
+            }
+
+            animId = requestAnimationFrame(animate);
+        }
+
+        // Avvio
+        tripLength = getTripLength();
+        applyFlip();
+        animate();
+
+        // Aggiorna dimensioni se la finestra cambia
+        window.addEventListener('resize', () => {
+            tripLength = getTripLength();
+        });
     }
 
     // ============================================================
