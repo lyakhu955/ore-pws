@@ -5468,6 +5468,80 @@
              }
         }
 
+        // ============================================================
+        // BACKUP COMPLETO — raccoglie TUTTI i dati dell'app + Iveco
+        // ============================================================
+        function getFullBackupData() {
+            const safeGet = (key) => { try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; } };
+            return {
+                // Dati ore / core PWS
+                timeTrackerData:    getDb(),
+                userName:           localStorage.getItem('userName') || null,
+                theme:              localStorage.getItem('theme') || null,
+                darkTheme:          localStorage.getItem('darkTheme') || null,
+
+                // Dati Iveco
+                iveco_vehicles:     safeGet('iveco_vehicles'),
+                iveco_atm_notes:    safeGet('iveco_atm_notes'),
+
+                // Impostazioni particelle
+                pwsParticlesEnabled: localStorage.getItem('pws-particles-enabled'),
+                pwsParticlesSettings: safeGet('pws-particles-settings'),
+
+                // Contatti salvati
+                pwsContacts:        safeGet('pwsContacts'),
+
+                // Backup metadata
+                _backupVersion:     '3.0',
+                _backupDate:        new Date().toISOString(),
+                _appName:           'PWS Ore + Iveco Orecchia'
+            };
+        }
+
+        function applyFullBackupData(data) {
+            if (!data) return;
+
+            // Ripristina dati core ore
+            const coreData = data.timeTrackerData || data; // compatibilità con backup vecchi
+            saveDb(coreData);
+
+            // Ripristina nome utente
+            if (data.userName) {
+                localStorage.setItem('userName', data.userName);
+                const el = document.getElementById('displayName') || document.getElementById('userNameDisplay');
+                if (el) el.textContent = data.userName;
+            }
+
+            // Ripristina tema
+            if (data.theme) localStorage.setItem('theme', data.theme);
+            if (data.darkTheme !== undefined && data.darkTheme !== null) {
+                localStorage.setItem('darkTheme', data.darkTheme);
+                if (data.darkTheme === 'true') document.body.classList.add('dark-theme');
+                else document.body.classList.remove('dark-theme');
+            }
+
+            // Ripristina dati Iveco
+            if (data.iveco_vehicles !== null && data.iveco_vehicles !== undefined) {
+                try { localStorage.setItem('iveco_vehicles', JSON.stringify(data.iveco_vehicles)); } catch(e) {}
+            }
+            if (data.iveco_atm_notes !== null && data.iveco_atm_notes !== undefined) {
+                try { localStorage.setItem('iveco_atm_notes', JSON.stringify(data.iveco_atm_notes)); } catch(e) {}
+            }
+
+            // Ripristina impostazioni particelle
+            if (data.pwsParticlesEnabled !== null && data.pwsParticlesEnabled !== undefined) {
+                localStorage.setItem('pws-particles-enabled', data.pwsParticlesEnabled);
+            }
+            if (data.pwsParticlesSettings) {
+                try { localStorage.setItem('pws-particles-settings', JSON.stringify(data.pwsParticlesSettings)); } catch(e) {}
+            }
+
+            // Ripristina contatti
+            if (data.pwsContacts) {
+                try { localStorage.setItem('pwsContacts', JSON.stringify(data.pwsContacts)); } catch(e) {}
+            }
+        }
+
         // Funzione per aggiornare la sezione Cash se attiva
         function updateCashSectionIfActive() {
             if (document.getElementById('cash-section')?.classList.contains('active')) {
@@ -13980,7 +14054,7 @@ END:VCARD`;
                         manualBackupBtn.disabled = true;
 
                         // Ottieni i dati da salvare
-                        const data = getDb(); // La tua funzione esistente
+                        const data = getFullBackupData(); // Backup completo: ore + Iveco + impostazioni
 
                         let result;
                         let isAuthenticated = false;
@@ -14111,13 +14185,15 @@ END:VCARD`;
                         }
 
                         // Ripristina i dati
-                        saveDb(result.data);
+                        applyFullBackupData(result.data);
 
                         // Aggiorna l'interfaccia utente
                         if (typeof loadTimeEntries === 'function') loadTimeEntries();
                         if (typeof loadCalendarData === 'function') loadCalendarData();
                         if (typeof populateVehicleDropdown === 'function') populateVehicleDropdown();
                         if (typeof loadVehiclesList === 'function') loadVehiclesList();
+                        // Ricarica dati Iveco se la funzione è disponibile
+                        if (typeof window.ivecoLoadData === 'function') window.ivecoLoadData();
 
                         showToast('Dati ripristinati con successo', 'success');
                     } catch (error) {
@@ -14219,7 +14295,7 @@ END:VCARD`;
                     if (cloudManager.getCurrentProvider()) {
                         try {
                             console.log('Esecuzione backup automatico dopo modifica...');
-                            const currentData = getDb();
+                            const currentData = getFullBackupData(); // Backup completo
                             const backupResult = await cloudManager.backup(currentData, true); // silent = true
                             if (backupResult.success) {
                                 console.log('Backup automatico dopo modifica completato');

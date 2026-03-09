@@ -53,6 +53,15 @@
         } catch(e) { ivecoState.atmNotes = {}; }
     }
 
+    // Esponi loadData globalmente per permettere al restore backup di ricaricare i dati Iveco
+    window.ivecoLoadData = function() {
+        loadData();
+        // Se la modalità Iveco è attiva, ri-renderizza la sezione corrente
+        if (document.body.classList.contains('iveco-mode')) {
+            if (typeof renderCurrentSection === 'function') renderCurrentSection();
+        }
+    };
+
     // Estrai ultimi 4 caratteri dal numero telaio
     function extractTelaio(raw) {
         if (!raw) return '';
