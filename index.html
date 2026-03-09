@@ -3113,6 +3113,16 @@
                             </button>
                         </div>
 
+                        <div class="setting-item" id="testRefreshSetting">
+                            <span class="setting-label">Test Refresh Token</span>
+                            <div style="display:flex; flex-direction:column; gap:8px; flex-grow:1;">
+                                <button id="testSilentRefreshBtn">
+                                    <span class="material-symbols-outlined">key</span> Testa Refresh Silenzioso
+                                </button>
+                                <div id="testRefreshResult" style="display:none; font-size:0.82rem; padding:8px 12px; border-radius:10px; font-weight:600;"></div>
+                            </div>
+                        </div>
+
                         <div class="setting-item">
                             <span class="setting-label">PIN Admin</span>
                             <div style="display: flex; gap: 10px; flex-grow: 1;">
@@ -14243,7 +14253,70 @@ END:VCARD`;
                 });
             }
 
-            // Toggle per backup automatico
+            // ---- Test Refresh Token Silenzioso ----
+            const testRefreshBtn = document.getElementById('testSilentRefreshBtn');
+            if (testRefreshBtn) {
+                testRefreshBtn.addEventListener('click', async () => {
+                    const resultEl = document.getElementById('testRefreshResult');
+                    testRefreshBtn.disabled = true;
+                    testRefreshBtn.innerHTML = '<span class="spinner"></span> Test in corso...';
+                    resultEl.style.display = 'none';
+
+                    const show = (msg, ok) => {
+                        resultEl.textContent = msg;
+                        resultEl.style.display = 'block';
+                        resultEl.style.background = ok ? 'rgba(46,204,113,0.13)' : 'rgba(231,76,60,0.13)';
+                        resultEl.style.color = ok ? '#27ae60' : '#e74c3c';
+                        resultEl.style.border = `1px solid ${ok ? 'rgba(46,204,113,0.4)' : 'rgba(231,76,60,0.4)'}`;
+                        testRefreshBtn.disabled = false;
+                        testRefreshBtn.innerHTML = '<span class="material-symbols-outlined">key</span> Testa Refresh Silenzioso';
+                    };
+
+                    // 1) Verifica che ci sia un token salvato
+                    const tokenStr = localStorage.getItem('googleAuthToken');
+                    if (!tokenStr) {
+                        return show('❌ Nessun token salvato. Fai prima il login con Google.', false);
+                    }
+
+                    let tokenData;
+                    try { tokenData = JSON.parse(tokenStr); } catch(e) {
+                        return show('❌ Token corrotto nel localStorage.', false);
+                    }
+
+                    if (!tokenData.refresh_token) {
+                        return show('⚠️ Nessun refresh_token presente. Fai logout e login per ottenerlo.', false);
+                    }
+
+                    // 2) Forza la scadenza del token in memoria (senza salvare)
+                    // poi chiama performSilentTokenRefresh
+                    const originalExpiry = tokenData.expires_at;
+                    tokenData.expires_at = Date.now() - 1000; // Scaduto 1 sec fa
+                    localStorage.setItem('googleAuthToken', JSON.stringify(tokenData));
+
+                    // 3) Chiama il refresh silenzioso
+                    try {
+                        const success = typeof performSilentTokenRefresh === 'function'
+                            ? await performSilentTokenRefresh()
+                            : null;
+
+                        if (success) {
+                            const newStr = localStorage.getItem('googleAuthToken');
+                            const newData = JSON.parse(newStr);
+                            const expiresIn = Math.round((newData.expires_at - Date.now()) / 60000);
+                            show(`✅ Refresh silenzioso riuscito! Nuovo token valido per ~${expiresIn} minuti. Nessuna finestra Google aperta.`, true);
+                        } else {
+                            // Ripristina il token originale
+                            tokenData.expires_at = originalExpiry;
+                            localStorage.setItem('googleAuthToken', JSON.stringify(tokenData));
+                            show('❌ Refresh silenzioso fallito. Controlla la console per dettagli.', false);
+                        }
+                    } catch(err) {
+                        tokenData.expires_at = originalExpiry;
+                        localStorage.setItem('googleAuthToken', JSON.stringify(tokenData));
+                        show(`❌ Errore: ${err.message}`, false);
+                    }
+                });
+            }
             const autoBackupToggle = document.getElementById('autoBackupToggle');
             if (autoBackupToggle) {
                 autoBackupToggle.addEventListener('change', (e) => {
