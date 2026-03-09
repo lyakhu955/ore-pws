@@ -30,10 +30,8 @@ function initGoogleAuth() {
         client_id: CLIENT_ID,
         scope: SCOPES,
         callback: handleTokenResponse,
-        error_callback: handleTokenError,
-        // Richiedi refresh token per il rinnovo automatico
-        prompt: 'consent',
-        access_type: 'offline'
+        error_callback: handleTokenError
+        // Non impostiamo prompt: 'consent' qui — viene chiesto solo al primo login esplicito
       });
 
       // Verifica se c'è già un token salvato
@@ -396,7 +394,8 @@ function loginWithGoogle() {
   } else {
     console.log('Uso popup per login...');
     try {
-      tokenClient.requestAccessToken();
+      // prompt: 'consent' + access_type: 'offline' garantisce il refresh_token al primo login
+      tokenClient.requestAccessToken({ prompt: 'consent', access_type: 'offline' });
     } catch (error) {
       console.error('Popup fallito, provo con redirect:', error);
       loginWithGoogleRedirect();
@@ -754,89 +753,66 @@ function performIframeSilentRefresh(refreshToken) {
   });
 }
 
-// Gestisce il fallimento del refresh automatico con fallback intelligente
+// Gestisce il fallimento del refresh automatico — SOLO refresh silenziosi, mai popup visibili
 async function handleRefreshFailure() {
-  console.log('Gestione fallimento refresh automatico...');
+  console.log('Gestione fallimento refresh automatico (solo silent)...');
 
-  // Prova un secondo tentativo dopo 30 secondi
-  setTimeout(async () => {
-    console.log('Secondo tentativo di refresh automatico...');
-
-    const success = await performSilentTokenRefresh();
-
-    if (success) {
-      console.log('Secondo tentativo riuscito');
-      return;
-    }
-
-    // Se anche il secondo tentativo fallisce, verifica lo stato del token
-    console.log('Refresh automatico fallito definitivamente');
-
-    const savedTokenStr = localStorage.getItem('googleAuthToken');
-    if (savedTokenStr) {
-      try {
-        const tokenData = JSON.parse(savedTokenStr);
-        const timeRemaining = tokenData.expires_at - Date.now();
-
-        // Se abbiamo ancora almeno 5 minuti, programma un altro tentativo
-        if (timeRemaining > (5 * 60 * 1000)) {
-          console.log('Token ancora valido, programmo un altro tentativo...');
-          setTimeout(() => performSilentTokenRefresh(), 2 * 60 * 1000); // Riprova tra 2 minuti
-          return;
-        }
-
-        // Se il token scadrà presto, prova il fallback popup automatico
-        if (timeRemaining > (1 * 60 * 1000)) { // Almeno 1 minuto rimasto
-          console.log('Token in scadenza imminente, tentativo popup automatico...');
-          await attemptAutomaticPopupRefresh();
-          return;
-        }
-      } catch (e) {
-        console.error('Errore nel parsing del token:', e);
-      }
-    }
-
-    // Solo come ultima risorsa, mostra un messaggio discreto all'utente
-    showToast('Sessione scaduta. Clicca qui per riconnetterti.', 'warning', 15000, () => {
-      loginWithGoogle();
-    });
-
-  }, 30000); // Aspetta 30 secondi prima del secondo tentativo
-}
-
-// Tentativo automatico di refresh tramite popup (solo se necessario)
-async function attemptAutomaticPopupRefresh() {
-  try {
-    console.log('Tentativo popup automatico per refresh token...');
-
-    // Mostra una notifica discreta che stiamo rinnovando la sessione
-    showToast('Rinnovo sessione in corso...', 'info', 3000);
-
-    // Usa il client token esistente per un refresh automatico
-    if (tokenClient) {
-      // Configura il client per un refresh silenzioso se possibile
-      tokenClient.requestAccessToken({
-        prompt: '', // Prova senza prompt
-        hint: localStorage.getItem('googleUserEmail') || ''
-      });
-    } else {
-      // Se non abbiamo il client, inizializza e riprova
-      await initGoogleAuth();
-      setTimeout(() => {
-        if (tokenClient) {
-          tokenClient.requestAccessToken();
-        }
-      }, 1000);
-    }
-
-  } catch (error) {
-    console.error('Errore durante il popup automatico:', error);
-
-    // Se anche il popup automatico fallisce, mostra il messaggio all'utente
-    showToast('Sessione scaduta. Clicca qui per riconnetterti.', 'warning', 15000, () => {
-      loginWithGoogle();
-    });
+  // Verifica se abbiamo ancora un refresh token valido
+  const savedTokenStr = localStorage.getItem('googleAuthToken');
+  if (!savedTokenStr) {
+    console.log('Nessun token salvato, utente non loggato.');
+    return;
   }
+
+  let tokenData;
+  try {
+    tokenData = JSON.parse(savedTokenStr);
+  } catch (e) {
+    console.error('Token corrotto:', e);
+    return;
+  }
+
+  if (!tokenData.refresh_token) {
+    console.log('Nessun refresh token disponibile — sessione terminata silenziosamente.');
+    // Non mostrare nulla, aspetta che l'utente tenti una operazione
+    return;
+  }
+
+  // Strategia: 3 retry silenziosi con backoff crescente (30s, 2min, 5min)
+  const retryDelays = [30 * 1000, 2 * 60 * 1000, 5 * 60 * 1000];
+
+  for (let attempt = 0; attempt < retryDelays.length; attempt++) {
+    await new Promise(resolve => setTimeout(resolve, retryDelays[attempt]));
+
+    console.log(`Retry silenzioso ${attempt + 1}/${retryDelays.length}...`);
+
+    // Prova direttamente via serverless (più affidabile dell'iframe)
+    const newToken = await refreshTokenWithVercel(tokenData.refresh_token);
+
+    if (newToken && newToken.access_token) {
+      console.log(`Retry ${attempt + 1} riuscito!`);
+      return updateTokenData(newToken, tokenData.refresh_token);
+    }
+
+    // Controlla se il refresh_token è stato revocato (errore 400/401 dalla serverless)
+    // In quel caso inutile ritentare
+    console.log(`Retry ${attempt + 1} fallito, proseguo...`);
+  }
+
+  // Dopo tutti i retry: verifica se il token attuale è ancora valido
+  const timeRemaining = (tokenData.expires_at || 0) - Date.now();
+  if (timeRemaining > 0) {
+    console.log(`Token ancora valido per ${Math.round(timeRemaining / 60000)} min, nessuna azione necessaria.`);
+    // Riprogramma un refresh tra il tempo rimanente meno 5 minuti
+    setupTokenRefresh(tokenData.expires_at);
+    return;
+  }
+
+  // Token completamente scaduto e tutti i retry silenziosi falliti:
+  // Non disturbare l'utente — il backup fallirà con un errore normale
+  // L'utente vedrà il popup solo se clicca manualmente su "Backup"
+  console.log('Tutti i retry silenziosi falliti. Sessione scaduta silenziosamente.');
+  console.log('Il login verrà richiesto solo al prossimo tentativo di backup manuale.');
 }
 
 // Sistema di refresh proattivo - controlla periodicamente lo stato del token
