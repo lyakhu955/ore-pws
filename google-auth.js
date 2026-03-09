@@ -384,23 +384,11 @@ function loginWithGoogle() {
 
   console.log('Richiesta token di accesso...');
 
-  // Rileva se siamo su mobile o se i popup sono bloccati
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  const isPopupBlocked = checkPopupBlocked();
-
-  if (isMobile || isPopupBlocked) {
-    console.log('Popup bloccato o dispositivo mobile, uso redirect...');
-    loginWithGoogleRedirect();
-  } else {
-    console.log('Uso popup per login...');
-    try {
-      // prompt: 'consent' + access_type: 'offline' garantisce il refresh_token al primo login
-      tokenClient.requestAccessToken({ prompt: 'consent', access_type: 'offline' });
-    } catch (error) {
-      console.error('Popup fallito, provo con redirect:', error);
-      loginWithGoogleRedirect();
-    }
-  }
+  // Usa sempre il flusso redirect (Authorization Code Flow) per garantire il refresh_token.
+  // Il token client GIS (requestAccessToken) usa il flusso implicito e NON restituisce mai
+  // il refresh_token, indipendentemente dal parametro access_type: 'offline'.
+  console.log('Uso redirect (code flow) per ottenere refresh_token...');
+  loginWithGoogleRedirect();
 }
 
 // Controlla se i popup sono bloccati
