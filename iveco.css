@@ -88,13 +88,23 @@ body.dark-theme.iveco-mode > .bottom-nav {
 #iveco-header {
     display: flex;
     flex-direction: column;
-    padding: 0.6rem 1.2rem 0;
+    padding: 0.6rem 1.2rem 0 !important;
     background: var(--neo-bg, #E4E9F2);
     box-shadow: var(--neo-out, 4px 4px 10px rgba(0,0,0,0.1), -4px -4px 10px rgba(255,255,255,0.8));
     position: sticky;
     top: 0;
     z-index: 100;
     gap: 0;
+    /* Sovrascrive il height:70px fisso del CSS globale (index.html) */
+    height: auto !important;
+    min-height: unset !important;
+    box-sizing: border-box;
+}
+
+/* Override anche per dark-theme che forza height+padding su tutti gli header */
+body.dark-theme #iveco-header {
+    height: auto !important;
+    padding: 0.6rem 1.2rem 0 !important;
 }
 
 /* Riga superiore: logo + pulsante tema */
@@ -140,6 +150,16 @@ body.dark-theme.iveco-mode > .bottom-nav {
 /* Dark mode */
 body.dark-theme #iveco-bus-track {
     border-bottom-color: rgba(255,255,255,0.06);
+}
+
+/* Override safe-area @supports che forza height+padding su tutti i header */
+@supports (padding: max(0px)) {
+    #iveco-header {
+        height: auto !important;
+        padding-top: 0.6rem !important;
+        padding-left: 1.2rem !important;
+        padding-right: 1.2rem !important;
+    }
 }
 
 /* ================================================================ */
