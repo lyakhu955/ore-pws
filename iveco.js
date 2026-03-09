@@ -1586,14 +1586,14 @@
         const WF_CX = 94, WF_CY = 48;  // centro ruota anteriore nel viewBox
         const WR_CX = 26, WR_CY = 48;  // centro ruota posteriore nel viewBox
 
-        const BUS_W   = 70;    // larghezza elemento wrap in px
+        const BUS_W    = 70;    // larghezza elemento wrap in px
         const PAUSE_MS = 1000; // sosta al capolinea in ms
-        const MAX_SPEED = 45;  // px/s velocità massima
+        const MAX_SPEED = 80;  // px/s velocità massima
 
         let pos       = 0;      // posizione px corrente
         let dir       = 1;      // 1=destra, -1=sinistra
         let phase     = 'drive'; // 'drive' | 'pause'
-        let tripDone  = 0;      // px percorsi nel tratto corrente
+        let tripDone  = 1;      // inizia con 1 per evitare speedFactor=0 all'avvio
         let tripLen   = 0;
         let lastTs    = null;
         let wheelAngle = 0;    // angolo ruote in gradi
@@ -1601,7 +1601,18 @@
         let bounceT    = 0;    // timer sospensioni indipendente
 
         function easeInOut(t) {
+            // Clamp per sicurezza
+            t = Math.max(0, Math.min(1, t));
             return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
+        }
+
+        // Velocità istantanea: derivata numerica dell'easing, normalizzata.
+        // Aggiunge un minimo (0.08) per non bloccarsi mai a speedFactor=0.
+        function getSpeedFactor(progress) {
+            const eps = 0.005;
+            const d = (easeInOut(progress + eps) - easeInOut(progress - eps)) / (2 * eps);
+            // d max ≈ 1.5 al centro, 0 agli estremi → normalizziamo
+            return Math.max(0.08, Math.min(1, d / 1.5));
         }
 
         // Ruota un gruppo SVG attorno a (cx,cy) nel sistema di coordinate del viewBox.
@@ -1649,13 +1660,7 @@
 
             // === FASE DRIVE ===
             const progress = tripLen > 0 ? Math.min(tripDone / tripLen, 1) : 0;
-
-            // Velocità istantanea dalla derivata dell'easing
-            const eps  = 0.001;
-            const dEase = (easeInOut(Math.min(1, progress + eps)) -
-                           easeInOut(Math.max(0, progress - eps))) / (2 * eps);
-            // dEase vale ~0 agli estremi (fermo) e ~1.5 al centro
-            const speedFactor = Math.max(0, Math.min(1, dEase / 1.5));
+            const speedFactor = getSpeedFactor(progress);
             const speed       = MAX_SPEED * speedFactor;
 
             // Aggiorna posizione
