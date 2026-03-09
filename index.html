@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -70,6 +70,9 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <!-- Include Flatpickr CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <!-- Iveco Orecchia Mode CSS -->
+    <link rel="stylesheet" href="iveco.css">
+
     <style>
         /* ================================================ */
         /* 🔘 NEOMORPHISM PREMIUM DESIGN                    */
@@ -887,8 +890,8 @@
         /* ===== BOTTOM NAVIGATION ===== */
         .bottom-nav {
             position: fixed;
-            bottom: 14px; left: 50%;
-            transform: translateX(-50%);
+            bottom: 14px; left: 50% !important;
+            transform: translateX(-50%) !important;
             width: calc(100% - 28px);
             max-width: 520px;
             background: var(--neo-bg);
@@ -10429,6 +10432,13 @@ END:VCARD`;
              if (logo) {
                  // Quando l'utente clicca sul logo, aggiungiamo un'animazione più vivace
                  logo.addEventListener('click', function(e) {
+                     if (window.__ivecoLongPressTriggered) {
+                         e.preventDefault();
+                         e.stopPropagation();
+                         window.__ivecoLongPressTriggered = false;
+                         return;
+                     }
+
                      // Rimuoviamo temporaneamente la classe per resettare l'animazione
                      this.classList.remove('bouncing-logo');
 
@@ -17332,6 +17342,12 @@ END:VCARD`;
             });
         });
     </script>
+
+    <!-- Libreria SheetJS per lettura Excel (Iveco Mode) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <!-- Iveco Orecchia Mode -->
+    <script src="iveco.js"></script>
 
 </body>
 </html>
