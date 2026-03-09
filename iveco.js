@@ -372,10 +372,7 @@
 
         container.innerHTML = list.map((v, idx) => `
             <div class="iveco-vehicle-item ${v.done ? 'completed' : ''}" data-id="${v.id}">
-                <div class="iveco-vehicle-number-wrap">
-                    <div class="iveco-vehicle-number">${idx + 1}</div>
-                    ${v.done && v.doneDate ? `<div class="iveco-done-date" title="Data completamento"><span class="material-symbols-outlined">event</span>${v.doneDate}</div>` : ''}
-                </div>
+                <div class="iveco-vehicle-number">${idx + 1}</div>
                 <div class="iveco-vehicle-info">
                     <div class="iveco-vehicle-field">
                         <label>Telaio</label>
@@ -386,6 +383,7 @@
                         <span>${v.vettura}</span>
                     </div>
                 </div>
+                ${v.done && v.doneDate ? `<div class="iveco-done-date" title="Data completamento"><span class="material-symbols-outlined">event</span>${v.doneDate}</div>` : ''}
                 <div class="iveco-check ${v.done ? 'checked' : ''}" data-id="${v.id}" title="${v.done ? 'Lavoro completato' : 'Segna come completato'}">
                     <span class="material-symbols-outlined">${v.done ? 'check' : ''}</span>
                 </div>
