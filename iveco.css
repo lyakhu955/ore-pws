@@ -423,6 +423,180 @@ body.dark-theme.iveco-mode > .bottom-nav {
     letter-spacing: 1px;
 }
 
+/* ---- Numero vettura + badge data ---- */
+.iveco-vehicle-number-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    min-width: 36px;
+}
+
+.iveco-done-date {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #27ae60;
+    background: rgba(46, 204, 113, 0.12);
+    border: 1px solid rgba(46, 204, 113, 0.35);
+    border-radius: 6px;
+    padding: 2px 5px;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+}
+
+.iveco-done-date .material-symbols-outlined {
+    font-size: 0.7rem;
+    line-height: 1;
+}
+
+/* ---- Popup overlay data completamento ---- */
+#iveco-date-popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+}
+
+#iveco-date-popup-overlay.visible {
+    opacity: 1;
+}
+
+#iveco-date-popup {
+    background: var(--neo-bg, #E4E9F2);
+    border-radius: 20px;
+    padding: 1.6rem 1.4rem;
+    width: min(92%, 360px);
+    box-shadow: 8px 8px 20px rgba(0,0,0,0.18), -4px -4px 14px rgba(255,255,255,0.7);
+    transform: scale(0.88) translateY(18px);
+    transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1), opacity 0.25s ease;
+    opacity: 0;
+}
+
+#iveco-date-popup-overlay.visible #iveco-date-popup {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+.iveco-date-popup-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+}
+
+.iveco-date-popup-header .material-symbols-outlined {
+    font-size: 1.6rem;
+    color: var(--neo-primary, #4A90D9);
+}
+
+.iveco-date-popup-header h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary, #333);
+}
+
+.iveco-date-popup-sub {
+    font-size: 0.82rem;
+    color: var(--text-secondary, #666);
+    margin: 0 0 1.1rem 0;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid rgba(0,0,0,0.07);
+}
+
+.iveco-date-popup-input-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1.3rem;
+}
+
+.iveco-date-popup-input-wrap label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary, #666);
+    letter-spacing: 0.4px;
+}
+
+.iveco-date-popup-input-wrap input[type="date"] {
+    width: 100%;
+    padding: 0.65rem 1rem;
+    border: none;
+    border-radius: 12px;
+    background: var(--neo-bg, #E4E9F2);
+    box-shadow: inset 3px 3px 7px rgba(0,0,0,0.1), inset -3px -3px 7px rgba(255,255,255,0.8);
+    color: var(--text-primary, #333);
+    font-family: var(--body-font-family, 'Poppins', sans-serif);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: box-shadow 0.2s ease, border 0.2s ease;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+}
+
+.iveco-date-popup-input-wrap input[type="date"]:focus {
+    box-shadow: inset 4px 4px 9px rgba(0,0,0,0.13), inset -4px -4px 9px rgba(255,255,255,0.7), 0 0 0 2px var(--neo-primary, #4A90D9);
+}
+
+.iveco-date-popup-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.iveco-date-btn {
+    flex: 1;
+    padding: 0.7rem 1rem;
+    border: none;
+    border-radius: 12px;
+    font-family: var(--body-font-family, 'Poppins', sans-serif);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+}
+
+.iveco-date-btn.cancel {
+    background: var(--neo-bg, #E4E9F2);
+    box-shadow: 4px 4px 10px rgba(0,0,0,0.1), -4px -4px 10px rgba(255,255,255,0.8);
+    color: var(--text-secondary, #666);
+}
+
+.iveco-date-btn.cancel:active {
+    box-shadow: inset 3px 3px 7px rgba(0,0,0,0.12), inset -3px -3px 7px rgba(255,255,255,0.7);
+}
+
+.iveco-date-btn.confirm {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    box-shadow: 0 4px 14px rgba(46,204,113,0.35);
+    color: white;
+}
+
+.iveco-date-btn.confirm:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 8px rgba(46,204,113,0.25);
+}
+
+.iveco-date-btn .material-symbols-outlined {
+    font-size: 1rem;
+}
+
 /* Check box neomorfico */
 .iveco-check {
     width: 28px;
@@ -1039,6 +1213,45 @@ body.dark-theme .iveco-check .material-symbols-outlined {
 body.dark-theme .iveco-check.checked .material-symbols-outlined {
     color: white;
     filter: drop-shadow(0 2px 6px rgba(46,204,113,0.35));
+}
+
+/* --- Badge data completamento (dark) --- */
+body.dark-theme .iveco-done-date {
+    color: #2ecc71;
+    background: rgba(46, 204, 113, 0.15);
+    border-color: rgba(46, 204, 113, 0.3);
+}
+
+/* --- Popup data completamento (dark) --- */
+body.dark-theme #iveco-date-popup {
+    background: var(--neo-bg-light, #1e1e38);
+    box-shadow: 8px 8px 24px rgba(0,0,0,0.5), -4px -4px 14px rgba(255,255,255,0.03);
+}
+
+body.dark-theme .iveco-date-popup-header h3 {
+    color: var(--text-primary, #EDF0F5);
+}
+
+body.dark-theme .iveco-date-popup-sub {
+    color: var(--text-secondary, rgba(237,240,245,0.55));
+    border-bottom-color: rgba(255,255,255,0.07);
+}
+
+body.dark-theme .iveco-date-popup-input-wrap label {
+    color: var(--text-secondary, rgba(237,240,245,0.55));
+}
+
+body.dark-theme .iveco-date-popup-input-wrap input[type="date"] {
+    background: var(--neo-bg, #16162a);
+    box-shadow: inset 3px 3px 7px rgba(0,0,0,0.35), inset -3px -3px 7px rgba(255,255,255,0.03);
+    color: var(--text-primary, #EDF0F5);
+    color-scheme: dark;
+}
+
+body.dark-theme .iveco-date-btn.cancel {
+    background: var(--neo-bg-light, #1e1e38);
+    box-shadow: 4px 4px 10px rgba(0,0,0,0.4), -4px -4px 10px rgba(255,255,255,0.03);
+    color: var(--text-secondary, rgba(237,240,245,0.7));
 }
 
 /* --- Note ATM --- */

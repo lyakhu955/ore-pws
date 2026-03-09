@@ -372,7 +372,10 @@
 
         container.innerHTML = list.map((v, idx) => `
             <div class="iveco-vehicle-item ${v.done ? 'completed' : ''}" data-id="${v.id}">
-                <div class="iveco-vehicle-number">${idx + 1}</div>
+                <div class="iveco-vehicle-number-wrap">
+                    <div class="iveco-vehicle-number">${idx + 1}</div>
+                    ${v.done && v.doneDate ? `<div class="iveco-done-date" title="Data completamento"><span class="material-symbols-outlined">event</span>${v.doneDate}</div>` : ''}
+                </div>
                 <div class="iveco-vehicle-info">
                     <div class="iveco-vehicle-field">
                         <label>Telaio</label>
@@ -389,19 +392,95 @@
             </div>
         `).join('');
 
-        // Check listener
+        // Check listener con popup data
         container.querySelectorAll('.iveco-check').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const id = btn.dataset.id;
                 const v  = ivecoState.vehicles.find(x => x.id === id);
-                if (v) {
-                    v.done = !v.done;
+                if (!v) return;
+
+                if (v.done) {
+                    // Riapri il mezzo: toglie done e data
+                    v.done = false;
+                    v.doneDate = null;
                     saveVehicles();
                     renderElenco();
-                    showIvecoToast(v.done ? '✅ Mezzo completato!' : '↩️ Mezzo riaperto', v.done ? 'success' : 'info', 2000);
+                    showIvecoToast('↩️ Mezzo riaperto', 'info', 2000);
+                } else {
+                    // Mostra popup per scegliere la data
+                    showVehicleDatePopup(v, (selectedDate) => {
+                        v.done = true;
+                        v.doneDate = selectedDate;
+                        saveVehicles();
+                        renderElenco();
+                        showIvecoToast('✅ Mezzo completato!', 'success', 2000);
+                    });
                 }
             });
+        });
+    }
+
+    // ============================================================
+    // POPUP DATA COMPLETAMENTO VEICOLO
+    // ============================================================
+    function showVehicleDatePopup(vehicle, onConfirm) {
+        // Rimuovi popup precedente se esiste
+        const existing = document.getElementById('iveco-date-popup-overlay');
+        if (existing) existing.remove();
+
+        // Data di oggi nel formato YYYY-MM-DD per l'input
+        const today = new Date();
+        const todayStr = today.toISOString().split('T')[0];
+        // Data formattata in italiano per la visualizzazione
+        const formatDate = (dateStr) => {
+            const [y, m, d] = dateStr.split('-');
+            return `${d}/${m}/${y}`;
+        };
+
+        const overlay = document.createElement('div');
+        overlay.id = 'iveco-date-popup-overlay';
+        overlay.innerHTML = `
+            <div id="iveco-date-popup">
+                <div class="iveco-date-popup-header">
+                    <span class="material-symbols-outlined">event_available</span>
+                    <h3>Data di completamento</h3>
+                </div>
+                <p class="iveco-date-popup-sub">Vettura <strong>${escapeHtml(vehicle.vettura)}</strong> · Telaio <strong>${escapeHtml(vehicle.telaio)}</strong></p>
+                <div class="iveco-date-popup-input-wrap">
+                    <label for="iveco-date-input">Seleziona data</label>
+                    <input type="date" id="iveco-date-input" value="${todayStr}" max="${todayStr}" />
+                </div>
+                <div class="iveco-date-popup-actions">
+                    <button id="iveco-date-cancel" class="iveco-date-btn cancel">Annulla</button>
+                    <button id="iveco-date-confirm" class="iveco-date-btn confirm">
+                        <span class="material-symbols-outlined">check</span> Conferma
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        // Anima apertura
+        requestAnimationFrame(() => overlay.classList.add('visible'));
+
+        const closePopup = () => {
+            overlay.classList.remove('visible');
+            setTimeout(() => overlay.remove(), 280);
+        };
+
+        document.getElementById('iveco-date-cancel').addEventListener('click', closePopup);
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) closePopup(); });
+
+        document.getElementById('iveco-date-confirm').addEventListener('click', () => {
+            const input = document.getElementById('iveco-date-input');
+            const selected = input.value;
+            if (!selected) {
+                input.style.borderColor = '#e74c3c';
+                return;
+            }
+            closePopup();
+            onConfirm(formatDate(selected));
         });
     }
 
