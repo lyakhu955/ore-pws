@@ -7508,13 +7508,27 @@
                  const userName = localStorage.getItem('userName') || 'Utente';
                  const filename = `Ore_${userName}_${new Date().toISOString().split('T')[0]}.json`;
 
+                 const safeParseLS = (key) => { try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; } };
+
                  // Transform data to the desired format
                  const exportData = {
                      timeEntries: [],
                      ferieMalattieEntries: [],
                      vehicles: db.vehicles || [],
                      userName: userName,
-                     darkTheme: db.settings?.darkTheme === true
+                     darkTheme: db.settings?.darkTheme === true,
+                     // Impostazioni extra
+                     theme:              localStorage.getItem('theme') || null,
+                     pwsParticlesEnabled: localStorage.getItem('pws-particles-enabled'),
+                     pwsParticlesSettings: safeParseLS('pws-particles-settings'),
+                     pwsContacts:        safeParseLS('pwsContacts'),
+                     // Dati Iveco Orecchia
+                     iveco_vehicles:     safeParseLS('iveco_vehicles'),
+                     iveco_atm_notes:    safeParseLS('iveco_atm_notes'),
+                     // Metadati
+                     _exportVersion:     '3.0',
+                     _exportDate:        new Date().toISOString(),
+                     _appName:           'PWS Ore + Iveco Orecchia'
                  };
 
                  // Convert entries from nested object to flat array
@@ -7732,18 +7746,29 @@
 
 
                      // --- Confirmation ---
-                     if (confirm("Importando questo file sovrascriverai TUTTI i dati attuali (ore, impostazioni, mezzi, assenze). Continuare?")) {
+                     if (confirm("Importando questo file sovrascriverai TUTTI i dati attuali (ore, impostazioni, mezzi Iveco, assenze). Continuare?")) {
                          console.log("Importazione confermata dall'utente.");
-                         // Merge settings smartly? For now, overwrite.
-                         const currentDb = getDb(); // Get current structure for reference if needed
                          const mergedDb = {
                              entries: { ...(importedData.entries || {}) },
                              settings: { ...(importedData.settings || {}) },
                              holidays: { ...(importedData.holidays || {}) },
-                             vehicles: [ ...(importedData.vehicles || []) ]
+                             vehicles: [ ...(importedData.vehicles || []) ],
+                             rates: importedData.rates || {}
                          };
 
-                         saveDb(mergedDb);
+                         // Usa applyFullBackupData per ripristinare tutto (incluso Iveco)
+                         applyFullBackupData({
+                             timeTrackerData: mergedDb,
+                             userName:           importedData.userName,
+                             theme:              importedData.theme,
+                             darkTheme:          importedData.darkTheme !== undefined ? String(importedData.darkTheme) : null,
+                             iveco_vehicles:     importedData.iveco_vehicles,
+                             iveco_atm_notes:    importedData.iveco_atm_notes,
+                             pwsParticlesEnabled: importedData.pwsParticlesEnabled,
+                             pwsParticlesSettings: importedData.pwsParticlesSettings,
+                             pwsContacts:        importedData.pwsContacts
+                         });
+
                          console.log("Dati importati e salvati in localStorage.");
                          showToast('Dati importati con successo! Ricaricamento...', 'success', 3000);
                          // Reload everything to reflect changes
@@ -8355,7 +8380,17 @@
                      }
 
                      // Save the converted data
-                     saveDb(newDb);
+                     applyFullBackupData({
+                         timeTrackerData: newDb,
+                         userName:           importedData.userName,
+                         theme:              importedData.theme || null,
+                         darkTheme:          importedData.darkTheme !== undefined ? String(importedData.darkTheme) : null,
+                         iveco_vehicles:     importedData.iveco_vehicles || null,
+                         iveco_atm_notes:    importedData.iveco_atm_notes || null,
+                         pwsParticlesEnabled: importedData.pwsParticlesEnabled || null,
+                         pwsParticlesSettings: importedData.pwsParticlesSettings || null,
+                         pwsContacts:        importedData.pwsContacts || null
+                     });
                      console.log("Dati in formato personalizzato importati e convertiti con successo.");
                      showToast('Dati importati con successo! Ricaricamento...', 'success', 3000);
 
