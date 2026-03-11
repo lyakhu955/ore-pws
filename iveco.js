@@ -1600,113 +1600,28 @@
     // ============================================================
     // 🚌 BUS ANIMATO — tutto gestito via requestAnimationFrame
     // ============================================================
-    // ============================================================
-    // PEZZI CHE CADONO DAL BUS
-    // ============================================================
-    (function setupBusDebris() {
-        // Canvas overlay sul track — creato una volta sola
-        let debrisCanvas = document.getElementById('bus-debris-canvas');
-        if (!debrisCanvas) {
-            debrisCanvas = document.createElement('canvas');
-            debrisCanvas.id = 'bus-debris-canvas';
-            debrisCanvas.style.cssText = `
-                position:absolute; top:0; left:0;
-                width:100%; height:100%;
-                pointer-events:none; z-index:5;
-            `;
-            // Verrà appeso al track in setupBusAnimation dopo che il track esiste
-            window._busDebrisCanvas = debrisCanvas;
+    function setupBusAnimation() {
+        const wrap  = document.getElementById('iveco-bus-wrap');
+        const track = document.getElementById('iveco-bus-track');
+        const svg   = document.getElementById('iveco-bus-svg');
+        if (!wrap || !track || !svg) return;
+
+        // ---- CANVAS DEBRIS ----
+        track.style.position = 'relative';
+        const debrisCanvas = document.createElement('canvas');
+        debrisCanvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5;';
+        track.appendChild(debrisCanvas);
+        const dctx = debrisCanvas.getContext('2d');
+
+        function syncCanvas() {
+            debrisCanvas.width  = track.offsetWidth  || 300;
+            debrisCanvas.height = track.offsetHeight || 60;
         }
+        syncCanvas();
+        window.addEventListener('resize', syncCanvas);
 
-        // Tipi di pezzi con emoji + colore + dimensione
-        const PIECE_TYPES = [
-            { label: '🔩', draw: drawPieceScrew,      size: 10 },
-            { label: '🪟', draw: drawPieceWindow,     size: 14 },
-            { label: '⚙️',  draw: drawPieceGear,       size: 13 },
-            { label: '🚗',  draw: drawPieceBody,       size: 16 },
-            { label: '🛞',  draw: drawPieceWheel,      size: 12 },
-            { label: '💡',  draw: drawPieceHeadlight,  size: 9  },
-        ];
-
-        // --- Disegna i pezzi su canvas 2D ---
-        function drawPieceWheel(ctx, x, y, size, alpha) {
-            ctx.save(); ctx.globalAlpha = alpha;
-            ctx.fillStyle = '#212121';
-            ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#616161';
-            ctx.beginPath(); ctx.arc(x, y, size*0.5, 0, Math.PI*2); ctx.fill();
-            ctx.strokeStyle = '#9E9E9E'; ctx.lineWidth = 1.5;
-            for (let i = 0; i < 4; i++) {
-                const a = (i/4)*Math.PI*2;
-                ctx.beginPath();
-                ctx.moveTo(x + Math.cos(a)*size*0.55, y + Math.sin(a)*size*0.55);
-                ctx.lineTo(x + Math.cos(a)*size*0.9,  y + Math.sin(a)*size*0.9);
-                ctx.stroke();
-            }
-            ctx.restore();
-        }
-
-        function drawPieceWindow(ctx, x, y, size, alpha) {
-            ctx.save(); ctx.globalAlpha = alpha;
-            ctx.fillStyle = '#B3E5FC';
-            ctx.strokeStyle = '#1565C0'; ctx.lineWidth = 1.5;
-            const w = size*1.6, h = size;
-            roundRectPath(ctx, x - w/2, y - h/2, w, h, 2);
-            ctx.fill(); ctx.stroke();
-            ctx.restore();
-        }
-
-        function drawPieceGear(ctx, x, y, size, alpha) {
-            ctx.save(); ctx.globalAlpha = alpha;
-            ctx.fillStyle = '#78909C';
-            ctx.strokeStyle = '#455A64'; ctx.lineWidth = 1;
-            const teeth = 8;
-            ctx.beginPath();
-            for (let i = 0; i < teeth * 2; i++) {
-                const a = (i / (teeth*2)) * Math.PI * 2;
-                const r = i % 2 === 0 ? size : size * 0.7;
-                i === 0 ? ctx.moveTo(x+Math.cos(a)*r, y+Math.sin(a)*r)
-                        : ctx.lineTo(x+Math.cos(a)*r, y+Math.sin(a)*r);
-            }
-            ctx.closePath(); ctx.fill(); ctx.stroke();
-            ctx.fillStyle = '#B0BEC5';
-            ctx.beginPath(); ctx.arc(x, y, size*0.35, 0, Math.PI*2); ctx.fill();
-            ctx.restore();
-        }
-
-        function drawPieceBody(ctx, x, y, size, alpha) {
-            ctx.save(); ctx.globalAlpha = alpha;
-            ctx.fillStyle = '#1565C0';
-            ctx.strokeStyle = '#0D47A1'; ctx.lineWidth = 1;
-            roundRectPath(ctx, x - size, y - size*0.5, size*2, size, 3);
-            ctx.fill(); ctx.stroke();
-            ctx.fillStyle = '#FFC107';
-            ctx.fillRect(x - size, y, size*2, size*0.3);
-            ctx.restore();
-        }
-
-        function drawPieceScrew(ctx, x, y, size, alpha) {
-            ctx.save(); ctx.globalAlpha = alpha;
-            ctx.fillStyle = '#9E9E9E';
-            ctx.strokeStyle = '#616161'; ctx.lineWidth = 1;
-            ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-            ctx.strokeStyle = '#757575'; ctx.lineWidth = 1.5;
-            ctx.beginPath(); ctx.moveTo(x-size*0.5, y); ctx.lineTo(x+size*0.5, y); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(x, y-size*0.5); ctx.lineTo(x, y+size*0.5); ctx.stroke();
-            ctx.restore();
-        }
-
-        function drawPieceHeadlight(ctx, x, y, size, alpha) {
-            ctx.save(); ctx.globalAlpha = alpha;
-            ctx.fillStyle = '#FFF9C4';
-            ctx.shadowColor = '#FFEB3B'; ctx.shadowBlur = 6;
-            ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#FFEB3B';
-            ctx.beginPath(); ctx.arc(x, y, size*0.6, 0, Math.PI*2); ctx.fill();
-            ctx.restore();
-        }
-
-        function roundRectPath(ctx, x, y, w, h, r) {
+        // ---- Funzioni di disegno pezzi ----
+        function roundRect(ctx, x, y, w, h, r) {
             ctx.beginPath();
             ctx.moveTo(x+r, y);
             ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
@@ -1716,53 +1631,101 @@
             ctx.closePath();
         }
 
-        // Stato pezzi attivi
+        function drawWheel(ctx, x, y, sz, a) {
+            ctx.save(); ctx.globalAlpha = a;
+            ctx.fillStyle = '#1a1a1a'; ctx.beginPath(); ctx.arc(x, y, sz, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#555';   ctx.beginPath(); ctx.arc(x, y, sz*0.5, 0, Math.PI*2); ctx.fill();
+            ctx.strokeStyle = '#aaa'; ctx.lineWidth = 1.2;
+            for (let i = 0; i < 4; i++) {
+                const ang = (i/4)*Math.PI*2;
+                ctx.beginPath();
+                ctx.moveTo(x+Math.cos(ang)*sz*0.55, y+Math.sin(ang)*sz*0.55);
+                ctx.lineTo(x+Math.cos(ang)*sz*0.92, y+Math.sin(ang)*sz*0.92);
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        function drawGlass(ctx, x, y, sz, a) {
+            ctx.save(); ctx.globalAlpha = a;
+            ctx.fillStyle = '#B3E5FC'; ctx.strokeStyle = '#1565C0'; ctx.lineWidth = 1.5;
+            roundRect(ctx, x - sz, y - sz*0.55, sz*2, sz*1.1, 2);
+            ctx.fill(); ctx.stroke();
+            ctx.restore();
+        }
+
+        function drawGear(ctx, x, y, sz, a) {
+            ctx.save(); ctx.globalAlpha = a;
+            ctx.fillStyle = '#78909C'; ctx.strokeStyle = '#455A64'; ctx.lineWidth = 1;
+            const teeth = 8;
+            ctx.beginPath();
+            for (let i = 0; i < teeth*2; i++) {
+                const ang = (i/(teeth*2))*Math.PI*2;
+                const r   = i%2===0 ? sz : sz*0.68;
+                i===0 ? ctx.moveTo(x+Math.cos(ang)*r, y+Math.sin(ang)*r)
+                      : ctx.lineTo(x+Math.cos(ang)*r, y+Math.sin(ang)*r);
+            }
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#B0BEC5'; ctx.beginPath(); ctx.arc(x, y, sz*0.35, 0, Math.PI*2); ctx.fill();
+            ctx.restore();
+        }
+
+        function drawBodywork(ctx, x, y, sz, a) {
+            ctx.save(); ctx.globalAlpha = a;
+            ctx.fillStyle = '#1565C0'; ctx.strokeStyle = '#0D47A1'; ctx.lineWidth = 1;
+            roundRect(ctx, x-sz, y-sz*0.5, sz*2, sz, 3);
+            ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#FFC107';
+            ctx.fillRect(x-sz, y+sz*0.15, sz*2, sz*0.35);
+            ctx.restore();
+        }
+
+        function drawScrew(ctx, x, y, sz, a) {
+            ctx.save(); ctx.globalAlpha = a;
+            ctx.fillStyle = '#9E9E9E'; ctx.strokeStyle = '#555'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(x, y, sz, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+            ctx.strokeStyle = '#666'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(x-sz*0.5, y); ctx.lineTo(x+sz*0.5, y); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(x, y-sz*0.5); ctx.lineTo(x, y+sz*0.5); ctx.stroke();
+            ctx.restore();
+        }
+
+        const PIECE_DEFS = [
+            { draw: drawWheel,    size: 11 },
+            { draw: drawGlass,    size: 12 },
+            { draw: drawGear,     size: 11 },
+            { draw: drawBodywork, size: 14 },
+            { draw: drawScrew,    size:  8 },
+        ];
+
         const pieces = [];
-        const LIFESPAN = 2000; // ms
+        const LIFESPAN        = 2000; // ms vita di un pezzo
+        const DEBRIS_INTERVAL = 2000; // ms tra un pezzo e l'altro
+        let   lastDebrisT     = null;
 
-        window._busDebrisPieces  = pieces;
-        window._busDebrisTypes   = PIECE_TYPES;
-        window._busDebrisLifespan = LIFESPAN;
-        window._busDebrisDrawFns = {
-            drawPieceWheel, drawPieceWindow, drawPieceGear,
-            drawPieceBody, drawPieceScrew, drawPieceHeadlight, roundRectPath
-        };
-    })();
-
-    function setupBusAnimation() {
-        const wrap  = document.getElementById('iveco-bus-wrap');
-        const track = document.getElementById('iveco-bus-track');
-        const svg   = document.getElementById('iveco-bus-svg');
-        if (!wrap || !track || !svg) return;
-
-        // Aggancia il canvas debris al track se non già fatto
-        if (window._busDebrisCanvas && !track.contains(window._busDebrisCanvas)) {
-            track.style.position = 'relative';
-            track.appendChild(window._busDebrisCanvas);
+        function spawnDebris(now) {
+            const def  = PIECE_DEFS[Math.floor(Math.random() * PIECE_DEFS.length)];
+            const busX = pos + BUS_W / 2 + (Math.random() * 24 - 12);
+            const busY = debrisCanvas.height - def.size - 3 - Math.random() * 5;
+            pieces.push({ def, x: busX, y: busY, born: now });
         }
-        const debrisCanvas = window._busDebrisCanvas;
-        const dctx = debrisCanvas ? debrisCanvas.getContext('2d') : null;
-        const pieces = window._busDebrisPieces || [];
-        const PIECE_TYPES = window._busDebrisTypes || [];
-        const LIFESPAN = window._busDebrisLifespan || 2000;
-        const drawFns  = window._busDebrisDrawFns || {};
 
-        // Sincronizza dimensioni canvas al track
-        function syncCanvas() {
-            if (!debrisCanvas) return;
-            debrisCanvas.width  = track.offsetWidth;
-            debrisCanvas.height = track.offsetHeight;
+        function renderDebris(now) {
+            dctx.clearRect(0, 0, debrisCanvas.width, debrisCanvas.height);
+            for (let i = pieces.length - 1; i >= 0; i--) {
+                const p   = pieces[i];
+                const age = now - p.born;
+                if (age >= LIFESPAN) { pieces.splice(i, 1); continue; }
+                const fadeAt = LIFESPAN * 0.6;
+                const alpha  = age < fadeAt ? 1 : 1 - (age - fadeAt) / (LIFESPAN - fadeAt);
+                p.def.draw(dctx, p.x, p.y, p.def.size, Math.max(0, alpha));
+            }
         }
-        syncCanvas();
-        window.addEventListener('resize', syncCanvas);
 
-        // Riferimenti agli elementi SVG delle ruote e ombra
-        const wf  = svg.getElementById ? svg.getElementById('bus-wheel-front')
-                  : document.getElementById('bus-wheel-front');
-        const wr  = svg.getElementById ? svg.getElementById('bus-wheel-rear')
-                  : document.getElementById('bus-wheel-rear');
-        const shd = svg.getElementById ? svg.getElementById('bus-shadow')
-                  : document.getElementById('bus-shadow');
+        // ---- Riferimenti agli elementi SVG delle ruote e ombra ----
+        const wf  = document.getElementById('bus-wheel-front');
+        const wr  = document.getElementById('bus-wheel-rear');
+        const shd = document.getElementById('bus-shadow');
 
         // Le ruote sono posizionate tramite translate nel viewBox:
         // anteriore: translate(94,48), posteriore: translate(26,48)
@@ -1785,37 +1748,6 @@
         let wheelAngle = 0;    // angolo ruote in gradi
         let pauseStart  = null;
         let bounceT     = 0;    // timer sospensioni indipendente
-        let lastDebrisT = null; // timestamp ultimo pezzo caduto
-        const DEBRIS_INTERVAL = 2000; // ms tra un pezzo e l'altro
-
-        // --- Spawn un nuovo pezzo nella posizione attuale del bus ---
-        function spawnDebris(now) {
-            if (!debrisCanvas || !dctx || PIECE_TYPES.length === 0) return;
-            const typeIdx = Math.floor(Math.random() * PIECE_TYPES.length);
-            const type    = PIECE_TYPES[typeIdx];
-            // Posizione x: centro del bus nel track
-            const busX = pos + BUS_W / 2 + (Math.random() * 20 - 10);
-            // Posizione y: fondo del track (lasciamo un margine di 6px)
-            const trackH = debrisCanvas.height;
-            const busY   = trackH - type.size - 4 - Math.random() * 6;
-            pieces.push({ type, x: busX, y: busY, born: now, alpha: 1 });
-        }
-
-        // --- Disegna tutti i pezzi attivi e rimuove quelli scaduti ---
-        function renderDebris(now) {
-            if (!debrisCanvas || !dctx) return;
-            dctx.clearRect(0, 0, debrisCanvas.width, debrisCanvas.height);
-            for (let i = pieces.length - 1; i >= 0; i--) {
-                const p   = pieces[i];
-                const age = now - p.born;
-                if (age >= LIFESPAN) { pieces.splice(i, 1); continue; }
-                // Fade: pieno per i primi 1.5s, poi dissolvenza
-                const fadeStart = LIFESPAN * 0.65;
-                p.alpha = age < fadeStart ? 1 : 1 - (age - fadeStart) / (LIFESPAN - fadeStart);
-                p.type.draw(dctx, p.x, p.y, p.type.size, Math.max(0, p.alpha),
-                            drawFns.roundRectPath);
-            }
-        }
 
         function easeInOut(t) {
             // Clamp per sicurezza
@@ -1833,8 +1765,6 @@
         }
 
         // Ruota un gruppo SVG attorno a (cx,cy) nel sistema di coordinate del viewBox.
-        // rotate(angle, cx, cy) è SVG standard e non richiede transform-box.
-        // IMPORTANTE: il <g> originale deve avere il translate rimosso (gestito sotto).
         function rotateGroup(el, cx, cy, angle) {
             if (!el) return;
             el.setAttribute('transform', `rotate(${angle.toFixed(2)},${cx},${cy})`);
@@ -1891,8 +1821,6 @@
             wrap.style.left = pos + 'px';
 
             // === RUOTE — angolo proporzionale alla distanza percorsa ===
-            // circonferenza ruota in viewBox ≈ 2π*8.5 ≈ 53.4 unità
-            // Scala: il bus è largo 70px nel DOM ma 120 unità nel viewBox → ratio
             const viewboxRatio = 120 / BUS_W;
             wheelAngle += step * viewboxRatio * (360 / 53.4);
             wheelAngle %= 360;
