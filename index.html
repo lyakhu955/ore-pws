@@ -2900,7 +2900,7 @@
 <body>
     <header>
         <div class="header-content">
-            <div class="logo bouncing-logo" id="pws-logo">
+            <div class="logo bouncing-logo" id="pws-logo" style="touch-action: pan-y; cursor: grab;">
                 <img src="https://i.imgur.com/BnllByD.png"
                      alt="PWS Logo"
                      draggable="false"
@@ -10551,13 +10551,6 @@ END:VCARD`;
              if (logo) {
                  // Quando l'utente clicca sul logo, aggiungiamo un'animazione più vivace
                  logo.addEventListener('click', function(e) {
-                     if (window.__ivecoLongPressTriggered) {
-                         e.preventDefault();
-                         e.stopPropagation();
-                         window.__ivecoLongPressTriggered = false;
-                         return;
-                     }
-
                      // Rimuoviamo temporaneamente la classe per resettare l'animazione
                      this.classList.remove('bouncing-logo');
 

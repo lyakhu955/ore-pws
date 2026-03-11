@@ -228,6 +228,7 @@ body.dark-theme #iveco-bus-track {
     cursor: grab;
     user-select: none;
     -webkit-user-select: none;
+    touch-action: pan-y;
 }
 
 #pws-logo::after,

@@ -118,38 +118,69 @@
         const logo = document.getElementById('pws-logo');
         if (!logo) return;
 
-        let startX = 0, startY = 0;
+        let startX = 0, startY = 0, tracking = false;
 
+        // --- TOUCH ---
         logo.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
+            startX    = e.touches[0].clientX;
+            startY    = e.touches[0].clientY;
+            tracking  = true;
+            logo.style.transition = 'transform 0.1s';
+        }, { passive: true });
+
+        logo.addEventListener('touchmove', (e) => {
+            if (!tracking) return;
+            const dx = e.touches[0].clientX - startX;
+            if (dx > 0) {
+                logo.style.transform = `translateX(${Math.min(dx * 0.4, 30)}px)`;
+            }
         }, { passive: true });
 
         logo.addEventListener('touchend', (e) => {
+            if (!tracking) return;
+            tracking = false;
+            logo.style.transform = '';
             const dx = e.changedTouches[0].clientX - startX;
             const dy = Math.abs(e.changedTouches[0].clientY - startY);
-            if (dx > 60 && dy < 40) {
+            if (dx > 55 && dy < 50) {
                 activateIvecoMode();
             }
         }, { passive: true });
 
-        // Mouse (desktop): drag verso destra
-        let mouseStartX = 0, mouseStartY = 0, mouseDown = false;
+        logo.addEventListener('touchcancel', () => {
+            tracking = false;
+            logo.style.transform = '';
+        }, { passive: true });
+
+        // --- MOUSE (desktop) ---
+        let mouseStartX = 0, mouseStartY = 0, mouseTracking = false;
+
         logo.addEventListener('mousedown', (e) => {
-            mouseDown = true;
-            mouseStartX = e.clientX;
-            mouseStartY = e.clientY;
+            mouseTracking = true;
+            mouseStartX   = e.clientX;
+            mouseStartY   = e.clientY;
+            logo.style.transition = 'transform 0.1s';
+            e.preventDefault();
         });
-        logo.addEventListener('mouseup', (e) => {
-            if (!mouseDown) return;
-            mouseDown = false;
+
+        document.addEventListener('mousemove', (e) => {
+            if (!mouseTracking) return;
+            const dx = e.clientX - mouseStartX;
+            if (dx > 0) {
+                logo.style.transform = `translateX(${Math.min(dx * 0.4, 30)}px)`;
+            }
+        });
+
+        document.addEventListener('mouseup', (e) => {
+            if (!mouseTracking) return;
+            mouseTracking = false;
+            logo.style.transform = '';
             const dx = e.clientX - mouseStartX;
             const dy = Math.abs(e.clientY - mouseStartY);
-            if (dx > 60 && dy < 40) {
+            if (dx > 55 && dy < 50) {
                 activateIvecoMode();
             }
         });
-        logo.addEventListener('mouseleave', () => { mouseDown = false; });
     }
 
     // ============================================================
@@ -159,38 +190,69 @@
         const logoWrap = document.getElementById('iveco-logo-wrap');
         if (!logoWrap) return;
 
-        let startX = 0, startY = 0;
+        let startX = 0, startY = 0, tracking = false;
 
+        // --- TOUCH ---
         logoWrap.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
+            startX   = e.touches[0].clientX;
+            startY   = e.touches[0].clientY;
+            tracking = true;
+            logoWrap.style.transition = 'transform 0.1s';
+        }, { passive: true });
+
+        logoWrap.addEventListener('touchmove', (e) => {
+            if (!tracking) return;
+            const dx = e.touches[0].clientX - startX;
+            if (dx > 0) {
+                logoWrap.style.transform = `translateX(${Math.min(dx * 0.4, 30)}px)`;
+            }
         }, { passive: true });
 
         logoWrap.addEventListener('touchend', (e) => {
+            if (!tracking) return;
+            tracking = false;
+            logoWrap.style.transform = '';
             const dx = e.changedTouches[0].clientX - startX;
             const dy = Math.abs(e.changedTouches[0].clientY - startY);
-            if (dx > 60 && dy < 40) {
+            if (dx > 55 && dy < 50) {
                 deactivateIvecoMode();
             }
         }, { passive: true });
 
-        // Mouse (desktop): drag verso destra
-        let mouseStartX = 0, mouseStartY = 0, mouseDown = false;
+        logoWrap.addEventListener('touchcancel', () => {
+            tracking = false;
+            logoWrap.style.transform = '';
+        }, { passive: true });
+
+        // --- MOUSE (desktop) ---
+        let mouseStartX = 0, mouseStartY = 0, mouseTracking = false;
+
         logoWrap.addEventListener('mousedown', (e) => {
-            mouseDown = true;
-            mouseStartX = e.clientX;
-            mouseStartY = e.clientY;
+            mouseTracking = true;
+            mouseStartX   = e.clientX;
+            mouseStartY   = e.clientY;
+            logoWrap.style.transition = 'transform 0.1s';
+            e.preventDefault();
         });
-        logoWrap.addEventListener('mouseup', (e) => {
-            if (!mouseDown) return;
-            mouseDown = false;
+
+        document.addEventListener('mousemove', (e) => {
+            if (!mouseTracking) return;
+            const dx = e.clientX - mouseStartX;
+            if (dx > 0) {
+                logoWrap.style.transform = `translateX(${Math.min(dx * 0.4, 30)}px)`;
+            }
+        });
+
+        document.addEventListener('mouseup', (e) => {
+            if (!mouseTracking) return;
+            mouseTracking = false;
+            logoWrap.style.transform = '';
             const dx = e.clientX - mouseStartX;
             const dy = Math.abs(e.clientY - mouseStartY);
-            if (dx > 60 && dy < 40) {
+            if (dx > 55 && dy < 50) {
                 deactivateIvecoMode();
             }
         });
-        logoWrap.addEventListener('mouseleave', () => { mouseDown = false; });
     }
 
     // ============================================================
