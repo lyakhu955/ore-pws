@@ -1606,132 +1606,11 @@
         const svg   = document.getElementById('iveco-bus-svg');
         if (!wrap || !track || !svg) return;
 
-        // ---- CANVAS DEBRIS ----
-        track.style.position = 'relative';
-        const debrisCanvas = document.createElement('canvas');
-        debrisCanvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5;';
-        track.appendChild(debrisCanvas);
-        const dctx = debrisCanvas.getContext('2d');
-
-        function syncCanvas() {
-            debrisCanvas.width  = track.offsetWidth  || 300;
-            debrisCanvas.height = track.offsetHeight || 60;
-        }
-        syncCanvas();
-        window.addEventListener('resize', syncCanvas);
-
-        // ---- Funzioni di disegno pezzi ----
-        function roundRect(ctx, x, y, w, h, r) {
-            ctx.beginPath();
-            ctx.moveTo(x+r, y);
-            ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
-            ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-            ctx.lineTo(x+r, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r);
-            ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y);
-            ctx.closePath();
-        }
-
-        function drawWheel(ctx, x, y, sz, a) {
-            ctx.save(); ctx.globalAlpha = a;
-            ctx.fillStyle = '#1a1a1a'; ctx.beginPath(); ctx.arc(x, y, sz, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#555';   ctx.beginPath(); ctx.arc(x, y, sz*0.5, 0, Math.PI*2); ctx.fill();
-            ctx.strokeStyle = '#aaa'; ctx.lineWidth = 1.2;
-            for (let i = 0; i < 4; i++) {
-                const ang = (i/4)*Math.PI*2;
-                ctx.beginPath();
-                ctx.moveTo(x+Math.cos(ang)*sz*0.55, y+Math.sin(ang)*sz*0.55);
-                ctx.lineTo(x+Math.cos(ang)*sz*0.92, y+Math.sin(ang)*sz*0.92);
-                ctx.stroke();
-            }
-            ctx.restore();
-        }
-
-        function drawGlass(ctx, x, y, sz, a) {
-            ctx.save(); ctx.globalAlpha = a;
-            ctx.fillStyle = '#B3E5FC'; ctx.strokeStyle = '#1565C0'; ctx.lineWidth = 1.5;
-            roundRect(ctx, x - sz, y - sz*0.55, sz*2, sz*1.1, 2);
-            ctx.fill(); ctx.stroke();
-            ctx.restore();
-        }
-
-        function drawGear(ctx, x, y, sz, a) {
-            ctx.save(); ctx.globalAlpha = a;
-            ctx.fillStyle = '#78909C'; ctx.strokeStyle = '#455A64'; ctx.lineWidth = 1;
-            const teeth = 8;
-            ctx.beginPath();
-            for (let i = 0; i < teeth*2; i++) {
-                const ang = (i/(teeth*2))*Math.PI*2;
-                const r   = i%2===0 ? sz : sz*0.68;
-                i===0 ? ctx.moveTo(x+Math.cos(ang)*r, y+Math.sin(ang)*r)
-                      : ctx.lineTo(x+Math.cos(ang)*r, y+Math.sin(ang)*r);
-            }
-            ctx.closePath(); ctx.fill(); ctx.stroke();
-            ctx.fillStyle = '#B0BEC5'; ctx.beginPath(); ctx.arc(x, y, sz*0.35, 0, Math.PI*2); ctx.fill();
-            ctx.restore();
-        }
-
-        function drawBodywork(ctx, x, y, sz, a) {
-            ctx.save(); ctx.globalAlpha = a;
-            ctx.fillStyle = '#1565C0'; ctx.strokeStyle = '#0D47A1'; ctx.lineWidth = 1;
-            roundRect(ctx, x-sz, y-sz*0.5, sz*2, sz, 3);
-            ctx.fill(); ctx.stroke();
-            ctx.fillStyle = '#FFC107';
-            ctx.fillRect(x-sz, y+sz*0.15, sz*2, sz*0.35);
-            ctx.restore();
-        }
-
-        function drawScrew(ctx, x, y, sz, a) {
-            ctx.save(); ctx.globalAlpha = a;
-            ctx.fillStyle = '#9E9E9E'; ctx.strokeStyle = '#555'; ctx.lineWidth = 1;
-            ctx.beginPath(); ctx.arc(x, y, sz, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-            ctx.strokeStyle = '#666'; ctx.lineWidth = 1.5;
-            ctx.beginPath(); ctx.moveTo(x-sz*0.5, y); ctx.lineTo(x+sz*0.5, y); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(x, y-sz*0.5); ctx.lineTo(x, y+sz*0.5); ctx.stroke();
-            ctx.restore();
-        }
-
-        const PIECE_DEFS = [
-            { draw: drawWheel,    size: 11 },
-            { draw: drawGlass,    size: 12 },
-            { draw: drawGear,     size: 11 },
-            { draw: drawBodywork, size: 14 },
-            { draw: drawScrew,    size:  8 },
-        ];
-
-        const pieces = [];
-        const LIFESPAN        = 2000; // ms vita di un pezzo
-        const DEBRIS_INTERVAL = 2000; // ms tra un pezzo e l'altro
-        let   lastDebrisT     = null;
-
-        function spawnDebris(now) {
-            const def  = PIECE_DEFS[Math.floor(Math.random() * PIECE_DEFS.length)];
-            const busX = pos + BUS_W / 2 + (Math.random() * 24 - 12);
-            const busY = debrisCanvas.height - def.size - 3 - Math.random() * 5;
-            pieces.push({ def, x: busX, y: busY, born: now });
-        }
-
-        function renderDebris(now) {
-            dctx.clearRect(0, 0, debrisCanvas.width, debrisCanvas.height);
-            for (let i = pieces.length - 1; i >= 0; i--) {
-                const p   = pieces[i];
-                const age = now - p.born;
-                if (age >= LIFESPAN) { pieces.splice(i, 1); continue; }
-                const fadeAt = LIFESPAN * 0.6;
-                const alpha  = age < fadeAt ? 1 : 1 - (age - fadeAt) / (LIFESPAN - fadeAt);
-                p.def.draw(dctx, p.x, p.y, p.def.size, Math.max(0, alpha));
-            }
-        }
-
         // ---- Riferimenti agli elementi SVG delle ruote e ombra ----
         const wf  = document.getElementById('bus-wheel-front');
         const wr  = document.getElementById('bus-wheel-rear');
         const shd = document.getElementById('bus-shadow');
 
-        // Le ruote sono posizionate tramite translate nel viewBox:
-        // anteriore: translate(94,48), posteriore: translate(26,48)
-        // Quando JS fa setAttribute('transform','rotate(...)') SOVRASCRIVE il translate.
-        // Soluzione: usare rotate(angle, cx, cy) nel sistema viewBox assoluto,
-        // togliendo il translate originale dal <g> e centrando via rotate.
         const WF_CX = 94, WF_CY = 48;  // centro ruota anteriore nel viewBox
         const WR_CX = 26, WR_CY = 48;  // centro ruota posteriore nel viewBox
 
@@ -1791,9 +1670,6 @@
                 const b = Math.sin(bounceT * 0.018) * 0.4;
                 wrap.style.transform = `translateY(${b}px)`;
 
-                // Render debris anche in pausa
-                renderDebris(ts);
-
                 if (ts - pauseStart >= PAUSE_MS) {
                     // Riparte in direzione opposta
                     dir      = -dir;
@@ -1832,13 +1708,6 @@
             const b2 = Math.sin(bounceT * 0.041) * 0.7 * speedFactor;
             const bounce = b1 + b2;
             wrap.style.transform = `translateY(${bounce}px)`;
-
-            // === DEBRIS — spawn ogni 2 secondi durante la guida ===
-            if (!lastDebrisT || ts - lastDebrisT >= DEBRIS_INTERVAL) {
-                spawnDebris(ts);
-                lastDebrisT = ts;
-            }
-            renderDebris(ts);
 
             // === OMBRA — si schiaccia con la velocità ===
             if (shd) {
