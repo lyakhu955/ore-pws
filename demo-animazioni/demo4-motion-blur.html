@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo 4 – Bus Mette a Fuoco e Dissolve</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #E4E9F2;
+    font-family: 'Segoe UI', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    user-select: none;
+  }
+
+  /* === PAGINE === */
+  .page {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 1.2rem;
+    transition: filter 0.3s, opacity 0.5s;
+  }
+
+  #page-pws { z-index: 2; background: #E4E9F2; }
+  #page-iveco {
+    z-index: 1;
+    background: linear-gradient(135deg, #0D1B4B 0%, #1A237E 60%, #003366 100%);
+  }
+
+  h1 { font-size: 2.2rem; font-weight: 800; color: #003366; }
+  p  { color: #666; text-align: center; max-width: 320px; font-size: 0.95rem; }
+
+  button {
+    padding: 1rem 2.5rem; font-size: 1rem; font-weight: 700;
+    background: #003366; color: white; border: none; border-radius: 50px;
+    cursor: pointer; box-shadow: 0 4px 20px rgba(0,51,102,0.3);
+    transition: transform 0.1s;
+  }
+  button:active { transform: scale(0.96); }
+
+  /* Iveco page styling */
+  #page-iveco h1 { color: #FFC107; font-size: 2.5rem; }
+  #page-iveco p  { color: rgba(255,255,255,0.7); }
+  #page-iveco button { background: #FFC107; color: #1A237E; }
+
+  /* === BUS OVERLAY === */
+  #bus-layer {
+    position: fixed; inset: 0;
+    z-index: 10;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  #bus-obj {
+    position: absolute;
+    will-change: transform, filter;
+  }
+
+  /* === SHOCKWAVE === */
+  #shockwave {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9;
+    display: none;
+  }
+
+  /* === BLUR OVERLAY === */
+  #blur-bg {
+    position: fixed; inset: 0;
+    z-index: 5;
+    backdrop-filter: blur(0px);
+    transition: backdrop-filter 0.4s;
+    pointer-events: none;
+  }
+  #blur-bg.active { backdrop-filter: blur(20px) brightness(1.5); }
+
+  @keyframes shake {
+    0%,100%{ transform:translate(0,0); }
+    20%    { transform:translate(-18px,12px) rotate(-2.5deg); }
+    40%    { transform:translate(20px,-14px) rotate(2deg); }
+    60%    { transform:translate(-12px,8px)  rotate(-1deg); }
+    80%    { transform:translate(9px,-5px)   rotate(0.5deg); }
+  }
+  body.shaking { animation: shake 0.55s ease; }
+</style>
+</head>
+<body>
+
+<div class="page" id="page-pws">
+  <h1>🏢 Modalità PWS</h1>
+  <p>Il bus entra sfocato ad altissima velocità, si mette a fuoco sull'impatto e tutto dissolve</p>
+  <button onclick="triggerAnim()">▶️ Avvia animazione</button>
+</div>
+
+<div class="page" id="page-iveco">
+  <h1>🚌 IVECO MODE</h1>
+  <p>Modalità Iveco Orecchia attivata!</p>
+  <button onclick="resetDemo()">🔄 Torna a PWS</button>
+</div>
+
+<div id="blur-bg"></div>
+<div id="bus-layer">
+  <svg id="bus-obj" viewBox="0 0 260 108" width="260" height="108">
+    <defs>
+      <filter id="motion-blur-h">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="18 0" result="blur"/>
+      </filter>
+      <filter id="no-blur">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="0 0"/>
+      </filter>
+      <filter id="glow-filter">
+        <feGaussianBlur stdDeviation="3" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+
+    <g id="bus-body">
+      <ellipse cx="130" cy="103" rx="88" ry="5" fill="rgba(0,0,0,0.2)"/>
+      <rect x="8" y="10" width="244" height="80" rx="12" fill="#0D47A1"/>
+      <rect x="8" y="48" width="244" height="14" fill="#FFC107"/>
+      <rect x="14" y="2" width="232" height="24" rx="9" fill="#1565C0"/>
+      <!-- vetri -->
+      <rect x="30"  y="14" width="42" height="22" rx="5" fill="#B3E5FC" opacity="0.9"/>
+      <rect x="82"  y="14" width="42" height="22" rx="5" fill="#B3E5FC" opacity="0.9"/>
+      <rect x="136" y="14" width="42" height="22" rx="5" fill="#B3E5FC" opacity="0.9"/>
+      <rect x="192" y="14" width="46" height="24" rx="5" fill="#B3E5FC" opacity="0.9"/>
+      <!-- porta -->
+      <rect x="100" y="62" width="22" height="24" rx="2" fill="#0A2F7A" opacity="0.7"/>
+      <!-- ruote -->
+      <circle cx="55"  cy="90" r="16" fill="#212121"/>
+      <circle cx="55"  cy="90" r="7"  fill="#757575"/>
+      <circle cx="205" cy="90" r="16" fill="#212121"/>
+      <circle cx="205" cy="90" r="7"  fill="#757575"/>
+      <!-- faro -->
+      <ellipse cx="250" cy="68" rx="8" ry="6" fill="#FFF59D"/>
+      <ellipse cx="250" cy="68" rx="5" ry="3" fill="#FFEE58"/>
+      <!-- targa ATM -->
+      <rect x="96" y="3" width="36" height="9" rx="2" fill="#FFC107"/>
+      <text x="114" y="11" font-size="7.5" fill="#0D1B4B" text-anchor="middle" font-family="monospace" font-weight="bold">ATM</text>
+      <!-- striping laterale -->
+      <rect x="8" y="44" width="244" height="3" fill="white" opacity="0.15"/>
+    </g>
+  </svg>
+</div>
+
+<div id="shockwave"></div>
+
+<script>
+const busObj   = document.getElementById('bus-obj');
+const busLayer = document.getElementById('bus-layer');
+const blurBg   = document.getElementById('blur-bg');
+const shockEl  = document.getElementById('shockwave');
+const pagePws  = document.getElementById('page-pws');
+const pageIv   = document.getElementById('page-iveco');
+let animRunning = false;
+
+/* === CLACSON === */
+function playHorn() {
+  const ac = new (window.AudioContext || window.webkitAudioContext)();
+  function b(f,s,d,v=0.55) {
+    const o=ac.createOscillator(), g=ac.createGain();
+    o.connect(g); g.connect(ac.destination);
+    o.type='sawtooth'; o.frequency.value=f;
+    g.gain.setValueAtTime(0,ac.currentTime+s);
+    g.gain.linearRampToValueAtTime(v,ac.currentTime+s+0.03);
+    g.gain.linearRampToValueAtTime(0,ac.currentTime+s+d);
+    o.start(ac.currentTime+s); o.stop(ac.currentTime+s+d+0.05);
+  }
+  b(400,0,0.18); b(520,0.22,0.24); b(400,0.50,0.12); b(520,0.65,0.35);
+}
+
+/* === SHOCKWAVE RING === */
+function spawnShockwave(cx, cy) {
+  shockEl.style.cssText = `
+    position:fixed;
+    width:20px; height:20px;
+    left:${cx-10}px; top:${cy-10}px;
+    border-radius:50%;
+    border:6px solid rgba(255,193,7,0.9);
+    box-shadow:0 0 20px rgba(255,193,7,0.6), inset 0 0 20px rgba(255,255,255,0.3);
+    pointer-events:none;
+    z-index:15;
+    display:block;
+    transition:
+      width 0.5s cubic-bezier(0,.6,.4,1),
+      height 0.5s cubic-bezier(0,.6,.4,1),
+      left 0.5s cubic-bezier(0,.6,.4,1),
+      top 0.5s cubic-bezier(0,.6,.4,1),
+      opacity 0.5s 0.1s,
+      border-width 0.5s;
+  `;
+  requestAnimationFrame(() => {
+    const r = Math.max(window.innerWidth, window.innerHeight) * 1.5;
+    shockEl.style.width       = r + 'px';
+    shockEl.style.height      = r + 'px';
+    shockEl.style.left        = (cx - r/2) + 'px';
+    shockEl.style.top         = (cy - r/2) + 'px';
+    shockEl.style.opacity     = '0';
+    shockEl.style.borderWidth = '1px';
+  });
+  setTimeout(() => { shockEl.style.display = 'none'; }, 600);
+}
+
+/* === ANIMAZIONE === */
+function triggerAnim() {
+  if (animRunning) return;
+  animRunning = true;
+
+  const W = window.innerWidth, H = window.innerHeight;
+  const busW = 260, busH = 108;
+
+  // Posizione iniziale fuori schermo a destra
+  let bx = W + busW + 100;
+  const by = H / 2 - busH / 2;
+
+  busObj.style.filter    = 'url(#motion-blur-h)';
+  busObj.parentElement.style.display = 'block';
+  busObj.style.left      = bx + 'px';
+  busObj.style.top       = by + 'px';
+  busObj.style.transition = 'none';
+  busObj.style.opacity   = '1';
+  busObj.style.transform = 'scaleX(-1)'; // bus guarda a sinistra (verso destinazione)
+
+  playHorn();
+
+  // Fase 1: entra velocissimo con motion blur
+  let startTs = null;
+  const enterDur = 400; // ms
+  const targetX  = W/2 - busW/2;
+
+  function enterLoop(ts) {
+    if (!startTs) startTs = ts;
+    const p    = Math.min((ts - startTs) / enterDur, 1);
+    const ease = 1 - Math.pow(1 - p, 3); // easeOut
+    bx = (W + busW + 100) + (targetX - W - busW - 100) * ease;
+
+    // Riduci gradualmente il blur mentre si avvicina
+    const blurAmt = Math.round(18 * (1 - p));
+    busObj.setAttribute('filter', `blur(${blurAmt}px)`);
+    busObj.style.left = bx + 'px';
+
+    if (p < 1) {
+      requestAnimationFrame(enterLoop);
+    } else {
+      onImpact();
+    }
+  }
+  requestAnimationFrame(enterLoop);
+
+  function onImpact() {
+    const cx = W / 2, cy = H / 2;
+
+    // Togli blur — bus a fuoco
+    busObj.removeAttribute('filter');
+    busObj.style.filter = 'none';
+
+    // Shake
+    document.body.classList.remove('shaking');
+    void document.body.offsetWidth;
+    document.body.classList.add('shaking');
+    setTimeout(() => document.body.classList.remove('shaking'), 600);
+
+    // Shockwave
+    spawnShockwave(cx, cy);
+
+    // Blur backdrop (simula impatto)
+    blurBg.classList.add('active');
+
+    // Flash
+    document.body.style.transition = 'filter 0.05s';
+    document.body.style.filter     = 'brightness(3)';
+    setTimeout(() => { document.body.style.filter = ''; }, 60);
+
+    // Dopo 200ms: cambio pagina
+    setTimeout(() => {
+      blurBg.classList.remove('active');
+      pagePws.style.opacity = '0';
+      pagePws.style.pointerEvents = 'none';
+      pageIv.style.zIndex   = '2';
+
+      // Bus esce a sinistra continuando
+      busObj.style.transition = 'left 0.35s ease-in, opacity 0.2s 0.15s';
+      busObj.style.left       = (-busW - 100) + 'px';
+      busObj.style.opacity    = '0';
+
+      setTimeout(() => {
+        busObj.style.display = 'none';
+      }, 400);
+
+    }, 250);
+  }
+}
+
+function resetDemo() {
+  animRunning = false;
+  pagePws.style.opacity = '1';
+  pagePws.style.pointerEvents = '';
+  pageIv.style.zIndex = '1';
+  busObj.style.opacity = '1';
+  busObj.style.display = '';
+  busObj.style.left    = (window.innerWidth + 360) + 'px';
+  busObj.style.transition = 'none';
+}
+</script>
+</body>
+</html>

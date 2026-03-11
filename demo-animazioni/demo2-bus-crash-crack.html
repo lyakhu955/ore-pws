@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo 2 – Bus Schiaccia lo Schermo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #E4E9F2;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    height: 100vh; overflow: hidden;
+    user-select: none;
+  }
+
+  h1 { font-size: 2rem; color: #003366; margin-bottom: 0.5rem; }
+  p  { color: #666; margin-bottom: 2rem; font-size: 0.95rem; text-align: center; max-width: 320px; }
+
+  button {
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem; font-weight: 700;
+    background: #003366; color: white;
+    border: none; border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0,51,102,0.3);
+    transition: transform 0.1s;
+  }
+  button:active { transform: scale(0.96); }
+
+  /* ======= SCREEEN CRACK OVERLAY ======= */
+  #crack-overlay {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 9997;
+    opacity: 0;
+    transition: opacity 0.1s;
+  }
+  #crack-overlay.show { opacity: 1; }
+
+  /* ======= BUS ELEMENT ======= */
+  #bus-el {
+    position: fixed;
+    z-index: 9999;
+    pointer-events: none;
+    display: none;
+    transform-origin: center center;
+  }
+
+  /* ======= FLASH ======= */
+  #flash {
+    position: fixed; inset: 0;
+    background: white;
+    opacity: 0; pointer-events: none;
+    z-index: 9998;
+  }
+
+  /* ======= SHAKE ======= */
+  @keyframes shake {
+    0%   { transform: translate(0,0); }
+    15%  { transform: translate(-15px, 10px) rotate(-2deg); }
+    30%  { transform: translate(18px,-12px) rotate(1.5deg); }
+    45%  { transform: translate(-12px, 7px) rotate(-1deg); }
+    60%  { transform: translate(8px,-4px) rotate(0.5deg); }
+    75%  { transform: translate(-4px, 2px); }
+    100% { transform: translate(0,0); }
+  }
+  body.shaking { animation: shake 0.55s cubic-bezier(.36,.07,.19,.97); }
+
+  /* ======= CRACK LINES SVG ======= */
+  #crack-svg {
+    position: fixed; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 9998;
+    opacity: 0;
+    transition: opacity 0.08s;
+  }
+  #crack-svg.show { opacity: 1; }
+
+  /* ======= NUOVA SCHERMATA ======= */
+  #new-screen {
+    position: fixed; inset: 0;
+    background: #1A237E;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+    z-index: 9996;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s;
+  }
+  #new-screen.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+  #new-screen h2 { color: #FFC107; font-size: 2.5rem; }
+  #new-screen p  { color: white; font-size: 1rem; }
+  #new-screen button {
+    background: #FFC107; color: #1A237E;
+    margin-top: 1rem;
+  }
+</style>
+</head>
+<body>
+
+<h1>🚌 Demo 2</h1>
+<p>Il bus arriva dal basso, sfonda lo schermo verso l'alto — lo schermo si incrina e cambia pagina</p>
+<button onclick="triggerAnim()">▶️ Avvia animazione</button>
+
+<!-- Bus SVG inline -->
+<svg id="bus-el" viewBox="0 0 240 100" width="240" height="100">
+  <!-- Ombra -->
+  <ellipse cx="120" cy="95" rx="80" ry="5" fill="rgba(0,0,0,0.2)"/>
+  <!-- Carrozzeria -->
+  <rect x="8" y="10" width="224" height="76" rx="10" fill="#1565C0"/>
+  <!-- Fascia gialla -->
+  <rect x="8" y="42" width="224" height="14" fill="#FFC107"/>
+  <!-- Tetto -->
+  <rect x="14" y="2" width="212" height="22" rx="8" fill="#1976D2"/>
+  <!-- Finestrini -->
+  <rect x="30"  y="12" width="38" height="20" rx="4" fill="#B3E5FC" opacity="0.9"/>
+  <rect x="80"  y="12" width="38" height="20" rx="4" fill="#B3E5FC" opacity="0.9"/>
+  <rect x="130" y="12" width="38" height="20" rx="4" fill="#B3E5FC" opacity="0.9"/>
+  <!-- Parabrezza -->
+  <rect x="182" y="12" width="40" height="22" rx="4" fill="#B3E5FC" opacity="0.9"/>
+  <!-- Ruote -->
+  <circle cx="50"  cy="86" r="14" fill="#212121"/>
+  <circle cx="50"  cy="86" r="6"  fill="#9E9E9E"/>
+  <circle cx="190" cy="86" r="14" fill="#212121"/>
+  <circle cx="190" cy="86" r="6"  fill="#9E9E9E"/>
+  <!-- Faro -->
+  <ellipse cx="228" cy="62" rx="7" ry="5" fill="#FFEB3B"/>
+  <!-- Numero -->
+  <rect x="88" y="3" width="32" height="8" rx="2" fill="#FFC107"/>
+  <text x="104" y="10" font-size="7" fill="#1A237E" text-anchor="middle" font-family="monospace" font-weight="bold">ATM</text>
+</svg>
+
+<!-- Crack SVG -->
+<svg id="crack-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+  <defs>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="0.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#glow)" stroke="white" stroke-width="0.4" fill="none" opacity="0.9">
+    <!-- Crepe che si irradiano dal centro -->
+    <polyline points="50,50 35,20 28,5"/>
+    <polyline points="50,50 60,15 55,0"/>
+    <polyline points="50,50 75,25 90,10 100,0"/>
+    <polyline points="50,50 80,40 100,35"/>
+    <polyline points="50,50 85,55 100,65"/>
+    <polyline points="50,50 70,75 80,95 85,100"/>
+    <polyline points="50,50 50,80 45,100"/>
+    <polyline points="50,50 30,75 20,100"/>
+    <polyline points="50,50 15,65 0,70"/>
+    <polyline points="50,50 10,45 0,40"/>
+    <polyline points="50,50 18,30 5,15 0,0"/>
+    <!-- Linee secondarie -->
+    <polyline points="50,50 40,35 30,30"/>
+    <polyline points="50,50 62,42 72,38"/>
+    <polyline points="50,50 58,62 65,75"/>
+    <polyline points="50,50 38,63 28,70"/>
+  </g>
+  <!-- Alone impatto -->
+  <circle cx="50" cy="50" r="8" fill="none" stroke="white" stroke-width="0.8" opacity="0.6"/>
+  <circle cx="50" cy="50" r="15" fill="none" stroke="white" stroke-width="0.4" opacity="0.4"/>
+</svg>
+
+<!-- Nuova schermata simulata -->
+<div id="new-screen">
+  <h2>🚌 IVECO MODE</h2>
+  <p>Modalità Iveco Orecchia attivata!</p>
+  <button onclick="resetDemo()">🔄 Ripristina demo</button>
+</div>
+
+<div id="flash"></div>
+
+<script>
+const busEl      = document.getElementById('bus-el');
+const crackSvg   = document.getElementById('crack-svg');
+const flashEl    = document.getElementById('flash');
+const newScreen  = document.getElementById('new-screen');
+let   animRunning = false;
+
+/* ===== CLACSON ===== */
+function playHorn() {
+  const ac = new (window.AudioContext || window.webkitAudioContext)();
+  function beep(freq, start, dur, vol=0.5) {
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.connect(g); g.connect(ac.destination);
+    o.type = 'sawtooth';
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0, ac.currentTime + start);
+    g.gain.linearRampToValueAtTime(vol, ac.currentTime + start + 0.03);
+    g.gain.linearRampToValueAtTime(0,   ac.currentTime + start + dur);
+    o.start(ac.currentTime + start);
+    o.stop(ac.currentTime + start + dur + 0.05);
+  }
+  beep(380, 0,    0.20);
+  beep(480, 0.25, 0.25);
+  beep(380, 0.52, 0.12);
+  beep(480, 0.66, 0.32);
+}
+
+/* ===== ANIMAZIONE ===== */
+function triggerAnim() {
+  if (animRunning) return;
+  animRunning = true;
+
+  const W = window.innerWidth, H = window.innerHeight;
+  const busW = 240, busH = 100;
+
+  // Posizione iniziale: bus fuori dallo schermo a destra
+  let bx = W + busW;
+  const by = H / 2 - busH / 2;
+
+  busEl.style.display = 'block';
+  busEl.style.left    = bx + 'px';
+  busEl.style.top     = by + 'px';
+  busEl.style.transition = 'none';
+  busEl.style.transform  = 'scale(1)';
+
+  playHorn();
+
+  // Fase 1: bus entra da destra veloce
+  const targetX = W / 2 - busW / 2;
+  let start = null;
+  const duration = 500; // ms
+
+  function animEnter(ts) {
+    if (!start) start = ts;
+    const p = Math.min((ts - start) / duration, 1);
+    // easeIn
+    const ease = p * p * p;
+    bx = W + busW - (W + busW - targetX) * ease;
+    const scale = 1 + ease * 0.5; // il bus si "ingrandisce" come se venisse verso di te
+    busEl.style.left      = bx + 'px';
+    busEl.style.transform = `scale(${scale})`;
+
+    if (p < 1) {
+      requestAnimationFrame(animEnter);
+    } else {
+      onImpact();
+    }
+  }
+  requestAnimationFrame(animEnter);
+
+  function onImpact() {
+    // Flash bianco
+    flashEl.style.transition = 'none';
+    flashEl.style.opacity = '1';
+    setTimeout(() => {
+      flashEl.style.transition = 'opacity 0.3s';
+      flashEl.style.opacity = '0';
+    }, 60);
+
+    // Shake
+    document.body.classList.remove('shaking');
+    void document.body.offsetWidth;
+    document.body.classList.add('shaking');
+    setTimeout(() => document.body.classList.remove('shaking'), 600);
+
+    // Crepe
+    crackSvg.classList.add('show');
+
+    // Bus: bounce e scomparsa
+    busEl.style.transition = 'transform 0.15s, opacity 0.3s 0.2s';
+    busEl.style.transform  = 'scale(1.6)';
+    setTimeout(() => { busEl.style.opacity = '0'; }, 200);
+
+    // Cambia schermata
+    setTimeout(() => {
+      crackSvg.classList.remove('show');
+      busEl.style.display = 'none';
+      busEl.style.opacity = '1';
+      newScreen.classList.add('show');
+    }, 500);
+  }
+}
+
+function resetDemo() {
+  animRunning = false;
+  newScreen.classList.remove('show');
+  busEl.style.display = 'none';
+  busEl.style.transform = 'scale(1)';
+}
+</script>
+</body>
+</html>

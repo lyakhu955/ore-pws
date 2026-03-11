@@ -297,45 +297,19 @@
 
     function activateIvecoMode() {
         loadData();
-
-        // Mostra overlay di transizione
-        const overlay = document.getElementById('iveco-overlay');
-        if (overlay) {
-            overlay.classList.add('active');
-            setTimeout(() => {
-                document.body.classList.add('iveco-mode');
-                hideNativeUI();
-                overlay.classList.remove('active');
-                renderCurrentSection();
-                localStorage.setItem(STORAGE_KEY_MODE, 'true');
-                showIvecoToast('🚌 Modalità Iveco Orecchia attivata!', 'success', 3000);
-            }, 1200);
-        } else {
-            document.body.classList.add('iveco-mode');
-            hideNativeUI();
-            renderCurrentSection();
-            localStorage.setItem(STORAGE_KEY_MODE, 'true');
-        }
+        document.body.classList.add('iveco-mode');
+        hideNativeUI();
+        renderCurrentSection();
+        localStorage.setItem(STORAGE_KEY_MODE, 'true');
+        showIvecoToast('🚌 Modalità Iveco Orecchia attivata!', 'success', 2000);
     }
 
     function deactivateIvecoMode() {
-        const overlay = document.getElementById('iveco-overlay');
-        if (overlay) {
-            overlay.classList.add('active');
-            setTimeout(() => {
-                restoreSettingsFromIveco();
-                document.body.classList.remove('iveco-mode');
-                showNativeUI();
-                overlay.classList.remove('active');
-                localStorage.removeItem(STORAGE_KEY_MODE);
-                showIvecoToast('👋 Modalità PWS ripristinata!', 'info', 2000);
-            }, 800);
-        } else {
-            restoreSettingsFromIveco();
-            document.body.classList.remove('iveco-mode');
-            showNativeUI();
-            localStorage.removeItem(STORAGE_KEY_MODE);
-        }
+        restoreSettingsFromIveco();
+        document.body.classList.remove('iveco-mode');
+        showNativeUI();
+        localStorage.removeItem(STORAGE_KEY_MODE);
+        showIvecoToast('👋 Modalità PWS ripristinata!', 'info', 2000);
     }
 
     // ============================================================
@@ -1178,18 +1152,6 @@
     // COSTRUZIONE DOM IVECO
     // ============================================================
     function buildIvecoDOM() {
-        // Overlay di transizione
-        if (!document.getElementById('iveco-overlay')) {
-            const overlay = document.createElement('div');
-            overlay.id = 'iveco-overlay';
-            overlay.innerHTML = `
-                <div class="iveco-logo-anim">🚌</div>
-                <div class="iveco-title-anim">IVECO ORECCHIA</div>
-                <div class="iveco-subtitle-anim">Gestione Mezzi ATM</div>
-            `;
-            document.body.appendChild(overlay);
-        }
-
         // App principale
         if (!document.getElementById('iveco-app')) {
             const app = document.createElement('div');

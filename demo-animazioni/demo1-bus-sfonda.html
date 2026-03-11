@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo 1 – Bus Sfonda lo Schermo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #E4E9F2;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    height: 100vh; overflow: hidden;
+    user-select: none;
+  }
+
+  h1 { font-size: 2rem; color: #003366; margin-bottom: 0.5rem; }
+  p  { color: #666; margin-bottom: 2rem; }
+
+  button {
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem; font-weight: 700;
+    background: #003366; color: white;
+    border: none; border-radius: 50px;
+    cursor: pointer; box-shadow: 0 4px 20px rgba(0,51,102,0.3);
+    transition: transform 0.1s;
+  }
+  button:active { transform: scale(0.96); }
+
+  /* ============ CANVAS OVERLAY ============ */
+  #anim-canvas {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    display: none;
+  }
+
+  /* ============ SHAKE ============ */
+  @keyframes screen-shake {
+    0%   { transform: translate(0,0) rotate(0deg); }
+    10%  { transform: translate(-12px, 8px) rotate(-1.5deg); }
+    20%  { transform: translate(14px,-10px) rotate(1.2deg); }
+    30%  { transform: translate(-10px, 6px) rotate(-0.8deg); }
+    40%  { transform: translate(8px,-4px) rotate(0.6deg); }
+    50%  { transform: translate(-6px, 3px) rotate(-0.4deg); }
+    70%  { transform: translate(4px,-2px) rotate(0.2deg); }
+    100% { transform: translate(0,0) rotate(0deg); }
+  }
+  body.shaking { animation: screen-shake 0.6s ease; }
+
+  /* ============ FLASH ============ */
+  #flash {
+    position: fixed; inset: 0;
+    background: white;
+    opacity: 0; pointer-events: none;
+    z-index: 9998;
+    transition: opacity 0.05s;
+  }
+  #flash.on { opacity: 1; }
+</style>
+</head>
+<body>
+
+<h1>🚌 Demo 1</h1>
+<p>Il bus entra da destra, sfonda e frantuma lo schermo</p>
+<button onclick="triggerAnim()">▶️ Avvia animazione</button>
+
+<canvas id="anim-canvas"></canvas>
+<div id="flash"></div>
+
+<script>
+const canvas = document.getElementById('anim-canvas');
+const ctx    = canvas.getContext('2d');
+const flash  = document.getElementById('flash');
+
+function resize() {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+/* ===== CLACSON via Web Audio ===== */
+function playHorn() {
+  const ac = new (window.AudioContext || window.webkitAudioContext)();
+
+  function beep(freq, start, dur, vol=0.6) {
+    const o = ac.createOscillator();
+    const g = ac.createGain();
+    o.connect(g); g.connect(ac.destination);
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(freq, ac.currentTime + start);
+    g.gain.setValueAtTime(0, ac.currentTime + start);
+    g.gain.linearRampToValueAtTime(vol, ac.currentTime + start + 0.02);
+    g.gain.linearRampToValueAtTime(0,   ac.currentTime + start + dur);
+    o.start(ac.currentTime + start);
+    o.stop(ac.currentTime + start + dur + 0.05);
+  }
+
+  beep(420, 0,    0.18);
+  beep(520, 0.22, 0.22);
+  beep(420, 0.48, 0.12);
+  beep(520, 0.62, 0.30);
+}
+
+/* ===== DISEGNA BUS SVG-style su canvas ===== */
+function drawBus(x, y, scale=1, alpha=1) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
+
+  const W = 200, H = 90;
+
+  // Carrozzeria
+  ctx.fillStyle = '#1565C0';
+  roundRect(ctx, -W/2, -H/2, W, H, 10);
+  ctx.fill();
+
+  // Fascia gialla
+  ctx.fillStyle = '#FFC107';
+  ctx.fillRect(-W/2, 10, W, 12);
+
+  // Tetto
+  ctx.fillStyle = '#1976D2';
+  roundRect(ctx, -W/2+6, -H/2-8, W-12, 20, 8);
+  ctx.fill();
+
+  // Finestrini
+  ctx.fillStyle = '#B3E5FC';
+  ctx.globalAlpha = alpha * 0.9;
+  [-60,-25,10,45].forEach(fx => {
+    roundRect(ctx, fx, -H/2+4, 28, 18, 4);
+    ctx.fill();
+  });
+
+  // Parabrezza anteriore
+  roundRect(ctx, W/2-38, -H/2+4, 32, 20, 4);
+  ctx.fill();
+  ctx.globalAlpha = alpha;
+
+  // Ruote
+  ctx.fillStyle = '#212121';
+  [W/2-30, -W/2+30].forEach(wx => {
+    ctx.beginPath();
+    ctx.arc(wx, H/2-2, 16, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = '#9E9E9E';
+    ctx.beginPath();
+    ctx.arc(wx, H/2-2, 7, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = '#212121';
+  });
+
+  // Faro
+  ctx.fillStyle = '#FFEB3B';
+  ctx.beginPath();
+  ctx.arc(W/2-6, 8, 8, 0, Math.PI*2);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y);
+  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r);
+  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h);
+  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r);
+  ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+}
+
+/* ===== FRAMMENTI VETRO ROTTO ===== */
+let fragments = [];
+
+function generateFragments(cx, cy) {
+  fragments = [];
+  const count = 40;
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 3 + Math.random() * 12;
+    const size  = 20 + Math.random() * 80;
+    fragments.push({
+      x: cx, y: cy,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - Math.random() * 4,
+      rot: Math.random() * Math.PI * 2,
+      rotV: (Math.random() - 0.5) * 0.3,
+      size,
+      alpha: 1,
+      color: `hsl(${200 + Math.random()*40}, 60%, ${50 + Math.random()*30}%)`,
+      points: generateShard(size)
+    });
+  }
+}
+
+function generateShard(size) {
+  const pts = [];
+  const n = 3 + Math.floor(Math.random() * 3);
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2 + (Math.random()-0.5) * 0.8;
+    const r = size * (0.5 + Math.random() * 0.5);
+    pts.push({ x: Math.cos(a)*r, y: Math.sin(a)*r });
+  }
+  return pts;
+}
+
+function drawFragments() {
+  fragments.forEach(f => {
+    ctx.save();
+    ctx.translate(f.x, f.y);
+    ctx.rotate(f.rot);
+    ctx.globalAlpha = f.alpha;
+    ctx.fillStyle = f.color;
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    f.points.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+
+    f.x   += f.vx;
+    f.y   += f.vy;
+    f.vy  += 0.4; // gravità
+    f.rot += f.rotV;
+    f.alpha -= 0.022;
+  });
+  fragments = fragments.filter(f => f.alpha > 0);
+}
+
+/* ===== ANIMAZIONE PRINCIPALE ===== */
+let animRunning = false;
+
+function triggerAnim() {
+  if (animRunning) return;
+  animRunning = true;
+
+  const W = canvas.width, H = canvas.height;
+  const cy = H / 2;
+  let busX = W + 160;
+  const targetX = W / 2;
+
+  canvas.style.display = 'block';
+  playHorn();
+
+  let phase = 'enter'; // enter → impact → shards → done
+  let impactFrame = 0;
+
+  function loop() {
+    ctx.clearRect(0, 0, W, H);
+
+    if (phase === 'enter') {
+      busX -= 28; // velocità bus
+      const scale = 1 + Math.max(0, (targetX - busX) / W) * 0.8;
+      drawBus(busX, cy, scale);
+
+      if (busX <= targetX) {
+        phase = 'impact';
+        impactFrame = 0;
+
+        // Flash bianco
+        flash.classList.add('on');
+        setTimeout(() => flash.classList.remove('on'), 80);
+
+        // Shake
+        document.body.classList.add('shaking');
+        setTimeout(() => document.body.classList.remove('shaking'), 600);
+
+        // Genera frammenti
+        generateFragments(targetX, cy);
+
+        // QUI cambieresti modalità nel sito vero
+        console.log('💥 CAMBIO MODALITÀ!');
+      }
+
+      requestAnimationFrame(loop);
+
+    } else if (phase === 'impact') {
+      impactFrame++;
+
+      // Bus si ferma con bounce
+      const bounceX = targetX + Math.sin(impactFrame * 0.5) * (20 - impactFrame) ;
+      const scale   = 1.5 - impactFrame * 0.03;
+      drawBus(Math.max(targetX, bounceX), cy, Math.max(1, scale));
+
+      drawFragments();
+
+      if (impactFrame > 30) phase = 'shards';
+      requestAnimationFrame(loop);
+
+    } else if (phase === 'shards') {
+      drawFragments();
+      if (fragments.length === 0) {
+        phase = 'done';
+        canvas.style.display = 'none';
+        animRunning = false;
+      } else {
+        requestAnimationFrame(loop);
+      }
+    }
+  }
+
+  requestAnimationFrame(loop);
+}
+</script>
+</body>
+</html>

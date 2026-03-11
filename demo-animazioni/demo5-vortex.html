@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo 5 – Bus Deforma e Vortice</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #E4E9F2;
+    font-family: 'Segoe UI', sans-serif;
+    overflow: hidden; height: 100vh;
+    user-select: none;
+  }
+
+  .page {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 1.2rem;
+    transition: opacity 0.5s;
+  }
+  #page-pws  { z-index: 2; background: #E4E9F2; }
+  #page-iveco {
+    z-index: 1;
+    background: radial-gradient(ellipse at 30% 40%, #1A237E, #0a0e2e 70%);
+  }
+
+  h1 { font-size: 2.2rem; font-weight: 800; color: #003366; }
+  p  { color: #666; text-align: center; max-width: 320px; font-size: 0.9rem; }
+  button {
+    padding: 1rem 2.5rem; font-size: 1rem; font-weight: 700;
+    background: #003366; color: white; border: none; border-radius: 50px;
+    cursor: pointer; box-shadow: 0 4px 20px rgba(0,51,102,0.3);
+  }
+  #page-iveco h1 { color: #FFC107; font-size: 2.5rem; }
+  #page-iveco p  { color: rgba(255,255,255,0.7); }
+  #page-iveco button { background: #FFC107; color: #1A237E; }
+
+  canvas#main-canvas {
+    position: fixed; inset: 0; z-index: 20;
+    pointer-events: none; display: none;
+  }
+
+  @keyframes shake {
+    0%,100%{ transform:translate(0,0); }
+    15%    { transform:translate(-16px,10px) rotate(-2deg); }
+    35%    { transform:translate(20px,-13px) rotate(1.8deg); }
+    55%    { transform:translate(-11px,7px)  rotate(-1deg); }
+    75%    { transform:translate(9px,-4px)   rotate(0.4deg); }
+  }
+  body.shaking { animation: shake 0.55s ease; }
+</style>
+</head>
+<body>
+
+<div class="page" id="page-pws">
+  <h1>🏢 Modalità PWS</h1>
+  <p>Il bus entra, lo schermo si distorce come un vortice attorno al punto d'impatto, poi tutto gira e cambia</p>
+  <button onclick="triggerAnim()">▶️ Avvia animazione</button>
+</div>
+
+<div class="page" id="page-iveco">
+  <h1>🚌 IVECO MODE</h1>
+  <p>Modalità Iveco Orecchia attivata!</p>
+  <button onclick="resetDemo()">🔄 Torna a PWS</button>
+</div>
+
+<canvas id="main-canvas"></canvas>
+
+<script>
+const canvas  = document.getElementById('main-canvas');
+const ctx     = canvas.getContext('2d');
+const pagePws = document.getElementById('page-pws');
+const pageIv  = document.getElementById('page-iveco');
+let W, H;
+let animRunning = false;
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+/* === CLACSON === */
+function playHorn() {
+  const ac = new (window.AudioContext || window.webkitAudioContext)();
+  function b(f,s,d,v=0.5) {
+    const o=ac.createOscillator(), g=ac.createGain();
+    o.connect(g); g.connect(ac.destination);
+    o.type='sawtooth'; o.frequency.value=f;
+    g.gain.setValueAtTime(0,ac.currentTime+s);
+    g.gain.linearRampToValueAtTime(v,ac.currentTime+s+0.03);
+    g.gain.linearRampToValueAtTime(0,ac.currentTime+s+d);
+    o.start(ac.currentTime+s); o.stop(ac.currentTime+s+d+0.05);
+  }
+  b(390,0,0.20); b(510,0.24,0.25); b(390,0.52,0.12); b(510,0.66,0.34);
+}
+
+/* === DISEGNA BUS SU CANVAS === */
+function drawBus(cx, cy, scale=1, alpha=1, blurPx=0) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  if (blurPx > 0) ctx.filter = `blur(${blurPx}px)`;
+  ctx.translate(cx, cy);
+  ctx.scale(scale, scale);
+
+  const W2=130, H2=55;
+
+  ctx.fillStyle='#0D47A1';
+  rr(ctx,-W2,-H2,W2*2,H2*2,10); ctx.fill();
+
+  ctx.fillStyle='#FFC107';
+  ctx.fillRect(-W2,5,W2*2,12);
+
+  ctx.fillStyle='#1565C0';
+  rr(ctx,-W2+6,-H2-8,(W2-6)*2,20,8); ctx.fill();
+
+  ctx.fillStyle='#B3E5FC'; ctx.globalAlpha=alpha*0.9;
+  [[-80,-H2+4],[-40,-H2+4],[0,-H2+4],[38,-H2+4]].forEach(([fx,fy])=>{
+    rr(ctx,fx,fy,32,20,4); ctx.fill();
+  });
+  rr(ctx,W2-38,-H2+4,32,22,4); ctx.fill();
+  ctx.globalAlpha=alpha;
+
+  ctx.fillStyle='#212121';
+  [W2-30,-W2+30].forEach(wx=>{
+    ctx.beginPath(); ctx.arc(wx,H2-2,16,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#9E9E9E';
+    ctx.beginPath(); ctx.arc(wx,H2-2,7,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#212121';
+  });
+
+  ctx.fillStyle='#FFEB3B';
+  ctx.beginPath(); ctx.arc(W2-6,8,9,0,Math.PI*2); ctx.fill();
+
+  ctx.filter='none';
+  ctx.restore();
+}
+
+function rr(c,x,y,w,h,r) {
+  c.beginPath();
+  c.moveTo(x+r,y); c.lineTo(x+w-r,y);
+  c.quadraticCurveTo(x+w,y,x+w,y+r);
+  c.lineTo(x+w,y+h-r);
+  c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  c.lineTo(x+r,y+h);
+  c.quadraticCurveTo(x,y+h,x,y+h-r);
+  c.lineTo(x,y+r);
+  c.quadraticCurveTo(x,y,x+r,y);
+  c.closePath();
+}
+
+/* === VORTICE CANVAS === */
+function drawVortex(cx, cy, progress, dir=1) {
+  // progress 0→1: vortice si espande
+  const rings = 8;
+  for (let i = rings; i >= 1; i--) {
+    const r     = (i / rings) * Math.max(W, H) * progress * 1.4;
+    const alpha = (1 - progress) * (i / rings) * 0.5;
+    const hue   = 210 + i * 12 + progress * 60;
+    ctx.save();
+    ctx.strokeStyle = `hsla(${hue}, 70%, 60%, ${alpha})`;
+    ctx.lineWidth   = 3;
+    ctx.beginPath();
+    // spirale
+    const startAngle = progress * Math.PI * 4 * dir + (i / rings) * Math.PI * 2;
+    ctx.arc(cx, cy, r, startAngle, startAngle + Math.PI * 1.5);
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+/* === CRACK LINES === */
+function drawCracks(cx, cy, alpha) {
+  const lines = [
+    [[cx,cy],[cx-80,cy-120],[cx-40,cy-200]],
+    [[cx,cy],[cx+90,cy-80],[cx+160,cy-50],[cx+220,cy-10]],
+    [[cx,cy],[cx+70,cy+110],[cx+100,cy+200]],
+    [[cx,cy],[cx-100,cy+80],[cx-180,cy+120]],
+    [[cx,cy],[cx-130,cy+10],[cx-220,cy+30]],
+    [[cx,cy],[cx+40,cy-140],[cx+20,cy-220]],
+    [[cx,cy],[cx-60,cy+150],[cx-30,cy+240]],
+  ];
+  ctx.save();
+  ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+  ctx.lineWidth = 1.2;
+  ctx.shadowColor = 'rgba(150,200,255,0.8)';
+  ctx.shadowBlur  = 4;
+  lines.forEach(pts => {
+    ctx.beginPath();
+    pts.forEach((p,i)=>i===0?ctx.moveTo(...p):ctx.lineTo(...p));
+    ctx.stroke();
+  });
+  ctx.restore();
+}
+
+/* === FLASH === */
+function flashScreen() {
+  document.body.style.transition='filter 0.05s';
+  document.body.style.filter='brightness(4)';
+  setTimeout(()=>{document.body.style.filter='';},60);
+}
+
+/* === ANIMAZIONE === */
+function triggerAnim() {
+  if (animRunning) return;
+  animRunning = true;
+  canvas.style.display = 'block';
+  playHorn();
+
+  const cx   = W/2, cy = H/2;
+  let busX   = W + 200;
+  const busTargetX = cx;
+  let phase  = 'enter';
+  let vortexP= 0, crackA=0;
+  let impactTimer=0;
+  let busScale=1, busAlpha=1, busBlur=16;
+
+  let lastTs = null;
+
+  function loop(ts) {
+    if (!lastTs) lastTs = ts;
+    const dt = Math.min((ts-lastTs)/16,3);
+    lastTs = ts;
+
+    ctx.clearRect(0,0,W,H);
+
+    if (phase === 'enter') {
+      busX   -= 26 * dt;
+      busBlur = Math.max(0, 16 - (W+200-busX)/18);
+      drawBus(busX, cy, 1, 1, busBlur);
+
+      if (busX <= busTargetX) {
+        phase = 'impact';
+        impactTimer = 0;
+
+        flashScreen();
+        document.body.classList.remove('shaking');
+        void document.body.offsetWidth;
+        document.body.classList.add('shaking');
+        setTimeout(()=>document.body.classList.remove('shaking'),600);
+      }
+
+    } else if (phase === 'impact') {
+      impactTimer += dt;
+
+      // bus bounce
+      const bounce = impactTimer < 15
+        ? Math.sin(impactTimer*0.6)*(15-impactTimer)*1.5
+        : 0;
+      busScale = Math.max(0, 1 - impactTimer/60);
+      busAlpha = Math.max(0, 1 - impactTimer/40);
+      drawBus(busTargetX+bounce, cy, 1+impactTimer*0.04, busAlpha, 0);
+
+      // Crepe
+      crackA = Math.min(1, impactTimer/10);
+      drawCracks(cx, cy, crackA * busAlpha);
+
+      // Vortice inizia a girare
+      if (impactTimer > 10) {
+        vortexP = Math.min(1, (impactTimer-10)/35);
+        drawVortex(cx, cy, vortexP, 1);
+      }
+
+      if (impactTimer > 50) {
+        phase = 'switch';
+      }
+
+    } else if (phase === 'switch') {
+      vortexP = Math.min(1, vortexP + 0.04 * dt);
+      drawVortex(cx, cy, vortexP, 1);
+
+      if (vortexP >= 1) {
+        // Cambia schermata
+        pagePws.style.opacity = '0';
+        pagePws.style.pointerEvents = 'none';
+        pageIv.style.zIndex  = '2';
+
+        phase = 'fadeout';
+      }
+
+    } else if (phase === 'fadeout') {
+      vortexP = Math.max(0, vortexP - 0.04 * dt);
+      drawVortex(cx, cy, vortexP, -1);
+      if (vortexP <= 0) {
+        canvas.style.display = 'none';
+        animRunning = false;
+        return;
+      }
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  requestAnimationFrame(loop);
+}
+
+function resetDemo() {
+  animRunning = false;
+  pagePws.style.opacity = '1';
+  pagePws.style.pointerEvents = '';
+  pageIv.style.zIndex = '1';
+  canvas.style.display = 'none';
+}
+</script>
+</body>
+</html>

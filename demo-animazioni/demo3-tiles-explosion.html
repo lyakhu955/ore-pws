@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo 3 – Schermo Esplode in Tessere</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #E4E9F2;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    height: 100vh; overflow: hidden;
+    user-select: none;
+  }
+
+  #page-a, #page-b {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 1rem;
+  }
+
+  #page-a { background: #E4E9F2; z-index: 1; }
+  #page-b { background: #1A237E; z-index: 0; }
+  #page-b h1 { color: #FFC107; font-size: 2.5rem; }
+  #page-b p  { color: white; }
+
+  h1 { font-size: 2rem; color: #003366; }
+  p  { color: #666; text-align: center; max-width: 320px; }
+  button {
+    padding: 1rem 2.5rem; font-size: 1.1rem; font-weight: 700;
+    background: #003366; color: white; border: none; border-radius: 50px;
+    cursor: pointer; margin-top: 1rem;
+    box-shadow: 0 4px 20px rgba(0,51,102,0.3);
+  }
+  #page-b button { background: #FFC107; color: #1A237E; }
+
+  #tile-canvas {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    display: none;
+  }
+
+  /* Bus animato in ingresso */
+  #bus-wrap {
+    position: fixed;
+    z-index: 200;
+    pointer-events: none;
+    display: none;
+  }
+
+  @keyframes shake {
+    0%,100%{ transform:translate(0,0)rotate(0); }
+    20%    { transform:translate(-16px,10px)rotate(-2deg); }
+    40%    { transform:translate(18px,-12px)rotate(1.5deg); }
+    60%    { transform:translate(-10px,6px)rotate(-1deg); }
+    80%    { transform:translate(8px,-4px)rotate(0.5deg); }
+  }
+  body.shaking { animation: shake 0.5s ease; }
+</style>
+</head>
+<body>
+
+<!-- Pagina A (PWS) -->
+<div id="page-a">
+  <h1>🏢 Modalità PWS</h1>
+  <p>Lo schermo esplode in tessere che volano via rivelando la schermata Iveco sotto</p>
+  <button onclick="triggerAnim()">▶️ Avvia animazione</button>
+</div>
+
+<!-- Pagina B (Iveco) — già visibile dietro -->
+<div id="page-b">
+  <h1>🚌 IVECO MODE</h1>
+  <p>Modalità Iveco Orecchia!</p>
+  <button onclick="resetDemo()">🔄 Torna a PWS</button>
+</div>
+
+<canvas id="tile-canvas"></canvas>
+
+<!-- Bus -->
+<div id="bus-wrap">
+  <svg viewBox="0 0 240 100" width="220" height="92">
+    <ellipse cx="120" cy="95" rx="78" ry="5" fill="rgba(0,0,0,0.15)"/>
+    <rect x="8" y="10" width="224" height="76" rx="10" fill="#1565C0"/>
+    <rect x="8" y="42" width="224" height="14" fill="#FFC107"/>
+    <rect x="14" y="2" width="212" height="22" rx="8" fill="#1976D2"/>
+    <rect x="30"  y="12" width="38" height="20" rx="4" fill="#B3E5FC" opacity="0.9"/>
+    <rect x="80"  y="12" width="38" height="20" rx="4" fill="#B3E5FC" opacity="0.9"/>
+    <rect x="130" y="12" width="38" height="20" rx="4" fill="#B3E5FC" opacity="0.9"/>
+    <rect x="182" y="12" width="40" height="22" rx="4" fill="#B3E5FC" opacity="0.9"/>
+    <circle cx="50"  cy="86" r="14" fill="#212121"/>
+    <circle cx="50"  cy="86" r="6"  fill="#9E9E9E"/>
+    <circle cx="190" cy="86" r="14" fill="#212121"/>
+    <circle cx="190" cy="86" r="6"  fill="#9E9E9E"/>
+    <ellipse cx="228" cy="62" rx="7" ry="5" fill="#FFEB3B"/>
+    <rect x="88" y="3" width="32" height="8" rx="2" fill="#FFC107"/>
+    <text x="104" y="10" font-size="7" fill="#1A237E" text-anchor="middle" font-family="monospace" font-weight="bold">ATM</text>
+  </svg>
+</div>
+
+<script>
+const canvas  = document.getElementById('tile-canvas');
+const ctx     = canvas.getContext('2d');
+const pageA   = document.getElementById('page-a');
+const busWrap = document.getElementById('bus-wrap');
+let animRunning = false;
+
+function resize() {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+/* ===== CLACSON ===== */
+function playHorn() {
+  const ac = new (window.AudioContext || window.webkitAudioContext)();
+  function beep(f, s, d, v=0.5) {
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.connect(g); g.connect(ac.destination);
+    o.type = 'sawtooth'; o.frequency.value = f;
+    g.gain.setValueAtTime(0, ac.currentTime+s);
+    g.gain.linearRampToValueAtTime(v, ac.currentTime+s+0.03);
+    g.gain.linearRampToValueAtTime(0, ac.currentTime+s+d);
+    o.start(ac.currentTime+s); o.stop(ac.currentTime+s+d+0.05);
+  }
+  beep(400,0,0.18); beep(500,0.22,0.22); beep(400,0.48,0.14); beep(500,0.64,0.32);
+}
+
+/* ===== TILES ===== */
+const COLS = 8, ROWS = 12;
+let tiles = [];
+
+function buildTiles() {
+  const W = canvas.width, H = canvas.height;
+  const tw = W / COLS, th = H / ROWS;
+  tiles = [];
+
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const cx = (c + 0.5) * tw;
+      const cy = (r + 0.5) * th;
+      const angle = Math.atan2(cy - H/2, cx - W/2);
+      const dist  = Math.hypot(cx - W/2, cy - H/2);
+      const delay = dist / 600; // più lontano dal centro = parte dopo
+      const speed = 8 + Math.random() * 14;
+
+      tiles.push({
+        x: c * tw, y: r * th, w: tw, h: th,
+        vx: Math.cos(angle) * speed * (0.5 + Math.random()),
+        vy: Math.sin(angle) * speed * (0.5 + Math.random()) - 2,
+        rot: 0,
+        rotV: (Math.random() - 0.5) * 0.15,
+        alpha: 1,
+        delay,
+        elapsed: 0,
+        started: false,
+        // Colore della pagina A
+        color: `hsl(${210 + Math.random()*20}, ${50+Math.random()*20}%, ${80+Math.random()*15}%)`
+      });
+    }
+  }
+}
+
+/* ===== ANIMAZIONE PRINCIPALE ===== */
+function triggerAnim() {
+  if (animRunning) return;
+  animRunning = true;
+
+  const W = canvas.width, H = canvas.height;
+
+  playHorn();
+
+  // Mostra il bus che entra
+  busWrap.style.display = 'block';
+  busWrap.style.left    = (W + 250) + 'px';
+  busWrap.style.top     = (H/2 - 46) + 'px';
+  busWrap.style.transition = 'none';
+  busWrap.style.transform  = 'scale(1)';
+
+  // Bus entra veloce
+  setTimeout(() => {
+    busWrap.style.transition = 'left 0.45s cubic-bezier(.8,0,1,1)';
+    busWrap.style.left = (W/2 - 110) + 'px';
+  }, 50);
+
+  // All'impatto
+  setTimeout(() => {
+    // Shake + flash
+    document.body.classList.remove('shaking');
+    void document.body.offsetWidth;
+    document.body.classList.add('shaking');
+
+    // Cattura schermata A come pattern sul canvas
+    canvas.style.display = 'block';
+    buildTiles();
+
+    // Nascondi pagina A
+    pageA.style.opacity = '0';
+
+    // Bus: ingrandisce e svanisce
+    busWrap.style.transition = 'transform 0.2s, opacity 0.3s 0.15s';
+    busWrap.style.transform  = 'scale(1.5)';
+    setTimeout(() => { busWrap.style.opacity = '0'; }, 150);
+
+    startTileExplosion();
+  }, 500);
+}
+
+let lastTs = null;
+
+function startTileExplosion() {
+  lastTs = null;
+
+  function loop(ts) {
+    if (!lastTs) lastTs = ts;
+    const dt = (ts - lastTs) / 16;
+    lastTs = ts;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    let allDone = true;
+
+    tiles.forEach(t => {
+      t.elapsed += dt;
+      const relT = t.elapsed - t.delay * 60;
+
+      if (relT < 0) {
+        // Non ancora partita: disegna ferma
+        ctx.save();
+        ctx.globalAlpha = 1;
+        ctx.fillStyle   = t.color;
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+        ctx.lineWidth   = 0.5;
+        ctx.fillRect(t.x, t.y, t.w, t.h);
+        ctx.strokeRect(t.x, t.y, t.w, t.h);
+        ctx.restore();
+        allDone = false;
+        return;
+      }
+
+      t.started = true;
+      // Muovi
+      t.x   += t.vx * dt;
+      t.y   += t.vy * dt;
+      t.vy  += 0.3 * dt;
+      t.rot += t.rotV * dt;
+      t.alpha -= 0.018 * dt;
+
+      if (t.alpha <= 0) return;
+      allDone = false;
+
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, t.alpha);
+      ctx.translate(t.x + t.w/2, t.y + t.h/2);
+      ctx.rotate(t.rot);
+      ctx.fillStyle   = t.color;
+      ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+      ctx.lineWidth   = 0.5;
+      ctx.fillRect(-t.w/2, -t.h/2, t.w, t.h);
+      ctx.strokeRect(-t.w/2, -t.h/2, t.w, t.h);
+      ctx.restore();
+    });
+
+    if (!allDone) {
+      requestAnimationFrame(loop);
+    } else {
+      canvas.style.display = 'none';
+      busWrap.style.display = 'none';
+      busWrap.style.opacity = '1';
+      busWrap.style.transform = 'scale(1)';
+    }
+  }
+
+  requestAnimationFrame(loop);
+}
+
+function resetDemo() {
+  animRunning = false;
+  pageA.style.opacity = '1';
+  canvas.style.display = 'none';
+  busWrap.style.display = 'none';
+  busWrap.style.opacity = '1';
+  busWrap.style.transform = 'scale(1)';
+}
+</script>
+</body>
+</html>

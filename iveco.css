@@ -3,52 +3,6 @@
 /* Modalità speciale per gestione mezzi Iveco       */
 /* ================================================ */
 
-/* Overlay di transizione */
-#iveco-overlay {
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(ellipse at center, #003366 0%, #001a33 100%);
-    z-index: 99999;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.5s ease;
-}
-
-#iveco-overlay.active {
-    opacity: 1;
-    pointer-events: all;
-}
-
-#iveco-overlay .iveco-logo-anim {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-    animation: iveco-spin 1s ease forwards;
-}
-
-#iveco-overlay .iveco-title-anim {
-    color: #fff;
-    font-size: 1.8rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-shadow: 0 0 20px rgba(255,255,255,0.5);
-}
-
-#iveco-overlay .iveco-subtitle-anim {
-    color: rgba(255,255,255,0.7);
-    font-size: 1rem;
-    margin-top: 0.5rem;
-}
-
-@keyframes iveco-spin {
-    0%   { transform: scale(0) rotate(-180deg); opacity: 0; }
-    60%  { transform: scale(1.2) rotate(10deg); opacity: 1; }
-    100% { transform: scale(1) rotate(0deg); opacity: 1; }
-}
-
 /* ---- App Iveco visibile ---- */
 body.iveco-mode #iveco-app {
     display: flex !important;

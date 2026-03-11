@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo Animazioni – Scegli il tuo stile</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: linear-gradient(135deg, #E4E9F2 0%, #d0d8ea 100%);
+    font-family: 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; padding: 2rem 1rem;
+  }
+  h1 { font-size: 2rem; color: #003366; margin-bottom: 0.4rem; }
+  .sub { color: #666; margin-bottom: 2.5rem; font-size: 0.95rem; }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    max-width: 900px;
+    width: 100%;
+  }
+
+  .card {
+    background: white;
+    border-radius: 20px;
+    padding: 1.8rem;
+    box-shadow: 6px 6px 16px rgba(0,0,0,0.1), -4px -4px 12px rgba(255,255,255,0.9);
+    display: flex; flex-direction: column; gap: 0.8rem;
+    text-decoration: none; color: inherit;
+    transition: transform 0.15s, box-shadow 0.15s;
+    cursor: pointer;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 8px 10px 22px rgba(0,0,0,0.14), -4px -4px 14px rgba(255,255,255,1);
+  }
+  .card:active { transform: scale(0.97); }
+
+  .emoji { font-size: 2.8rem; }
+  .card h2 { font-size: 1.1rem; color: #003366; }
+  .card p  { font-size: 0.85rem; color: #666; line-height: 1.5; }
+  .badge {
+    display: inline-block;
+    padding: 0.2rem 0.7rem;
+    border-radius: 50px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: #003366;
+    color: white;
+    width: fit-content;
+  }
+  .badge.gold  { background: #e6a800; }
+  .badge.green { background: #27ae60; }
+  .badge.red   { background: #c0392b; }
+  .badge.purple{ background: #8e44ad; }
+</style>
+</head>
+<body>
+
+<h1>🚌 Demo Animazioni</h1>
+<p class="sub">Clicca su una card per aprire la demo — scegli quella che preferisci!</p>
+
+<div class="cards">
+
+  <a class="card" href="demo1-bus-sfonda.html" target="_blank">
+    <div class="emoji">💥</div>
+    <h2>Demo 1 – Bus Sfonda lo Schermo</h2>
+    <p>Il bus entra da destra ad alta velocità su canvas. All'impatto lo schermo shake + flash bianco, frammenti colorati esplodono fuori dal punto d'impatto.</p>
+    <span class="badge">Canvas + Frammenti</span>
+  </a>
+
+  <a class="card" href="demo2-bus-crash-crack.html" target="_blank">
+    <div class="emoji">🔨</div>
+    <h2>Demo 2 – Bus Crash + Vetro Incrinato</h2>
+    <p>Bus SVG inline entra da destra. All'impatto appare un SVG di crepe che si irradiano dal centro, lo schermo shaka e la nuova pagina appare sotto.</p>
+    <span class="badge gold">SVG Crack + Shake</span>
+  </a>
+
+  <a class="card" href="demo3-tiles-explosion.html" target="_blank">
+    <div class="emoji">🧩</div>
+    <h2>Demo 3 – Schermo Esplode in Tessere</h2>
+    <p>La pagina si divide in N tessere che esplodono verso l'esterno con gravità e rotazione, rivelando la nuova schermata sotto di esse.</p>
+    <span class="badge green">Tiles Explosion</span>
+  </a>
+
+  <a class="card" href="demo4-motion-blur.html" target="_blank">
+    <div class="emoji">💨</div>
+    <h2>Demo 4 – Motion Blur + Shockwave</h2>
+    <p>Bus entra sfocato per il motion blur (velocità altissima), si mette a fuoco esattamente sull'impatto, poi un anello shockwave si espande e la pagina dissolve.</p>
+    <span class="badge red">Motion Blur + Ring</span>
+  </a>
+
+  <a class="card" href="demo5-vortex.html" target="_blank">
+    <div class="emoji">🌀</div>
+    <h2>Demo 5 – Impatto + Vortice</h2>
+    <p>Bus entra da destra, crepe si irradiano, poi un vortice a spirale si espande dal punto d'impatto e durante la rotazione massima la pagina cambia.</p>
+    <span class="badge purple">Vortex + Crack</span>
+  </a>
+
+</div>
+
+</body>
+</html>
