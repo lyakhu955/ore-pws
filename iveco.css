@@ -221,54 +221,37 @@ body.dark-theme #iveco-bus-track {
     box-shadow: var(--neo-in-sm, inset 2px 2px 5px rgba(0,0,0,0.1), inset -2px -2px 5px rgba(255,255,255,0.8));
 }
 
-/* ---- Long press progress bar lineare (sotto header) ---- */
-#iveco-press-bar-container,
-#pws-press-bar-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    z-index: 999999;
-    background: transparent;
-    pointer-events: none;
+/* ---- Hint swipe → sul logo (freccia animata) ---- */
+#pws-logo,
+#iveco-logo-wrap {
+    position: relative;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#pws-logo::after,
+#iveco-logo-wrap::after {
+    content: '›';
+    position: absolute;
+    right: -18px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--accent, #003366);
     opacity: 0;
-    transition: opacity 0.15s ease;
+    pointer-events: none;
+    animation: swipe-hint 2.8s ease-in-out infinite;
+    animation-delay: 1.5s;
 }
 
-#iveco-press-bar-container.visible,
-#pws-press-bar-container.visible {
-    opacity: 1;
-}
-
-#iveco-press-bar,
-#pws-press-bar {
-    height: 100%;
-    width: 0%;
-    border-radius: 0 2px 2px 0;
-    transition: width 3s linear;
-}
-
-#iveco-press-bar-container.visible #iveco-press-bar,
-#pws-press-bar-container.visible #pws-press-bar {
-    width: 100%;
-}
-
-#iveco-press-bar {
-    background: linear-gradient(90deg, #e74c3c, #f39c12, #e74c3c);
-    background-size: 200% 100%;
-    animation: bar-shimmer 1.5s linear infinite;
-}
-
-#pws-press-bar {
-    background: linear-gradient(90deg, #003366, #00E5CC, #003366);
-    background-size: 200% 100%;
-    animation: bar-shimmer 1.5s linear infinite;
-}
-
-@keyframes bar-shimmer {
-    0%   { background-position: 100% 0; }
-    100% { background-position: -100% 0; }
+@keyframes swipe-hint {
+    0%   { opacity: 0;   transform: translateY(-50%) translateX(0);    }
+    20%  { opacity: 0.7; transform: translateY(-50%) translateX(4px);  }
+    45%  { opacity: 0.9; transform: translateY(-50%) translateX(10px); }
+    70%  { opacity: 0.4; transform: translateY(-50%) translateX(16px); }
+    100% { opacity: 0;   transform: translateY(-50%) translateX(20px); }
 }
 
 /* Nascondi i vecchi ring SVG / div */

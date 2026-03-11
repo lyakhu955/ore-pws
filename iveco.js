@@ -112,124 +112,85 @@
     }
 
     // ============================================================
-    // UTILITY: progress bar lineare sotto l'header
+    // SWIPE DESTRA SUL LOGO PWS → entra in modalità Iveco
     // ============================================================
-    function createPressBar(containerId, barId) {
-        let container = document.getElementById(containerId);
-        if (!container) {
-            container = document.createElement('div');
-            container.id = containerId;
-            const bar = document.createElement('div');
-            bar.id = barId;
-            container.appendChild(bar);
-            document.body.appendChild(container);
-        }
-        return container;
-    }
-
-    function startPressBar(containerId) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        const bar = container.firstChild;
-        // Reset
-        bar.style.transition = 'none';
-        bar.style.width = '0%';
-        container.classList.add('visible');
-        // Avvia fill
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                bar.style.transition = 'width 3s linear';
-                bar.style.width = '100%';
-            });
-        });
-    }
-
-    function stopPressBar(containerId) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        container.classList.remove('visible');
-        const bar = container.firstChild;
-        bar.style.transition = 'none';
-        bar.style.width = '0%';
-    }
-
-    // ============================================================
-    // LONG PRESS SUL LOGO PWS (modalità normale)
-    // ============================================================
-    let pwsLongPressTimer = null;
-    let pwsLongPressActive = false;
-
-    function setupPwsLongPress() {
+    function setupPwsSwipe() {
         const logo = document.getElementById('pws-logo');
         if (!logo) return;
 
-        // Crea la barra
-        createPressBar('pws-press-bar-container', 'pws-press-bar');
+        let startX = 0, startY = 0;
 
-        function startPress(e) {
-            pwsLongPressActive = true;
-            startPressBar('pws-press-bar-container');
+        logo.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        }, { passive: true });
 
-            pwsLongPressTimer = setTimeout(() => {
-                if (pwsLongPressActive) {
-                    cancelPress();
-                    window.__ivecoLongPressTriggered = true;
-                    activateIvecoMode();
-                }
-            }, 3000);
-        }
+        logo.addEventListener('touchend', (e) => {
+            const dx = e.changedTouches[0].clientX - startX;
+            const dy = Math.abs(e.changedTouches[0].clientY - startY);
+            if (dx > 60 && dy < 40) {
+                activateIvecoMode();
+            }
+        }, { passive: true });
 
-        function cancelPress() {
-            pwsLongPressActive = false;
-            stopPressBar('pws-press-bar-container');
-            if (pwsLongPressTimer) { clearTimeout(pwsLongPressTimer); pwsLongPressTimer = null; }
-        }
-
-        logo.addEventListener('mousedown',  startPress);
-        logo.addEventListener('touchstart', startPress, { passive: true });
-        logo.addEventListener('mouseup',    cancelPress);
-        logo.addEventListener('mouseleave', cancelPress);
-        logo.addEventListener('touchend',   cancelPress);
-        logo.addEventListener('touchcancel',cancelPress);
+        // Mouse (desktop): drag verso destra
+        let mouseStartX = 0, mouseStartY = 0, mouseDown = false;
+        logo.addEventListener('mousedown', (e) => {
+            mouseDown = true;
+            mouseStartX = e.clientX;
+            mouseStartY = e.clientY;
+        });
+        logo.addEventListener('mouseup', (e) => {
+            if (!mouseDown) return;
+            mouseDown = false;
+            const dx = e.clientX - mouseStartX;
+            const dy = Math.abs(e.clientY - mouseStartY);
+            if (dx > 60 && dy < 40) {
+                activateIvecoMode();
+            }
+        });
+        logo.addEventListener('mouseleave', () => { mouseDown = false; });
     }
 
     // ============================================================
-    // LONG PRESS SUL LOGO IVECO (per uscire)
+    // SWIPE DESTRA SUL LOGO IVECO → torna a modalità PWS
     // ============================================================
-    let ivecoLongPressTimer = null;
-    let ivecoLongPressActive = false;
-
-    function setupIvecoLongPress() {
+    function setupIvecoSwipe() {
         const logoWrap = document.getElementById('iveco-logo-wrap');
         if (!logoWrap) return;
 
-        // Crea la barra
-        createPressBar('iveco-press-bar-container', 'iveco-press-bar');
+        let startX = 0, startY = 0;
 
-        function startPress() {
-            ivecoLongPressActive = true;
-            startPressBar('iveco-press-bar-container');
+        logoWrap.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        }, { passive: true });
 
-            ivecoLongPressTimer = setTimeout(() => {
-                if (ivecoLongPressActive) {
-                    cancelPress();
-                    deactivateIvecoMode();
-                }
-            }, 3000);
-        }
+        logoWrap.addEventListener('touchend', (e) => {
+            const dx = e.changedTouches[0].clientX - startX;
+            const dy = Math.abs(e.changedTouches[0].clientY - startY);
+            if (dx > 60 && dy < 40) {
+                deactivateIvecoMode();
+            }
+        }, { passive: true });
 
-        function cancelPress() {
-            ivecoLongPressActive = false;
-            stopPressBar('iveco-press-bar-container');
-            if (ivecoLongPressTimer) { clearTimeout(ivecoLongPressTimer); ivecoLongPressTimer = null; }
-        }
-
-        logoWrap.addEventListener('mousedown',  startPress);
-        logoWrap.addEventListener('touchstart', startPress, { passive: true });
-        logoWrap.addEventListener('mouseup',    cancelPress);
-        logoWrap.addEventListener('mouseleave', cancelPress);
-        logoWrap.addEventListener('touchend',   cancelPress);
-        logoWrap.addEventListener('touchcancel',cancelPress);
+        // Mouse (desktop): drag verso destra
+        let mouseStartX = 0, mouseStartY = 0, mouseDown = false;
+        logoWrap.addEventListener('mousedown', (e) => {
+            mouseDown = true;
+            mouseStartX = e.clientX;
+            mouseStartY = e.clientY;
+        });
+        logoWrap.addEventListener('mouseup', (e) => {
+            if (!mouseDown) return;
+            mouseDown = false;
+            const dx = e.clientX - mouseStartX;
+            const dy = Math.abs(e.clientY - mouseStartY);
+            if (dx > 60 && dy < 40) {
+                deactivateIvecoMode();
+            }
+        });
+        logoWrap.addEventListener('mouseleave', () => { mouseDown = false; });
     }
 
     // ============================================================
@@ -1583,8 +1544,8 @@
             });
         }
 
-        // Long press logo Iveco (per uscire)
-        setupIvecoLongPress();
+        // Swipe destra logo Iveco (per uscire)
+        setupIvecoSwipe();
 
         // Bus animato
         setupBusAnimation();
@@ -1769,8 +1730,8 @@
         // Setup eventi
         setupIvecoEvents();
 
-        // Long press logo PWS (per entrare)
-        setupPwsLongPress();
+        // Swipe destra logo PWS (per entrare in Iveco)
+        setupPwsSwipe();
 
         // Controlla se era attiva la modalità Iveco
         if (localStorage.getItem(STORAGE_KEY_MODE) === 'true') {
