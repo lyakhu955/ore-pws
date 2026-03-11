@@ -1132,6 +1132,15 @@ body.dark-theme #iveco-bus-track {
     font-weight: 700;
 }
 
+.iveco-preview-table .badge-ok {
+    background: #27ae60;
+    color: white;
+    border-radius: 4px;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
 /* Barra azioni import */
 .iveco-import-actions {
     display: flex;

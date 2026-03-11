@@ -23,6 +23,7 @@
         excelData  : null, // dati Excel raw
         excelColTelaio : 0,
         excelColVettura: 1,
+        excelColStato  : -1, // -1 = non usata
         atmFilter  : 'all',
         elencoFilter: 'all'  // 'all' | 'done' | 'todo'
     };
@@ -845,6 +846,7 @@
         const resetBtn    = document.getElementById('iveco-reset-btn');
         const colTelaio   = document.getElementById('iveco-col-telaio');
         const colVettura  = document.getElementById('iveco-col-vettura');
+        const colStato    = document.getElementById('iveco-col-stato');
 
         if (!fileInput || !uploadZone) return;
 
@@ -866,6 +868,7 @@
         // Cambia colonne → aggiorna preview
         if (colTelaio)  colTelaio.addEventListener('change',  () => updatePreview());
         if (colVettura) colVettura.addEventListener('change', () => updatePreview());
+        if (colStato)   colStato.addEventListener('change',   () => updatePreview());
 
         // Importa
         if (importBtn) {
@@ -940,6 +943,7 @@
     function populateColSelectors(headerRow) {
         const colTelaio  = document.getElementById('iveco-col-telaio');
         const colVettura = document.getElementById('iveco-col-vettura');
+        const colStato   = document.getElementById('iveco-col-stato');
         if (!colTelaio || !colVettura) return;
 
         const options = (headerRow || []).map((h, i) => {
@@ -954,13 +958,18 @@
 
         colTelaio.innerHTML  = options || fallback;
         colVettura.innerHTML = options || fallback;
+        if (colStato) {
+            colStato.innerHTML = `<option value="-1">— Non usare —</option>` + (options || fallback);
+        }
 
-        // Default: Telaio = col 0 (A), Vettura = col 1 (B)
+        // Default: Telaio = col 0 (A), Vettura = col 1 (B), Stato = non usata
         colTelaio.value  = '0';
         colVettura.value = '1';
+        if (colStato) colStato.value = '-1';
 
         ivecoState.excelColTelaio  = 0;
         ivecoState.excelColVettura = 1;
+        ivecoState.excelColStato   = -1;
     }
 
     function updatePreview() {
@@ -969,9 +978,15 @@
 
         const colT  = parseInt(document.getElementById('iveco-col-telaio')?.value  || '0');
         const colV  = parseInt(document.getElementById('iveco-col-vettura')?.value || '1');
+        const colS  = parseInt(document.getElementById('iveco-col-stato')?.value   ?? '-1');
 
         ivecoState.excelColTelaio  = colT;
         ivecoState.excelColVettura = colV;
+        ivecoState.excelColStato   = colS;
+
+        // Aggiorna intestazione tabella anteprima in base alla colonna stato
+        const thStato = document.getElementById('iveco-preview-th-stato');
+        if (thStato) thStato.style.display = colS >= 0 ? '' : 'none';
 
         // Skip intestazione (riga 0)
         const dataRows = rows.slice(1);
@@ -983,10 +998,12 @@
         const tableRows = preview.map(row => {
             const rawT = row[colT] !== undefined ? String(row[colT]) : '';
             const rawV = row[colV] !== undefined ? String(row[colV]) : '';
+            const rawS = colS >= 0 && row[colS] !== undefined ? String(row[colS]).trim() : '';
             const telaio  = extractTelaio(rawT);
             const vettura = extractVettura(rawV);
             const key     = telaio + '_' + vettura;
             const isDup   = existingIds.has(key);
+            const isOk    = rawS.toLowerCase() === 'ok';
 
             return `
                 <tr>
@@ -994,6 +1011,7 @@
                     <td><strong>${escapeHtml(telaio)}</strong></td>
                     <td>${escapeHtml(rawV)}</td>
                     <td><strong>${escapeHtml(vettura)}</strong></td>
+                    ${colS >= 0 ? `<td>${isOk ? '<span class="badge-ok">✅ OK</span>' : '<span style="color:var(--text-secondary);font-size:0.75rem;">' + escapeHtml(rawS || '—') + '</span>'}</td>` : ''}
                     <td>${isDup ? '<span class="badge-dup">DUPLICATO</span>' : '<span class="badge-new">NUOVO</span>'}</td>
                 </tr>
             `;
@@ -1005,6 +1023,10 @@
             const v = extractVettura(row[colV] !== undefined ? String(row[colV]) : '');
             return existingIds.has(t + '_' + v);
         }).length;
+        const okCount = colS >= 0 ? dataRows.filter(row => {
+            const s = row[colS] !== undefined ? String(row[colS]).trim().toLowerCase() : '';
+            return s === 'ok';
+        }).length : 0;
 
         const previewContainer = document.getElementById('iveco-preview-container');
         const previewBody      = document.getElementById('iveco-preview-body');
@@ -1015,6 +1037,7 @@
         if (previewInfo) {
             previewInfo.innerHTML = `
                 📊 <strong>${totalRows}</strong> righe trovate
+                ${okCount > 0 ? ` · <span style="color:#2ecc71">✅ ${okCount} già completati (colonna OK)</span>` : ''}
                 ${dupCount > 0 ? ` · <span style="color:#e74c3c">⚠️ ${dupCount} duplicati (verranno ignorati)</span>` : ''}
                 ${preview.length < totalRows ? ` · (anteprima primi 10 di ${totalRows})` : ''}
             `;
@@ -1034,7 +1057,8 @@
         // Chiave univoca = telaio(4) + vettura
         const existingKeys = new Set(ivecoState.vehicles.map(v => v.telaio + '_' + v.vettura));
 
-        let added = 0, skipped = 0;
+        const colS = ivecoState.excelColStato;
+        let added = 0, skipped = 0, markedDone = 0;
 
         // Salta riga 0 (intestazione)
         rows.slice(1).forEach(row => {
@@ -1046,16 +1070,29 @@
             const vettura = extractVettura(rawV);
             const key     = telaio + '_' + vettura;
 
+            // Leggi colonna stato
+            const rawS  = colS >= 0 && row[colS] !== undefined ? String(row[colS]).trim().toLowerCase() : '';
+            const isDone = rawS === 'ok';
+
             if (existingKeys.has(key)) {
+                // Se esiste già e ora ha ok, aggiorna il flag done
+                const existing = ivecoState.vehicles.find(v => v.telaio === telaio && v.vettura === vettura);
+                if (existing && isDone && !existing.done) {
+                    existing.done = true;
+                    markedDone++;
+                }
                 skipped++;
-                return; // mantieni il primo inserito
+                return;
             }
+
+            if (isDone) markedDone++;
 
             ivecoState.vehicles.push({
                 id     : uuid(),
                 telaio : telaio,
                 vettura: vettura,
-                done   : false
+                done   : isDone,
+                doneDate: null
             });
 
             existingKeys.add(key);
@@ -1065,6 +1102,7 @@
         saveVehicles();
 
         let msg = `✅ Importati ${added} mezzi`;
+        if (markedDone > 0) msg += ` · 🟢 ${markedDone} segnati come fatti (OK)`;
         if (skipped > 0) msg += ` · ${skipped} duplicati ignorati`;
         showIvecoToast(msg, 'success', 4000);
         renderAggiungiStatus('success', msg, false);
@@ -1346,7 +1384,17 @@
                                     <option value="1" selected>B</option>
                                 </select>
                             </div>
+                            <div class="iveco-col-field">
+                                <label>✅ Colonna Stato (OK)</label>
+                                <select id="iveco-col-stato">
+                                    <option value="-1">— Non usare —</option>
+                                    <option value="2">C</option>
+                                </select>
+                            </div>
                         </div>
+                        <p style="font-size:0.75rem;color:var(--text-secondary);margin-top:0.5rem;">
+                            💡 Se selezioni la colonna Stato, i mezzi con valore <strong>OK</strong> verranno importati già come <strong>completati</strong>.
+                        </p>
                     </div>
 
                     <!-- Preview -->
@@ -1361,7 +1409,8 @@
                                         <th>Telaio (ultimi 4)</th>
                                         <th>Vettura (raw)</th>
                                         <th>N. Vettura</th>
-                                        <th>Stato</th>
+                                        <th id="iveco-preview-th-stato" style="display:none;">Stato</th>
+                                        <th>Import</th>
                                     </tr>
                                 </thead>
                                 <tbody id="iveco-preview-body"></tbody>
