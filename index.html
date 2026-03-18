@@ -1046,6 +1046,21 @@
         }
 
         /* Work descriptions */
+        .calendar-day.riposo-dopo-notte {
+            background: rgba(100, 80, 200, 0.10);
+            box-shadow: var(--neo-in-sm);
+            border-left: 3px solid #7c5cbf !important;
+        }
+        .calendar-day.riposo-dopo-notte .calendar-day-number {
+            background: #7c5cbf;
+            color: white;
+            border-radius: 50%;
+            padding: 0.1em 0.35em;
+        }
+        .calendar-day.riposo-dopo-notte .calendar-holiday-name {
+            color: #5a3fa0;
+        }
+
         #work-descriptions-container {
             display: flex; flex-direction: column;
             gap: 8px; margin-bottom: 8px;
@@ -1934,6 +1949,12 @@
             padding-left: calc(1rem - 3px);
         }
         .monthly-report-item.malattia-entry .monthly-report-date { color: var(--neo-secondary); }
+        .monthly-report-item.riposo-entry {
+            background: rgba(100, 80, 200, 0.08);
+            border-left: 3px solid #7c5cbf;
+            padding-left: calc(1rem - 3px);
+        }
+        .monthly-report-item.riposo-entry .monthly-report-date { color: #5a3fa0; }
 
         /* ===== FERIE/MALATTIE SECTION ===== */
         .ferie-malattie-content { display: flex; flex-direction: column; gap: 1.5rem; }
@@ -3027,7 +3048,10 @@
                                 </button>
                             </div>
 
-                            <div class="form-group" style="margin-top: 20px; text-align: right;">
+                            <div class="form-group" style="margin-top: 20px; display: flex; gap: 0.75rem; justify-content: flex-end; flex-wrap: wrap; align-items: center;">
+                                <button type="button" id="riposoDopoNotteBtn" title="Segna come Riposo dopo notte" style="background: var(--md-sys-color-surface-variant); color: var(--md-sys-color-on-surface-variant); border: 1.5px solid var(--md-sys-color-outline); border-radius: var(--border-radius-large); padding: 0.6rem 1rem; font-size: 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.4rem;">
+                                    😴 Riposo dopo notte
+                                </button>
                                 <button type="submit" id="submitBtn">
                                     <span class="material-symbols-outlined">save</span> Salva
                                 </button>
@@ -3916,6 +3940,9 @@
                      </button>
                      <button id="markMalattiaBtn" class="action-btn secondary-btn">
                          <span class="material-symbols-outlined">sick</span> Segna Malattia
+                     </button>
+                     <button id="markRiposoDopoNotteBtn" class="action-btn" style="background: var(--md-sys-color-surface-variant); color: var(--md-sys-color-on-surface-variant);">
+                         😴 Riposo dopo notte
                      </button>
                  </div>
                  <!-- Entries list -->
@@ -5400,6 +5427,24 @@
                  console.warn("Modale dettagli giorno non trovato.");
              }
 
+            // Listener pulsante "Riposo dopo notte" nel form principale
+            const riposoDopoNotteBtn = document.getElementById('riposoDopoNotteBtn');
+            if (riposoDopoNotteBtn) {
+                riposoDopoNotteBtn.addEventListener('click', function() {
+                    const dateInput = document.getElementById('date');
+                    if (!dateInput || !dateInput.value) {
+                        showToast('Seleziona prima una data.', 'warning');
+                        return;
+                    }
+                    const dateStr = dateInput.value; // formato DD/MM/YYYY
+                    if (typeof markDayAsAbsence === 'function') {
+                        markDayAsAbsence(dateStr, 'riposo_dopo_notte');
+                    } else {
+                        showToast('Errore interno: funzione non disponibile.', 'error');
+                    }
+                });
+            }
+
             // Initial load for the default active section (Home)
             if (document.getElementById('home-section')?.classList.contains('active')) {
                  if (typeof loadTimeEntries === 'function') loadTimeEntries();
@@ -6429,13 +6474,13 @@
                  const holidayInfo = db.holidays[dateStr]; // Check ferie/malattie first
                  const isWeekend = date.getDay() === 0 || date.getDay() === 6; // Sunday or Saturday
                  const isStdHoliday = !holidayInfo && isItalianHoliday(date); // Check standard holiday if not ferie/malattia
-                 const holidayName = holidayInfo ? (holidayInfo.note || (holidayInfo.type === 'ferie' ? 'Ferie' : 'Malattia')) : (isStdHoliday ? getHolidayName(date) : '');
+                 const holidayName = holidayInfo ? (holidayInfo.note || (holidayInfo.type === 'ferie' ? 'Ferie' : holidayInfo.type === 'malattia' ? 'Malattia' : 'Riposo dopo notte')) : (isStdHoliday ? getHolidayName(date) : '');
 
 
                  let dayClasses = 'calendar-day';
                  if (dateStr === todayStr) dayClasses += ' today';
                  if (entries.length > 0) dayClasses += ' has-entries';
-                  if (holidayInfo) dayClasses += ` ${holidayInfo.type}`; // 'ferie' or 'malattia' class
+                  if (holidayInfo) dayClasses += ` ${holidayInfo.type === 'riposo_dopo_notte' ? 'riposo-dopo-notte' : holidayInfo.type}`; // 'ferie', 'malattia' o 'riposo-dopo-notte'
                  else if (isStdHoliday) dayClasses += ' holiday';
                  // Add weekend class? Optional for styling.
                  // if (isWeekend) dayClasses += ' weekend';
@@ -6454,8 +6499,10 @@
 
                  // Determine title attribute for hover info
                  let title = `${day} ${monthNames[month]} ${year}`;
-                 if(holidayInfo) title += ` - ${holidayInfo.type === 'ferie' ? 'Ferie' : 'Malattia'}${holidayInfo.note ? ': ' + holidayInfo.note : ''}`;
-                 else if(isStdHoliday) title += ` - ${holidayName}`;
+                 if(holidayInfo) {
+                     const hLabel = holidayInfo.type === 'ferie' ? 'Ferie' : holidayInfo.type === 'malattia' ? 'Malattia' : 'Riposo dopo notte';
+                     title += ` - ${hLabel}${holidayInfo.note && holidayInfo.note !== hLabel ? ': ' + holidayInfo.note : ''}`;
+                 } else if(isStdHoliday) title += ` - ${holidayName}`;
                  else if(entries.length > 0) title += ` - Lavorato: ${totalHours.toFixed(1)}h`;
 
 
@@ -6471,14 +6518,20 @@
                  html += `<div class="calendar-day-content">`;
 
                   if (holidayInfo) {
-                     // Show Ferie/Malattia icon and optional note
-                     const icon = holidayInfo.type === 'ferie' ? 'beach_access' : 'sick';
-                     html += `<span class="calendar-icons"><span class="material-symbols-outlined">${icon}</span></span>`;
-                      if (holidayInfo.note) {
-                          html += `<span class="calendar-holiday-name">${escapeHtml(holidayInfo.note)}</span>`;
-                      } else {
-                           html += `<span class="calendar-holiday-name">${holidayInfo.type === 'ferie' ? 'Ferie' : 'Malattia'}</span>`;
-                      }
+                     if (holidayInfo.type === 'riposo_dopo_notte') {
+                         // Mostra emoji 😴 invece delle ore
+                         html += `<span class="calendar-hours" style="font-size:1.3rem;">😴</span>`;
+                         html += `<span class="calendar-holiday-name">Riposo</span>`;
+                     } else {
+                         // Show Ferie/Malattia icon and optional note
+                         const icon = holidayInfo.type === 'ferie' ? 'beach_access' : 'sick';
+                         html += `<span class="calendar-icons"><span class="material-symbols-outlined">${icon}</span></span>`;
+                         if (holidayInfo.note) {
+                             html += `<span class="calendar-holiday-name">${escapeHtml(holidayInfo.note)}</span>`;
+                         } else {
+                             html += `<span class="calendar-holiday-name">${holidayInfo.type === 'ferie' ? 'Ferie' : 'Malattia'}</span>`;
+                         }
+                     }
                   } else if (entries.length > 0) {
                      // Show work details
                       if (totalHours > 0) { // Show hours if positive
@@ -7241,18 +7294,23 @@
             addEntryModalBtn.style.display = 'inline-flex';
             markFerieBtn.style.display = 'inline-flex';
             markMalattiaBtn.style.display = 'inline-flex';
+            const markRiposoBtn = modal.querySelector('#markRiposoDopoNotteBtn');
+            if (markRiposoBtn) markRiposoBtn.style.display = 'inline-flex';
             daySummary.style.display = 'grid';
 
             // --- Remove previous listeners from absence buttons to prevent duplicates ---
             markFerieBtn.replaceWith(markFerieBtn.cloneNode(true));
             markMalattiaBtn.replaceWith(markMalattiaBtn.cloneNode(true));
+            if (markRiposoBtn) markRiposoBtn.replaceWith(markRiposoBtn.cloneNode(true));
             // Re-acquire references after cloning
             const freshMarkFerieBtn = modal.querySelector('#markFerieBtn');
             const freshMarkMalattiaBtn = modal.querySelector('#markMalattiaBtn');
+            const freshMarkRiposoBtn = modal.querySelector('#markRiposoDopoNotteBtn');
 
             // --- Attach new listeners ---
             freshMarkFerieBtn.addEventListener('click', () => markDayAsAbsence(dateStr, 'ferie'));
             freshMarkMalattiaBtn.addEventListener('click', () => markDayAsAbsence(dateStr, 'malattia'));
+            if (freshMarkRiposoBtn) freshMarkRiposoBtn.addEventListener('click', () => markDayAsAbsence(dateStr, 'riposo_dopo_notte'));
 
              // --- Get data AFTER setting up buttons and title ---
              console.log(`[openDayModal] Accessing db.entries with key: '${dateStr}'`);
@@ -7263,26 +7321,42 @@
              console.log(`[openDayModal] Found holidayInfo:`, holidayInfo);
 
             if (holidayInfo) {
-                 // --- Display Ferie/Malattia Info (already marked) ---
-                 // Restore the code that displays the colored block and delete button
+                 // --- Display Ferie/Malattia/Riposo Info (already marked) ---
                  console.log(`Giorno ${dateStr} è ${holidayInfo.type}`);
-                 const typeText = holidayInfo.type === 'ferie' ? 'Ferie' : 'Malattia';
-                 const icon = holidayInfo.type === 'ferie' ? 'beach_access' : 'sick';
+                 let typeText, bgColor, textColor, iconHtml;
+                 if (holidayInfo.type === 'ferie') {
+                     typeText = 'Ferie';
+                     bgColor = 'var(--md-sys-color-tertiary-container)';
+                     textColor = 'var(--md-sys-color-on-tertiary-container)';
+                     iconHtml = `<span class="material-symbols-outlined" style="font-size: 2rem; vertical-align: middle; margin-right: 0.5rem;">beach_access</span>`;
+                 } else if (holidayInfo.type === 'riposo_dopo_notte') {
+                     typeText = 'Riposo dopo notte';
+                     bgColor = 'rgba(100, 80, 200, 0.15)';
+                     textColor = '#5a3fa0';
+                     iconHtml = `<span style="font-size: 2rem; vertical-align: middle; margin-right: 0.5rem;">😴</span>`;
+                 } else {
+                     typeText = 'Malattia';
+                     bgColor = 'var(--md-sys-color-secondary-container)';
+                     textColor = 'var(--md-sys-color-on-secondary-container)';
+                     iconHtml = `<span class="material-symbols-outlined" style="font-size: 2rem; vertical-align: middle; margin-right: 0.5rem;">sick</span>`;
+                 }
                  modalEntries.innerHTML = `
-                     <div style="text-align: center; padding: 1rem; background-color: ${holidayInfo.type === 'ferie' ? 'var(--md-sys-color-tertiary-container)' : 'var(--md-sys-color-secondary-container)'} ; border-radius: var(--border-radius-medium); color: ${holidayInfo.type === 'ferie' ? 'var(--md-sys-color-on-tertiary-container)' : 'var(--md-sys-color-on-secondary-container)'};">
-                         <span class="material-symbols-outlined" style="font-size: 2rem; vertical-align: middle; margin-right: 0.5rem;">${icon}</span>
+                     <div style="text-align: center; padding: 1rem; background-color: ${bgColor}; border-radius: var(--border-radius-medium); color: ${textColor};">
+                         ${iconHtml}
                          <strong style="font-size: 1.1rem;">${typeText}</strong>
-                         ${holidayInfo.note ? `<p style="margin-top: 0.5rem; font-style: italic;">${escapeHtml(holidayInfo.note)}</p>` : ''}
+                         ${holidayInfo.note && holidayInfo.note !== typeText ? `<p style="margin-top: 0.5rem; font-style: italic;">${escapeHtml(holidayInfo.note)}</p>` : ''}
+                         <br>
                           <button class="delete-btn" style="margin-top: 1rem; background-color: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container);" onclick="deleteFerieMalattieEntryFromModal('${dateStr}')">
-                             <span class="material-symbols-outlined">delete</span> Elimina ${typeText}
+                             <span class="material-symbols-outlined">delete</span> Elimina
                          </button>
                      </div>`;
 
                  // Hide action buttons if already marked as absence
                  daySummary.style.display = 'none';
                  addEntryModalBtn.style.display = 'none';
-                 freshMarkFerieBtn.style.display = 'none'; // Use fresh reference
-                 freshMarkMalattiaBtn.style.display = 'none'; // Use fresh reference
+                 freshMarkFerieBtn.style.display = 'none';
+                 freshMarkMalattiaBtn.style.display = 'none';
+                 if (freshMarkRiposoBtn) freshMarkRiposoBtn.style.display = 'none';
 
             } else if (entries.length > 0) {
                  // --- Display Work Entries ---
@@ -8832,11 +8906,12 @@
               console.log(`Trovati ${monthData.length} giorni con dati per il report di ${yearMonth}`);
 
              // --- Create Overall Monthly Stats ---
-             let monthTotalHours = 0, monthTotalTransferta = 0, monthTotalNotturne = 0, monthTotalBreak = 0, monthWorkDays = 0, monthFerieDays = 0, monthMalattiaDays = 0;
+             let monthTotalHours = 0, monthTotalTransferta = 0, monthTotalNotturne = 0, monthTotalBreak = 0, monthWorkDays = 0, monthFerieDays = 0, monthMalattiaDays = 0, monthRipesoDays = 0;
               monthData.forEach(dayData => {
                  if (dayData.holidayInfo) {
                      if (dayData.holidayInfo.type === 'ferie') monthFerieDays++;
                      if (dayData.holidayInfo.type === 'malattia') monthMalattiaDays++;
+                     if (dayData.holidayInfo.type === 'riposo_dopo_notte') monthRipesoDays++;
                  } else if (dayData.entries.length > 0) {
                       let dayHasHours = false;
                       let dayHasTransferta = false;
@@ -8891,6 +8966,11 @@
                          <span class="monthly-stat-value" style="color: var(--md-sys-color-secondary);">${monthMalattiaDays}</span>
                          <span class="monthly-stat-label">Giorni Malattia</span>
                      </div>` : ''}
+                     ${monthRipesoDays > 0 ? `
+                      <div class="monthly-stat-item" style="background-color: rgba(100,80,200,0.15); color: #5a3fa0;">
+                         <span class="monthly-stat-value" style="color: #7c5cbf;">😴 ${monthRipesoDays}</span>
+                         <span class="monthly-stat-label">Riposo Notte</span>
+                     </div>` : ''}
                  </div>
               `;
               contentElement.innerHTML = statsHtml; // Use '=' to replace previous content, starting with stats
@@ -8906,13 +8986,18 @@
 
                  if (dayData.holidayInfo) {
                       // --- Absence Entry ---
-                      const typeText = dayData.holidayInfo.type === 'ferie' ? 'Ferie' : 'Malattia';
-                      const icon = dayData.holidayInfo.type === 'ferie' ? 'beach_access' : 'sick';
-                       itemDiv.classList.add(dayData.holidayInfo.type === 'ferie' ? 'ferie-entry' : 'malattia-entry'); // Add class for styling
+                      const typeText = dayData.holidayInfo.type === 'ferie' ? 'Ferie' : dayData.holidayInfo.type === 'riposo_dopo_notte' ? 'Riposo dopo notte' : 'Malattia';
+                      const iconHtml = dayData.holidayInfo.type === 'ferie'
+                          ? '<span class="material-symbols-outlined" style="font-size:1.1em;vertical-align:text-bottom;">beach_access</span>'
+                          : dayData.holidayInfo.type === 'riposo_dopo_notte'
+                          ? '<span style="font-size:1.1em;">😴</span>'
+                          : '<span class="material-symbols-outlined" style="font-size:1.1em;vertical-align:text-bottom;">sick</span>';
+                      const entryClass = dayData.holidayInfo.type === 'ferie' ? 'ferie-entry' : dayData.holidayInfo.type === 'riposo_dopo_notte' ? 'riposo-entry' : 'malattia-entry';
+                       itemDiv.classList.add(entryClass); // Add class for styling
                       contentHtml += `
                          <div class="monthly-report-details">
                               <span class="monthly-report-detail" style="background-color: inherit; color: inherit; font-weight: 500;">
-                                 <span class="material-symbols-outlined" style="font-size: 1.1em; vertical-align: text-bottom;">${icon}</span>
+                                 ${iconHtml}
                                  ${typeText}
                               </span>
                          </div>`;
@@ -9178,9 +9263,17 @@
                         console.log(`🗓️ ${dateStr}: ${entries.length} entries, holiday: ${holidayInfo?.type || 'none'}`);
                     }
                     
-                    // Controlla se è ferie o malattia
+                    // Controlla se è ferie, malattia o riposo dopo notte
                     const isFerie = holidayInfo?.type === 'ferie';
                     const isMalattia = holidayInfo?.type === 'malattia';
+                    const isRiposoDopoNotte = holidayInfo?.type === 'riposo_dopo_notte';
+                    
+                    // --- RIPOSO DOPO NOTTE: solo descrizione, nessun orario ---
+                    if (isRiposoDopoNotte) {
+                        row.getCell(3).value = 'Riposo dopo notte'; // C = 3 (Località/Descrizione)
+                        console.log(`😴 ${dateStr}: Riposo dopo notte → solo descrizione in C`);
+                        continue; // Salta agli altri giorni
+                    }
                     
                     // --- COLONNA S: Ferie ---
                     if (isFerie) {
@@ -9933,14 +10026,18 @@ if (isIOS) {
                     console.warn(`Data non valida ${entry.dateStr} nella lista assenze, skip.`);
                     return; // Skip if date is invalid
                 }
-                const typeText = entry.type === 'ferie' ? 'Ferie' : 'Malattia';
-                const icon = entry.type === 'ferie' ? 'beach_access' : 'sick';
+                const typeText = entry.type === 'ferie' ? 'Ferie' : entry.type === 'riposo_dopo_notte' ? 'Riposo dopo notte' : 'Malattia';
+                const iconHtml = entry.type === 'ferie'
+                    ? '<span class="material-symbols-outlined">beach_access</span>'
+                    : entry.type === 'riposo_dopo_notte'
+                    ? '😴'
+                    : '<span class="material-symbols-outlined">sick</span>';
 
                 div.innerHTML = `
                     <div class="ferie-malattie-info">
                         <div class="ferie-malattie-header">
                             <span class="ferie-malattie-type">
-                                <span class="material-symbols-outlined">${icon}</span>
+                                ${iconHtml}
                                 ${typeText}
                             </span>
                             <span class="ferie-malattie-date">${date.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
@@ -9969,7 +10066,7 @@ if (isIOS) {
                 return;
             }
 
-            const typeText = holidayInfo.type === 'ferie' ? 'Ferie' : 'Malattia';
+            const typeText = holidayInfo.type === 'ferie' ? 'Ferie' : holidayInfo.type === 'riposo_dopo_notte' ? 'Riposo dopo notte' : 'Malattia';
             if (confirm(`Sei sicuro di voler eliminare la voce di ${typeText} per il ${dateStr}?`)) {
                 if (db.holidays && db.holidays[dateStr]) { // Double check it exists before deleting
                     delete db.holidays[dateStr];
@@ -10486,10 +10583,11 @@ END:VCARD`;
             }
 
             // Add/overwrite the absence entry
-            db.holidays[dateStr] = { type: type, note: '' }; // Add empty note by default
+            const noteDefault = type === 'riposo_dopo_notte' ? 'Riposo dopo notte' : '';
+            db.holidays[dateStr] = { type: type, note: noteDefault }; // Add default note
             saveDb(db);
 
-            const typeText = type === 'ferie' ? 'Ferie' : 'Malattia';
+            const typeText = type === 'ferie' ? 'Ferie' : type === 'malattia' ? 'Malattia' : 'Riposo dopo notte';
             showToast(`Giorno ${dateStr} segnato come ${typeText}.`, 'success');
 
             // Close the modal
