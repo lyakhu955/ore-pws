@@ -14,6 +14,7 @@
     const STORAGE_KEY_MODE       = 'iveco_mode_active';  // Stato modalitÃ 
     const STORAGE_KEY_BUS_SPEED  = 'iveco_bus_speed';    // Velocita bus animato
     const STORAGE_KEY_BUS_IMAGE  = 'iveco_bus_image';    // Immagine bus personalizzata
+    const STORAGE_KEY_BUS_SCALE  = 'iveco_bus_scale';    // Dimensione bus (percentuale)
 
     // ============================================================
     // STATO APPLICAZIONE
@@ -29,7 +30,8 @@
         atmFilter  : 'todo',
         elencoFilter: 'all',  // 'all' | 'done' | 'todo'
         busSpeed   : 600,
-        busImage   : null
+        busImage   : null,
+        busScale   : 100
     };
 
     // ============================================================
@@ -51,6 +53,7 @@
 
     function saveBusSettings() {
         try { localStorage.setItem(STORAGE_KEY_BUS_SPEED, String(ivecoState.busSpeed || 600)); } catch(e) {}
+        try { localStorage.setItem(STORAGE_KEY_BUS_SCALE, String(ivecoState.busScale || 100)); } catch(e) {}
         try {
             if (ivecoState.busImage) localStorage.setItem(STORAGE_KEY_BUS_IMAGE, ivecoState.busImage);
             else localStorage.removeItem(STORAGE_KEY_BUS_IMAGE);
@@ -78,6 +81,11 @@
             const img = localStorage.getItem(STORAGE_KEY_BUS_IMAGE);
             ivecoState.busImage = img || null;
         } catch(e) { ivecoState.busImage = null; }
+
+        try {
+            const bs = parseInt(localStorage.getItem(STORAGE_KEY_BUS_SCALE) || '100', 10);
+            if (!Number.isNaN(bs)) ivecoState.busScale = Math.max(60, Math.min(180, bs));
+        } catch(e) { ivecoState.busScale = 100; }
     }
 
     // Esponi saveVehicles globalmente per iveco-attachments.js
@@ -1557,7 +1565,19 @@
         const wrap = document.getElementById('iveco-bus-wrap');
         const svg  = document.getElementById('iveco-bus-svg');
         if (!wrap || !svg) return;
+
+        const scale = Math.max(60, Math.min(180, parseInt(ivecoState.busScale || 100, 10))) / 100;
+        const busW = Math.round(80 * scale);
+        const busH = Math.round(58 * scale);
+
+        wrap.style.width = busW + 'px';
+        wrap.style.height = busH + 'px';
+
+        svg.style.width = busW + 'px';
+        svg.style.height = busH + 'px';
+
         let img = document.getElementById('iveco-bus-custom-img');
+
         if (ivecoState.busImage) {
             if (!img) {
                 img = document.createElement('img');
@@ -1565,13 +1585,14 @@
                 img.alt = 'Bus personalizzato';
                 img.style.position = 'absolute';
                 img.style.left = '0';
-                img.style.top = '-6px';
-                img.style.width = '80px';
-                img.style.height = '58px';
+                img.style.top = '0';
                 img.style.objectFit = 'contain';
                 img.style.pointerEvents = 'none';
                 wrap.appendChild(img);
             }
+
+            img.style.width = busW + 'px';
+            img.style.height = busH + 'px';
             img.src = ivecoState.busImage;
             img.style.display = 'block';
             svg.style.display = 'none';
@@ -1580,16 +1601,22 @@
             svg.style.display = '';
         }
     }
+
     function renderIvecoBusSettingsPanel() {
         const container = document.getElementById('iveco-settings-content');
         if (!container) return;
+
         const existing = document.getElementById('iveco-bus-settings-card');
         if (existing) existing.remove();
+
         const card = document.createElement('div');
         card.className = 'iveco-card';
         card.id = 'iveco-bus-settings-card';
         card.style.marginTop = '1rem';
+
         const speedValue = Math.max(50, Math.min(1200, parseInt(ivecoState.busSpeed || 600, 10)));
+        const scaleValue = Math.max(60, Math.min(180, parseInt(ivecoState.busScale || 100, 10)));
+
         card.innerHTML = `
             <h2><span class="material-symbols-outlined" style="vertical-align:middle;margin-right:.3rem;">tune</span>Bus Animato</h2>
             <div style="margin: .75rem 0 1rem 0;">
@@ -1600,20 +1627,35 @@
                 <input id="iveco-bus-speed-slider" type="range" min="50" max="1200" step="20" value="${speedValue}" style="width:100%;">
                 <small style="opacity:.8;">Trascina verso destra per un bus piu veloce.</small>
             </div>
+
+            <div style="margin: .25rem 0 1rem 0;">
+                <label for="iveco-bus-scale-slider" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;">
+                    <span>Dimensione bus</span>
+                    <strong id="iveco-bus-scale-value">${scaleValue}%</strong>
+                </label>
+                <input id="iveco-bus-scale-slider" type="range" min="60" max="180" step="5" value="${scaleValue}" style="width:100%;">
+                <small style="opacity:.8;">Regola la grandezza del bus animato.</small>
+            </div>
+
             <div style="margin-top:.75rem;">
                 <label for="iveco-bus-image-input" style="display:block;margin-bottom:.4rem;">Immagine bus personalizzata</label>
                 <input id="iveco-bus-image-input" type="file" accept="image/*" style="width:100%;">
                 <div style="display:flex;gap:.5rem;align-items:center;margin-top:.6rem;">
                     <button class="iveco-btn" id="iveco-bus-image-reset" type="button">Ripristina bus originale</button>
                 </div>
-                <small style="opacity:.8;display:block;margin-top:.4rem;">Consigliato PNG trasparente. Max 2MB.</small>
+                <small style="opacity:.8;display:block;margin-top:.4rem;">Supporta PNG/JPG/GIF. Max 2MB.</small>
             </div>
         `;
+
         container.appendChild(card);
+
         const slider = card.querySelector('#iveco-bus-speed-slider');
         const speedLabel = card.querySelector('#iveco-bus-speed-value');
+        const scaleSlider = card.querySelector('#iveco-bus-scale-slider');
+        const scaleLabel = card.querySelector('#iveco-bus-scale-value');
         const imageInput = card.querySelector('#iveco-bus-image-input');
         const resetBtn = card.querySelector('#iveco-bus-image-reset');
+
         if (slider && speedLabel) {
             const onSpeedChange = () => {
                 const v = Math.max(50, Math.min(1200, parseInt(slider.value || '600', 10)));
@@ -1621,18 +1663,35 @@
                 speedLabel.textContent = String(v);
                 saveBusSettings();
             };
+
             slider.addEventListener('input', onSpeedChange);
             slider.addEventListener('change', onSpeedChange);
         }
+
+        if (scaleSlider && scaleLabel) {
+            const onScaleChange = () => {
+                const v = Math.max(60, Math.min(180, parseInt(scaleSlider.value || '100', 10)));
+                ivecoState.busScale = v;
+                scaleLabel.textContent = String(v) + '%';
+                saveBusSettings();
+                applyBusVisual();
+            };
+
+            scaleSlider.addEventListener('input', onScaleChange);
+            scaleSlider.addEventListener('change', onScaleChange);
+        }
+
         if (imageInput) {
             imageInput.addEventListener('change', (e) => {
                 const file = e.target.files && e.target.files[0];
                 if (!file) return;
+
                 if (file.size > 2 * 1024 * 1024) {
                     showIvecoToast('Immagine troppo grande. Usa un file fino a 2MB.', 'error', 3000);
                     imageInput.value = '';
                     return;
                 }
+
                 const reader = new FileReader();
                 reader.onload = () => {
                     ivecoState.busImage = String(reader.result || '');
@@ -1647,6 +1706,7 @@
                 reader.readAsDataURL(file);
             });
         }
+
         if (resetBtn) {
             resetBtn.addEventListener('click', () => {
                 ivecoState.busImage = null;
@@ -1656,7 +1716,8 @@
             });
         }
     }
-    // SETUP EVENTI
+
+    // ============================================================// SETUP EVENTI
     // ============================================================
     function setupIvecoEvents() {
         // Navigazione
@@ -1778,7 +1839,7 @@
         const WF_CX = 94, WF_CY = 48;  // centro ruota anteriore nel viewBox
         const WR_CX = 26, WR_CY = 48;  // centro ruota posteriore nel viewBox
 
-        const BUS_W    = 80;    // larghezza elemento wrap in px (aggiornato)
+        const BUS_W_BASE = 80;  // larghezza base in px (prima della scala)
         const PAUSE_MS = 120; // sosta rapidissima al capolinea in ms
         const DEFAULT_SPEED = 600; // px/s velocita default (regolabile da slider)
 
@@ -1814,8 +1875,13 @@
             el.setAttribute('transform', `rotate(${angle.toFixed(2)},${cx},${cy})`);
         }
 
+        function getBusWidth() {
+            const scale = Math.max(60, Math.min(180, parseInt(ivecoState.busScale || 100, 10))) / 100;
+            return BUS_W_BASE * scale;
+        }
+
         function getTrackLen() {
-            return Math.max(0, track.offsetWidth - BUS_W);
+            return Math.max(0, track.offsetWidth - getBusWidth());
         }
 
         function loop(ts) {
@@ -1865,7 +1931,7 @@
             wrap.style.left = pos + 'px';
 
             // === RUOTE â€” angolo proporzionale alla distanza percorsa ===
-            const viewboxRatio = 120 / BUS_W;
+            const viewboxRatio = 120 / getBusWidth();
             wheelAngle += step * viewboxRatio * (360 / 53.4);
             wheelAngle %= 360;
             rotateGroup(wf, WF_CX, WF_CY, wheelAngle);
@@ -1936,6 +2002,9 @@
     }
 
 })();
+
+
+
 
 
 
