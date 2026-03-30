@@ -71,7 +71,7 @@
 
         try {
             const s = parseInt(localStorage.getItem(STORAGE_KEY_BUS_SPEED) || '600', 10);
-            if (!Number.isNaN(s)) ivecoState.busSpeed = Math.max(200, Math.min(1200, s));
+            if (!Number.isNaN(s)) ivecoState.busSpeed = Math.max(50, Math.min(1200, s));
         } catch(e) { ivecoState.busSpeed = 600; }
 
         try {
@@ -1589,7 +1589,7 @@
         card.className = 'iveco-card';
         card.id = 'iveco-bus-settings-card';
         card.style.marginTop = '1rem';
-        const speedValue = Math.max(200, Math.min(1200, parseInt(ivecoState.busSpeed || 600, 10)));
+        const speedValue = Math.max(50, Math.min(1200, parseInt(ivecoState.busSpeed || 600, 10)));
         card.innerHTML = `
             <h2><span class="material-symbols-outlined" style="vertical-align:middle;margin-right:.3rem;">tune</span>Bus Animato</h2>
             <div style="margin: .75rem 0 1rem 0;">
@@ -1597,7 +1597,7 @@
                     <span>Velocita autobus</span>
                     <strong id="iveco-bus-speed-value">${speedValue}</strong>
                 </label>
-                <input id="iveco-bus-speed-slider" type="range" min="200" max="1200" step="20" value="${speedValue}" style="width:100%;">
+                <input id="iveco-bus-speed-slider" type="range" min="50" max="1200" step="20" value="${speedValue}" style="width:100%;">
                 <small style="opacity:.8;">Trascina verso destra per un bus piu veloce.</small>
             </div>
             <div style="margin-top:.75rem;">
@@ -1616,7 +1616,7 @@
         const resetBtn = card.querySelector('#iveco-bus-image-reset');
         if (slider && speedLabel) {
             const onSpeedChange = () => {
-                const v = Math.max(200, Math.min(1200, parseInt(slider.value || '600', 10)));
+                const v = Math.max(50, Math.min(1200, parseInt(slider.value || '600', 10)));
                 ivecoState.busSpeed = v;
                 speedLabel.textContent = String(v);
                 saveBusSettings();
@@ -1854,7 +1854,7 @@
             // === FASE DRIVE ===
             const progress = tripLen > 0 ? Math.min(tripDone / tripLen, 1) : 0;
             const speedFactor = getSpeedFactor(progress);
-            const speedBase   = Math.max(200, Math.min(1200, parseInt(ivecoState.busSpeed || DEFAULT_SPEED, 10)));
+            const speedBase   = Math.max(50, Math.min(1200, parseInt(ivecoState.busSpeed || DEFAULT_SPEED, 10)));
             const speed       = speedBase * speedFactor;
 
             // Aggiorna posizione
@@ -1936,6 +1936,7 @@
     }
 
 })();
+
 
 
 
