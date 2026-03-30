@@ -1648,8 +1648,8 @@
         const WR_CX = 26, WR_CY = 48;  // centro ruota posteriore nel viewBox
 
         const BUS_W    = 80;    // larghezza elemento wrap in px (aggiornato)
-        const PAUSE_MS = 1000; // sosta al capolinea in ms
-        const MAX_SPEED = 120;  // px/s velocitÃ  massima (+50%)
+        const PAUSE_MS = 120; // sosta rapidissima al capolinea in ms
+        const MAX_SPEED = 600;  // px/s velocita massima (turbo)
 
         let pos       = 0;      // posizione px corrente
         let dir       = 1;      // 1=destra, -1=sinistra
@@ -1672,8 +1672,9 @@
         function getSpeedFactor(progress) {
             const eps = 0.005;
             const d = (easeInOut(progress + eps) - easeInOut(progress - eps)) / (2 * eps);
-            // d max â‰ˆ 1.5 al centro, 0 agli estremi â†’ normalizziamo
-            return Math.max(0.08, Math.min(1, d / 1.5));
+            // Manteniamo una velocita minima alta anche vicino ai capolinea.
+            const normalized = Math.max(0, Math.min(1, d / 1.5));
+            return 0.75 + (normalized * 0.25);
         }
 
         // Ruota un gruppo SVG attorno a (cx,cy) nel sistema di coordinate del viewBox.
@@ -1798,6 +1799,7 @@
     }
 
 })();
+
 
 
 
