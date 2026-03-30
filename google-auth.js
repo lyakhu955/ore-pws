@@ -1,7 +1,7 @@
 // google-auth.js - Sistema di autenticazione Google semplificato
 
 // Configurazione - Client ID di Google Cloud per Vercel
-const CLIENT_ID = '990017681774-kmghq0vajmb8lbv7gqv2qsi7fn1rbp4f.apps.googleusercontent.com';
+const CLIENT_ID = '141214713715-9ns5460706gfabg52shjp0f75536fars.apps.googleusercontent.com';
 const SCOPES = 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file openid profile email';
 
 // Variabili di stato

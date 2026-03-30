@@ -1,10 +1,9 @@
 ﻿import {
   applyCors,
-  clearRefreshCookie,
+  setRefreshCookie,
   getOAuthConfig,
-  getRefreshTokenFromCookie,
   googleTokenRequest,
-  setRefreshCookie
+  fetchGoogleUserInfo
 } from './_google-oauth.js';
 
 export default async function handler(req, res) {
@@ -22,14 +21,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    const refreshTokenFromBody = req.body?.refreshToken;
-    const refreshTokenFromCookie = getRefreshTokenFromCookie(req);
-    const refreshToken = refreshTokenFromCookie || refreshTokenFromBody;
+    const { code, redirectUri } = req.body || {};
 
-    if (!refreshToken) {
-      return res.status(401).json({
-        error: 'Missing refresh token',
-        message: 'Sessione Google non disponibile, è necessario effettuare login manuale'
+    if (!code) {
+      return res.status(400).json({
+        error: 'Missing authorization code',
+        message: 'Il codice di autorizzazione è obbligatorio'
       });
     }
 
@@ -38,27 +35,24 @@ export default async function handler(req, res) {
     const { response, data } = await googleTokenRequest({
       client_id: clientId,
       client_secret: clientSecret,
-      refresh_token: refreshToken,
-      grant_type: 'refresh_token'
+      code,
+      grant_type: 'authorization_code',
+      redirect_uri: redirectUri || 'postmessage'
     });
 
     if (!response.ok) {
-      // Se il refresh token è revocato/non valido, chiudiamo la sessione cookie
-      if (data?.error === 'invalid_grant') {
-        clearRefreshCookie(res);
-      }
-
-      return res.status(401).json({
-        error: 'Token refresh failed',
-        message: data.error_description || 'Impossibile rinnovare il token',
+      return res.status(400).json({
+        error: 'Code exchange failed',
+        message: data.error_description || 'Impossibile completare l\'autenticazione Google',
         details: data
       });
     }
 
-    // Alcuni provider/flow possono restituire un nuovo refresh token: ruotiamo cookie se presente
     if (data.refresh_token) {
       setRefreshCookie(res, data.refresh_token);
     }
+
+    const user = data.access_token ? await fetchGoogleUserInfo(data.access_token) : null;
 
     return res.status(200).json({
       success: true,
@@ -66,19 +60,20 @@ export default async function handler(req, res) {
       expires_in: data.expires_in || 3600,
       token_type: data.token_type || 'Bearer',
       scope: data.scope,
-      source: refreshTokenFromCookie ? 'server_cookie' : 'body'
+      has_refresh_token: Boolean(data.refresh_token),
+      user
     });
   } catch (error) {
     if (error.name === 'AbortError') {
       return res.status(408).json({
         error: 'Request timeout',
-        message: 'Timeout durante la richiesta di rinnovo del token'
+        message: 'Timeout durante il completamento del login Google'
       });
     }
 
     return res.status(500).json({
       error: 'Internal server error',
-      message: error.message || 'Errore interno del server durante il rinnovo del token'
+      message: error.message || 'Errore interno durante lo scambio codice Google'
     });
   }
 }
