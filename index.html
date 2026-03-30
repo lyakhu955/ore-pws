@@ -12378,6 +12378,7 @@ END:VCARD`;
                             console.warn('Errore nel ripristino del token da localStorage:', e);
                             localStorage.removeItem('googleAuthToken');
                             localStorage.removeItem('googleTokenExpiry');
+                    localStorage.removeItem('googleServerSession');
                         }
                     }
 
@@ -12445,13 +12446,16 @@ END:VCARD`;
                         }
                     }
 
-                    // Nessun token locale valido: prova a recuperare silenziosamente dal backend.
+                    // Nessun token locale valido: prova a recuperare dal backend solo se esiste sessione nota.
                     if (!currentToken || !currentToken.access_token) {
-                        try {
-                            await this.refreshToken();
-                            return this.checkAuthStatus();
-                        } catch (_refreshSilentError) {
-                            return false;
+                        const hasServerSession = localStorage.getItem('googleServerSession') === '1';
+                        if (hasServerSession) {
+                            try {
+                                await this.refreshToken();
+                                return this.checkAuthStatus();
+                            } catch (_refreshSilentError) {
+                                return false;
+                            }
                         }
                     }
 
@@ -12676,13 +12680,14 @@ END:VCARD`;
                                     });
 
                                     localStorage.setItem('googleAuthToken', JSON.stringify(tokenResponse));
+                                    localStorage.setItem('googleServerSession', '1');
                                     this.setupTokenRefresh(tokenResponse);
 
                                     let userInfo = exchangeData.user || null;
                                     if (!userInfo) {
                                         const userResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                                             headers: {
-                                                'Authorization': `Bearer ${tokenResponse.access_token}` 
+                                                'Authorization': 'Bearer ' + tokenResponse.access_token
                                             }
                                         });
 
@@ -12717,6 +12722,30 @@ END:VCARD`;
                                 }
                             },
                             error_callback: (error) => {
+                                const errorMessage = error?.message || '';
+                                const popupBlocked = errorMessage.includes('popup') || errorMessage.includes('open popup');
+
+                                if (popupBlocked) {
+                                    try {
+                                        const redirectClient = google.accounts.oauth2.initCodeClient({
+                                            client_id: '141214713715-9ns5460706gfabg52shjp0f75536fars.apps.googleusercontent.com',
+                                            scope: 'https://www.googleapis.com/auth/drive openid profile email',
+                                            ux_mode: 'redirect',
+                                            redirect_uri: window.location.origin + window.location.pathname,
+                                            callback: () => {}
+                                        });
+
+                                        redirectClient.requestCode({
+                                            prompt: 'consent',
+                                            hint: this.userData?.email || ''
+                                        });
+                                        return;
+                                    } catch (redirectError) {
+                                        reject(new Error(redirectError?.message || 'Login redirect Google non disponibile'));
+                                        return;
+                                    }
+                                }
+
                                 reject(new Error(error?.message || 'Login Google annullato o non disponibile'));
                             }
                         });
@@ -12757,6 +12786,7 @@ END:VCARD`;
                     localStorage.removeItem('cloudUserData');
                     localStorage.removeItem('googleAuthToken');
                     localStorage.removeItem('googleTokenExpiry');
+                    localStorage.removeItem('googleServerSession');
 
                     try {
                         await fetch('/api/logout-google', {
@@ -12891,16 +12921,25 @@ END:VCARD`;
                         });
 
                         localStorage.setItem('googleAuthToken', JSON.stringify(tokenResponse));
+                        localStorage.setItem('googleServerSession', '1');
                         this.setupTokenRefresh(tokenResponse);
                         this.isLoggedIn = true;
 
                         return tokenResponse;
                     }
+
+                    if (serverResponse.status === 401) {
+                        localStorage.removeItem('googleServerSession');
+                        throw new Error('NoServerSession');
+                    }
                 } catch (error) {
+                    if (error.message === 'NoServerSession') {
+                        throw error;
+                    }
                     console.warn('Refresh server-side non disponibile, fallback client silenzioso:', error);
                 }
 
-                if (window.googleAuthClient) {
+                if (window.googleAuthClient && currentToken && currentToken.access_token) {
                     return this.silentRefreshToken();
                 }
 
@@ -17416,6 +17455,8 @@ END:VCARD`;
 
 </body>
 </html>
+
+
 
 
 
