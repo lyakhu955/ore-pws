@@ -12439,7 +12439,7 @@ END:VCARD`;
                         } catch (error) {
                             console.warn('Errore nel recupero delle informazioni utente:', error);
                             // Pulisci i token salvati in caso di errore
-                            if (error.message.includes('401') || error.message.includes('403')) {
+                            if ((error?.message || '').includes('401') || (error?.message || '').includes('403')) {
                                 localStorage.removeItem('googleAuthToken');
                                 gapi.client.setToken(null);
                             }
@@ -12877,7 +12877,7 @@ END:VCARD`;
                     console.error('Errore nella ricerca/creazione del file di backup:', error);
 
                     // Se l'errore è di autenticazione, richiedi un nuovo token
-                    if (error.status === 401 || error.message.includes('auth')) {
+                    if (error?.status === 401 || (error?.message || '').includes('auth')) {
                         console.log('Token scaduto o problema di autenticazione, richiedo un nuovo token...');
                         try {
                             await this.refreshToken();
@@ -13611,11 +13611,11 @@ END:VCARD`;
                     console.error(`Errore durante il login con ${this.selectedProvider}:`, error);
 
                     // Mostra un messaggio di errore specifico
-                    if (error.message.includes('popup')) {
+                    if ((error?.message || '').includes('popup')) {
                         showToast('Il popup di login è stato bloccato. Abilita i popup per questo sito e riprova.', 'error', 5000);
-                    } else if (error.message.includes('access_denied') || error.message.includes('cancelled')) {
+                    } else if ((error?.message || '').includes('access_denied') || (error?.message || '').includes('cancelled')) {
                         showToast('Accesso negato o annullato dall\'utente.', 'warning');
-                    } else if (error.message.includes('Failed to open popup')) {
+                    } else if ((error?.message || '').includes('Failed to open popup')) {
                         showToast('Impossibile aprire la finestra di login. Clicca nuovamente sul pulsante di accesso.', 'error', 5000);
                     } else {
                         showToast(`Errore durante l'accesso: ${error.message}`, 'error');
@@ -17455,6 +17455,7 @@ END:VCARD`;
 
 </body>
 </html>
+
 
 
 
