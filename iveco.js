@@ -1317,9 +1317,9 @@
 
                     <div class="iveco-filter-bar">
                         <select class="iveco-filter-select" id="iveco-atm-filter">
-                            <option value="all">ðŸ“‹ Tutti i lavori</option>
-                            <option value="todo">ðŸ”§ Da fare</option>
-                            <option value="done">âœ… GiÃ  fatto</option>
+                            <option value="all">&#128203; Tutti i lavori</option>
+                            <option value="todo">&#128295; Da fare</option>
+                            <option value="done">&#9989; Gi&agrave; fatto</option>
                         </select>
                     </div>
 
@@ -1772,5 +1772,6 @@
     }
 
 })();
+
 
 
