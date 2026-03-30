@@ -12,6 +12,8 @@
     const STORAGE_KEY_VEHICLES   = 'iveco_vehicles';    // Lista mezzi
     const STORAGE_KEY_ATM_NOTES  = 'iveco_atm_notes';   // Note ATM
     const STORAGE_KEY_MODE       = 'iveco_mode_active';  // Stato modalitÃ 
+    const STORAGE_KEY_BUS_SPEED  = 'iveco_bus_speed';    // Velocita bus animato
+    const STORAGE_KEY_BUS_IMAGE  = 'iveco_bus_image';    // Immagine bus personalizzata
 
     // ============================================================
     // STATO APPLICAZIONE
@@ -25,7 +27,9 @@
         excelColVettura: 1,
         excelColStato  : -1, // -1 = non usata
         atmFilter  : 'todo',
-        elencoFilter: 'all'  // 'all' | 'done' | 'todo'
+        elencoFilter: 'all',  // 'all' | 'done' | 'todo'
+        busSpeed   : 600,
+        busImage   : null
     };
 
     // ============================================================
@@ -45,6 +49,15 @@
         if (typeof window.ivecoTriggerBackup === 'function') window.ivecoTriggerBackup();
     }
 
+    function saveBusSettings() {
+        try { localStorage.setItem(STORAGE_KEY_BUS_SPEED, String(ivecoState.busSpeed || 600)); } catch(e) {}
+        try {
+            if (ivecoState.busImage) localStorage.setItem(STORAGE_KEY_BUS_IMAGE, ivecoState.busImage);
+            else localStorage.removeItem(STORAGE_KEY_BUS_IMAGE);
+        } catch(e) {}
+        if (typeof window.ivecoTriggerBackup === 'function') window.ivecoTriggerBackup();
+    }
+
     function loadData() {
         try {
             const v = localStorage.getItem(STORAGE_KEY_VEHICLES);
@@ -55,6 +68,16 @@
             const n = localStorage.getItem(STORAGE_KEY_ATM_NOTES);
             if (n) ivecoState.atmNotes = JSON.parse(n);
         } catch(e) { ivecoState.atmNotes = {}; }
+
+        try {
+            const s = parseInt(localStorage.getItem(STORAGE_KEY_BUS_SPEED) || '600', 10);
+            if (!Number.isNaN(s)) ivecoState.busSpeed = Math.max(200, Math.min(1200, s));
+        } catch(e) { ivecoState.busSpeed = 600; }
+
+        try {
+            const img = localStorage.getItem(STORAGE_KEY_BUS_IMAGE);
+            ivecoState.busImage = img || null;
+        } catch(e) { ivecoState.busImage = null; }
     }
 
     // Esponi saveVehicles globalmente per iveco-attachments.js
@@ -65,7 +88,8 @@
     // Esponi loadData globalmente per permettere al restore backup di ricaricare i dati Iveco
     window.ivecoLoadData = function() {
         loadData();
-        // Se la modalitÃ  Iveco Ã¨ attiva, ri-renderizza la sezione corrente
+        applyBusVisual();
+        // Se la modalita Iveco e attiva, ri-renderizza la sezione corrente
         if (document.body.classList.contains('iveco-mode')) {
             if (typeof renderCurrentSection === 'function') renderCurrentSection();
         }
@@ -297,6 +321,7 @@
 
     function activateIvecoMode() {
         loadData();
+        applyBusVisual();
         document.body.classList.add('iveco-mode');
         hideNativeUI();
         renderCurrentSection();
@@ -1507,6 +1532,7 @@
         settingsSection.classList.add('active');
         ivecoSettings.innerHTML = '';
         ivecoSettings.appendChild(settingsSection);
+        renderIvecoBusSettingsPanel();
     }
 
     function restoreSettingsFromIveco() {
@@ -1527,6 +1553,109 @@
     }
 
     // ============================================================
+    function applyBusVisual() {
+        const wrap = document.getElementById('iveco-bus-wrap');
+        const svg  = document.getElementById('iveco-bus-svg');
+        if (!wrap || !svg) return;
+        let img = document.getElementById('iveco-bus-custom-img');
+        if (ivecoState.busImage) {
+            if (!img) {
+                img = document.createElement('img');
+                img.id = 'iveco-bus-custom-img';
+                img.alt = 'Bus personalizzato';
+                img.style.position = 'absolute';
+                img.style.left = '0';
+                img.style.top = '-6px';
+                img.style.width = '80px';
+                img.style.height = '58px';
+                img.style.objectFit = 'contain';
+                img.style.pointerEvents = 'none';
+                wrap.appendChild(img);
+            }
+            img.src = ivecoState.busImage;
+            img.style.display = 'block';
+            svg.style.display = 'none';
+        } else {
+            if (img) img.style.display = 'none';
+            svg.style.display = '';
+        }
+    }
+    function renderIvecoBusSettingsPanel() {
+        const container = document.getElementById('iveco-settings-content');
+        if (!container) return;
+        const existing = document.getElementById('iveco-bus-settings-card');
+        if (existing) existing.remove();
+        const card = document.createElement('div');
+        card.className = 'iveco-card';
+        card.id = 'iveco-bus-settings-card';
+        card.style.marginTop = '1rem';
+        const speedValue = Math.max(200, Math.min(1200, parseInt(ivecoState.busSpeed || 600, 10)));
+        card.innerHTML = `
+            <h2><span class="material-symbols-outlined" style="vertical-align:middle;margin-right:.3rem;">tune</span>Bus Animato</h2>
+            <div style="margin: .75rem 0 1rem 0;">
+                <label for="iveco-bus-speed-slider" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;">
+                    <span>Velocita autobus</span>
+                    <strong id="iveco-bus-speed-value">${speedValue}</strong>
+                </label>
+                <input id="iveco-bus-speed-slider" type="range" min="200" max="1200" step="20" value="${speedValue}" style="width:100%;">
+                <small style="opacity:.8;">Trascina verso destra per un bus piu veloce.</small>
+            </div>
+            <div style="margin-top:.75rem;">
+                <label for="iveco-bus-image-input" style="display:block;margin-bottom:.4rem;">Immagine bus personalizzata</label>
+                <input id="iveco-bus-image-input" type="file" accept="image/*" style="width:100%;">
+                <div style="display:flex;gap:.5rem;align-items:center;margin-top:.6rem;">
+                    <button class="iveco-btn" id="iveco-bus-image-reset" type="button">Ripristina bus originale</button>
+                </div>
+                <small style="opacity:.8;display:block;margin-top:.4rem;">Consigliato PNG trasparente. Max 2MB.</small>
+            </div>
+        `;
+        container.appendChild(card);
+        const slider = card.querySelector('#iveco-bus-speed-slider');
+        const speedLabel = card.querySelector('#iveco-bus-speed-value');
+        const imageInput = card.querySelector('#iveco-bus-image-input');
+        const resetBtn = card.querySelector('#iveco-bus-image-reset');
+        if (slider && speedLabel) {
+            const onSpeedChange = () => {
+                const v = Math.max(200, Math.min(1200, parseInt(slider.value || '600', 10)));
+                ivecoState.busSpeed = v;
+                speedLabel.textContent = String(v);
+                saveBusSettings();
+            };
+            slider.addEventListener('input', onSpeedChange);
+            slider.addEventListener('change', onSpeedChange);
+        }
+        if (imageInput) {
+            imageInput.addEventListener('change', (e) => {
+                const file = e.target.files && e.target.files[0];
+                if (!file) return;
+                if (file.size > 2 * 1024 * 1024) {
+                    showIvecoToast('Immagine troppo grande. Usa un file fino a 2MB.', 'error', 3000);
+                    imageInput.value = '';
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = () => {
+                    ivecoState.busImage = String(reader.result || '');
+                    saveBusSettings();
+                    applyBusVisual();
+                    showIvecoToast('Immagine bus aggiornata!', 'success', 1800);
+                    imageInput.value = '';
+                };
+                reader.onerror = () => {
+                    showIvecoToast('Errore durante il caricamento immagine.', 'error', 2500);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                ivecoState.busImage = null;
+                saveBusSettings();
+                applyBusVisual();
+                showIvecoToast('Bus originale ripristinato.', 'info', 1800);
+            });
+        }
+    }
     // SETUP EVENTI
     // ============================================================
     function setupIvecoEvents() {
@@ -1639,6 +1768,8 @@
         const svg   = document.getElementById('iveco-bus-svg');
         if (!wrap || !track || !svg) return;
 
+        applyBusVisual();
+
         // ---- Riferimenti agli elementi SVG delle ruote e ombra ----
         const wf  = document.getElementById('bus-wheel-front');
         const wr  = document.getElementById('bus-wheel-rear');
@@ -1649,7 +1780,7 @@
 
         const BUS_W    = 80;    // larghezza elemento wrap in px (aggiornato)
         const PAUSE_MS = 120; // sosta rapidissima al capolinea in ms
-        const MAX_SPEED = 600;  // px/s velocita massima (turbo)
+        const DEFAULT_SPEED = 600; // px/s velocita default (regolabile da slider)
 
         let pos       = 0;      // posizione px corrente
         let dir       = 1;      // 1=destra, -1=sinistra
@@ -1713,6 +1844,8 @@
                     lastTs = ts;
                     // Flip del SVG
                     svg.style.transform = dir === 1 ? 'scaleX(1)' : 'scaleX(-1)';
+                    const customBusImg = document.getElementById('iveco-bus-custom-img');
+                    if (customBusImg) customBusImg.style.transform = dir === 1 ? 'scaleX(1)' : 'scaleX(-1)';
                 }
                 requestAnimationFrame(loop);
                 return;
@@ -1721,7 +1854,8 @@
             // === FASE DRIVE ===
             const progress = tripLen > 0 ? Math.min(tripDone / tripLen, 1) : 0;
             const speedFactor = getSpeedFactor(progress);
-            const speed       = MAX_SPEED * speedFactor;
+            const speedBase   = Math.max(200, Math.min(1200, parseInt(ivecoState.busSpeed || DEFAULT_SPEED, 10)));
+            const speed       = speedBase * speedFactor;
 
             // Aggiorna posizione
             const step = speed * (dt / 1000);
@@ -1763,6 +1897,8 @@
 
         // Avvio: flip iniziale e primo frame
         svg.style.transform = 'scaleX(1)';
+        const customBusImg = document.getElementById('iveco-bus-custom-img');
+        if (customBusImg) customBusImg.style.transform = 'scaleX(1)';
         requestAnimationFrame(loop);
     }
 
@@ -1782,6 +1918,7 @@
         // Controlla se era attiva la modalitÃ  Iveco
         if (localStorage.getItem(STORAGE_KEY_MODE) === 'true') {
             loadData();
+            applyBusVisual();
             document.body.classList.add('iveco-mode');
             // Aspetta che il sito finisca di applicare i suoi stili, poi nascondi la UI PWS
             setTimeout(hideNativeUI, 100);
@@ -1799,6 +1936,8 @@
     }
 
 })();
+
+
 
 
 
