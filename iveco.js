@@ -1564,6 +1564,8 @@
     function applyBusVisual() {
         const wrap = document.getElementById('iveco-bus-wrap');
         const svg  = document.getElementById('iveco-bus-svg');
+        const track = document.getElementById('iveco-bus-track');
+        const header = document.getElementById('iveco-header');
         if (!wrap || !svg) return;
 
         const scale = Math.max(60, Math.min(180, parseInt(ivecoState.busScale || 100, 10))) / 100;
@@ -1572,9 +1574,24 @@
 
         wrap.style.width = busW + 'px';
         wrap.style.height = busH + 'px';
+        wrap.style.bottom = '0';
+        wrap.style.zIndex = '5200';
+        wrap.style.pointerEvents = 'none';
 
         svg.style.width = busW + 'px';
         svg.style.height = busH + 'px';
+
+        const trackH = Math.max(52, busH + 10);
+        if (track) {
+            track.style.height = trackH + 'px';
+            track.style.minHeight = trackH + 'px';
+            track.style.overflow = 'visible';
+            track.style.zIndex = '5100';
+        }
+        if (header) {
+            header.style.overflow = 'visible';
+            header.style.zIndex = '5000';
+        }
 
         let img = document.getElementById('iveco-bus-custom-img');
 
