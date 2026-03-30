@@ -788,24 +788,21 @@
     function showAddVehicleToNoteModal() {
         const vehicles = ivecoState.vehicles;
         if (vehicles.length === 0) {
-            showIvecoToast('âš ï¸ Nessun mezzo disponibile. Carica prima un file Excel.', 'error', 3000);
+            showIvecoToast('Nessun mezzo disponibile. Carica prima un file Excel.', 'error', 3000);
             return;
         }
-
+        const sortedVehicles = vehicles
+            .slice()
+            .sort((a, b) => (parseInt(a.vettura, 10) || 0) - (parseInt(b.vettura, 10) || 0));
         const backdrop = document.createElement('div');
         backdrop.className = 'iveco-modal-backdrop';
         backdrop.id = 'iveco-add-vehicle-modal';
-
         backdrop.innerHTML = `
             <div class="iveco-modal-box">
                 <h3><span class="material-symbols-outlined">directions_bus</span> Seleziona Mezzo</h3>
+                <input type="text" class="iveco-modal-select" id="iveco-search-vehicle-modal" placeholder="Cerca per vettura o telaio..." autocomplete="off">
                 <select class="iveco-modal-select" id="iveco-select-vehicle-modal">
                     <option value="">-- Seleziona un mezzo --</option>
-                    ${vehicles
-                        .slice()
-                        .sort((a,b) => (parseInt(a.vettura)||0) - (parseInt(b.vettura)||0))
-                        .map(v => `<option value="${v.id}">Vettura: ${v.vettura} | Telaio: ${v.telaio}</option>`)
-                        .join('')}
                 </select>
                 <div class="iveco-modal-actions">
                     <button class="iveco-btn" id="iveco-cancel-vehicle-modal">Annulla</button>
@@ -813,24 +810,53 @@
                 </div>
             </div>
         `;
-
         document.body.appendChild(backdrop);
-
+        const searchInput = backdrop.querySelector('#iveco-search-vehicle-modal');
+        const select = backdrop.querySelector('#iveco-select-vehicle-modal');
+        function renderVehicleOptions(queryText) {
+            const q = (queryText || '').trim().toLowerCase();
+            const filtered = !q
+                ? sortedVehicles
+                : sortedVehicles.filter(v =>
+                    String(v.vettura || '').toLowerCase().includes(q) ||
+                    String(v.telaio || '').toLowerCase().includes(q)
+                );
+            const optionsHtml = filtered
+                .map(v => `<option value="${v.id}">Vettura: ${escapeHtml(v.vettura)} | Telaio: ${escapeHtml(v.telaio)}</option>`)
+                .join('');
+            select.innerHTML = `<option value="">-- Seleziona un mezzo --</option>${optionsHtml}`;
+            if (filtered.length === 1) {
+                select.value = filtered[0].id;
+            }
+        }
+        renderVehicleOptions('');
+        if (searchInput) {
+            searchInput.addEventListener('input', () => {
+                renderVehicleOptions(searchInput.value);
+            });
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (select) select.focus();
+                }
+            });
+            setTimeout(() => searchInput.focus(), 0);
+        }
         backdrop.querySelector('#iveco-cancel-vehicle-modal').addEventListener('click', () => backdrop.remove());
         backdrop.addEventListener('click', (e) => { if (e.target === backdrop) backdrop.remove(); });
-
         backdrop.querySelector('#iveco-confirm-vehicle-modal').addEventListener('click', () => {
-            const sel = backdrop.querySelector('#iveco-select-vehicle-modal').value;
-            if (!sel) { showIvecoToast('Seleziona un mezzo!', 'error', 2000); return; }
+            const sel = select.value;
+            if (!sel) {
+                showIvecoToast('Seleziona un mezzo!', 'error', 2000);
+                return;
+            }
             if (!ivecoState.atmNotes[sel]) ivecoState.atmNotes[sel] = [];
             saveAtmNotes();
             backdrop.remove();
             renderNoteATM();
-            showIvecoToast('ðŸšŒ Mezzo aggiunto alle note!', 'success', 2000);
+            showIvecoToast('Mezzo aggiunto alle note!', 'success', 2000);
         });
     }
-
-    // ============================================================
     // SEZIONE 3: AGGIUNGI (Import Excel)
     // ============================================================
     function renderAggiungi() {
