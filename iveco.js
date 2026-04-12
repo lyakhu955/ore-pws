@@ -1,5 +1,5 @@
-﻿﻿/* ================================================ */
-/* ðŸšŒ IVECO ORECCHIA MODE - JavaScript              */
+﻿/* ================================================ */
+/* 🚌 IVECO ORECCHIA MODE - JavaScript              */
 /* Logica completa per la gestione mezzi            */
 /* ================================================ */
 
@@ -11,7 +11,7 @@
     // ============================================================
     const STORAGE_KEY_VEHICLES   = 'iveco_vehicles';    // Lista mezzi
     const STORAGE_KEY_ATM_NOTES  = 'iveco_atm_notes';   // Note ATM
-    const STORAGE_KEY_MODE       = 'iveco_mode_active';  // Stato modalitÃ 
+    const STORAGE_KEY_MODE       = 'iveco_mode_active';  // Stato modalità
     const STORAGE_KEY_BUS_SPEED  = 'iveco_bus_speed';    // Velocita bus animato
     const STORAGE_KEY_BUS_IMAGE  = 'iveco_bus_image';    // Immagine bus personalizzata
     const STORAGE_KEY_BUS_SCALE  = 'iveco_bus_scale';    // Dimensione bus (percentuale)
@@ -110,18 +110,18 @@
         return str.length > 4 ? str.slice(-4) : str;
     }
 
-    // Normalizza N.Vettura (giÃ  4 cifre)
+    // Normalizza N.Vettura (già 4 cifre)
     function extractVettura(raw) {
         if (!raw) return '';
         return String(raw).trim();
     }
 
-    // Lettera colonna â†’ indice (A=0, B=1, ...)
+    // Lettera colonna → indice (A=0, B=1, ...)
     function colLetterToIndex(letter) {
         return letter.toUpperCase().charCodeAt(0) - 65;
     }
 
-    // Indice â†’ lettera colonna
+    // Indice → lettera colonna
     function indexToColLetter(idx) {
         return String.fromCharCode(65 + idx);
     }
@@ -144,7 +144,7 @@
     }
 
     // ============================================================
-    // SWIPE DESTRA SUL LOGO PWS â†’ entra in modalitÃ  Iveco
+    // SWIPE DESTRA SUL LOGO PWS → entra in modalità Iveco
     // ============================================================
     function setupPwsSwipe() {
         const logo = document.getElementById('pws-logo');
@@ -216,7 +216,7 @@
     }
 
     // ============================================================
-    // SWIPE DESTRA SUL LOGO IVECO â†’ torna a modalitÃ  PWS
+    // SWIPE DESTRA SUL LOGO IVECO → torna a modalità PWS
     // ============================================================
     function setupIvecoSwipe() {
         const logoWrap = document.getElementById('iveco-logo-wrap');
@@ -288,7 +288,7 @@
     }
 
     // ============================================================
-    // ATTIVA / DISATTIVA MODALITÃ€ IVECO
+    // ATTIVA / DISATTIVA MODALITÀ IVECO
     // ============================================================
 
     // Elementi PWS da nascondere forzatamente (il dark theme li rimette con !important)
@@ -334,7 +334,7 @@
         hideNativeUI();
         renderCurrentSection();
         localStorage.setItem(STORAGE_KEY_MODE, 'true');
-        showIvecoToast('ðŸšŒ ModalitÃ  Iveco Orecchia attivata!', 'success', 2000);
+        showIvecoToast('🚌 Modalità Iveco Orecchia attivata!', 'success', 2000);
     }
 
     function deactivateIvecoMode() {
@@ -342,7 +342,7 @@
         document.body.classList.remove('iveco-mode');
         showNativeUI();
         localStorage.removeItem(STORAGE_KEY_MODE);
-        showIvecoToast('ðŸ‘‹ ModalitÃ  PWS ripristinata!', 'info', 2000);
+        showIvecoToast('👋 Modalità PWS ripristinata!', 'info', 2000);
     }
 
     // ============================================================
@@ -479,7 +479,7 @@
                     v.doneDate = null;
                     saveVehicles();
                     renderElenco();
-                    showIvecoToast('â†©ï¸ Mezzo riaperto', 'info', 2000);
+                    showIvecoToast('↩️ Mezzo riaperto', 'info', 2000);
                 } else {
                     // Mostra popup per scegliere la data
                     showVehicleDatePopup(v, null, (selectedDate) => {
@@ -487,7 +487,7 @@
                         v.doneDate = selectedDate;
                         saveVehicles();
                         renderElenco();
-                        showIvecoToast('âœ… Mezzo completato!', 'success', 2000);
+                        showIvecoToast('✅ Mezzo completato!', 'success', 2000);
                     });
                 }
             });
@@ -519,7 +519,7 @@
                     v.doneDate = selectedDate;
                     saveVehicles();
                     renderElenco();
-                    showIvecoToast('ðŸ“… Data aggiornata!', 'success', 2000);
+                    showIvecoToast('📆 Data aggiornata!', 'success', 2000);
                 });
             });
         });
@@ -560,7 +560,7 @@
                     <span class="material-symbols-outlined">event_available</span>
                     <h3>Data di completamento</h3>
                 </div>
-                <p class="iveco-date-popup-sub">Vettura <strong>${escapeHtml(vehicle.vettura)}</strong> Â· Telaio <strong>${escapeHtml(vehicle.telaio)}</strong></p>
+                <p class="iveco-date-popup-sub">Vettura <strong>${escapeHtml(vehicle.vettura)}</strong> · Telaio <strong>${escapeHtml(vehicle.telaio)}</strong></p>
                 <div class="iveco-date-popup-input-wrap">
                     <label for="iveco-date-input">Seleziona data</label>
                     <input type="date" id="iveco-date-input" value="${initialStr}" max="${todayStr}" />
@@ -644,7 +644,7 @@
                         // Mostra file caricato nella lista
                         const item = document.createElement('div');
                         item.className = 'iveco-date-upload-item';
-                        item.innerHTML = `<span class="material-symbols-outlined">${file.type.startsWith('video/') ? 'videocam' : 'image'}</span><span>${escapeHtml(file.name)}</span><span class="iveco-date-upload-ok">âœ“</span>`;
+                        item.innerHTML = `<span class="material-symbols-outlined">${file.type.startsWith('video/') ? 'videocam' : 'image'}</span><span>${escapeHtml(file.name)}</span><span class="iveco-date-upload-ok">✓</span>`;
                         uploadList.appendChild(item);
                     } catch (err) {
                         const item = document.createElement('div');
@@ -789,14 +789,14 @@
         saveAtmNotes();
 
         if (note.done) {
-            // Animazione di sparizione, poi sposta nella lista "fatto" (in realtÃ  rimane, filtro la gestisce)
+            // Animazione di sparizione, poi sposta nella lista "fatto" (in realtà rimane, filtro la gestisce)
             if (itemEl) {
                 itemEl.classList.add('removing');
                 setTimeout(() => renderNoteATM(), 450);
             } else {
                 renderNoteATM();
             }
-            showIvecoToast('âœ… Lavoro completato!', 'success', 2000);
+            showIvecoToast('✅ Lavoro completato!', 'success', 2000);
         } else {
             renderNoteATM();
         }
@@ -893,12 +893,12 @@
     // SEZIONE 3: AGGIUNGI (Import Excel)
     // ============================================================
     function renderAggiungi() {
-        // GiÃ  renderizzato HTML, gestiamo solo i listeners dinamici
+        // Già renderizzato HTML, gestiamo solo i listeners dinamici
         setupExcelHandlers();
     }
 
     function setupExcelHandlers() {
-        // GiÃ  setupExcelUpload Ã¨ chiamato all'inizializzazione, qui solo aggiorniamo eventualmente
+        // Già setupExcelUpload è chiamato all'inizializzazione, qui solo aggiorniamo eventualmente
     }
 
     function setupExcelUpload() {
@@ -927,7 +927,7 @@
             if (file) processExcelFile(file);
         });
 
-        // Cambia colonne â†’ aggiorna preview
+        // Cambia colonne → aggiorna preview
         if (colTelaio)  colTelaio.addEventListener('change',  () => updatePreview());
         if (colVettura) colVettura.addEventListener('change', () => updatePreview());
         if (colStato)   colStato.addEventListener('change',   () => updatePreview());
@@ -940,13 +940,13 @@
         // Reset lista
         if (resetBtn) {
             resetBtn.addEventListener('click', () => {
-                if (!confirm('âš ï¸ Sei sicuro di voler cancellare TUTTA la lista mezzi?\nQuesta operazione Ã¨ irreversibile.')) return;
+                if (!confirm('⚠️ Sei sicuro di voler cancellare TUTTA la lista mezzi?\nQuesta operazione è irreversibile.')) return;
                 ivecoState.vehicles = [];
                 ivecoState.atmNotes = {};
                 saveVehicles();
                 saveAtmNotes();
                 ivecoState.excelData = null;
-                showIvecoToast('ðŸ—‘ï¸ Lista mezzi eliminata.', 'info', 2500);
+                showIvecoToast('🗑️ Lista mezzi eliminata.', 'info', 2500);
                 renderAggiungiStatus('info', 'Lista eliminata. Carica un nuovo file Excel.', true);
                 const preview = document.getElementById('iveco-preview-container');
                 if (preview) preview.style.display = 'none';
@@ -960,17 +960,17 @@
 
         // Controlla che la libreria XLSX sia disponibile
         if (typeof XLSX === 'undefined') {
-            showIvecoToast('âš ï¸ Libreria Excel non ancora caricata. Riprova tra un secondo.', 'error', 4000);
+            showIvecoToast('⚠️ Libreria Excel non ancora caricata. Riprova tra un secondo.', 'error', 4000);
             return;
         }
 
         const ext = file.name.split('.').pop().toLowerCase();
         if (!['xlsx', 'xls', 'csv'].includes(ext)) {
-            showIvecoToast('âš ï¸ Formato non supportato. Usa .xlsx, .xls o .csv', 'error', 3000);
+            showIvecoToast('⚠️ Formato non supportato. Usa .xlsx, .xls o .csv', 'error', 3000);
             return;
         }
 
-        showIvecoToast('ðŸ“‚ Lettura file in corso...', 'info', 2000);
+        showIvecoToast('📂 Lettura file in corso...', 'info', 2000);
 
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -981,7 +981,7 @@
                 const rows     = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
                 if (!rows || rows.length < 2) {
-                    showIvecoToast('âš ï¸ Il file sembra vuoto o ha solo intestazioni.', 'error', 3000);
+                    showIvecoToast('⚠️ Il file sembra vuoto o ha solo intestazioni.', 'error', 3000);
                     return;
                 }
 
@@ -993,10 +993,10 @@
                 // Aggiorna preview
                 updatePreview();
 
-                showIvecoToast(`âœ… File caricato: ${rows.length - 1} righe trovate.`, 'success', 3000);
+                showIvecoToast(`✅ File caricato: ${rows.length - 1} righe trovate.`, 'success', 3000);
             } catch (err) {
                 console.error('Errore lettura Excel:', err);
-                showIvecoToast('âŒ Errore nel leggere il file: ' + err.message, 'error', 4000);
+                showIvecoToast('❌ Errore nel leggere il file: ' + err.message, 'error', 4000);
             }
         };
         reader.readAsArrayBuffer(file);
@@ -1009,7 +1009,7 @@
         if (!colTelaio || !colVettura) return;
 
         const options = (headerRow || []).map((h, i) => {
-            const label = h ? `${indexToColLetter(i)} â€“ ${String(h).substring(0,20)}` : indexToColLetter(i);
+            const label = h ? `${indexToColLetter(i)} – ${String(h).substring(0,20)}` : indexToColLetter(i);
             return `<option value="${i}">${label}</option>`;
         }).join('');
 
@@ -1021,7 +1021,7 @@
         colTelaio.innerHTML  = options || fallback;
         colVettura.innerHTML = options || fallback;
         if (colStato) {
-            colStato.innerHTML = `<option value="-1">â€” Non usare â€”</option>` + (options || fallback);
+            colStato.innerHTML = `<option value="-1">— Non usare —</option>` + (options || fallback);
         }
 
         // Default: Telaio = col 0 (A), Vettura = col 1 (B), Stato = non usata
@@ -1073,7 +1073,7 @@
                     <td><strong>${escapeHtml(telaio)}</strong></td>
                     <td>${escapeHtml(rawV)}</td>
                     <td><strong>${escapeHtml(vettura)}</strong></td>
-                    ${colS >= 0 ? `<td>${isOk ? '<span class="badge-ok">âœ… OK</span>' : '<span style="color:var(--text-secondary);font-size:0.75rem;">' + escapeHtml(rawS || 'â€”') + '</span>'}</td>` : ''}
+                    ${colS >= 0 ? `<td>${isOk ? '<span class="badge-ok">✅ OK</span>' : '<span style="color:var(--text-secondary);font-size:0.75rem;">' + escapeHtml(rawS || '—') + '</span>'}</td>` : ''}
                     <td>${isDup ? '<span class="badge-dup">DUPLICATO</span>' : '<span class="badge-new">NUOVO</span>'}</td>
                 </tr>
             `;
@@ -1098,10 +1098,10 @@
         if (previewBody)      previewBody.innerHTML = tableRows;
         if (previewInfo) {
             previewInfo.innerHTML = `
-                ðŸ“Š <strong>${totalRows}</strong> righe trovate
-                ${okCount > 0 ? ` Â· <span style="color:#2ecc71">âœ… ${okCount} giÃ  completati (colonna OK)</span>` : ''}
-                ${dupCount > 0 ? ` Â· <span style="color:#e74c3c">âš ï¸ ${dupCount} duplicati (verranno ignorati)</span>` : ''}
-                ${preview.length < totalRows ? ` Â· (anteprima primi 10 di ${totalRows})` : ''}
+                📊 <strong>${totalRows}</strong> righe trovate
+                ${okCount > 0 ? ` · <span style="color:#2ecc71">✅ ${okCount} già completati (colonna OK)</span>` : ''}
+                ${dupCount > 0 ? ` · <span style="color:#e74c3c">⚠️ ${dupCount} duplicati (verranno ignorati)</span>` : ''}
+                ${preview.length < totalRows ? ` · (anteprima primi 10 di ${totalRows})` : ''}
             `;
         }
     }
@@ -1109,7 +1109,7 @@
     function importVehicles() {
         const rows = ivecoState.excelData;
         if (!rows || rows.length < 2) {
-            showIvecoToast('âš ï¸ Nessun dato da importare. Carica prima un file Excel.', 'error', 3000);
+            showIvecoToast('⚠️ Nessun dato da importare. Carica prima un file Excel.', 'error', 3000);
             return;
         }
 
@@ -1137,7 +1137,7 @@
             const isDone = rawS === 'ok';
 
             if (existingKeys.has(key)) {
-                // Se esiste giÃ  e ora ha ok, aggiorna il flag done
+                // Se esiste già e ora ha ok, aggiorna il flag done
                 const existing = ivecoState.vehicles.find(v => v.telaio === telaio && v.vettura === vettura);
                 if (existing && isDone && !existing.done) {
                     existing.done = true;
@@ -1163,9 +1163,9 @@
 
         saveVehicles();
 
-        let msg = `âœ… Importati ${added} mezzi`;
-        if (markedDone > 0) msg += ` Â· ðŸŸ¢ ${markedDone} segnati come fatti (OK)`;
-        if (skipped > 0) msg += ` Â· ${skipped} duplicati ignorati`;
+        let msg = `✅ Importati ${added} mezzi`;
+        if (markedDone > 0) msg += ` · 🟢 ${markedDone} segnati come fatti (OK)`;
+        if (skipped > 0) msg += ` · ${skipped} duplicati ignorati`;
         showIvecoToast(msg, 'success', 4000);
         renderAggiungiStatus('success', msg, false);
 
@@ -1197,7 +1197,7 @@
     // SEZIONE 4: IMPOSTAZIONI (usa quelle del sito PWS)
     // ============================================================
     function renderImpostazioni() {
-        // GiÃ  copiato l'HTML nella sezione, non serve re-render
+        // Già copiato l'HTML nella sezione, non serve re-render
     }
 
     // ============================================================
@@ -1292,7 +1292,7 @@
                         <rect x="68" y="7" width="18" height="6" rx="1" fill="#FFC107"/>
                         <text x="77" y="13" font-size="4.5" fill="#1A237E" text-anchor="middle" font-family="monospace" font-weight="bold">ATM</text>
 
-                        <!-- RUOTA ANTERIORE â€” cerchi centrati su (94,48) nel viewBox -->
+                        <!-- RUOTA ANTERIORE — cerchi centrati su (94,48) nel viewBox -->
                         <g id="bus-wheel-front">
                             <circle cx="94" cy="48" r="8.5" fill="#212121"/>
                             <circle cx="94" cy="48" r="6" fill="#424242"/>
@@ -1309,7 +1309,7 @@
                             <line x1="91.9" y1="50.1" x2="89.9" y2="52.1" stroke="#9E9E9E" stroke-width="1.2"/>
                         </g>
 
-                        <!-- RUOTA POSTERIORE â€” cerchi centrati su (26,48) nel viewBox -->
+                        <!-- RUOTA POSTERIORE — cerchi centrati su (26,48) nel viewBox -->
                         <g id="bus-wheel-rear">
                             <circle cx="26" cy="48" r="8.5" fill="#212121"/>
                             <circle cx="26" cy="48" r="6" fill="#424242"/>
@@ -1414,43 +1414,43 @@
 
                     <!-- Configurazione colonne -->
                     <div class="iveco-card" style="margin-bottom:1rem;">
-                        <h3 style="font-size:0.9rem;margin-bottom:0.5rem;">âš™ï¸ Configurazione Colonne</h3>
+                        <h3 style="font-size:0.9rem;margin-bottom:0.5rem;">⚙️ Configurazione Colonne</h3>
                         <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.8rem;">
                             Seleziona da quale colonna del file Excel prendere i dati.
                             <br><em>Il Telaio usa solo gli ultimi 4 caratteri.</em>
                         </p>
                         <div class="iveco-col-config">
                             <div class="iveco-col-field">
-                                <label>ðŸ”‘ Colonna Telaio</label>
+                                <label>🔑 Colonna Telaio</label>
                                 <select id="iveco-col-telaio">
                                     <option value="0">A</option>
                                     <option value="1">B</option>
                                 </select>
                             </div>
                             <div class="iveco-col-field">
-                                <label>ðŸšŒ Colonna N. Vettura</label>
+                                <label>🚌 Colonna N. Vettura</label>
                                 <select id="iveco-col-vettura">
                                     <option value="0">A</option>
                                     <option value="1" selected>B</option>
                                 </select>
                             </div>
                             <div class="iveco-col-field">
-                                <label>âœ… Colonna Stato (OK)</label>
+                                <label>✅ Colonna Stato (OK)</label>
                                 <select id="iveco-col-stato">
-                                    <option value="-1">â€” Non usare â€”</option>
+                                    <option value="-1">— Non usare —</option>
                                     <option value="2">C</option>
                                 </select>
                             </div>
                         </div>
                         <p style="font-size:0.75rem;color:var(--text-secondary);margin-top:0.5rem;">
-                            ðŸ’¡ Se selezioni la colonna Stato, i mezzi con valore <strong>OK</strong> verranno importati giÃ  come <strong>completati</strong>.
+                            💡 Se selezioni la colonna Stato, i mezzi con valore <strong>OK</strong> verranno importati già come <strong>completati</strong>.
                         </p>
                     </div>
 
                     <!-- Preview -->
                     <div id="iveco-preview-container" style="display:none;">
                         <div class="iveco-card" style="margin-bottom:1rem;overflow-x:auto;">
-                            <h3 style="font-size:0.9rem;margin-bottom:0.5rem;">ðŸ‘ï¸ Anteprima (prime 10 righe)</h3>
+                            <h3 style="font-size:0.9rem;margin-bottom:0.5rem;">👁️ Anteprima (prime 10 righe)</h3>
                             <div id="iveco-preview-info" style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.5rem;"></div>
                             <table class="iveco-preview-table">
                                 <thead>
@@ -1477,7 +1477,7 @@
 
                     <!-- Azioni pericolose -->
                     <div class="iveco-card" style="margin-top:1.5rem;">
-                        <h3 style="font-size:0.9rem;margin-bottom:0.5rem;color:#e74c3c;">âš ï¸ Zona Pericolo</h3>
+                        <h3 style="font-size:0.9rem;margin-bottom:0.5rem;color:#e74c3c;">⚠️ Zona Pericolo</h3>
                         <div class="iveco-import-actions">
                             <button class="iveco-import-btn danger" id="iveco-reset-btn">
                                 <span class="material-symbols-outlined">delete_forever</span>
@@ -1527,15 +1527,15 @@
         const ivecoSettings   = document.getElementById('iveco-settings-content');
         if (!settingsSection || !ivecoSettings) return;
 
-        // Segna il parent originale se non giÃ  fatto
+        // Segna il parent originale se non già fatto
         if (!settingsSection.dataset.ivecoOriginalParent) {
             settingsSection.dataset.ivecoOriginalParent = 'main > .container';
         }
 
-        // GiÃ  dentro iveco-settings-content, niente da fare
+        // Già dentro iveco-settings-content, niente da fare
         if (settingsSection.parentElement === ivecoSettings) return;
 
-        // Sposta il nodo REALE (con tutti i listener giÃ  attaccati)
+        // Sposta il nodo REALE (con tutti i listener già attaccati)
         settingsSection.style.display = 'block';
         settingsSection.classList.add('active');
         ivecoSettings.innerHTML = '';
@@ -1548,7 +1548,7 @@
         if (!settingsSection) return;
 
         const ivecoSettings = document.getElementById('iveco-settings-content');
-        // Se il nodo Ã¨ dentro il container Iveco, riportalo a main
+        // Se il nodo è dentro il container Iveco, riportalo a main
         if (ivecoSettings && settingsSection.parentElement === ivecoSettings) {
             const mainContainer = document.querySelector('main > .container');
             if (mainContainer) {
@@ -1778,7 +1778,7 @@
             searchInput.addEventListener('input', () => renderElenco());
         }
 
-        // Pulsante X cancella ricerca â€” event delegation (funziona anche se l'elemento Ã¨ nascosto al bind)
+        // Pulsante X cancella ricerca — event delegation (funziona anche se l'elemento è nascosto al bind)
         document.addEventListener('click', (e) => {
             if (e.target.closest('#iveco-search-clear')) {
                 const inp = document.getElementById('iveco-search');
@@ -1817,8 +1817,8 @@
         // Setup Excel upload
         setupExcelUpload();
 
-        // Quando il tema cambia (dark/light) e siamo in modalitÃ  Iveco,
-        // riesegui hideNativeUI perchÃ© il CSS del dark theme rimette display:flex !important
+        // Quando il tema cambia (dark/light) e siamo in modalità Iveco,
+        // riesegui hideNativeUI perché il CSS del dark theme rimette display:flex !important
         document.addEventListener('themeChange', () => {
             if (document.body.classList.contains('iveco-mode')) {
                 setTimeout(hideNativeUI, 50);
@@ -1838,7 +1838,7 @@
     }
 
     // ============================================================
-    // ðŸšŒ BUS ANIMATO â€” tutto gestito via requestAnimationFrame
+    // 🚌 BUS ANIMATO — tutto gestito via requestAnimationFrame
     // ============================================================
     function setupBusAnimation() {
         const wrap  = document.getElementById('iveco-bus-wrap');
@@ -1876,7 +1876,7 @@
             return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
         }
 
-        // VelocitÃ  istantanea: derivata numerica dell'easing, normalizzata.
+        // Velocità istantanea: derivata numerica dell'easing, normalizzata.
         // Aggiunge un minimo (0.08) per non bloccarsi mai a speedFactor=0.
         function getSpeedFactor(progress) {
             const eps = 0.005;
@@ -1947,20 +1947,20 @@
             pos = Math.max(0, Math.min(tripLen, pos));
             wrap.style.left = pos + 'px';
 
-            // === RUOTE â€” angolo proporzionale alla distanza percorsa ===
+            // === RUOTE — angolo proporzionale alla distanza percorsa ===
             const viewboxRatio = 120 / getBusWidth();
             wheelAngle += step * viewboxRatio * (360 / 53.4);
             wheelAngle %= 360;
             rotateGroup(wf, WF_CX, WF_CY, wheelAngle);
             rotateGroup(wr, WR_CX, WR_CY, wheelAngle);
 
-            // === SOSPENSIONI â€” bounce sinusoidale multi-frequenza ===
+            // === SOSPENSIONI — bounce sinusoidale multi-frequenza ===
             const b1 = Math.sin(bounceT * 0.022) * 1.6 * speedFactor;
             const b2 = Math.sin(bounceT * 0.041) * 0.7 * speedFactor;
             const bounce = b1 + b2;
             wrap.style.transform = `translateY(${bounce}px)`;
 
-            // === OMBRA â€” si schiaccia con la velocitÃ  ===
+            // === OMBRA — si schiaccia con la velocità ===
             if (shd) {
                 const sx = 1 + speedFactor * 0.1;
                 const sy = Math.max(0.5, 1 - speedFactor * 0.35);
@@ -1998,7 +1998,7 @@
         // Swipe destra logo PWS (per entrare in Iveco)
         setupPwsSwipe();
 
-        // Controlla se era attiva la modalitÃ  Iveco
+        // Controlla se era attiva la modalità Iveco
         if (localStorage.getItem(STORAGE_KEY_MODE) === 'true') {
             loadData();
             applyBusVisual();
@@ -2008,10 +2008,10 @@
             renderCurrentSection();
         }
 
-        console.log('ðŸšŒ Iveco Orecchia Mode: inizializzato!');
+        console.log('🚌 Iveco Orecchia Mode: inizializzato!');
     }
 
-    // Avvia quando il DOM Ã¨ pronto
+    // Avvia quando il DOM è pronto
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {
