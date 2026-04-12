@@ -4011,17 +4011,35 @@
             appId: "1:225349266473:web:55c8a489670b49f53b0038"
         };
 
-        let pwsworkApp, pwsworkDb, pwsworkStorage;
-        try {
-            pwsworkApp = firebase.initializeApp(pwsworkFirebaseConfig, 'pwswork');
-            pwsworkDb = firebase.firestore(pwsworkApp);
-            pwsworkStorage = firebase.storage(pwsworkApp);
-            console.log('PwsWork Firebase connected');
-        } catch (e) {
-            console.warn('PwsWork Firebase init skipped:', e.message);
+        let pwsworkApp, pwsworkDb, pwsworkStorage, pwsworkInitDone = false;
+
+        function initPwsWorkFirebase() {
+            if (pwsworkInitDone) return;
+            pwsworkInitDone = true;
+            try {
+                if (typeof firebase === 'undefined') {
+                    console.warn('Firebase SDK not loaded yet');
+                    return;
+                }
+                pwsworkApp = firebase.initializeApp(pwsworkFirebaseConfig, 'pwswork');
+                pwsworkDb = firebase.firestore(pwsworkApp);
+                pwsworkStorage = firebase.storage(pwsworkApp);
+                console.log('PwsWork Firebase connected');
+            } catch (e) {
+                console.warn('PwsWork Firebase init skipped:', e.message);
+            }
+        }
+
+        // Init when DOM is ready (defer scripts will be loaded by then)
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPwsWorkFirebase);
+        } else {
+            initPwsWorkFirebase();
         }
 
         async function uploadToPwsWork(blob, fileName) {
+            // Lazy init in case DOMContentLoaded already fired before defer scripts
+            if (!pwsworkInitDone) initPwsWorkFirebase();
             if (!pwsworkStorage || !pwsworkDb) {
                 console.warn('PwsWork Firebase not available, skip upload');
                 return;
