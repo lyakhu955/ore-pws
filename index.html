@@ -6886,7 +6886,7 @@
                     const line = lines[i];
 
                     // Date line (?? Day DD/MM/YYYY)
-                    const dateMatch = line.match(/^??\s+(.+)\s+(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+                    const dateMatch = line.match(/^\?\?\s+(.+)\s+(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
                     if (dateMatch) {
                         // Save previous entry if exists
                         if (currentEntry) {
@@ -6917,7 +6917,7 @@
                     if (!currentEntry) continue;
 
                     // Time line (? Ore: start-break-end)
-                    const timeMatch = line.match(/^?\s+Ore:\s+(.+)-(.+)-(.+)$/);
+                    const timeMatch = line.match(/^\?\s+Ore:\s+(.+)-(.+)-(.+)$/);
                     if (timeMatch) {
                         currentEntry.startTime = timeMatch[1].trim();
                         currentEntry.breakTime = parseFloat(timeMatch[2].trim()) || 0;
@@ -6926,27 +6926,27 @@
                     }
 
                     // Description line (?? text)
-                    const descMatch = line.match(/^??\s+(.+)$/);
+                    const descMatch = line.match(/^\?\?\s+(.+)$/);
                     if (descMatch) {
                         currentEntry.description = descMatch[1].trim();
                         continue;
                     }
 
                     // Trasferta line (?? Trasferta: Sì)
-                    if (line.match(/^??\s+Trasferta:\s+Sì$/)) {
+                    if (line.match(/^\?\?\s+Trasferta:\s+Sì$/)) {
                         currentEntry.transferta = true;
                         continue;
                     }
 
                     // Night hours line (?? Ore notturne: Xh)
-                    const nightMatch = line.match(/^??\s+Ore\s+notturne:\s+(\d+(?:\.\d+)?)h$/);
+                    const nightMatch = line.match(/^\?\?\s+Ore\s+notturne:\s+(\d+(?:\.\d+)?)h$/);
                     if (nightMatch) {
                         currentEntry.notturne = parseFloat(nightMatch[1]);
                         continue;
                     }
 
                     // Total hours line (?? Totale ore: Xh)
-                    const totalMatch = line.match(/^??\s+Totale\s+ore:\s+(\d+(?:\.\d+)?)h$/);
+                    const totalMatch = line.match(/^\?\?\s+Totale\s+ore:\s+(\d+(?:\.\d+)?)h$/);
                     if (totalMatch) {
                         currentEntry.totalHours = parseFloat(totalMatch[1]);
                         continue;
