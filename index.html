@@ -3055,7 +3055,7 @@
 
                             <div class="form-group" style="margin-top: 20px; display: flex; gap: 0.75rem; justify-content: flex-end; flex-wrap: wrap; align-items: center;">
                                 <button type="button" id="riposoDopoNotteBtn" title="Segna come Riposo dopo notte" style="background: var(--md-sys-color-surface-variant); color: var(--md-sys-color-on-surface-variant); border: 1.5px solid var(--md-sys-color-outline); border-radius: var(--border-radius-large); padding: 0.6rem 1rem; font-size: 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.4rem;">
-                                    ?? Riposo dopo notte
+                                    🌙 Riposo dopo notte
                                 </button>
                                 <button type="submit" id="submitBtn">
                                     <span class="material-symbols-outlined">save</span> Salva
@@ -3947,7 +3947,7 @@
                          <span class="material-symbols-outlined">sick</span> Segna Malattia
                      </button>
                      <button id="markRiposoDopoNotteBtn" class="action-btn" style="background: var(--md-sys-color-surface-variant); color: var(--md-sys-color-on-surface-variant);">
-                         ?? Riposo dopo notte
+                         🌙 Riposo dopo notte
                      </button>
                  </div>
                  <!-- Entries list -->
@@ -6636,8 +6636,8 @@
 
                   if (holidayInfo) {
                      if (holidayInfo.type === 'riposo_dopo_notte') {
-                         // Mostra emoji ?? invece delle ore
-                         html += `<span class="calendar-hours" style="font-size:1.3rem;">??</span>`;
+                         // Mostra emoji 🌙 invece delle ore
+                         html += `<span class="calendar-hours" style="font-size:1.3rem;">🌙</span>`;
                          html += `<span class="calendar-holiday-name">Riposo</span>`;
                      } else {
                          // Show Ferie/Malattia icon and optional note
@@ -7450,7 +7450,7 @@
                      typeText = 'Riposo dopo notte';
                      bgColor = 'rgba(100, 80, 200, 0.15)';
                      textColor = '#5a3fa0';
-                     iconHtml = `<span style="font-size: 2rem; vertical-align: middle; margin-right: 0.5rem;">??</span>`;
+                     iconHtml = `<span style="font-size: 2rem; vertical-align: middle; margin-right: 0.5rem;">🌙</span>`;
                  } else {
                      typeText = 'Malattia';
                      bgColor = 'var(--md-sys-color-secondary-container)';
@@ -9085,7 +9085,7 @@
                      </div>` : ''}
                      ${monthRipesoDays > 0 ? `
                       <div class="monthly-stat-item" style="background-color: rgba(100,80,200,0.15); color: #5a3fa0;">
-                         <span class="monthly-stat-value" style="color: #7c5cbf;">?? ${monthRipesoDays}</span>
+                         <span class="monthly-stat-value" style="color: #7c5cbf;">🌙 ${monthRipesoDays}</span>
                          <span class="monthly-stat-label">Riposo Notte</span>
                      </div>` : ''}
                  </div>
@@ -9107,7 +9107,7 @@
                       const iconHtml = dayData.holidayInfo.type === 'ferie'
                           ? '<span class="material-symbols-outlined" style="font-size:1.1em;vertical-align:text-bottom;">beach_access</span>'
                           : dayData.holidayInfo.type === 'riposo_dopo_notte'
-                          ? '<span style="font-size:1.1em;">??</span>'
+                          ? '<span style="font-size:1.1em;">🌙</span>'
                           : '<span class="material-symbols-outlined" style="font-size:1.1em;vertical-align:text-bottom;">sick</span>';
                       const entryClass = dayData.holidayInfo.type === 'ferie' ? 'ferie-entry' : dayData.holidayInfo.type === 'riposo_dopo_notte' ? 'riposo-entry' : 'malattia-entry';
                        itemDiv.classList.add(entryClass); // Add class for styling
@@ -10150,7 +10150,7 @@ if (isIOS) {
                 const iconHtml = entry.type === 'ferie'
                     ? '<span class="material-symbols-outlined">beach_access</span>'
                     : entry.type === 'riposo_dopo_notte'
-                    ? '??'
+                    ? '🌙'
                     : '<span class="material-symbols-outlined">sick</span>';
 
                 div.innerHTML = `
