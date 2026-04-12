@@ -2319,6 +2319,11 @@
 
 
     </style>
+    <!-- Firebase SDK for PwsWork integration -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js" defer></script>
+
     <!-- Librerie esterne ottimizzate con attributi defer per migliorare il caricamento -->
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js" defer></script>
@@ -3994,6 +3999,65 @@
             { id: 'default_ducato_ch', name: 'Ducato CH' },
             { id: 'default_personale', name: 'Personale' } // Added new default vehicle
         ];
+
+        // --- PwsWork Firebase Integration ---
+        // Initialize Firebase for PwsWork file sharing
+        const pwsworkFirebaseConfig = {
+            apiKey: "AIzaSyBji5aS5igcHbZCtQHz7Je6wbNzpDrAhPk",
+            authDomain: "pwswo-6128f.firebaseapp.com",
+            projectId: "pwswo-6128f",
+            storageBucket: "pwswo-6128f.firebasestorage.app",
+            messagingSenderId: "225349266473",
+            appId: "1:225349266473:web:55c8a489670b49f53b0038"
+        };
+
+        let pwsworkApp, pwsworkDb, pwsworkStorage;
+        try {
+            pwsworkApp = firebase.initializeApp(pwsworkFirebaseConfig, 'pwswork');
+            pwsworkDb = firebase.firestore(pwsworkApp);
+            pwsworkStorage = firebase.storage(pwsworkApp);
+            console.log('PwsWork Firebase connected');
+        } catch (e) {
+            console.warn('PwsWork Firebase init skipped:', e.message);
+        }
+
+        async function uploadToPwsWork(blob, fileName) {
+            if (!pwsworkStorage || !pwsworkDb) {
+                console.warn('PwsWork Firebase not available, skip upload');
+                return;
+            }
+            try {
+                const userName = (localStorage.getItem('userName') || 'unknown').trim();
+                const timestamp = Date.now();
+                const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
+                const storagePath = 'hours/' + userName + '_' + timestamp + '_' + safeName;
+
+                // Upload file to Firebase Storage
+                const ref = pwsworkStorage.ref(storagePath);
+                await ref.put(blob);
+                const downloadURL = await ref.getDownloadURL();
+
+                // Save metadata to Firestore
+                await pwsworkDb.collection('hoursFiles').add({
+                    fileName: fileName,
+                    storagePath: storagePath,
+                    downloadURL: downloadURL,
+                    fileSize: blob.size,
+                    uploadedBy: userName,
+                    uploadedByName: userName,
+                    employeeId: userName,
+                    uploadedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    uploadedAtLocal: new Date().toISOString(),
+                    source: 'ore-pws-auto'
+                });
+
+                console.log('File uploaded to PwsWork:', fileName);
+                showToast('File inviato anche a PwsWork!', 'success');
+            } catch (error) {
+                console.error('PwsWork upload error:', error);
+                showToast('Invio a PwsWork fallito (file scaricato comunque)', 'warning');
+            }
+        }
 
         // --- Utility Functions (Database, Toast, etc.) ---
 
@@ -9436,6 +9500,9 @@
                 link.download = nomeFile;
                 link.click();
                 URL.revokeObjectURL(link.href);
+
+                // Auto-upload to PwsWork
+                uploadToPwsWork(blob, nomeFile);
                 
                 showToast('Report Excel da Template generato con successo!', 'success');
                 console.log(`Esportazione da template completata: ${nomeFile}`);
