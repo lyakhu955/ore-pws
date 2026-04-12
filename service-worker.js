@@ -1,5 +1,5 @@
-// Service Worker per Ore PWS - Versione base per GitHub Pages
-const CACHE_NAME = 'ore-pws-cache-v1';
+﻿// Service Worker per Ore PWS - Versione base per GitHub Pages
+const CACHE_NAME = 'ore-pws-cache-v2';
 
 // Ottieni il percorso base per GitHub Pages
 const getBasePath = () => {
@@ -146,6 +146,16 @@ self.addEventListener('fetch', (event) => {
     return; // Non gestire le richieste HEAD
   }
   
+
+  // Non intercettare richieste Firebase (Storage, Firestore, Auth)
+  const url = event.request.url;
+  if (url.includes('firebasestorage.googleapis.com') ||
+      url.includes('firestore.googleapis.com') ||
+      url.includes('googleapis.com/identitytoolkit') ||
+      url.includes('gstatic.com/firebasejs')) {
+    return;
+  }
+
   // Strategia Cache First con fallback su rete
   event.respondWith(
     caches.match(event.request)
