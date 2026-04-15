@@ -2101,6 +2101,57 @@
         .import-btn-merge { background: var(--neo-bg); color: var(--neo-primary); box-shadow: var(--neo-out-sm); }
         .import-btn-merge:hover { box-shadow: var(--neo-out); }
 
+        /* ===== APP VERSION BADGE ===== */
+        .app-version {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            opacity: 0.5;
+            letter-spacing: 0.03em;
+            padding: 2px 6px;
+            border-radius: 6px;
+            border: 1px solid currentColor;
+            user-select: none;
+            transition: opacity 0.2s;
+            cursor: pointer;
+        }
+        .app-version:hover { opacity: 0.9; }
+
+        .dev-modal-card { max-width: 580px; width: 95%; }
+
+        .dev-modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            max-height: 60vh;
+            overflow-y: auto;
+            line-height: 1.75;
+            color: var(--text-primary);
+        }
+        .dev-modal-body p { margin: 0; }
+
+        .dev-phases {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: rgba(0,0,0,0.15);
+            border-left: 3px solid #6366f1;
+            border-radius: 0 10px 10px 0;
+            padding: 14px 16px;
+        }
+        .dev-phase { display: flex; gap: 12px; align-items: flex-start; }
+        .dev-phase-num {
+            flex-shrink: 0;
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            background: #6366f1;
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-top: 2px;
+        }
+
         /* ===== THEME TOGGLE BUTTON (Header) ===== */
         .theme-toggle-btn {
             width: 44px;
@@ -2862,6 +2913,8 @@
                      >
             </div>
             <div class="header-actions">
+                <!-- Badge Versione -->
+                <span class="app-version" title="Messaggio dallo sviluppatore" onclick="document.getElementById('dev-modal').classList.add('active')" style="cursor:pointer">v1</span>
                 <!-- Pulsante Tema Chiaro/Scuro -->
                 <button id="headerThemeToggle" class="btn theme-toggle-btn" aria-label="Cambia tema">
                     <span class="material-symbols-outlined theme-icon-light">light_mode</span>
@@ -3887,6 +3940,40 @@
 
     <!-- Toast Notification Placeholder -->
     <div id="toast-container"></div>
+
+    <!-- Developer Message Modal -->
+    <div id="dev-modal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('active')">
+        <div class="modal glass-card dev-modal-card">
+            <div class="modal-header">
+                <h3>⚠️ Attenzione: Messaggio dallo Sviluppatore</h3>
+                <button class="modal-close" onclick="document.getElementById('dev-modal').classList.remove('active')">&times;</button>
+            </div>
+            <div class="dev-modal-body">
+                <p>Ciao, sono Leonid.</p>
+                <p>Sì, lo so cosa ti starai chiedendo guardando il numero di versione di questo sito: <em>"Ma come ci è arrivato? Ha un team di 50 ingegneri che aggiornano il codice ogni 3 minuti?"</em></p>
+                <p>La risposta è no. Fammi spiegare il mio segreto aziendale: <strong>la sera non ho assolutamente un cazzo da fare.</strong> Quindi, invece di dormire o guardare serie TV come le persone normali, mi metto a creare cose. Poi le modifico. E poi le modifico ancora. E ancora, e ancora.</p>
+                <p>Sono clinicamente fuori di testa? Molto probabile. Il mio processo creativo funziona esattamente così:</p>
+                <div class="dev-phases">
+                    <div class="dev-phase">
+                        <span class="dev-phase-num">Fase 1</span>
+                        <span>Finisco finalmente un progetto e mi sento in pace con l'universo.</span>
+                    </div>
+                    <div class="dev-phase">
+                        <span class="dev-phase-num">Fase 2</span>
+                        <span>Il mio cervello mi sussurra: <em>"Ehi... ma se aggiungessimo questa cosa totalmente inutile ma bellissima?"</em></span>
+                    </div>
+                    <div class="dev-phase">
+                        <span class="dev-phase-num">Fase 3</span>
+                        <span>Si riparte da capo in un loop infinito di follia.</span>
+                    </div>
+                </div>
+                <p>Grazie per l'attenzione! <em>(Sempre che tu sia arrivato a leggere fin qui e non abbia già chiuso la pagina temendo per la mia salute mentale)</em>. 😉</p>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="document.getElementById('dev-modal').classList.remove('active')">Ho capito, sei matto 🤝</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Overlay per la GIF del supereroe rimosso per ottimizzazione -->
 
@@ -11602,6 +11689,25 @@ END:VCARD`;
              // Fine inizializzazione
          });
 
+    </script>
+
+    <!-- Script Auto-Versione GitHub -->
+    <script>
+    (function() {
+        fetch('https://api.github.com/repos/lyakhu955/ore-pws/commits?per_page=1', {
+            headers: { 'Accept': 'application/vnd.github.v3+json' }
+        })
+        .then(function(res) {
+            const link = res.headers.get('Link') || '';
+            const match = link.match(/page=(\d+)>;\s*rel="last"/);
+            if (match) {
+                const count = parseInt(match[1], 10);
+                const badge = document.querySelector('.app-version');
+                if (badge) badge.textContent = 'v' + count;
+            }
+        })
+        .catch(function() {});
+    })();
     </script>
 
     <!-- Script per la gestione del backup cloud -->
