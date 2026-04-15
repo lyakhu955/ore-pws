@@ -11829,8 +11829,6 @@ END:VCARD`;
                 el.textContent = line.text || '\u00A0';
             }
             content.appendChild(el);
-            var body = document.getElementById('dev-terminal-body');
-            body.scrollTop = body.scrollHeight;
             i++;
         }, 80);
         var commits = window._devCommitCount || 1;
