@@ -2117,39 +2117,139 @@
         }
         .app-version:hover { opacity: 0.9; }
 
-        .dev-modal-card { max-width: 580px; width: 95%; }
-
+        /* ===== DEV MODAL ===== */
+        .dev-modal-card {
+            max-width: 600px;
+            width: 95%;
+            padding: 0;
+            overflow: hidden;
+            border-radius: var(--border-radius-large);
+        }
+        .dev-modal-banner {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+            padding: 28px 28px 22px;
+            position: relative;
+            overflow: hidden;
+        }
+        .dev-modal-banner::before {
+            content: '';
+            position: absolute;
+            top: -40px; right: -40px;
+            width: 160px; height: 160px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 50%;
+        }
+        .dev-modal-banner::after {
+            content: '';
+            position: absolute;
+            bottom: -30px; left: 30px;
+            width: 100px; height: 100px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        .dev-modal-banner-top {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: relative;
+            z-index: 1;
+        }
+        .dev-modal-avatar {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.4);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem;
+            flex-shrink: 0;
+        }
+        .dev-modal-banner-title {
+            color: #fff;
+        }
+        .dev-modal-banner-title h3 {
+            margin: 0 0 2px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff !important;
+        }
+        .dev-modal-banner-title span {
+            font-size: 0.78rem;
+            opacity: 0.8;
+            color: rgba(255,255,255,0.85);
+        }
+        .dev-modal-close {
+            margin-left: auto;
+            background: rgba(255,255,255,0.15) !important;
+            border: 1px solid rgba(255,255,255,0.25) !important;
+            color: #fff !important;
+            width: 32px; height: 32px;
+            border-radius: 50% !important;
+            padding: 0 !important;
+            font-size: 1.1rem !important;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            position: relative; z-index: 1;
+            box-shadow: none !important;
+            transition: background 0.2s;
+        }
+        .dev-modal-close:hover { background: rgba(255,255,255,0.28) !important; }
         .dev-modal-body {
             display: flex;
             flex-direction: column;
             gap: 14px;
-            max-height: 60vh;
+            max-height: 55vh;
             overflow-y: auto;
             line-height: 1.75;
             color: var(--text-primary);
+            padding: 24px 28px 8px;
         }
-        .dev-modal-body p { margin: 0; }
-
+        .dev-modal-body p { margin: 0; font-size: 0.95rem; }
+        .dev-modal-body em { color: var(--neo-primary); font-style: italic; }
+        .dev-modal-body strong { color: var(--neo-primary); }
         .dev-phases {
             display: flex;
             flex-direction: column;
             gap: 10px;
-            background: rgba(0,0,0,0.15);
+            background: rgba(99,102,241,0.07);
             border-left: 3px solid #6366f1;
-            border-radius: 0 10px 10px 0;
+            border-radius: 0 12px 12px 0;
             padding: 14px 16px;
         }
         .dev-phase { display: flex; gap: 12px; align-items: flex-start; }
         .dev-phase-num {
             flex-shrink: 0;
-            font-size: 0.72rem;
+            font-size: 0.68rem;
             font-weight: 800;
             text-transform: uppercase;
-            background: #6366f1;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
             color: #fff;
-            padding: 2px 8px;
+            padding: 3px 9px;
             border-radius: 20px;
-            margin-top: 2px;
+            margin-top: 3px;
+            letter-spacing: 0.04em;
+        }
+        .dev-phase span:last-child { font-size: 0.9rem; }
+        .dev-modal-footer {
+            padding: 16px 28px 24px;
+            display: flex;
+            justify-content: flex-end;
+            border-top: 1px solid var(--neo-shadow-dark);
+            margin-top: 8px;
+        }
+        .dev-modal-footer .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #a855f7) !important;
+            border: none !important;
+            color: #fff !important;
+            font-weight: 600;
+            padding: 10px 22px;
+            border-radius: var(--border-radius-full);
+            box-shadow: 0 4px 15px rgba(99,102,241,0.35) !important;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .dev-modal-footer .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(99,102,241,0.5) !important;
         }
 
         /* ===== THEME TOGGLE BUTTON (Header) ===== */
@@ -3944,10 +4044,18 @@
     <!-- Developer Message Modal -->
     <div id="dev-modal" class="modal" onclick="if(event.target===this){this.classList.remove('show');document.body.style.overflow=''}">
         <div class="modal-content dev-modal-card">
-            <div class="modal-header">
-                <h3>⚠️ Attenzione: Messaggio dallo Sviluppatore</h3>
-                <button class="modal-close" onclick="document.getElementById('dev-modal').classList.remove('show');document.body.style.overflow=''">&times;</button>
+            <!-- Banner colorato con avatar -->
+            <div class="dev-modal-banner">
+                <div class="dev-modal-banner-top">
+                    <div class="dev-modal-avatar">🧑‍💻</div>
+                    <div class="dev-modal-banner-title">
+                        <h3>⚠️ Messaggio dallo Sviluppatore</h3>
+                        <span>Leonid &mdash; Autore di questo sito</span>
+                    </div>
+                    <button class="dev-modal-close" onclick="document.getElementById('dev-modal').classList.remove('show');document.body.style.overflow=''">&times;</button>
+                </div>
             </div>
+            <!-- Corpo del messaggio -->
             <div class="dev-modal-body">
                 <p>Ciao, sono Leonid.</p>
                 <p>Sì, lo so cosa ti starai chiedendo guardando il numero di versione di questo sito: <em>"Ma come ci è arrivato? Ha un team di 50 ingegneri che aggiornano il codice ogni 3 minuti?"</em></p>
@@ -3969,7 +4077,8 @@
                 </div>
                 <p>Grazie per l'attenzione! <em>(Sempre che tu sia arrivato a leggere fin qui e non abbia già chiuso la pagina temendo per la mia salute mentale)</em>. 😉</p>
             </div>
-            <div class="modal-actions">
+            <!-- Footer con bottone -->
+            <div class="dev-modal-footer">
                 <button class="btn btn-primary" onclick="document.getElementById('dev-modal').classList.remove('show');document.body.style.overflow=''">Ho capito, sei matto 🤝</button>
             </div>
         </div>
