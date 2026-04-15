@@ -2914,7 +2914,7 @@
             </div>
             <div class="header-actions">
                 <!-- Badge Versione -->
-                <span class="app-version" title="Messaggio dallo sviluppatore" onclick="document.getElementById('dev-modal').classList.add('active')" style="cursor:pointer">v1</span>
+                <span class="app-version" title="Messaggio dallo sviluppatore" onclick="document.getElementById('dev-modal').classList.add('show');document.body.style.overflow='hidden'" style="cursor:pointer">v1</span>
                 <!-- Pulsante Tema Chiaro/Scuro -->
                 <button id="headerThemeToggle" class="btn theme-toggle-btn" aria-label="Cambia tema">
                     <span class="material-symbols-outlined theme-icon-light">light_mode</span>
@@ -3942,11 +3942,11 @@
     <div id="toast-container"></div>
 
     <!-- Developer Message Modal -->
-    <div id="dev-modal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('active')">
-        <div class="modal glass-card dev-modal-card">
+    <div id="dev-modal" class="modal" onclick="if(event.target===this){this.classList.remove('show');document.body.style.overflow=''}">
+        <div class="modal-content dev-modal-card">
             <div class="modal-header">
                 <h3>⚠️ Attenzione: Messaggio dallo Sviluppatore</h3>
-                <button class="modal-close" onclick="document.getElementById('dev-modal').classList.remove('active')">&times;</button>
+                <button class="modal-close" onclick="document.getElementById('dev-modal').classList.remove('show');document.body.style.overflow=''">&times;</button>
             </div>
             <div class="dev-modal-body">
                 <p>Ciao, sono Leonid.</p>
@@ -3970,7 +3970,7 @@
                 <p>Grazie per l'attenzione! <em>(Sempre che tu sia arrivato a leggere fin qui e non abbia già chiuso la pagina temendo per la mia salute mentale)</em>. 😉</p>
             </div>
             <div class="modal-actions">
-                <button class="btn btn-primary" onclick="document.getElementById('dev-modal').classList.remove('active')">Ho capito, sei matto 🤝</button>
+                <button class="btn btn-primary" onclick="document.getElementById('dev-modal').classList.remove('show');document.body.style.overflow=''">Ho capito, sei matto 🤝</button>
             </div>
         </div>
     </div>
