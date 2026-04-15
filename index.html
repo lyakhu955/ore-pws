@@ -2103,153 +2103,118 @@
 
         /* ===== APP VERSION BADGE ===== */
         .app-version {
-            font-size: 0.7rem;
-            font-weight: 700;
-            color: var(--text-secondary);
-            opacity: 0.5;
-            letter-spacing: 0.03em;
-            padding: 2px 6px;
-            border-radius: 6px;
+            font-size: 0.7rem; font-weight: 700;
+            color: var(--text-secondary, #94a3b8);
+            opacity: 0.5; letter-spacing: 0.03em;
+            padding: 2px 6px; border-radius: 6px;
             border: 1px solid currentColor;
-            user-select: none;
-            transition: opacity 0.2s;
-            cursor: pointer;
+            user-select: none; transition: opacity 0.2s; cursor: pointer;
         }
         .app-version:hover { opacity: 0.9; }
 
-        /* ===== DEV MODAL ===== */
-        .dev-modal-card {
-            max-width: 600px;
-            width: 95%;
-            padding: 0;
-            overflow: hidden;
-            border-radius: var(--border-radius-large);
+        /* ===== DEV TERMINAL MODAL ===== */
+        #dev-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: none; justify-content: center; align-items: center;
         }
-        .dev-modal-banner {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
-            padding: 28px 28px 22px;
-            position: relative;
-            overflow: hidden;
+        #dev-modal.active { display: flex; }
+        .dev-terminal {
+            width: 95%; max-width: 620px; background: #0a0e14;
+            border: 1px solid #1a1f2e; border-radius: 12px; overflow: hidden;
+            box-shadow: 0 0 60px rgba(0,255,65,0.08), 0 20px 60px rgba(0,0,0,0.6);
+            animation: devTerminalOpen 0.5s cubic-bezier(0.16,1,0.3,1);
         }
-        .dev-modal-banner::before {
-            content: '';
-            position: absolute;
-            top: -40px; right: -40px;
-            width: 160px; height: 160px;
-            background: rgba(255,255,255,0.08);
-            border-radius: 50%;
+        @keyframes devTerminalOpen {
+            0% { transform: scale(0.8) translateY(30px); opacity: 0; filter: blur(6px); }
+            100% { transform: scale(1) translateY(0); opacity: 1; filter: blur(0); }
         }
-        .dev-modal-banner::after {
-            content: '';
-            position: absolute;
-            bottom: -30px; left: 30px;
-            width: 100px; height: 100px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 50%;
+        .dev-terminal-bar {
+            display: flex; align-items: center;
+            background: #151a25; padding: 10px 14px; border-bottom: 1px solid #1a1f2e;
         }
-        .dev-modal-banner-top {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            position: relative;
-            z-index: 1;
+        .dev-terminal-dots { display: flex; gap: 7px; }
+        .dev-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .dev-dot.red { background: #ff5f57; }
+        .dev-dot.yellow { background: #ffbd2e; }
+        .dev-dot.green { background: #28c840; }
+        .dev-terminal-title {
+            flex: 1; text-align: center;
+            font-family: 'Courier New', monospace; font-size: 0.75rem; color: #5a6278;
         }
-        .dev-modal-avatar {
-            width: 56px; height: 56px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.2);
-            border: 2px solid rgba(255,255,255,0.4);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.8rem;
-            flex-shrink: 0;
+        .dev-terminal-close {
+            background: none !important; border: none !important; color: #5a6278 !important;
+            font-size: 1rem; cursor: pointer; box-shadow: none !important; padding: 0 !important;
         }
-        .dev-modal-banner-title {
-            color: #fff;
+        .dev-terminal-close:hover { color: #ff5f57 !important; }
+        .dev-terminal-body {
+            padding: 18px 20px; font-family: 'Courier New', monospace;
+            font-size: 0.82rem; line-height: 1.85; color: #00ff41;
+            max-height: 55vh; overflow-y: auto; position: relative;
         }
-        .dev-modal-banner-title h3 {
-            margin: 0 0 2px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #fff !important;
+        .dev-scanline {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none; z-index: 1;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,65,0.02) 2px, rgba(0,255,65,0.02) 4px);
+            animation: devScanMove 8s linear infinite;
         }
-        .dev-modal-banner-title span {
-            font-size: 0.78rem;
-            opacity: 0.8;
-            color: rgba(255,255,255,0.85);
+        @keyframes devScanMove { 0% { background-position: 0 0; } 100% { background-position: 0 100px; } }
+        .dev-cursor { animation: devBlink 0.7s step-end infinite; color: #00ff41; }
+        @keyframes devBlink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+        .dev-line { opacity: 0; animation: devLineAppear 0.08s forwards; }
+        @keyframes devLineAppear { to { opacity: 1; } }
+        .dev-line-cmd { color: #5eead4; }
+        .dev-line-warn { color: #fbbf24; }
+        .dev-line-error { color: #f87171; }
+        .dev-line-success { color: #4ade80; }
+        .dev-line-comment { color: #5a6278; font-style: italic; }
+        .dev-line-text { color: #c9d1d9; }
+        .dev-line-bold { color: #fff; font-weight: 700; }
+        .dev-line-ascii { color: #6366f1; }
+        .dev-line-dim { color: #3a4050; }
+        .dev-log-tag {
+            font-size: 0.72rem; font-weight: 800;
+            padding: 1px 6px; border-radius: 3px; flex-shrink: 0;
         }
-        .dev-modal-close {
-            margin-left: auto;
-            background: rgba(255,255,255,0.15) !important;
-            border: 1px solid rgba(255,255,255,0.25) !important;
-            color: #fff !important;
-            width: 32px; height: 32px;
-            border-radius: 50% !important;
-            padding: 0 !important;
-            font-size: 1.1rem !important;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            flex-shrink: 0;
-            position: relative; z-index: 1;
+        .dev-log-tag.ok { background: #065f46; color: #4ade80; }
+        .dev-log-tag.warn { background: #713f12; color: #fbbf24; }
+        .dev-log-tag.fail { background: #7f1d1d; color: #f87171; }
+        .dev-terminal-footer {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #151a25; border-top: 1px solid #1a1f2e; padding: 8px 14px;
+        }
+        .dev-stats {
+            display: flex; gap: 16px;
+            font-family: 'Courier New', monospace; font-size: 0.7rem; color: #5a6278;
+        }
+        .dev-stats strong { color: #00ff41; }
+        .dev-exit-btn {
+            background: none !important; border: 1px solid #1a1f2e !important; color: #f87171 !important;
+            font-family: 'Courier New', monospace; font-size: 0.78rem;
+            padding: 4px 14px; border-radius: 6px; cursor: pointer;
             box-shadow: none !important;
-            transition: background 0.2s;
         }
-        .dev-modal-close:hover { background: rgba(255,255,255,0.28) !important; }
-        .dev-modal-body {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            max-height: 55vh;
-            overflow-y: auto;
-            line-height: 1.75;
-            color: var(--text-primary);
-            padding: 24px 28px 8px;
+        .dev-exit-btn:hover { border-color: #f87171 !important; background: rgba(248,113,113,0.1) !important; }
+        @keyframes devCrash {
+            0% { transform: scale(1); filter: blur(0); }
+            30% { transform: scale(1.02) skewX(-2deg); filter: blur(1px) hue-rotate(90deg); }
+            60% { transform: scale(0.98) skewX(3deg); filter: blur(2px) hue-rotate(180deg); }
+            100% { transform: scale(0) rotate(5deg); opacity: 0; filter: blur(10px); }
         }
-        .dev-modal-body p { margin: 0; font-size: 0.95rem; }
-        .dev-modal-body em { color: var(--neo-primary); font-style: italic; }
-        .dev-modal-body strong { color: var(--neo-primary); }
-        .dev-phases {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            background: rgba(99,102,241,0.07);
-            border-left: 3px solid #6366f1;
-            border-radius: 0 12px 12px 0;
-            padding: 14px 16px;
+        .dev-terminal.crashing { animation: devCrash 0.6s ease-in forwards; }
+        @keyframes devGlitch {
+            0%,100% { text-shadow: none; }
+            20% { text-shadow: -2px 0 #f87171, 2px 0 #4ade80; }
+            40% { text-shadow: 2px 0 #f87171, -2px 0 #6366f1; }
+            60% { text-shadow: -1px 0 #fbbf24, 1px 0 #f87171; }
         }
-        .dev-phase { display: flex; gap: 12px; align-items: flex-start; }
-        .dev-phase-num {
-            flex-shrink: 0;
-            font-size: 0.68rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            background: linear-gradient(135deg, #6366f1, #a855f7);
-            color: #fff;
-            padding: 3px 9px;
-            border-radius: 20px;
-            margin-top: 3px;
-            letter-spacing: 0.04em;
-        }
-        .dev-phase span:last-child { font-size: 0.9rem; }
-        .dev-modal-footer {
-            padding: 16px 28px 24px;
-            display: flex;
-            justify-content: flex-end;
-            border-top: 1px solid var(--neo-shadow-dark);
-            margin-top: 8px;
-        }
-        .dev-modal-footer .btn-primary {
-            background: linear-gradient(135deg, #6366f1, #a855f7) !important;
-            border: none !important;
-            color: #fff !important;
-            font-weight: 600;
-            padding: 10px 22px;
-            border-radius: var(--border-radius-full);
-            box-shadow: 0 4px 15px rgba(99,102,241,0.35) !important;
-            transition: transform 0.15s, box-shadow 0.15s;
-        }
-        .dev-modal-footer .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(99,102,241,0.5) !important;
+        .dev-glitch { animation: devGlitch 0.3s linear 3; }
+        @media (max-width: 600px) {
+            .dev-terminal-body { font-size: 0.72rem; padding: 14px; max-height: 50vh; }
+            .dev-stats { gap: 8px; font-size: 0.6rem; flex-wrap: wrap; }
+            .dev-stats span:nth-child(4) { display: none; }
         }
 
         /* ===== THEME TOGGLE BUTTON (Header) ===== */
@@ -3014,7 +2979,7 @@
             </div>
             <div class="header-actions">
                 <!-- Badge Versione -->
-                <span class="app-version" title="Messaggio dallo sviluppatore" onclick="document.getElementById('dev-modal').classList.add('show');document.body.style.overflow='hidden'" style="cursor:pointer">v1</span>
+                <span class="app-version" title="Messaggio dallo sviluppatore" onclick="openDevModal()" style="cursor:pointer">v1</span>
                 <!-- Pulsante Tema Chiaro/Scuro -->
                 <button id="headerThemeToggle" class="btn theme-toggle-btn" aria-label="Cambia tema">
                     <span class="material-symbols-outlined theme-icon-light">light_mode</span>
@@ -4041,45 +4006,33 @@
     <!-- Toast Notification Placeholder -->
     <div id="toast-container"></div>
 
-    <!-- Developer Message Modal -->
-    <div id="dev-modal" class="modal" onclick="if(event.target===this){this.classList.remove('show');document.body.style.overflow=''}">
-        <div class="modal-content dev-modal-card">
-            <!-- Banner colorato con avatar -->
-            <div class="dev-modal-banner">
-                <div class="dev-modal-banner-top">
-                    <div class="dev-modal-avatar">🧑‍💻</div>
-                    <div class="dev-modal-banner-title">
-                        <h3>⚠️ Messaggio dallo Sviluppatore</h3>
-                        <span>Leonid &mdash; Autore di questo sito</span>
-                    </div>
-                    <button class="dev-modal-close" onclick="document.getElementById('dev-modal').classList.remove('show');document.body.style.overflow=''">&times;</button>
+    <!-- Developer Terminal Modal -->
+    <div id="dev-modal" onclick="if(event.target===this)devModalExit()">
+        <div class="dev-terminal">
+            <div class="dev-terminal-bar">
+                <div class="dev-terminal-dots">
+                    <span class="dev-dot red"></span>
+                    <span class="dev-dot yellow"></span>
+                    <span class="dev-dot green"></span>
                 </div>
+                <span class="dev-terminal-title">leonid@pwswork:~/brain</span>
+                <button class="dev-terminal-close" onclick="devModalExit()">✕</button>
             </div>
-            <!-- Corpo del messaggio -->
-            <div class="dev-modal-body">
-                <p>Ciao, sono Leonid.</p>
-                <p>Sì, lo so cosa ti starai chiedendo guardando il numero di versione di questo sito: <em>"Ma come ci è arrivato? Ha un team di 50 ingegneri che aggiornano il codice ogni 3 minuti?"</em></p>
-                <p>La risposta è no. Fammi spiegare il mio segreto aziendale: <strong>la sera non ho assolutamente un cazzo da fare.</strong> Quindi, invece di dormire o guardare serie TV come le persone normali, mi metto a creare cose. Poi le modifico. E poi le modifico ancora. E ancora, e ancora.</p>
-                <p>Sono clinicamente fuori di testa? Molto probabile. Il mio processo creativo funziona esattamente così:</p>
-                <div class="dev-phases">
-                    <div class="dev-phase">
-                        <span class="dev-phase-num">Fase 1</span>
-                        <span>Finisco finalmente un progetto e mi sento in pace con l'universo.</span>
-                    </div>
-                    <div class="dev-phase">
-                        <span class="dev-phase-num">Fase 2</span>
-                        <span>Il mio cervello mi sussurra: <em>"Ehi... ma se aggiungessimo questa cosa totalmente inutile ma bellissima?"</em></span>
-                    </div>
-                    <div class="dev-phase">
-                        <span class="dev-phase-num">Fase 3</span>
-                        <span>Si riparte da capo in un loop infinito di follia.</span>
-                    </div>
+            <div class="dev-terminal-body" id="dev-terminal-body">
+                <div class="dev-scanline"></div>
+                <div id="dev-typewriter-content"></div>
+                <span class="dev-cursor">█</span>
+            </div>
+            <div class="dev-terminal-footer">
+                <div class="dev-stats">
+                    <span>commits: <strong id="dev-stat-commits">0</strong></span>
+                    <span>sleep_hours: <strong id="dev-stat-sleep">0</strong></span>
+                    <span>sanity: <strong id="dev-stat-sanity">100%</strong></span>
+                    <span>caffè: <strong id="dev-stat-coffee">∞</strong></span>
                 </div>
-                <p>Grazie per l'attenzione! <em>(Sempre che tu sia arrivato a leggere fin qui e non abbia già chiuso la pagina temendo per la mia salute mentale)</em>. 😉</p>
-            </div>
-            <!-- Footer con bottone -->
-            <div class="dev-modal-footer">
-                <button class="btn btn-primary" onclick="document.getElementById('dev-modal').classList.remove('show');document.body.style.overflow=''">Ho capito, sei matto 🤝</button>
+                <button class="dev-exit-btn" onclick="devModalExit()">
+                    <span class="dev-exit-prompt">> exit()</span>
+                </button>
             </div>
         </div>
     </div>
@@ -11800,23 +11753,123 @@ END:VCARD`;
 
     </script>
 
-    <!-- Script Auto-Versione GitHub -->
+    <!-- Script Auto-Versione GitHub + Terminal Easter Egg -->
     <script>
     (function() {
         fetch('https://api.github.com/repos/lyakhu955/ore-pws/commits?per_page=1', {
             headers: { 'Accept': 'application/vnd.github.v3+json' }
         })
         .then(function(res) {
-            const link = res.headers.get('Link') || '';
-            const match = link.match(/page=(\d+)>;\s*rel="last"/);
+            var link = res.headers.get('Link') || '';
+            var match = link.match(/page=(\d+)>;\s*rel="last"/);
             if (match) {
-                const count = parseInt(match[1], 10);
-                const badge = document.querySelector('.app-version');
+                var count = parseInt(match[1], 10);
+                var badge = document.querySelector('.app-version');
                 if (badge) badge.textContent = 'v' + count;
+                window._devCommitCount = count;
             }
         })
         .catch(function() {});
     })();
+
+    var _devTypeTimer = null;
+    var _devStatsTimer = null;
+
+    var _devLines = [
+        { type: 'cmd', text: '$ cat /dev/brain/readme.md' },
+        { type: 'dim', text: '────────────────────────────────────────' },
+        { type: 'ascii', text: '  (╯°□°）╯︵ ┻━┻' },
+        { type: 'dim', text: '────────────────────────────────────────' },
+        { type: 'warn', text: '⚠️  ATTENZIONE: Messaggio dallo Sviluppatore' },
+        { type: 'text', text: '' },
+        { type: 'success', text: '> Ciao, sono Leonid.' },
+        { type: 'text', text: '' },
+        { type: 'text', text: 'Sì, lo so cosa ti starai chiedendo guardando' },
+        { type: 'text', text: 'il numero di versione di questo sito:' },
+        { type: 'warn', text: '"Ma come ci è arrivato? Ha un team di 50' },
+        { type: 'warn', text: ' ingegneri che aggiornano il codice ogni 3 min?"' },
+        { type: 'text', text: '' },
+        { type: 'bold', text: 'La risposta è no.' },
+        { type: 'text', text: 'Il mio segreto aziendale: la sera non ho' },
+        { type: 'error', text: 'assolutamente un cazzo da fare.' },
+        { type: 'text', text: 'Quindi, invece di dormire come le persone' },
+        { type: 'text', text: 'normali, mi metto a creare cose. Poi le' },
+        { type: 'text', text: 'modifico. E poi le modifico ancora. E ancora.' },
+        { type: 'text', text: '' },
+        { type: 'comment', text: '// Diagnosi clinica del processo creativo:' },
+        { type: 'text', text: '' },
+        { type: 'log', tag: 'FASE_1', tagClass: 'ok',   text: "Finisco un progetto. Pace con l'universo. ✓" },
+        { type: 'log', tag: 'FASE_2', tagClass: 'warn', text: '"Ehi... e se aggiungessimo questa cosa inutile ma bellissima?"' },
+        { type: 'log', tag: 'FASE_3', tagClass: 'fail', text: 'Loop infinito. SANITY = 0. CTRL+C ignorato.' },
+        { type: 'text', text: '' },
+        { type: 'error', text: 'ERROR: sleep() rejected — "too many ideas pending"' },
+        { type: 'error', text: 'WARN: caffeine_level > MAX_SAFE_INTEGER' },
+        { type: 'text', text: '' },
+        { type: 'comment', text: "// Grazie per l'attenzione!" },
+        { type: 'comment', text: '// (Sempre che tu non abbia già chiuso la pagina' },
+        { type: 'comment', text: '//  temendo per la mia salute mentale) 😉' },
+        { type: 'text', text: '' },
+        { type: 'success', text: '> process.exit(sanity) — Segmentation fault 🧠💥' },
+    ];
+
+    function openDevModal() {
+        var modal = document.getElementById('dev-modal');
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        var content = document.getElementById('dev-typewriter-content');
+        content.innerHTML = '';
+        var i = 0;
+        _devTypeTimer = setInterval(function() {
+            if (i >= _devLines.length) { clearInterval(_devTypeTimer); return; }
+            var line = _devLines[i];
+            var el = document.createElement('div');
+            el.className = 'dev-line';
+            if (line.type === 'log') {
+                el.innerHTML = '<span class="dev-log-tag ' + line.tagClass + '">' + line.tag + '</span> <span class="dev-line-text">' + line.text + '</span>';
+            } else {
+                el.className += ' dev-line-' + line.type;
+                el.textContent = line.text || '\u00A0';
+            }
+            content.appendChild(el);
+            var body = document.getElementById('dev-terminal-body');
+            body.scrollTop = body.scrollHeight;
+            i++;
+        }, 80);
+        var commits = window._devCommitCount || 1;
+        var commitCounter = 0; var sanity = 100; var sleep = 8;
+        document.getElementById('dev-stat-commits').textContent = '0';
+        document.getElementById('dev-stat-sleep').textContent = '8.0';
+        document.getElementById('dev-stat-sanity').textContent = '100%';
+        document.getElementById('dev-stat-sanity').style.color = '';
+        _devStatsTimer = setInterval(function() {
+            commitCounter = Math.min(commitCounter + Math.ceil(commits / 30), commits);
+            sanity = Math.max(sanity - 4, 0);
+            sleep = Math.max(sleep - 0.3, 0);
+            document.getElementById('dev-stat-commits').textContent = commitCounter;
+            document.getElementById('dev-stat-sleep').textContent = sleep.toFixed(1);
+            document.getElementById('dev-stat-sanity').textContent = sanity + '%';
+            if (commitCounter >= commits && sanity <= 0) {
+                clearInterval(_devStatsTimer);
+                document.getElementById('dev-stat-sanity').textContent = 'NaN%';
+                document.getElementById('dev-stat-sanity').style.color = '#f87171';
+            }
+        }, 60);
+    }
+
+    function devModalExit() {
+        clearInterval(_devTypeTimer);
+        clearInterval(_devStatsTimer);
+        var terminal = document.querySelector('.dev-terminal');
+        terminal.classList.add('crashing');
+        var title = document.querySelector('.dev-terminal-title');
+        if (title) title.classList.add('dev-glitch');
+        setTimeout(function() {
+            document.getElementById('dev-modal').classList.remove('active');
+            document.body.style.overflow = '';
+            terminal.classList.remove('crashing');
+            if (title) title.classList.remove('dev-glitch');
+        }, 650);
+    }
     </script>
 
     <!-- Script per la gestione del backup cloud -->
